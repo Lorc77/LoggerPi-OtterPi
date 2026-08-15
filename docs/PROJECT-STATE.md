@@ -372,37 +372,82 @@ Diese Legacy-Mechanismen werden nicht automatisch Bestandteil des neuen Core Bat
 
 ## Weitere beobachtete Systemdienste
 
-Auf der aktuellen Installation wurden außerdem unter anderem festgestellt:
+Die Runtime-Inventur hat neben den bereits als relevant identifizierten
+Diensten weitere Systemdienste gezeigt.
+
+Nicht jeder installierte oder laufende Linux-Dienst ist automatisch ein
+LoggerPi-Service im Sinne des Data Models.
+
+Für die Service-Bewertung ist entscheidend, ob der Zustand eines Dienstes
+für Betrieb, Zustand, Health oder Dashboard des LoggerPi relevant ist.
+
+Damit können auch administrative oder infrastrukturelle Dienste relevant
+sein, wenn ihr Ausfall den LoggerPi-Betrieb oder dessen Erreichbarkeit
+wesentlich beeinflusst.
+
+### Als relevant betrachtete Dienste
+
+Insbesondere gehören dazu:
+
+- `meshagent.service` – Mesh-/Remote-Zugriff
+- `ssh.service` – administrative Erreichbarkeit
+- `lightdm.service` – lokale grafische Recovery-/Konfigurationsumgebung
+- `rc-local.service` – Startmechanismus der aktuellen Legacy-Anwendung
+
+Diese Dienste sind damit grundsätzlich Kandidaten für den Service-Bereich
+des Core Batches.
+
+### Weitere beobachtete Dienste
+
+Daneben wurden unter anderem festgestellt:
 
 - `dhcpcd.service`
 - `networking.service`
-- `wpa_supplicant.service`
 - `raspberrypi-net-mods.service`
-- `ModemManager.service`
-- `bluetooth.service`
 - `rsync.service`
-- `teamviewerd.service`
 
-Ihre bloße Existenz bedeutet noch nicht, dass sie Bestandteil des fachlichen Core Batch werden.
+Diese Dienste werden separat auf ihre funktionale Relevanz für den
+LoggerPi bewertet.
 
-Für jeden relevanten Dienst wird separat bewertet:
+`rsync.service` ist aktiviert, läuft aktuell jedoch nicht, da auf der
+Installation keine `/etc/rsyncd.conf` vorhanden ist.
+
+### Nicht für das aktuelle LoggerPi-Service-Modell vorgesehen
+
+Folgende Dienste werden aufgrund der aktuellen Architektur nicht als
+relevante LoggerPi-Services weiterverfolgt:
+
+- `wpa_supplicant.service` – WLAN wird für den LoggerPi derzeit nicht
+  vorgesehen
+- `ModemManager.service` – kein vorgesehenes Modem-Szenario
+- `bluetooth.service` – Bluetooth ist für den aktuellen LoggerPi-Betrieb
+  nicht vorgesehen
+- `avahi-daemon.service` – für den vorgesehenen Betrieb nicht erforderlich
+- `teamviewerd.service` – obsolet und soll zu einem späteren Zeitpunkt
+  deinstalliert werden
+
+Diese Einordnung bezieht sich auf den aktuellen Zielzustand. Durch die
+weitere Umstellung des LoggerPi können später zusätzliche Dienste
+hinzukommen, die heute noch nicht absehbar sind.
+
+Die Service-Liste bleibt deshalb bewusst erweiterbar.
+
+### Bewertungsprinzip
+
+Für einen als relevant betrachteten Service werden insbesondere bewertet:
 
 1. operative Relevanz
-2. Daten-Erfassungsrelevanz
-3. Batch-/Queue-Relevanz
-4. API-/Upload-Relevanz
-5. Dashboard-Relevanz
-6. stabiler funktionaler Zweck
+2. Relevanz für LoggerPi-Zustand und Health
+3. Relevanz für Erreichbarkeit oder Administration
+4. stabiler funktionaler Zweck
+5. sinnvoller Nutzen für Dashboard und Diagnose
 
-Nur fachlich relevante Services sollen in den regulären Core Batch aufgenommen werden.
+Nicht jeder relevante Service muss dabei eine direkte Daten-Erfassungs-,
+Batch- oder API-Funktion besitzen.
 
-### Beobachtete Sonderfälle
+Der LoggerPi liefert den technischen Service-Zustand.
 
-`rsync.service` ist aktiviert, läuft aktuell jedoch nicht, da auf der Installation keine `/etc/rsyncd.conf` vorhanden ist.
-
-`teamviewerd.service` ist installiert, aktuell jedoch deaktiviert/inaktiv.
-
-`ModemManager.service` und `bluetooth.service` laufen bzw. sind aktiviert. Ihre tatsächliche fachliche Relevanz für den LoggerPi muss noch bewertet werden.
+Der OtterPi bewertet dessen fachliche Bedeutung für Health und Dashboard.
 
 ---
 
@@ -505,7 +550,8 @@ Die reale LoggerPi-Runtime wurde untersucht und unter
 Die Inventur ist damit abgeschlossen.
 
 Der nächste fachliche Schritt ist jetzt die funktionale Bewertung der
-festgestellten Runtime-Komponenten:
+festgestellten Runtime-Komponenten und die Ableitung der tatsächlich
+relevanten Services:
 
 ```text
 reale Runtime
@@ -514,7 +560,7 @@ funktionale Services identifizieren
     ↓
 Service-Modell gegen Realität abgleichen
     ↓
-Legacy-/Infrastruktur-/Recovery-Funktionen abgrenzen
+für Betrieb / Health / Dashboard relevante Services bestimmen
     ↓
 Core-Batch-Mitgliedschaft bestimmen
     ↓
@@ -526,9 +572,14 @@ Dabei gilt:
 Nicht jeder installierte oder laufende Linux-Dienst ist automatisch ein
 LoggerPi-Service im Sinne des Data Models.
 
-Insbesondere müssen fachliche LoggerPi-Funktionen von allgemeinen
-Betriebssystem-, Netzwerk-, Remote-Access- und Recovery-Komponenten
-getrennt werden.
+Dabei wird nicht allein danach unterschieden, ob ein Dienst eine
+fachliche Messfunktion besitzt. Auch Dienste für Erreichbarkeit,
+Administration, Recovery und andere für den LoggerPi-Betrieb relevante
+Funktionen können Bestandteil des Service-Modells sein.
+
+Nicht jeder installierte Linux-Dienst ist deshalb relevant, aber ein
+Dienst wird nicht allein aufgrund seiner technischen Nähe zum
+Betriebssystem ausgeschlossen.
 
 Die bestehende Legacy-`observer.py` bleibt dabei zunächst als Ist-Zustand
 und Referenz erhalten. Ihre Ablösung oder Migration erfolgt erst auf Basis
