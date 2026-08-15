@@ -2,7 +2,7 @@
 
 ## Status
 
-**LEGACY / REFERENCE ONLY**
+**LEGACY / NUR REFERENZ**
 
 Diese Datei dokumentiert die bisher produktiv eingesetzte LoggerPi-Anwendung
 `observer.py`.
@@ -55,9 +55,9 @@ Der Datenfluss besteht im Wesentlichen aus:
 
 ```text
 AtmoWEB-Geräte ─┐
-                │
+                 │
 Freezer-Log ────┼──> observer.py ──> message_buffer ──> ThingSpeak
-                │
+                 │
 LoggerPi ───────┘
 ```
 
@@ -339,7 +339,7 @@ Ist-Zustand der bisherigen `observer.py`.
 
 ---
 
-**Status:** Legacy / Reference Only  
+**Status:** Legacy / nur Referenz  
 **Quelle:** produktiver LoggerPi  
 **Archivierte Datei:** `docs/legacy/observer.py`  
 **SHA-256:** `f740d8832208e83735c8b10493cd586f17374c9529652af305eb20e3a8ff7dd0`
