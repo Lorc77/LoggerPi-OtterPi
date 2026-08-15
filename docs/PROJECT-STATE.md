@@ -639,8 +639,41 @@ erhalten.
 Ablösung der Legacy-Anwendung wird geprüft, ob `rc-local.service` aus dem
 Modell entfernt werden kann.
 
-Der nächste Arbeitsschritt ist nun die technische Spezifikation der noch
-offenen Übertragungs- und API-Mechanismen.
+## Aktueller technischer Stand
+
+Die folgenden Designschritte sind abgeschlossen und committed:
+
+1. Data Model v1
+2. Core Batch v1
+3. Core Batch JSON Definition v1
+4. Core Batch API v1
+
+Damit sind insbesondere festgelegt:
+
+- Core Batch Struktur
+- Batch Envelope
+- Pflicht-/Optional-Semantik
+- `null`-Semantik
+- `validity`-Semantik
+- JSON-Repräsentation
+- HTTP Push von LoggerPi → OtterPi
+- `POST /api/v1/batches`
+- HTTP Response über die vom LoggerPi initiierte Verbindung
+- kein eingehender Rückkanal zum LoggerPi
+- keine Mesh-Agent-Abhängigkeit für die API
+
+Noch nicht abschließend spezifiziert sind:
+
+- ACK-/Acceptance-Semantik
+- Retry-Verhalten
+- Duplicate Handling
+- Queue-/Delivery-Semantik
+- Authentication
+- Metadata Change
+- Event-Protokoll
+
+Der nächste Designschritt ist die eigenständige Spezifikation von
+ACK, Retry und Duplicate Handling.
 
 ---
 
@@ -660,9 +693,13 @@ Zustellung spezifiziert.
 Insbesondere:
 
 ```text
+Data Model v1
+    ↓
 Core Batch v1
     ↓
-API Contract
+Core Batch JSON v1
+    ↓
+Core Batch API v1
     ↓
 ACK / Retry / Duplicate Handling
     ↓
