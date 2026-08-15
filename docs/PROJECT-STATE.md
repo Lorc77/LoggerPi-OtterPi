@@ -130,19 +130,46 @@ The service model is structurally defined:
 services.<service_id>
 ├── purpose
 └── state
-The actual LoggerPi service inventory has not yet been reviewed.
+
+The actual LoggerPi runtime/service inventory has now been collected from the running device.
+
+The inventory covers:
+- enabled and running systemd services
+- relevant custom/local systemd units
+- network interfaces and routing
+- listening TCP/UDP ports
+- USB and serial devices
+- ModemManager and Bluetooth state
+- mounted filesystems
+- `/etc/rc.local` and its systemd drop-in
+- root and user crontabs
+- cron directories
+- the legacy `observer.py` runtime and its associated `freezer.log` / `backup_log.sh` mechanism
+
+The legacy `observer.py` is documented separately under `docs/legacy/` and is not the current implementation target.
 
 ## Next Step
 
-Compare the actual LoggerPi service inventory against the service model.
-For each relevant service determine:
-1.	operational relevance 
-2.	data-collection relevance 
-3.	batch / queue relevance 
-4.	API / upload relevance 
-5.	dashboard relevance 
-6.	stable functional purpose 
-Only relevant services should become part of the Core Batch.
+Compare the actual LoggerPi runtime/service inventory against the service model.
+
+For each relevant service or mechanism determine:
+1. operational relevance
+2. data-collection relevance
+3. batch / queue relevance
+4. API / upload relevance
+5. dashboard relevance
+6. stable functional purpose
+
+Classify each relevant item as:
+1. Core Batch runtime
+2. required supporting infrastructure
+3. operational / administrative infrastructure
+4. legacy functionality to be retained temporarily
+5. unrelated to the new data-model implementation
+
+Use this classification to derive the concrete Core Batch implementation and its required runtime dependencies.
+
+Do not remove or disable existing services during this inventory/classification step.
 
 ## Open Decisions
 
