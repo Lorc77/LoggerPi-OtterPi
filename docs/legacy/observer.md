@@ -110,7 +110,13 @@ vcgencmd measure_temp
 
 ermittelt.
 
-Die CPU-Auslastung wird über `psutil.cpu_percent(interval=2)` ermittelt.
+Die CPU-Auslastung wird über
+
+```python
+psutil.cpu_percent(interval=2)
+```
+
+ermittelt.
 
 ## Erfassungsintervall
 
@@ -123,6 +129,9 @@ update_interval = 900
 legt fest, dass die Anwendung ungefähr alle **900 Sekunden (15 Minuten)**
 einen neuen Datensatz erfasst.
 
+Die Anwendung prüft die Zeitbedingung innerhalb einer Schleife und ruft
+`updatesJson()` nach Ablauf dieses Intervalls auf.
+
 ## Übertragungsintervall
 
 Die Variable
@@ -131,11 +140,16 @@ Die Variable
 posting_interval = 900
 ```
 
-legt fest, dass die gesammelten Daten ungefähr alle **900 Sekunden
-(15 Minuten)** an ThingSpeak übertragen werden.
+legt fest, dass der `message_buffer` ungefähr alle **900 Sekunden
+(15 Minuten)** an ThingSpeak übertragen wird.
 
-Die Daten werden zunächst im lokalen `message_buffer` gesammelt und
-anschließend als Bulk Update übertragen.
+Im aktuell archivierten Code sind `update_interval` und `posting_interval`
+beide auf 900 Sekunden gesetzt. Dadurch wird im Normalbetrieb ungefähr ein
+Messdatensatz pro Übertragungszyklus erzeugt und anschließend übertragen.
+
+Die Anwendung verwendet trotzdem einen Buffer, sodass mehrere Einträge
+grundsätzlich gesammelt und gemeinsam übertragen werden könnten, falls sich
+die Intervalle oder die Laufzeitlogik ändern.
 
 ## ThingSpeak
 
@@ -191,8 +205,8 @@ field7
 field8
 ```
 
-`delta_t` beschreibt im Legacy-Protokoll die seit der letzten Aktualisierung
-vergangene Zeit.
+`delta_t` beschreibt im Legacy-Protokoll die seit dem letzten
+`last_update_time` vergangene Zeit.
 
 Beim Erreichen des Übertragungsintervalls wird der gesamte Puffer als JSON
 an ThingSpeak übertragen.
@@ -264,6 +278,8 @@ Unter anderem:
 - Datenquellen und deren Parsing sind direkt mit der Übertragungslogik
   gekoppelt.
 - Zugangsdaten zur ThingSpeak-API waren Bestandteil des Legacy-Quellcodes.
+- Mehrere Kommentare im Legacy-Code entsprechen nicht mehr exakt den
+  tatsächlich konfigurierten Intervallen.
 
 Diese Eigenschaften dokumentieren den damaligen Stand und sollen bei der
 Ablösung nicht ungeprüft übernommen werden.
