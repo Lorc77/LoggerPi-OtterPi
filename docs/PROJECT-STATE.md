@@ -146,11 +146,20 @@ Ein Retry verändert weder `batch_id` noch `sequence`.
 
 Die dauerhafte Zustell- und Retry-Logik basiert auf:
 
-- persistenter Queue
-- `batch_id`
-- unveränderter `sequence`
-- Idempotenz
-- ACK-basierter Zustellbestätigung
+* persistenter Queue
+* `batch_id`
+* unveränderter `sequence`
+* Idempotenz
+* erfolgreicher Annahme durch den OtterPi im Push-Verfahren
+
+Der LoggerPi kann keine nachgelagerte Zustellbestätigung vom OtterPi
+voraussetzen.
+
+Der OtterPi initiiert keine Verbindung zum LoggerPi.
+
+Eine technische HTTP-Response auf einen vom LoggerPi initiierten Request
+ist Teil des jeweiligen Transportprotokolls und wird nicht als separates
+ACK-Synchronisationsprotokoll modelliert.
 
 ---
 
@@ -176,19 +185,45 @@ Diese Zeitbegriffe werden nicht miteinander vermischt.
 
 ## Queue und Retry
 
-Bereits erzeugte, aber noch nicht bestätigte Batches müssen in einer persistenten lokalen Queue verbleiben.
+Bereits erzeugte Batches müssen bis zur erfolgreichen technischen
+Zustellung bzw. Annahme durch den OtterPi in einer persistenten lokalen
+Queue verbleiben.
 
-Ein Verbindungsabbruch darf nicht dazu führen, dass ein bereits erzeugter Batch verloren geht.
+Ein Verbindungsabbruch darf nicht dazu führen, dass ein bereits erzeugter
+Batch verloren geht.
 
 Ein Retry erzeugt keinen neuen fachlichen Batch:
 
-```text
-gleicher batch_id
-gleiche sequence
-neuer Zustellversuch
-```
+    gleicher `batch_id`
+    gleiche `sequence`
+    neuer Zustellversuch
 
-Die technische Spezifikation von Queue, ACK und Duplicate Handling ist noch nicht vollständig festgelegt.
+Der LoggerPi kann keine aktive Rückverbindung bzw. nachgelagerte
+Zustellbestätigung durch den OtterPi voraussetzen.
+
+Die Kommunikation erfolgt grundsätzlich als Push:
+
+    LoggerPi
+        │
+        │ Request
+        ▼
+    OtterPi
+
+Der OtterPi muss den LoggerPi nicht aktiv erreichen können.
+
+Eine erfolgreiche technische Antwort auf einen vom LoggerPi initiierten
+Request kann zur Feststellung einer erfolgreichen Zustellung dieses
+Requests verwendet werden.
+
+Ein separates ACK-Synchronisationsprotokoll zwischen LoggerPi und OtterPi
+ist nicht Bestandteil des Kommunikationsmodells.
+
+Duplicate Handling muss deshalb auf Empfängerseite anhand der stabilen
+Batch-Identität erfolgen, insbesondere über `batch_id` und die persistente
+`sequence`.
+
+Die konkrete technische Ausgestaltung von Queue, Retry und Duplicate
+Handling wird im API-/Delivery-Design spezifiziert.
 
 ---
 
@@ -546,23 +581,31 @@ Das Konzept ist:
 
 ```text
 Erster Kontakt
-    ↓
-vollständige Metadata
-    ↓
-keine Änderung
-    ↓
-keine erneute vollständige Übertragung
+        ↓
+    vollständige Metadata
+        ↓
+    keine Änderung
+        ↓
+    keine erneute vollständige Übertragung
 
-Änderung
-    ↓
-Metadata-Änderung / Delta
-    ↓
-Übertragung über normalen LoggerPi → OtterPi Push-Weg
-    ↓
-erfolgreiches ACK
-    ↓
-Änderung gilt als synchronisiert
+    Änderung
+        ↓
+    Metadata-Änderung / Delta
+        ↓
+    Übertragung über normalen LoggerPi → OtterPi Push-Weg
+        ↓
+    erfolgreiche technische Annahme
+        ↓
+    Änderung gilt auf Transportebene als zugestellt
 ```
+
+Der LoggerPi kann keine aktive Rückverbindung des OtterPi voraussetzen.
+
+Ein separates ACK-Synchronisationsprotokoll für Metadata ist nicht
+Bestandteil des Kommunikationsmodells.
+
+Die konkrete Behandlung von Wiederholungen, Duplikaten und einer erneuten
+Synchronisation wird im Metadata-/Delivery-Design festgelegt.
 
 Die genaue technische Metadata-Synchronisationsprotokollierung ist noch nicht finalisiert.
 
@@ -721,7 +764,7 @@ Events
 - vollständiges Metadata-Synchronisationsprotokoll
 - finale Validitätssemantik
 - Event-Schema
-- Queue-/ACK-Semantik
+- Queue-/Delivery-Semantik
 - Duplicate Handling
 - API Contract
 - Authentication
