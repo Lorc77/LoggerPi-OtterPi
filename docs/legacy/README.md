@@ -1,29 +1,41 @@
 # Legacy
 
-This directory documents the legacy LoggerPi implementation that is currently
-still running in production.
+Dieser Ordner enthält die Dokumentation und Referenzdateien für die frühere LoggerPi-Implementierung.
 
-## `observer.py`
+Die Dateien hier dienen als **historische Referenz** für die ursprüngliche Architektur und Implementierung. Sie sind **nicht** die Spezifikation des aktuellen Datenmodells oder der aktuellen LoggerPi-Architektur.
 
-[`observer.md`](observer.md) documents the original `observer.py` running on the
-LoggerPi.
+## Inhalt
 
-The legacy implementation is **not** the target architecture of the
-LoggerPi → OtterPi project. It is preserved here as a reference for:
+### `observer.md`
 
-- understanding the existing production system,
-- identifying existing data sources and hardware interfaces,
-- comparing legacy behaviour with the new architecture,
-- preserving knowledge during the migration.
+Dokumentation der ursprünglichen `observer.py`-Implementierung.
 
-The legacy application currently starts through `/etc/rc.local` and therefore
-must not be modified or disabled casually while the LoggerPi is still relying
-on it.
+Die Datei beschreibt insbesondere:
 
-## Migration status
+- die ursprüngliche Datenerfassung,
+- die verwendeten Datenquellen,
+- die Zuordnung der Messwerte zu ThingSpeak-Feldern,
+- den ursprünglichen Upload-Mechanismus,
+- die zeitgesteuerte Verarbeitung,
+- bekannte Eigenschaften und Einschränkungen der Legacy-Implementierung.
 
-The long-term goal is to replace the legacy `observer.py` with the new
-LoggerPi → OtterPi architecture documented elsewhere in this repository.
+### `observer.py`
 
-Until the migration is complete, the legacy implementation should be treated
-as **production-critical**.
+Referenzkopie der ursprünglichen `observer.py`.
+
+Diese Datei bleibt erhalten, damit nachvollziehbar bleibt, wie die frühere LoggerPi-Implementierung tatsächlich aufgebaut war.
+
+**Wichtig:** Die Legacy-Dateien werden nicht als Grundlage für die Weiterentwicklung des aktuellen Datenmodells verwendet. Bei der Entwicklung ist der aktuelle Stand unter `docs/data-model/` sowie die aktuelle Projektbeschreibung in `docs/PROJECT-STATE.md` maßgeblich.
+
+## Zweck des Legacy-Bereichs
+
+Der Legacy-Bereich verhindert, dass historische Implementierungsdetails verloren gehen, ohne sie mit dem aktuellen Architekturstand zu vermischen.
+
+Insbesondere soll nachvollziehbar bleiben:
+
+1. welche Funktionen die ursprüngliche Implementierung hatte,
+2. welche Datenquellen ursprünglich verwendet wurden,
+3. welche Annahmen und technischen Einschränkungen damals bestanden,
+4. welche Teile später durch das neue Datenmodell ersetzt oder weiterentwickelt wurden.
+
+Neue Änderungen am aktuellen System sollen grundsätzlich **nicht** in diesen Legacy-Dateien dokumentiert werden.
