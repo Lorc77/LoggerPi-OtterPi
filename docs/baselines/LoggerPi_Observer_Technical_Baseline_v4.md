@@ -686,6 +686,7 @@ Auch `/etc/cron.d` sowie die Standard-Cron-Verzeichnisse enthielten keinen weite
 
 Die Architektur erklärt damit die beobachtete zeitliche Abfolge.
 
+```text
 **Monatlich**
 
 01. des Monats 03:28
@@ -735,6 +736,7 @@ minicom
 ↓
 
 /dev/ttyUSB0 → freezer.log
+```
 
 Damit ist die interessante Sequenz:
 
