@@ -652,8 +652,67 @@ unknown
 stale
 ```
 
-Die endgültige fachliche Semantik dieser Zustände wird im Rahmen der
-formalen Validity-Spezifikation festgelegt.
+# 16. Validity
+
+`validity` beschreibt den technischen bzw. datenseitigen Zustand eines
+übertragenen Measurements.
+
+`validity` ist keine fachliche Health- oder Alarmbewertung.
+
+Zulässige Zustände:
+
+```text
+valid
+invalid
+unavailable
+unknown
+stale
+```
+
+Die verbindliche Semantik ist:
+
+```text
+valid
+    → value ist nicht null
+
+invalid
+    → value = null
+
+unavailable
+    → value = null
+
+unknown
+    → value = null
+
+stale
+    → value ist nicht null
+```
+
+Bei `stale` bleiben der letzte bekannte Wert und sein tatsächliches
+`measured_at` erhalten.
+
+Insbesondere gilt für AtmoWEB:
+
+```text
+AtmoWEB N/A
+    ↓
+value = null
+validity = unavailable
+```
+
+und niemals:
+
+```text
+N/A
+    ↓
+value = 0
+validity = valid
+```
+
+Der LoggerPi liefert die technische Validity.
+
+Der OtterPi bewertet daraus fachliche Health, Grenzwertverletzungen,
+Alarme und sonstige fachliche Zustände.
 
 Insbesondere gilt:
 
@@ -930,11 +989,6 @@ finaler API Contract.
     }
   },
 
-  "connectivity": {
-    "upload": {},
-    "queue": {}
-  },
-
   "services": {
     "meshagent": {
       "name": "meshagent.service",
@@ -997,16 +1051,28 @@ finaler API Contract.
   },
 
   "measurements": {
-    "temperature_1": {},
-    "temperature_2": {},
-    "temperature_3": {},
-    "temperature_4": {},
-    "humidity": {},
-    "vacuum": {},
-    "co2": {},
-    "o2": {},
-    "fan_speed": {}
+  "temperature_1": {
+    "value": 23.1,
+    "unit": "celsius",
+    "measured_at": "2026-08-15T10:44:55+02:00",
+    "validity": "valid",
+    "source": "atmoweb"
   },
+  "humidity": {
+    "value": 45.2,
+    "unit": "percent",
+    "measured_at": "2026-08-15T10:44:55+02:00",
+    "validity": "valid",
+    "source": "atmoweb"
+  },
+  "co2": {
+    "value": null,
+    "unit": "ppm",
+    "measured_at": null,
+    "validity": "unavailable",
+    "source": "atmoweb"
+  }
+},
 
   "states": {
     "door_open": false,
@@ -1035,8 +1101,6 @@ Noch nicht finalisiert sind:
 - konkrete Unterstruktur von `connectivity.upload`
 - konkrete Unterstruktur von `connectivity.queue`
 - Pflicht-/Optional-Semantik auf API-Ebene
-- endgültige `validity`-Semantik
-- vollständige Unit-Tabelle
 - Event-Schema
 - Metadata-Change-Schema
 - API-Endpunkte
@@ -1045,6 +1109,11 @@ Noch nicht finalisiert sind:
 - ACK-/Retry-Semantik
 - Duplicate Handling
 - Schema-Versionierung
+
+Die JSON-Struktur des Core Batch v1 einschließlich der
+Required-/Optional-/Nullable-Semantik, `null`-Semantik, Validity-Semantik
+und der für die aktuellen Core-Measurements definierten Units ist in
+`core-batch-v1-json.md` festgelegt.
 
 Diese Punkte gehören in die nachfolgenden API-/Delivery-Designschritte.
 
