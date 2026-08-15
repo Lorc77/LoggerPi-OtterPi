@@ -573,26 +573,107 @@ Hersteller-/Quellenbezeichnungen werden nicht einfach in das gemeinsame Data Mod
 
 ## 21. Validity
 
-### Vorgesehene Zustände
+## 21. Validity
 
-- `valid`
-- `invalid`
-- `unavailable`
-- `unknown`
-- `stale`
+`validity` beschreibt den technischen bzw. datenseitigen Zustand eines
+übertragenen Measurements.
 
-Die endgültige fachliche Semantik wird im nächsten Arbeitsschritt noch verbindlich festgelegt.
+`validity` ist keine fachliche Health- oder Alarmbewertung.
 
-### Grundprinzip
+### Zulässige Zustände
+
+  * `valid`
+  * `invalid`
+  * `unavailable`
+  * `unknown`
+  * `stale`
+
+### Semantik
+
+`valid`
+
+Der Messwert wurde erfolgreich erfasst und kann technisch als Messwert
+verwendet werden.
+
+`invalid`
+
+Ein Messwert wurde grundsätzlich erkannt, kann aber technisch nicht
+zuverlässig als gültiger Messwert verwendet werden.
+
+`unavailable`
+
+Die erwartete Messgröße ist aktuell nicht verfügbar.
+
+`unknown`
+
+Der technische Zustand des Messwertes kann nicht zuverlässig bestimmt
+werden.
+
+`stale`
+
+Ein zuvor verfügbarer Messwert ist vorhanden, aber älter als der für die
+betreffende Messgröße zulässige Aktualitätszeitraum.
+
+### Value-Konsistenz
+
+Für Measurements gilt:
+
+  * `valid` → `value` ist nicht `null`
+  * `invalid` → `value` ist `null`
+  * `unavailable` → `value` ist `null`
+  * `unknown` → `value` ist `null`
+  * `stale` → `value` ist nicht `null`
+
+Bei `stale` bleiben der letzte bekannte Wert und sein tatsächliches
+`measured_at` erhalten.
+
+### Verantwortlichkeiten
 
 Der LoggerPi liefert:
 
-- Rohwert
-- Quelle
-- technische Situation
-- Zeit
+  * den erfassten Wert bzw. `null`
+  * die Quelle
+  * die technische Validity
+  * den Zeitbezug
 
-Der OtterPi entscheidet über die **fachliche Bewertung der Messwertgültigkeit**.
+Der OtterPi bewertet daraus:
+
+  * fachliche Health
+  * Grenzwertverletzungen
+  * Alarme
+  * fachliche Kritikalität
+
+Damit bedeutet beispielsweise:
+
+`value = -60`
+`validity = valid`
+
+dass der Messwert technisch gültig übertragen wurde.
+
+Ob `-60 °C` fachlich unkritisch oder alarmwürdig ist, entscheidet der
+OtterPi anhand der jeweiligen fachlichen Regeln.
+
+### AtmoWEB N/A
+
+Wenn AtmoWEB beispielsweise:
+
+`CO2Read = N/A`
+
+liefert, wird dies als:
+
+```text
+value = null
+validity = unavailable
+```
+
+abgebildet.
+
+Insbesondere niemals:
+
+```text
+value = 0
+validity = valid
+```
 
 ## 22. Derived Measurements
 
@@ -860,7 +941,34 @@ states.flap
 states.defrost
 ```
 
-Die genaue Typisierung einzelner States wird beim finalen Batch-Schema festgelegt.
+Die Typisierung der States ist im Core-Batch-JSON verbindlich festgelegt.
+
+Die Boolean-States sind:
+
+  * `states.door_open`
+  * `states.door_locked`
+  * `states.flap`
+  * `states.defrost`
+
+Die gruppierten Licht-States sind:
+
+  * `states.lights.day`
+  * `states.lights.uv`
+  * `states.lights.led`
+
+Die gruppierten Switch-States sind:
+
+  * `states.switches.a`
+  * `states.switches.b`
+  * `states.switches.c`
+  * `states.switches.d`
+
+Diese States sind vom Typ `boolean`.
+
+Nicht vorhandene, fachlich nicht unterstützte Switches dürfen weggelassen
+werden.
+
+`null` wird nicht als Ersatz für einen fehlenden State verwendet.
 
 ---
 
@@ -1122,7 +1230,14 @@ Grundprinzip:
 - memory → bytes
 - time → seconds
 
-Die endgültige vollständige Unit-Tabelle gehört zur formalen Schema-/Batchdefinition und wird nicht von einzelnen Herstellern bestimmt.
+Die für den Core Batch v1 verbindlich verwendeten Units sind in der
+Core-Batch-JSON-Definition festgelegt.
+
+Weitere Units außerhalb des Core Batch werden bei der jeweiligen späteren
+Schema-Definition ergänzt.
+
+Units werden nicht durch einzelne Hersteller-APIs bestimmt, sondern durch
+das gemeinsame Data Model.
 
 ## 47. Core-Batch-Prinzip
 
