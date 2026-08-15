@@ -499,9 +499,13 @@ Der OtterPi darf auch für Metadata-Synchronisation nicht auf eine aktive eingeh
 
 ## Aktueller Arbeitsschritt
 
-Die reale LoggerPi-Runtime wurde untersucht.
+Die reale LoggerPi-Runtime wurde untersucht und unter
+`docs/system-inventory.md` dokumentiert.
 
-Der nächste fachliche Schritt ist jetzt:
+Die Inventur ist damit abgeschlossen.
+
+Der nächste fachliche Schritt ist jetzt die funktionale Bewertung der
+festgestellten Runtime-Komponenten:
 
 ```text
 reale Runtime
@@ -510,14 +514,26 @@ funktionale Services identifizieren
     ↓
 Service-Modell gegen Realität abgleichen
     ↓
+Legacy-/Infrastruktur-/Recovery-Funktionen abgrenzen
+    ↓
 Core-Batch-Mitgliedschaft bestimmen
     ↓
 konkreten Core Batch ableiten
 ```
 
-Dabei sollen insbesondere die tatsächlich relevanten funktionalen Dienste vom übrigen Betriebssystem-/Infrastruktur-Overhead getrennt werden.
+Dabei gilt:
 
-Nicht jeder installierte oder laufende Linux-Dienst ist automatisch ein LoggerPi-Service im Sinne des Data Models.
+Nicht jeder installierte oder laufende Linux-Dienst ist automatisch ein
+LoggerPi-Service im Sinne des Data Models.
+
+Insbesondere müssen fachliche LoggerPi-Funktionen von allgemeinen
+Betriebssystem-, Netzwerk-, Remote-Access- und Recovery-Komponenten
+getrennt werden.
+
+Die bestehende Legacy-`observer.py` bleibt dabei zunächst als Ist-Zustand
+und Referenz erhalten. Ihre Ablösung oder Migration erfolgt erst auf Basis
+der neuen Architektur und wird nicht durch die reine Runtime-Inventur
+vorweggenommen.
 
 ---
 
