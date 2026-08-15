@@ -1,99 +1,99 @@
-# LoggerPi – System Inventory
+# LoggerPi – Systeminventar
 
-## Purpose
+## Zweck
 
-This document records the currently observed runtime configuration of the
-LoggerPi Raspberry Pi before further migration or cleanup work.
+Dieses Dokument erfasst die aktuell beobachtete Laufzeitkonfiguration des
+LoggerPi Raspberry Pi vor weiteren Migrations- oder Bereinigungsarbeiten.
 
-The inventory is intentionally descriptive. It does not imply that all
-listed services or components are required.
+Das Inventar ist bewusst beschreibend. Daraus folgt nicht, dass alle
+aufgeführten Services oder Komponenten benötigt werden.
 
-This snapshot is intended to prevent loss of knowledge during the ongoing
-migration from the legacy `observer.py` implementation toward the new
-data model and service architecture.
+Dieser Snapshot soll verhindern, dass während der laufenden Migration von der
+Legacy-Implementierung `observer.py` hin zum neuen Datenmodell und der neuen
+Service-Architektur bereits gewonnene Erkenntnisse verloren gehen.
 
 ---
 
-## 1. System services
+## 1. System-Services
 
-### Important application / access services
+### Wichtige Anwendungs- und Zugriffs-Services
 
-| Service | Enabled | Running | Notes |
+| Service | Aktiviert | Läuft | Hinweise |
 |---|---:|---:|---|
-| `meshagent.service` | yes | yes | Mesh remote-management agent |
-| `ssh.service` | yes | yes | Primary remote shell access |
-| `lightdm.service` | yes | yes | Local graphical login / LXDE environment |
-| `teamviewerd.service` | no | no | Installed but currently inactive |
-| `rsync.service` | yes | no | Enabled, but inactive because `/etc/rsyncd.conf` does not exist |
-| `sshswitch.service` | yes | — | Enables SSH when `/boot/ssh` or `/boot/ssh.txt` exists |
-| `rc-local.service` | yes | yes | `/etc/rc.local` compatibility service |
+| `meshagent.service` | ja | ja | Mesh-Remote-Management-Agent |
+| `ssh.service` | ja | ja | Primärer Remote-Shell-Zugriff |
+| `lightdm.service` | ja | ja | Lokale grafische Anmeldung / LXDE-Umgebung |
+| `teamviewerd.service` | nein | nein | Installiert, derzeit aber inaktiv |
+| `rsync.service` | ja | nein | Aktiviert, aber inaktiv, da `/etc/rsyncd.conf` nicht existiert |
+| `sshswitch.service` | ja | — | Aktiviert SSH, wenn `/boot/ssh` oder `/boot/ssh.txt` vorhanden ist |
+| `rc-local.service` | ja | ja | Kompatibilitäts-Service für `/etc/rc.local` |
 
-### Network-related services
+### Netzwerkbezogene Services
 
-| Service | Enabled | Running | Notes |
+| Service | Aktiviert | Läuft | Hinweise |
 |---|---:|---:|---|
-| `dhcpcd.service` | yes | yes | DHCP/network configuration |
-| `networking.service` | yes | — | ifup/ifdown based networking |
-| `wpa_supplicant.service` | yes | yes | Wi-Fi supplicant |
-| `raspberrypi-net-mods.service` | yes | — | Copies `/boot/wpa_supplicant.conf` when present |
-| `avahi-daemon.service` | yes | yes | mDNS / local service discovery |
-| `ModemManager.service` | yes | yes | No modem currently detected |
-| `bluetooth.service` | yes | yes | Bluetooth stack |
+| `dhcpcd.service` | ja | ja | DHCP-/Netzwerkkonfiguration |
+| `networking.service` | ja | — | ifup/ifdown-basiertes Netzwerk |
+| `wpa_supplicant.service` | ja | ja | WLAN-Supplicant |
+| `raspberrypi-net-mods.service` | ja | — | Kopiert `/boot/wpa_supplicant.conf`, wenn vorhanden |
+| `avahi-daemon.service` | ja | ja | mDNS / lokale Service-Erkennung |
+| `ModemManager.service` | ja | ja | Derzeit kein Modem erkannt |
+| `bluetooth.service` | ja | ja | Bluetooth-Stack |
 
-### Other notable enabled services
+### Weitere relevante aktivierte Services
 
-The system also has enabled services for:
+Das System verfügt außerdem über aktivierte Services für:
 
 - AppArmor
 - Bluetooth / HCI UART
-- CUPS / printer discovery
+- CUPS / Druckererkennung
 - cron
-- console / keyboard setup
-- fake hardware clock
-- Raspberry Pi display backlight
-- Raspberry Pi EEPROM update
+- Konsolen- und Tastaturkonfiguration
+- Fake-Hardware-Uhr
+- Raspberry-Pi-Display-Backlight
+- Raspberry-Pi-EEPROM-Update
 - rsyslog
-- systemd time synchronization
+- systemd-Zeitsynchronisation
 - triggerhappy
 - udisks2
 
-The full service inventory was captured directly from the running system on
-2026-08-15.
+Das vollständige Service-Inventar wurde am **15.08.2026** direkt auf dem
+laufenden System erfasst.
 
 ---
 
-## 2. Graphical environment
+## 2. Grafische Umgebung
 
-A complete graphical environment is intentionally kept installed and enabled.
+Eine vollständige grafische Umgebung ist bewusst installiert und aktiviert.
 
-Current display manager:
+Aktueller Display Manager:
 
 ```text
 lightdm.service
 ```
 
-The purpose is operational recovery:
+Der Zweck ist die betriebliche Wiederherstellung:
 
-> A locally connected monitor and keyboard should remain available as a
-> fallback configuration and recovery path if remote SSH / mesh access
-> becomes unavailable.
+> Ein lokal angeschlossener Monitor und eine Tastatur sollen weiterhin als
+> Fallback-Konfigurations- und Wiederherstellungsweg zur Verfügung stehen,
+> falls der Remote-Zugriff über SSH / Mesh nicht mehr verfügbar ist.
 
-The graphical environment must therefore **not be removed as part of the
-current migration**.
+Die grafische Umgebung darf daher im Rahmen der aktuellen Migration
+**nicht entfernt werden**.
 
-### Current HDMI observation
+### Aktuelle HDMI-Beobachtung
 
-At the time of the hardware check no monitor was connected.
+Zum Zeitpunkt der Hardwareprüfung war kein Monitor angeschlossen.
 
-DRM reports:
+DRM meldet:
 
 ```text
 card0-HDMI-A-1/status = disconnected
 ```
 
-The Raspberry Pi therefore currently reports no connected HDMI display.
+Der Raspberry Pi meldet daher aktuell kein angeschlossenes HDMI-Display.
 
-The following graphics configuration is present in `/boot/config.txt`:
+Folgende Grafikkonfiguration ist in `/boot/config.txt` vorhanden:
 
 ```text
 framebuffer_width=1280
@@ -105,7 +105,7 @@ dtoverlay=vc4-kms-v3d
 max_framebuffers=2
 ```
 
-No active X11 display could be queried from the root shell because:
+Es konnte aus der Root-Shell kein aktives X11-Display abgefragt werden, da:
 
 ```text
 xrandr --display :0
@@ -113,17 +113,17 @@ No protocol specified
 Can't open display :0
 ```
 
-This does **not** by itself indicate that Xorg/LXDE is not running. The
-command was executed without the X session's authorization environment.
+Dies bedeutet **nicht automatisch**, dass Xorg/LXDE nicht läuft. Der Befehl
+wurde ohne die Autorisierungsumgebung der X-Sitzung ausgeführt.
 
-The HDMI configuration should be investigated separately when a physical
-monitor is available.
+Die HDMI-Konfiguration sollte separat untersucht werden, sobald wieder ein
+physischer Monitor zur Verfügung steht.
 
 ---
 
-## 3. Network interfaces
+## 3. Netzwerkschnittstellen
 
-Current interfaces:
+Aktuelle Schnittstellen:
 
 ```text
 lo       UNKNOWN   127.0.0.1/8
@@ -131,21 +131,21 @@ eth0     UP        141.51.190.103/24
 wlan0    DOWN
 ```
 
-Default route:
+Standardroute:
 
 ```text
 default via 141.51.190.1 dev eth0
 ```
 
-The system is therefore currently operating through wired Ethernet.
+Das System arbeitet derzeit daher über kabelgebundenes Ethernet.
 
-Wi-Fi is present but currently down.
+WLAN ist vorhanden, aber derzeit deaktiviert bzw. nicht aktiv.
 
 ---
 
-## 4. Listening network services
+## 4. Netzwerk-Services mit offenen Ports
 
-Currently listening TCP ports:
+Aktuell offene TCP-Ports:
 
 ```text
 0.0.0.0:22       sshd
@@ -154,11 +154,11 @@ Currently listening TCP ports:
 [::1]:631         CUPS
 ```
 
-The most important externally reachable TCP service is SSH on port 22.
+Der wichtigste von außen erreichbare TCP-Service ist SSH auf Port 22.
 
-No TCP listener for the meshagent was observed in this snapshot.
+Für den `meshagent` wurde in diesem Snapshot kein TCP-Listener beobachtet.
 
-The meshagent does have a UDP socket:
+Der `meshagent` besitzt jedoch einen UDP-Socket:
 
 ```text
 0.0.0.0:56448
@@ -166,9 +166,9 @@ The meshagent does have a UDP socket:
 
 ---
 
-## 5. USB and serial hardware
+## 5. USB- und serielle Hardware
 
-USB devices include:
+Zu den USB-Geräten gehören:
 
 ```text
 FTDI FT232 Serial (UART) IC
@@ -176,52 +176,55 @@ SMSC9512/9514 Fast Ethernet Adapter
 SMSC9514 USB Hub
 ```
 
-The FTDI device is exposed as:
+Das FTDI-Gerät wird als
 
 ```text
 /dev/ttyUSB0
 ```
 
-It is actively used by the legacy freezer logging setup.
+bereitgestellt.
 
-Current process:
+Es wird aktuell aktiv von der Legacy-Freezer-Protokollierung verwendet.
+
+Aktueller Prozess:
 
 ```text
 minicom -C /home/ZOOLOGY-observ/Programs/freezer.log
 ```
 
-PID at the time of inventory:
+PID zum Zeitpunkt der Inventarisierung:
 
 ```text
 1349
 ```
 
-The device is therefore currently opened by:
+Das Gerät ist damit aktuell wie folgt belegt:
 
 ```text
 /dev/ttyUSB0 -> minicom -> freezer.log
 ```
 
-This is an important legacy dependency and must not be removed or repurposed
-without explicitly migrating the freezer serial data source.
+Dies ist eine wichtige Legacy-Abhängigkeit und darf nicht entfernt oder für
+andere Zwecke verwendet werden, ohne zuvor die serielle Datenquelle des
+Freezers ausdrücklich zu migrieren.
 
 ---
 
-## 6. Legacy freezer logger
+## 6. Legacy-Freezer-Logger
 
-The legacy freezer logger writes to:
+Der Legacy-Freezer-Logger schreibt nach:
 
 ```text
 /home/ZOOLOGY-observ/Programs/freezer.log
 ```
 
-Current file:
+Aktuelle Datei:
 
 ```text
 -rw-r--r-- 1 ZOOLOGY-observ ZOOLOGY-observ ...
 ```
 
-Recent values observed:
+Zuletzt beobachtete Werte:
 
 ```text
 - 80 C
@@ -230,150 +233,161 @@ Recent values observed:
 - 82 C
 ```
 
-The legacy `observer.py` reads the most recent freezer value from this file.
+Die Legacy-`observer.py` liest den jeweils neuesten Freezer-Wert aus dieser
+Datei.
 
-This establishes a direct dependency:
+Damit besteht folgende direkte Abhängigkeit:
 
 ```text
-serial device /dev/ttyUSB0
-        |
-        v
-     minicom
-        |
-        v
-freezer.log
-        |
-        v
-legacy observer.py
-        |
-        v
-ThingSpeak
+serielles Gerät /dev/ttyUSB0
+         |
+         v
+      minicom
+         |
+         v
+    freezer.log
+         |
+         v
+  Legacy observer.py
+         |
+         v
+     ThingSpeak
 ```
 
-This dependency should be preserved until the freezer data source has been
-explicitly migrated into the new data model.
+Diese Abhängigkeit soll erhalten bleiben, bis die Freezer-Datenquelle
+ausdrücklich in das neue Datenmodell migriert wurde.
 
 ---
 
 ## 7. RSYNC
 
-`rsync.service` is enabled but currently not running.
+`rsync.service` ist aktiviert, läuft derzeit aber nicht.
 
-The reason is that:
+Der Grund ist:
 
 ```text
 /etc/rsyncd.conf
 ```
 
-does not exist.
+existiert nicht.
 
-The installed systemd unit is configured for rsync daemon mode.
+Der installierte systemd-Service ist für den rsync-Daemon-Modus
+konfiguriert.
 
-This should not currently be interpreted as an active data-transfer service.
+Dies sollte derzeit **nicht** als aktiver Datentransfer-Service interpretiert
+werden.
 
 ---
 
 ## 8. TeamViewer
 
-A custom systemd unit exists:
+Ein eigener systemd-Service existiert unter:
 
 ```text
 /etc/systemd/system/teamviewerd.service
 ```
 
-It is currently:
+Er befindet sich derzeit im Zustand:
 
 ```text
 disabled
 inactive (dead)
 ```
 
-The unit starts:
+Der Service startet:
 
 ```text
 /opt/teamviewer/tv_bin/teamviewerd -d
 ```
 
-No active TeamViewer process was observed.
+Es wurde kein aktiver TeamViewer-Prozess beobachtet.
 
-The unit contains a legacy `/var/run/teamviewerd.pid` reference, which systemd
-currently normalizes to the corresponding `/run/...` path.
+Der Service enthält noch einen Legacy-Verweis auf:
 
-TeamViewer should be considered an installed but inactive legacy/recovery
-component until its role is explicitly decided.
+```text
+/var/run/teamviewerd.pid
+```
+
+den systemd aktuell auf den entsprechenden `/run/...`-Pfad normalisiert.
+
+TeamViewer ist daher als installierte, aber inaktive Legacy-/Recovery-
+Komponente zu betrachten, bis seine Rolle ausdrücklich entschieden wurde.
 
 ---
 
-## 9. Modem and Bluetooth
+## 9. Modem und Bluetooth
 
-ModemManager is installed and running, but:
+ModemManager ist installiert und läuft, aber:
 
 ```text
 mmcli -L
 No modems were found
 ```
 
-No Bluetooth devices were currently paired / listed.
+Aktuell waren keine Bluetooth-Geräte gekoppelt bzw. aufgelistet.
 
-Bluetooth itself is running and has an active HCI-related dependency.
+Bluetooth selbst läuft und besitzt eine aktive HCI-bezogene Abhängigkeit.
 
-Neither subsystem should be removed solely based on this snapshot; their
-necessity should be evaluated separately.
+Keines der beiden Subsysteme sollte allein aufgrund dieses Snapshots entfernt
+werden. Ihre tatsächliche Notwendigkeit sollte separat bewertet werden.
 
 ---
 
-## 10. Filesystems
+## 10. Dateisysteme
 
-The root filesystem is:
+Das Root-Dateisystem ist:
 
 ```text
 /dev/mmcblk0p2 ext4 rw,noatime
 ```
 
-The boot filesystem is:
+Das Boot-Dateisystem ist:
 
 ```text
 /dev/mmcblk0p1 vfat rw
 ```
 
-The system is currently operating with a writable root filesystem.
+Das System arbeitet derzeit mit einem beschreibbaren Root-Dateisystem.
 
 ---
 
-## 11. Current architectural significance
+## 11. Architektonische Bedeutung für den aktuellen Stand
 
-The most important findings for the ongoing LoggerPi → OtterPi migration are:
+Die wichtigsten Erkenntnisse für die laufende Migration von LoggerPi → OtterPi
+sind:
 
-1. `lightdm` and the graphical environment are intentionally retained as a
-   local recovery mechanism.
-2. SSH is enabled and currently running.
-3. Ethernet is the active network path.
-4. `/dev/ttyUSB0` is actively occupied by `minicom`.
-5. `freezer.log` is still a live legacy data source.
-6. The legacy `observer.py` depends on the freezer log and several external
-   HTTP endpoints.
-7. `rsync` is installed/enabled but not operational because its configuration
-   file is absent.
-8. TeamViewer is installed but inactive.
-9. ModemManager and Bluetooth are active but currently have no observed
-   application-level device usage.
-10. No service should be disabled or removed solely on the basis of this
-    inventory.
+1. `lightdm` und die grafische Umgebung bleiben bewusst als lokaler
+   Wiederherstellungsweg erhalten.
+2. SSH ist aktiviert und läuft derzeit.
+3. Ethernet ist der aktive Netzwerkpfad.
+4. `/dev/ttyUSB0` wird aktuell von `minicom` verwendet.
+5. `freezer.log` ist weiterhin eine aktive Legacy-Datenquelle.
+6. Die Legacy-`observer.py` hängt vom Freezer-Log und mehreren externen
+   HTTP-Endpunkten ab.
+7. `rsync` ist installiert und aktiviert, aber aufgrund der fehlenden
+   Konfigurationsdatei nicht aktiv.
+8. TeamViewer ist installiert, aber inaktiv.
+9. ModemManager und Bluetooth laufen, es wurde jedoch derzeit keine
+   Anwendungsebene-Nutzung dieser Geräte beobachtet.
+10. Kein Service darf allein aufgrund dieses Inventars deaktiviert oder
+    entfernt werden.
 
 ---
 
-## 12. Migration rule
+## 12. Migrationsregel
 
-Before removing or disabling any legacy component, establish whether it is:
+Bevor eine Legacy-Komponente entfernt oder deaktiviert wird, muss festgestellt
+werden, ob sie:
 
-- still required by the current data acquisition path,
-- required for local recovery,
-- required by the new OtterPi architecture,
-- merely installed but unused,
-- or historical residue.
+- weiterhin für den aktuellen Datenerfassungspfad benötigt wird,
+- für die lokale Wiederherstellung benötigt wird,
+- für die neue OtterPi-Architektur benötigt wird,
+- lediglich installiert, aber ungenutzt ist,
+- oder nur noch historischer Überrest ist.
 
-Changes should be made incrementally and documented in the repository.
+Änderungen sollen schrittweise durchgeführt und im Repository dokumentiert
+werden.
 
-The repository documentation is the authoritative record of architectural
-decisions and discovered dependencies; the running Raspberry Pi is the
-authoritative source for the current runtime state.
+Die Repository-Dokumentation ist die maßgebliche Quelle für
+Architekturentscheidungen und erkannte Abhängigkeiten; der laufende
+Raspberry Pi ist die maßgebliche Quelle für den aktuellen Laufzeitstatus.
