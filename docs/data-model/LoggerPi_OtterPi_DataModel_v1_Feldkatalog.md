@@ -1,23 +1,18 @@
 # LoggerPi → OtterPi
 
-
 ## Data Model v1 – vollständiger Feldkatalog
-
 
 **Status:** Feldkatalog abgeschlossen  
 **Zweck:** Verbindliche Referenz für die spätere Batch- und API-Struktur  
 **Grundprinzip:** Data Model ≠ Core-Batch-Konfiguration
 
-
 ---
-
 
 ## 1. Grundprinzipien
 
-
 ### 1.1 Architektur
 
-
+```text
 LoggerPi
   │
   ├── Systemtelemetrie
@@ -39,27 +34,30 @@ LoggerPi
           ├── Zustandsbewertung
           ├── Events / Alerts
           └── Dashboard
+```
 
+### 1.2 Verantwortlichkeiten
 
-1.2 Verantwortlichkeiten
+**LoggerPi**
 
-LoggerPi
+- erfasst Daten
+- liest Sensoren/Geräte
+- normalisiert Herstellerdaten
+- liefert technische Fakten
+- liefert Herkunft und Zeitbezug
+- überträgt den Batch
 
-erfasst Daten
-liest Sensoren/Geräte
-normalisiert Herstellerdaten
-liefert technische Fakten
-liefert Herkunft und Zeitbezug
-überträgt den Batch
+**OtterPi**
 
-OtterPi
+- bewertet fachliche Gültigkeit
+- bewertet Health und Zustände
+- erkennt Ausfälle und Zeitlücken
+- verarbeitet Events
+- stellt Daten im Dashboard dar
 
-bewertet fachliche Gültigkeit
-bewertet Health und Zustände
-erkennt Ausfälle und Zeitlücken
-verarbeitet Events
-stellt Daten im Dashboard dar
-1.3 Wichtige Trennung
+### 1.3 Wichtige Trennung
+
+```text
 Quelle / Hersteller-API
         ↓
 Adapter / Reader
@@ -69,13 +67,17 @@ gemeinsames Data Model
 konkrete Batch-Konfiguration
         ↓
 tatsächliche Übertragung
+```
 
 Nicht jedes Feld des Data Models muss Bestandteil des regelmäßigen Core-Batches sein.
 
-2. Batch Envelope
+---
+
+## 2. Batch Envelope
 
 Der äußere Rahmen eines Batches enthält die Identität und Reihenfolge der Übertragung.
 
+```text
 batch
 ├── schema_version
 ├── batch_id
@@ -83,62 +85,77 @@ batch
 ├── sequence
 ├── created_at
 └── ...
-Felder
-Feld	Typ	Bedeutung
-schema_version	string	Version des Data Models
-batch_id	string	eindeutige Identität dieses Batches
-logger_id	string	eindeutige Identität des LoggerPi
-sequence	integer	fortlaufende Batch-Nummer des jeweiligen LoggerPi
-created_at	datetime	Zeitpunkt der Batch-Erstellung
-Sequence-Regel
+```
 
-sequence ist pro LoggerPi fortlaufend.
+### Felder
+
+| Feld | Typ | Bedeutung |
+|---|---|---|
+| `schema_version` | string | Version des Data Models |
+| `batch_id` | string | eindeutige Identität dieses Batches |
+| `logger_id` | string | eindeutige Identität des LoggerPi |
+| `sequence` | integer | fortlaufende Batch-Nummer des jeweiligen LoggerPi |
+| `created_at` | datetime | Zeitpunkt der Batch-Erstellung |
+
+### Sequence-Regel
+
+`sequence` ist pro LoggerPi fortlaufend.
 
 Damit können gleiche Sequenznummern verschiedener LoggerPis problemlos unterschieden werden:
 
+```text
 loggerpi-01 / 1842
 loggerpi-02 / 1842
+```
 
 sind zwei unterschiedliche Batches.
 
-3. Zeitmodell
+## 3. Zeitmodell
 
 Zeitangaben müssen semantisch getrennt bleiben.
 
-Vorgesehene Zeitfelder
-created_at
-measured_at
-received_at
-Bedeutung
+### Vorgesehene Zeitfelder
 
-measured_at
+- `created_at`
+- `measured_at`
+- `received_at`
+
+### Bedeutung
+
+**`measured_at`**
 
 Zeitpunkt, zu dem ein Messwert tatsächlich erfasst wurde.
 
-created_at
+**`created_at`**
 
 Zeitpunkt, zu dem der LoggerPi den Batch erzeugt hat.
 
-received_at
+**`received_at`**
 
 Zeitpunkt, zu dem der OtterPi den Batch empfangen hat.
 
 Diese Zeiten dürfen nicht miteinander vermischt werden.
 
-4. System / Identity
+---
 
-system.identity
+## 4. System / Identity
 
-Felder
-hostname
-hardware.model
-hardware.revision
-hardware.cpu_cores
-os.name
-os.version
-os.codename
-kernel.release
-Beispiel
+`system.identity`
+
+### Felder
+
+- `hostname`
+- `hardware.model`
+- `hardware.revision`
+- `hardware.cpu_cores`
+- `os.name`
+- `os.version`
+- `os.codename`
+- `kernel.release`
+
+### Beispiel
+
+```text
 system.identity.hostname
 system.identity.hardware.model
 system.identity.hardware.revision
@@ -147,148 +164,191 @@ system.identity.os.name
 system.identity.os.version
 system.identity.os.codename
 system.identity.kernel.release
-Hinweis
+```
 
-RAM wird nicht als Hardware-Metadatum geführt.
+### Hinweis
+
+RAM wird **nicht** als Hardware-Metadatum geführt.
 
 Die tatsächliche Speicherkapazität kommt aus:
 
-memory.total_bytes
+`memory.total_bytes`
 
-5. System / Time
+## 5. System / Time
 
-system.time
+`system.time`
 
-Felder
-current
-timezone
-clock_state
-Bedeutung
+### Felder
 
-current
+- `current`
+- `timezone`
+- `clock_state`
+
+### Bedeutung
+
+**`current`**
 
 Aktuelle LoggerPi-Zeit.
 
-timezone
+**`timezone`**
 
 Zeitzone des Systems.
 
-clock_state
+**`clock_state`**
 
 Zustand der Systemuhr bzw. Zeitsynchronisation.
 
-6. System / Boot
+---
 
-system.boot
+## 6. System / Boot
 
-Felder
-last_boot_at
-uptime_seconds
-Bewusste Entscheidung
+`system.boot`
+
+### Felder
+
+- `last_boot_at`
+- `uptime_seconds`
+
+### Bewusste Entscheidung
 
 Kein separates:
 
-reboot_detected
+`reboot_detected`
 
 Der OtterPi kann einen Neustart erkennen, wenn sich:
 
-last_boot_at
+`last_boot_at`
 
 gegenüber dem vorherigen bekannten Zustand verändert.
 
-7. System / CPU
+---
 
-system.cpu
+## 7. System / CPU
 
-Auslastung
-usage_percent
-Load
-load.1m
-load.5m
-load.15m
-Frequenz
-frequency.current_hz
-frequency.max_hz
-Temperatur
-temperature
-Throttling / Hardwarezustände
-throttling.undervoltage
-throttling.frequency_capped
-throttling.throttled
-throttling.temperature_limit
-Einordnung
+`system.cpu`
+
+### Auslastung
+
+- `usage_percent`
+
+### Load
+
+- `load.1m`
+- `load.5m`
+- `load.15m`
+
+### Frequenz
+
+- `frequency.current_hz`
+- `frequency.max_hz`
+
+### Temperatur
+
+- `temperature`
+
+### Throttling / Hardwarezustände
+
+- `throttling.undervoltage`
+- `throttling.frequency_capped`
+- `throttling.throttled`
+- `throttling.temperature_limit`
+
+### Einordnung
 
 CPU-Auslastung und Temperatur sind Measurements.
 
-Die Throttling-Werte sind States, keine Measurements.
+Die Throttling-Werte sind **States**, keine Measurements.
 
-8. System / Memory
+## 8. System / Memory
 
-memory
+`memory`
 
-Rohwerte
-total_bytes
-used_bytes
-available_bytes
-Abgeleiteter Wert
-used_percent
+### Rohwerte
+
+- `total_bytes`
+- `used_bytes`
+- `available_bytes`
+
+### Abgeleiteter Wert
+
+- `used_percent`
 
 Das Grundprinzip lautet:
 
-Rohdaten möglichst erhalten; abgeleitete Werte dürfen zusätzlich übertragen werden.
+**Rohdaten möglichst erhalten; abgeleitete Werte dürfen zusätzlich übertragen werden.**
 
-9. System / Swap
+---
 
-swap
+## 9. System / Swap
 
-Technische Eigenschaften
-device
-type
-state
-Speicherwerte
-total_bytes
-used_bytes
-available_bytes
-used_percent
-Beispiel
+`swap`
+
+### Technische Eigenschaften
+
+- `device`
+- `type`
+- `state`
+
+### Speicherwerte
+
+- `total_bytes`
+- `used_bytes`
+- `available_bytes`
+- `used_percent`
+
+### Beispiel
+
+```text
 device = /dev/zram0
 type   = zram
 state  = active
-10. System / Storage
+```
 
-Storage wird bewusst in physisches Medium und Dateisysteme getrennt.
+---
 
-10.1 Physische Devices
+## 10. System / Storage
 
-storage.devices[]
+Storage wird bewusst in **physisches Medium** und **Dateisysteme** getrennt.
 
-Felder
-device
-model
-type
-manufactured_at
+### 10.1 Physische Devices
 
-manufactured_at ist optional.
+`storage.devices[]`
 
-Beispiel
+### Felder
+
+- `device`
+- `model`
+- `type`
+- `manufactured_at`
+
+`manufactured_at` ist optional.
+
+### Beispiel
+
+```text
 device = /dev/mmcblk0
 model  = SN64G
 type   = sd
-10.2 Filesystems
+```
 
-storage.filesystems{}
+### 10.2 Filesystems
+
+`storage.filesystems{}`
 
 Pro Mountpoint:
 
-device
-filesystem
-mount_state
-total_bytes
-used_bytes
-available_bytes
-used_percent
-inodes_used_percent
-Beispiel
+- `device`
+- `filesystem`
+- `mount_state`
+- `total_bytes`
+- `used_bytes`
+- `available_bytes`
+- `used_percent`
+- `inodes_used_percent`
+
+### Beispiel
+
+```text
 /
 ├── device
 ├── filesystem
@@ -298,165 +358,204 @@ Beispiel
 ├── available_bytes
 ├── used_percent
 └── inodes_used_percent
-11. System / Processes
+```
+
+---
+
+## 11. System / Processes
 
 Im Core zunächst bewusst nur aggregiert:
 
-system.processes.total
+`system.processes.total`
 
-Beispiel:
+### Beispiel
 
+```text
 system.processes.total = 192
-Nicht Bestandteil des Core-Feldkatalogs
-PID-Liste
-Prozessnamen
-CPU-Verbrauch jedes Prozesses
-Memory-Verbrauch jedes Prozesses
-vollständige Prozessliste
+```
+
+### Nicht Bestandteil des Core-Feldkatalogs
+
+- PID-Liste
+- Prozessnamen
+- CPU-Verbrauch jedes Prozesses
+- Memory-Verbrauch jedes Prozesses
+- vollständige Prozessliste
 
 Das wäre gegebenenfalls spätere Diagnoseinformation.
 
-12. Network / Interfaces
+## 12. Network / Interfaces
 
-network.interfaces{}
+`network.interfaces{}`
 
 Pro Interface:
 
-state
-blocked
-mac
-addresses[]
+- `state`
+- `blocked`
+- `mac`
+- `addresses[]`
 
-Beispiele:
+### Beispiele
 
-eth0
-wlan0
-Beispielhafte Zustände
-up
-down
+- `eth0`
+- `wlan0`
 
-blocked beschreibt beispielsweise einen administrativ/radioseitig blockierten Zustand.
+### Beispielhafte Zustände
+
+- `up`
+- `down`
+
+`blocked` beschreibt beispielsweise einen administrativ/radioseitig blockierten Zustand.
 
 Damit ist auch ein Dashboard-Eintrag wie:
 
-WLAN (wlan0): blockiert
+**WLAN (wlan0): blockiert**
 
 im Bereich Network / Interfaces abbildbar.
 
-13. Network / Routing
+---
 
-network.routing
+## 13. Network / Routing
 
-Feld
-default_gateway
-14. Network / DNS
+`network.routing`
 
-network.dns
+### Feld
 
-Feld
-servers[]
-15. Connectivity / Upload
+- `default_gateway`
+
+---
+
+## 14. Network / DNS
+
+`network.dns`
+
+### Feld
+
+- `servers[]`
+
+---
+
+## 15. Connectivity / Upload
 
 Der LoggerPi soll den technischen Übertragungszustand nachvollziehbar machen.
 
 Vorgesehen sind insbesondere Informationen zu:
 
-upload
-queue
+- `upload`
+- `queue`
 
 Die genaue endgültige Unterstruktur wird beim späteren Batch-/API-Design festgelegt.
 
-Grundprinzip
+### Grundprinzip
 
 Ein erfolgreicher Upload zum OtterPi ist bereits ein praktischer Connectivity-Nachweis.
 
 Deshalb keine permanenten redundanten:
 
-ping
-DNS-Test
-HTTPS-Test
+- `ping`
+- DNS-Test
+- HTTPS-Test
 
 nur um Connectivity zu beweisen.
 
 Aktive Tests sind später bei gezielter Diagnose möglich.
 
-16. Services
+---
 
-services.<service_id>
+## 16. Services
+
+`services.<service_id>`
 
 Services werden dynamisch modelliert.
 
-Felder
-name
-purpose
-state
-enabled
-pid
-started_at
-last_state_change_at
+### Felder
+
+- `name`
+- `purpose`
+- `state`
+- `enabled`
+- `pid`
+- `started_at`
+- `last_state_change_at`
 
 Nicht jeder Dienst muss zwangsläufig jedes Feld liefern.
 
-17. Service State
-Mögliche Zustände
-running
-stopped
-failed
-starting
-stopping
-unknown
+---
+
+## 17. Service State
+
+### Mögliche Zustände
+
+- `running`
+- `stopped`
+- `failed`
+- `starting`
+- `stopping`
+- `unknown`
 
 Der LoggerPi liefert den technischen Zustand.
 
 Der OtterPi bewertet dessen Bedeutung für Health/Dashboard.
 
-18. Autostart
+## 18. Autostart
 
 Autostart-Information wird bewusst von einem laufenden Service getrennt.
 
 Konzeptionell:
 
-autostart
+`autostart`
 
 mit Informationen darüber, ob ein Dienst beim Boot gestartet werden soll.
 
-Beispielhafte Semantik
+### Beispielhafte Semantik
+
+```text
 enabled = true
 state = stopped
+```
 
 → Dienst sollte laufen, läuft aber nicht.
 
 Oder:
 
+```text
 enabled = false
 state = running
+```
 
 → läuft momentan, wird aber nicht automatisch gestartet.
 
-19. Timer / Cron
+---
+
+## 19. Timer / Cron
 
 Timer und Cron sind wiederum eine eigene Kategorie.
 
 Sie beantworten:
 
-Was wird zeitgesteuert ausgeführt?
+**Was wird zeitgesteuert ausgeführt?**
 
 und nicht:
 
-Was läuft gerade?
+**Was läuft gerade?**
 
-Ein vollständiger Linux-Cron-Dump gehört nicht in den Core-Batch.
+Ein vollständiger Linux-Cron-Dump gehört **nicht** in den Core-Batch.
 
-20. Measurements – gemeinsames Schema
+---
+
+## 20. Measurements – gemeinsames Schema
 
 Physikalische Messwerte folgen grundsätzlich demselben Muster:
 
-value
-unit
-measured_at
-validity
-source
-Beispiel
+- `value`
+- `unit`
+- `measured_at`
+- `validity`
+- `source`
+
+### Beispiel
+
+```json
 {
   "value": 23.1,
   "unit": "celsius",
@@ -464,446 +563,527 @@ Beispiel
   "validity": "valid",
   "source": "..."
 }
-Grundsatz
+```
+
+### Grundsatz
 
 Hersteller-/Quellenbezeichnungen werden nicht einfach in das gemeinsame Data Model übernommen.
 
-21. Validity
-Vorgesehene Zustände
-valid
-invalid
-unavailable
-unknown
-stale
+---
+
+## 21. Validity
+
+### Vorgesehene Zustände
+
+- `valid`
+- `invalid`
+- `unavailable`
+- `unknown`
+- `stale`
 
 Die endgültige fachliche Semantik wird im nächsten Arbeitsschritt noch verbindlich festgelegt.
 
-Grundprinzip
+### Grundprinzip
 
 Der LoggerPi liefert:
 
-Rohwert
-Quelle
-technische Situation
-Zeit
+- Rohwert
+- Quelle
+- technische Situation
+- Zeit
 
-Der OtterPi entscheidet über die fachliche Bewertung der Messwertgültigkeit.
+Der OtterPi entscheidet über die **fachliche Bewertung der Messwertgültigkeit**.
 
-22. Derived Measurements
+## 22. Derived Measurements
 
 Abgeleitete Werte sind zulässig.
 
-Beispiele
-used_percent
-inodes_used_percent
+### Beispiele
+
+- `used_percent`
+- `inodes_used_percent`
 
 Sie dürfen übertragen werden, obwohl sie aus Rohdaten berechnet werden.
 
 Rohdaten sollen, wo sinnvoll, zusätzlich vorhanden sein.
 
-23. Serial
+---
+
+## 23. Serial
 
 Der Freezer wird über RS-232 angebunden.
 
-Technische Parameter
+### Technische Parameter
+
+```text
 baud: 1200
 data_bits: 8
 start_bits: 1
 stop_bits: 2
 parity: none
+```
 
 Diese statischen Kommunikationsparameter müssen nicht bei jedem Batch übertragen werden.
 
-24. Serial State
-Felder
-serial.device
-serial.state
-Zustände
-connected
-degraded
-disconnected
-unknown
-Definition
+---
 
-connected
+## 24. Serial State
 
-/dev/ttyUSB0 vorhanden
+### Felder
 
-erwarteter Datenempfang funktioniert
+- `serial.device`
+- `serial.state`
 
-degraded
+### Zustände
 
-/dev/ttyUSB0 vorhanden
+- `connected`
+- `degraded`
+- `disconnected`
+- `unknown`
 
-aber erwarteter Empfang bleibt aus
+### Definition
 
-disconnected
+**`connected`**
 
-/dev/ttyUSB0 nicht vorhanden
+`/dev/ttyUSB0` vorhanden
 
-unknown
+**und**
+
+erwarteter Datenempfang funktioniert.
+
+**`degraded`**
+
+`/dev/ttyUSB0` vorhanden
+
+aber erwarteter Empfang bleibt aus.
+
+**`disconnected`**
+
+`/dev/ttyUSB0` nicht vorhanden.
+
+**`unknown`**
 
 Zustand nicht zuverlässig bestimmbar.
 
-25. Serial Diagnostics
+---
+
+## 25. Serial Diagnostics
 
 Vorgesehen:
 
-serial.last_rx_at
-serial.seconds_since_rx
-serial.lines_received
-serial.parse_errors
-serial.reconnect_count
+- `serial.last_rx_at`
+- `serial.seconds_since_rx`
+- `serial.lines_received`
+- `serial.parse_errors`
+- `serial.reconnect_count`
 
-Diese Informationen sind Health-/Diagnosedaten.
+Diese Informationen sind **Health-/Diagnosedaten**.
 
 Sie sind keine Freezer-Messwerte.
 
-26. Freezer Temperature
+---
+
+## 26. Freezer Temperature
 
 Der tatsächlich aus dem RS-232-Protokoll gelesene Temperaturwert wird in das gemeinsame Measurement-Modell übersetzt.
 
-freezer.temperature
+`freezer.temperature`
 
 mit:
 
-value
-unit
-measured_at
-validity
-source
-27. Freezer Protocol Errors
+- `value`
+- `unit`
+- `measured_at`
+- `validity`
+- `source`
+
+---
+
+## 27. Freezer Protocol Errors
 
 Das Protokoll kann beispielsweise liefern:
 
-UNDERTEMP
-OVERTEMP
-PWRFAIL
-CNTRFAIL
-Er07
-HSHX FAIL
-HOT COND
+- `UNDERTEMP`
+- `OVERTEMP`
+- `PWRFAIL`
+- `CNTRFAIL`
+- `Er07`
+- `HSHX FAIL`
+- `HOT COND`
 
 sowie:
 
-T_ERR
+`T_ERR`
 
 bei bestimmten fehlerhaften Temperaturwerten.
 
-Diese Informationen sind Events/Fehlerzustände, nicht einfach normale Temperaturwerte.
+Diese Informationen sind **Events/Fehlerzustände**, nicht einfach normale Temperaturwerte.
 
-28. Freezer Events / Alarms
+## 28. Freezer Events / Alarms
 
 Für solche Ereignisse ist ein separater Event-/Alarmbereich vorgesehen.
 
 Beispielsweise:
 
-events[]
+`events[]`
 
 Die genaue Event-Struktur wird beim nächsten Arbeitsschritt definiert.
 
-29. AtmoWEB Measurements
+---
+
+## 29. AtmoWEB Measurements
 
 Aus der AtmoWEB-API bekannte Messwerte:
 
-Temp1Read
-Temp2Read
-Temp3Read
-Temp4Read
-HumRead
-VacRead
-CO2Read
-O2Read
-FanRead
+- `Temp1Read`
+- `Temp2Read`
+- `Temp3Read`
+- `Temp4Read`
+- `HumRead`
+- `VacRead`
+- `CO2Read`
+- `O2Read`
+- `FanRead`
 
 Diese werden auf fachliche Felder abgebildet.
 
-30. AtmoWEB → Data Model Mapping
+---
+
+## 30. AtmoWEB → Data Model Mapping
 
 Beispiele:
 
+```text
 Temp1Read
     ↓
 measurements.temperature_1
+```
 
-
+```text
 HumRead
     ↓
 measurements.humidity
+```
 
-
+```text
 VacRead
     ↓
 measurements.vacuum
+```
 
-
+```text
 CO2Read
     ↓
 measurements.co2
+```
 
-
+```text
 O2Read
     ↓
 measurements.o2
+```
 
-
+```text
 FanRead
     ↓
 measurements.fan_speed
+```
 
 Die endgültige Benennung und Gruppierung wird beim konkreten Batch-Schema noch einmal geprüft.
 
-31. AtmoWEB N/A
+---
+
+## 31. AtmoWEB N/A
 
 Wenn AtmoWEB beispielsweise:
 
-CO2Read = N/A
+`CO2Read = N/A`
 
-liefert, darf daraus nicht
+liefert, darf daraus **nicht**
 
-0
+`0`
 
 werden.
 
 Stattdessen beispielsweise:
 
+```json
 {
   "value": null,
   "validity": "unavailable"
 }
+```
 
 Damit bleibt die Bedeutung erhalten:
 
-kein verfügbarer Messwert
+**kein verfügbarer Messwert**
 
 und nicht:
 
-Messwert ist 0.
+**Messwert ist 0.**
 
-32. AtmoWEB States
+## 32. AtmoWEB States
 
 Bekannte States:
 
-DoorOpen
-DoorLock
-LightDay
-LightUV
-LightLED
-SwASet
-SwBSet
-SwCSet
-SwDSet
-FlapSet
-Defrost
+- `DoorOpen`
+- `DoorLock`
+- `LightDay`
+- `LightUV`
+- `LightLED`
+- `SwASet`
+- `SwBSet`
+- `SwCSet`
+- `SwDSet`
+- `FlapSet`
+- `Defrost`
 
 Diese werden als States und nicht als normale physikalische Measurements behandelt.
 
-33. Fachliche State-Namen
+---
+
+## 33. Fachliche State-Namen
 
 Beispielsweise:
 
+```text
 states.door_open
 states.door_locked
-
 
 states.light_day
 states.light_uv
 states.light_led
 
-
 states.switches
-
 
 states.flap
 states.defrost
+```
 
 Die genaue Typisierung einzelner States wird beim finalen Batch-Schema festgelegt.
 
-34. AtmoWEB Operation
+---
+
+## 34. AtmoWEB Operation
 
 AtmoWEB:
 
-CurOp
+`CurOp`
 
 wird als Betriebszustand modelliert.
 
-operation.mode
-Mapping
-Program → program
-Idle    → idle
-Timer   → timer
-Manual  → manual
-35. Device Metadata
+`operation.mode`
+
+### Mapping
+
+| AtmoWEB | Data Model |
+|---|---|
+| `Program` | `program` |
+| `Idle` | `idle` |
+| `Timer` | `timer` |
+| `Manual` | `manual` |
+
+---
+
+## 35. Device Metadata
 
 AtmoWEB liefert:
 
-SN
-DevType
-SWRev
-Fachliche Zuordnung
-device.serial_number
-device.device_type
-device.software_revision
+- `SN`
+- `DevType`
+- `SWRev`
+
+### Fachliche Zuordnung
+
+- `device.serial_number`
+- `device.device_type`
+- `device.software_revision`
 
 Diese Werte ändern sich normalerweise selten.
 
 Sie müssen deshalb nicht zwangsläufig in jedem Core-Batch vollständig wiederholt werden.
 
-36. Setpoints
+---
+
+## 36. Setpoints
 
 Konzeptioneller Bereich:
 
-setpoints
-Vorgesehen
-temperature
-humidity
-vacuum
-co2
-o2
-fan
+`setpoints`
 
-Setpoints sind keine Measurements.
+### Vorgesehen
+
+- `temperature`
+- `humidity`
+- `vacuum`
+- `co2`
+- `o2`
+- `fan`
+
+Setpoints sind **keine Measurements**.
 
 Sie sind Konfigurations-/Sollwerte.
 
-Sie gehören zunächst nicht automatisch in den Core-Batch v1.
+Sie gehören zunächst **nicht automatisch in den Core-Batch v1**.
 
-37. Alarm Limits
+## 37. Alarm Limits
 
 Konzeptioneller Bereich:
 
-alarm_limits
-Vorgesehen
-temperature
-humidity
-vacuum
-co2
-o2
+`alarm_limits`
+
+### Vorgesehen
+
+- `temperature`
+- `humidity`
+- `vacuum`
+- `co2`
+- `o2`
 
 Auch diese sind keine Measurements.
 
 Sie sind Grenz-/Konfigurationswerte.
 
-38. Programming / Program Information
+---
+
+## 38. Programming / Program Information
 
 Aus AtmoWEB bekannte Informationen:
 
-InfoTemp
-InfoHum
-InfoVac
-InfoMsg
-Info
-ProgStart
-ProgStop
-ProgExit
-ProgCurrent
-ProgDuration
-ProgRemain
-ProgList
-ProgLoad
-ProgDelete
+- `InfoTemp`
+- `InfoHum`
+- `InfoVac`
+- `InfoMsg`
+- `Info`
+- `ProgStart`
+- `ProgStop`
+- `ProgExit`
+- `ProgCurrent`
+- `ProgDuration`
+- `ProgRemain`
+- `ProgList`
+- `ProgLoad`
+- `ProgDelete`
 
-Diese Daten werden nicht automatisch in den Core-Batch übernommen.
+Diese Daten werden **nicht automatisch in den Core-Batch übernommen**.
 
 Sie gehören konzeptionell in einen späteren Bereich für Programm-/Betriebsinformationen.
 
-39. AtmoWEB LOG.TXT
+---
 
-LOG.TXT enthält beispielsweise:
+## 39. AtmoWEB LOG.TXT
 
-Door open
-Restart
-Start: MyProgram
-End: MyProgram
-Temp. max alarm
+`LOG.TXT` enthält beispielsweise:
 
-Diese Informationen werden als Events betrachtet.
+- `Door open`
+- `Restart`
+- `Start: MyProgram`
+- `End: MyProgram`
+- `Temp. max alarm`
+
+Diese Informationen werden als **Events** betrachtet.
 
 Nicht als:
 
-measurement
-health
-40. Events
+- Measurement
+- Health
+
+---
+
+## 40. Events
 
 Konzeptioneller Bereich:
 
-events[]
-Mögliche Quellen
-freezer
-serial
-atmoweb
-logger
-service
-connectivity
-system
-Mögliche Ereignisse
-alarm
-restart
-service_failure
-connectivity_change
-device_event
+`events[]`
+
+### Mögliche Quellen
+
+- `freezer`
+- `serial`
+- `atmoweb`
+- `logger`
+- `service`
+- `connectivity`
+- `system`
+
+### Mögliche Ereignisse
+
+- `alarm`
+- `restart`
+- `service_failure`
+- `connectivity_change`
+- `device_event`
 
 Die endgültige Event-Struktur ist Bestandteil des nächsten Arbeitsschrittes.
 
-41. Metadata
+## 41. Metadata
 
 Metadata umfasst selten veränderliche Informationen wie beispielsweise:
 
-Hardware
-OS
-Kernel
-Device Serial Number
-Device Type
-Software Revision
-Storage Model
+- Hardware
+- OS
+- Kernel
+- Device Serial Number
+- Device Type
+- Software Revision
+- Storage Model
 
-Wichtig:
+### Wichtig
 
 Metadata muss nicht zwangsläufig in jedem regulären Batch vollständig wiederholt werden.
 
 Wenn sich Metadata ändert, muss die Änderung aber über den normalen LoggerPi → OtterPi Kommunikationsweg beim OtterPi ankommen.
 
-Der OtterPi soll nicht darauf angewiesen sein, den LoggerPi aktiv erreichen zu können.
+Der OtterPi soll **nicht** darauf angewiesen sein, den LoggerPi aktiv erreichen zu können.
 
-42. Erweiterbare Sensorik
+---
+
+## 42. Erweiterbare Sensorik
 
 Neue Sensoren können später über Adapter eingebunden werden.
 
+```text
 AtmoWEB ───────┐
 Modbus ────────┤
 MQTT ──────────┼──> gemeinsames Data Model
 Serial ────────┤
 Sensor X ──────┘
+```
 
 Der jeweilige Adapter übersetzt die Quellstruktur in die gemeinsamen fachlichen Felder.
 
 Damit muss das Data Model nicht für jeden Hersteller neu erfunden werden.
 
-43. Kein misc
+---
+
+## 43. Kein misc
 
 Bewusst nicht vorgesehen:
 
-measurements.misc
-states.misc
-Begründung
+- `measurements.misc`
+- `states.misc`
 
-Ein misc-Feld würde schnell zum unspezifizierten Auffangbecken werden und die Semantik des Data Models verschlechtern.
+### Begründung
 
-Wenn künftig wirklich nicht standardisierte Daten benötigt werden, soll dafür ein expliziter Erweiterungsmechanismus definiert werden.
+Ein `misc`-Feld würde schnell zum unspezifizierten Auffangbecken werden und die Semantik des Data Models verschlechtern.
 
-44. Data Model ≠ Batch
+Wenn künftig wirklich nicht standardisierte Daten benötigt werden, soll dafür ein **expliziter Erweiterungsmechanismus** definiert werden.
+
+---
+
+## 44. Data Model ≠ Batch
 
 Ein Feld darf im Data Model vorhanden sein, ohne regelmäßig übertragen zu werden.
 
-Beispiel:
+### Beispiel
 
-vacuum
+`vacuum`
 
 kann grundsätzlich unterstützt werden.
 
 Der konkrete Sensor kann aber:
 
-VacRead = N/A
+`VacRead = N/A`
 
 liefern.
 
@@ -911,7 +1091,7 @@ Oder Vacuum wird im normalen Core-Batch zunächst überhaupt nicht abgefragt.
 
 Das ist kein Widerspruch.
 
-45. Data Model ≠ Hersteller-API
+## 45. Data Model ≠ Hersteller-API
 
 Herstellerfelder bleiben auf Adapter-/Reader-Ebene.
 
@@ -927,62 +1107,67 @@ temperature_1
 
 Damit können unterschiedliche Quellen dasselbe fachliche Feld bedienen.
 
-46. Einheiten
+## 46. Einheiten
 
 Einheiten werden zentral und einheitlich verwendet.
 
 Grundprinzip:
 
-temperature → celsius
-humidity    → percent
-pressure    → pascal / definierte Druckeinheit
-co2         → definierte Konzentrationseinheit
-o2          → definierte Konzentrationseinheit
-frequency   → hz
-memory      → bytes
-time        → seconds
+- temperature → celsius
+- humidity → percent
+- pressure → pascal / definierte Druckeinheit
+- co2 → definierte Konzentrationseinheit
+- o2 → definierte Konzentrationseinheit
+- frequency → hz
+- memory → bytes
+- time → seconds
 
 Die endgültige vollständige Unit-Tabelle gehört zur formalen Schema-/Batchdefinition und wird nicht von einzelnen Herstellern bestimmt.
 
-47. Core-Batch-Prinzip
+## 47. Core-Batch-Prinzip
 
 Der regelmäßige Core-Batch soll nur die für den laufenden Betrieb sinnvollen Informationen enthalten.
 
-Nicht automatisch
-vollständige Hersteller-API
-sämtliche Linux-Sensoren
-Prozesslisten
-vollständige Cron-Konfiguration
-seltene Metadata bei jedem Durchlauf
-redundante Connectivity-Tests
-unstrukturierte misc-Daten
-Aber
-ausreichend Systemdaten
-relevante Health-Daten
-relevante Services
-relevante Sensorwerte
-relevante Geräte-/Serial-Zustände
-notwendige Upload-/Queue-Informationen
-48. Connectivity-Prinzip
+### Nicht automatisch
+
+- vollständige Hersteller-API
+- sämtliche Linux-Sensoren
+- Prozesslisten
+- vollständige Cron-Konfiguration
+- seltene Metadata bei jedem Durchlauf
+- redundante Connectivity-Tests
+- unstrukturierte misc-Daten
+
+### Aber
+
+- ausreichend Systemdaten
+- relevante Health-Daten
+- relevante Services
+- relevante Sensorwerte
+- relevante Geräte-/Serial-Zustände
+- notwendige Upload-/Queue-Informationen
+
+## 48. Connectivity-Prinzip
 
 Wir vermeiden unnötige aktive Tests.
 
 Nicht standardmäßig bei jedem Batch:
 
-ping
-DNS lookup
-HTTPS test
+- ping
+- DNS lookup
+- HTTPS test
 
 wenn die reguläre Übertragung selbst bereits den Kommunikationsweg bestätigt.
 
 Das entspricht dem übergeordneten Projektprinzip:
 
-So wenig Tests wie möglich, aber so viele Informationen wie für einen zuverlässigen Betrieb tatsächlich nötig sind.
+**So wenig Tests wie möglich, aber so viele Informationen wie für einen zuverlässigen Betrieb tatsächlich nötig sind.**
 
-49. Spätere Queue-/Disconnect-Logik
+## 49. Spätere Queue-/Disconnect-Logik
 
 Noch nicht Bestandteil des endgültigen Feldschemas, aber konzeptionell vorgesehen:
 
+```text
 LoggerPi offline
       ↓
 lokale Queue
@@ -992,20 +1177,22 @@ Verbindung wieder verfügbar
 Batches nachliefern
       ↓
 OtterPi verarbeitet Sequenzen und Zeitstempel
+```
 
 Dabei müssen insbesondere:
 
-sequence
-created_at
-measured_at
-received_at
+- `sequence`
+- `created_at`
+- `measured_at`
+- `received_at`
 
 sauber auseinandergehalten werden.
 
-50. Feldkatalog – Kategorienübersicht
+## 50. Feldkatalog – Kategorienübersicht
 
 Damit ergibt sich aktuell folgende Gesamtstruktur:
 
+```text
 batch
 │
 ├── Envelope
@@ -1089,52 +1276,55 @@ batch
 ├── events[]
 │
 └── metadata
-51. Abgeschlossene Entscheidungen
+```
+
+## 51. Abgeschlossene Entscheidungen
 
 Folgende Punkte gelten als entschieden:
 
-LoggerPi erfasst Fakten, OtterPi bewertet sie.
-Data Model und tatsächlicher Batch sind getrennt.
-Hersteller-API-Namen werden nicht zu universellen Feldnamen.
-Measurements, States, Health, Metadata, Configuration und Events werden getrennt.
-Rohwerte und sinnvolle abgeleitete Werte dürfen gemeinsam übertragen werden.
-validity gehört zum Messwertmodell.
-system.processes.total reicht zunächst für den Core.
-Keine Prozessliste im regulären Batch.
-Netzwerkinterfaces gehören in network.interfaces.
-wlan0 blocked gehört dort hinein.
-Keine unnötigen aktiven Connectivity-Tests.
-Services sind dynamisch erweiterbar.
-Serial und Freezer werden getrennt von allgemeinen Measurements betrachtet.
-AtmoWEB N/A wird niemals als 0 interpretiert.
-Setpoints sind keine Measurements.
-Alarmgrenzen sind keine Measurements.
-LOG-/Alarminformationen sind Events.
-Metadata ist von regelmäßigen Messdaten getrennt.
-measurements.misc wird nicht vorgesehen.
-states.misc wird nicht vorgesehen.
-Neue Sensoren werden über Adapter in das gemeinsame Modell überführt.
-sequence ist pro LoggerPi fortlaufend.
-LoggerPi-Identität und Sequence werden gemeinsam betrachtet.
-Metadata-Änderungen müssen über den normalen Uploadweg beim OtterPi ankommen.
-Der OtterPi soll den LoggerPi nicht aktiv erreichen müssen.
-Der Core-Batch soll schlank bleiben.
-52. Was ausdrücklich noch NICHT abgeschlossen ist
+- LoggerPi erfasst Fakten, OtterPi bewertet sie.
+- Data Model und tatsächlicher Batch sind getrennt.
+- Hersteller-API-Namen werden nicht zu universellen Feldnamen.
+- Measurements, States, Health, Metadata, Configuration und Events werden getrennt.
+- Rohwerte und sinnvolle abgeleitete Werte dürfen gemeinsam übertragen werden.
+- `validity` gehört zum Messwertmodell.
+- `system.processes.total` reicht zunächst für den Core.
+- Keine Prozessliste im regulären Batch.
+- Netzwerkinterfaces gehören in `network.interfaces`.
+- `wlan0` `blocked` gehört dort hinein.
+- Keine unnötigen aktiven Connectivity-Tests.
+- Services sind dynamisch erweiterbar.
+- Serial und Freezer werden getrennt von allgemeinen Measurements betrachtet.
+- AtmoWEB `N/A` wird niemals als `0` interpretiert.
+- Setpoints sind keine Measurements.
+- Alarmgrenzen sind keine Measurements.
+- LOG-/Alarminformationen sind Events.
+- Metadata ist von regelmäßigen Messdaten getrennt.
+- `measurements.misc` wird nicht vorgesehen.
+- `states.misc` wird nicht vorgesehen.
+- Neue Sensoren werden über Adapter in das gemeinsame Modell überführt.
+- `sequence` ist pro LoggerPi fortlaufend.
+- LoggerPi-Identität und Sequence werden gemeinsam betrachtet.
+- Metadata-Änderungen müssen über den normalen Uploadweg beim OtterPi ankommen.
+- Der OtterPi soll den LoggerPi nicht aktiv erreichen müssen.
+- Der Core-Batch soll schlank bleiben.
+
+## 52. Was ausdrücklich noch NICHT abgeschlossen ist
 
 Der Feldkatalog ist abgeschlossen, aber daraus müssen noch abgeleitet werden:
 
-konkrete Core-Batch-JSON-Struktur
-welche Felder tatsächlich regelmäßig übertragen werden
-welche Felder nur bei Änderung übertragen werden
-Metadata-/Discovery-Mechanismus
-vollständige Unit-Tabelle
-finale Validity-Semantik
-Event-Schema
-API-Endpunkte
-Request-/Response-Schema
-Idempotenz / Duplicate Handling
-Retry-/Queue-Verhalten
-Authentifizierung
-Schema-Versionierung
+- konkrete Core-Batch-JSON-Struktur
+- welche Felder tatsächlich regelmäßig übertragen werden
+- welche Felder nur bei Änderung übertragen werden
+- Metadata-/Discovery-Mechanismus
+- vollständige Unit-Tabelle
+- finale Validity-Semantik
+- Event-Schema
+- API-Endpunkte
+- Request-/Response-Schema
+- Idempotenz / Duplicate Handling
+- Retry-/Queue-Verhalten
+- Authentifizierung
+- Schema-Versionierung
 
 Damit ist der Feldkatalog selbst sauber abgeschlossen, ohne uns an dieser Stelle bereits die nächste Designphase vorwegzunehmen.
