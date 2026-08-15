@@ -96,15 +96,33 @@ Der OtterPi bewertet deren fachliche Bedeutung, Health und Zustand.
 
 ### Aktueller Arbeitspunkt
 
-Der aktuelle fachliche Arbeitspunkt ist:
+Die funktionale Bewertung der relevanten LoggerPi-Services wurde durchgeführt
+und in den Core-Batch-Entwurf übernommen.
+
+Der daraus abgeleitete Core Batch v1 ist unter
 
 ```text
-Core Batch → Services
+docs/data-model/core-batch-v1.md
 ```
 
-Das Data Model ist bereits wesentlich weiter entwickelt als der konkrete Core Batch.
+dokumentiert und committed.
 
-Der Core Batch wird aus dem vorhandenen Feldkatalog abgeleitet und soll nur die für den regulären Betrieb tatsächlich relevanten Daten enthalten.
+Damit ist die fachliche Ableitung
+
+```text
+Data Model v1
+    ↓
+reale LoggerPi-Runtime
+    ↓
+relevante Services
+    ↓
+Core Batch v1
+```
+
+abgeschlossen.
+
+Der nächste Arbeitsschritt betrifft nun die noch offenen technischen
+Details des Übertragungs- und API-Modells.
 
 ---
 
@@ -261,9 +279,20 @@ Das Service-Modell ist strukturell definiert als:
 
 ```text
 services.<service_id>
+├── name
 ├── purpose
-└── state
+├── state
+├── enabled
+├── pid
+├── started_at
+└── last_state_change_at
 ```
+
+Nicht jeder Service muss zwangsläufig jedes Feld liefern.
+
+Der LoggerPi liefert den technischen Zustand des Dienstes.
+
+Der OtterPi bewertet dessen fachliche Bedeutung für Health und Dashboard.
 
 Die reale LoggerPi-Installation wurde inzwischen untersucht.
 
@@ -393,24 +422,48 @@ Insbesondere gehören dazu:
 - `ssh.service` – administrative Erreichbarkeit
 - `lightdm.service` – lokale grafische Recovery-/Konfigurationsumgebung
 - `rc-local.service` – Startmechanismus der aktuellen Legacy-Anwendung
+- `systemd-timesyncd.service` – Zeitsynchronisation
+- `dhcpcd.service` – Netzwerkverwaltung / DHCP
 
-Diese Dienste sind damit grundsätzlich Kandidaten für den Service-Bereich
-des Core Batches.
+Diese Dienste sind Bestandteil des Service-Bereichs des Core Batches.
+
+Dabei wird insbesondere der technische Laufzustand übertragen, sodass im
+Dashboard beispielsweise sichtbar sein kann:
+
+```text
+systemd-timesyncd    running
+dhcpcd               running
+```
+
+Die fachliche Bewertung eines Ausfalls erfolgt weiterhin auf dem OtterPi.
+
+`rc-local.service` bleibt Bestandteil des Modells, solange die Legacy-
+`observer.py` darüber gestartet wird.
+
+Nach der erfolgreichen Ablösung der Legacy-Anwendung kann `rc-local.service`
+aus dem LoggerPi-Service-Modell entfernt werden.
 
 ### Weitere beobachtete Dienste
 
 Daneben wurden unter anderem festgestellt:
 
-- `dhcpcd.service`
 - `networking.service`
 - `raspberrypi-net-mods.service`
 - `rsync.service`
 
-Diese Dienste werden separat auf ihre funktionale Relevanz für den
-LoggerPi bewertet.
+Diese Dienste werden aktuell nicht als reguläre LoggerPi-Core-Services
+geführt.
 
 `rsync.service` ist aktiviert, läuft aktuell jedoch nicht, da auf der
 Installation keine `/etc/rsyncd.conf` vorhanden ist.
+
+`dhcpcd.service` wird dagegen als relevanter technischer Service geführt,
+da der Zustand der aktuell verwendeten Netzwerkverwaltung für Betrieb,
+Health und Diagnose relevant ist.
+
+`systemd-timesyncd.service` wird ebenfalls als relevanter technischer
+Service geführt, da die Zeitsynchronisation für die korrekte Interpretation
+von Messwerten, Batches und Zeitstempeln relevant ist.
 
 ### Nicht für das aktuelle LoggerPi-Service-Modell vorgesehen
 
@@ -547,52 +600,78 @@ Der OtterPi darf auch für Metadata-Synchronisation nicht auf eine aktive eingeh
 Die reale LoggerPi-Runtime wurde untersucht und unter
 `docs/system-inventory.md` dokumentiert.
 
-Die Inventur ist damit abgeschlossen.
+Die funktionale Servicebewertung ist abgeschlossen.
 
-Der nächste fachliche Schritt ist jetzt die funktionale Bewertung der
-festgestellten Runtime-Komponenten und die Ableitung der tatsächlich
-relevanten Services:
+Als relevante LoggerPi-Services für den aktuellen Core-Batch-Stand wurden
+insbesondere festgelegt:
 
 ```text
-reale Runtime
-    ↓
-funktionale Services identifizieren
-    ↓
-Service-Modell gegen Realität abgleichen
-    ↓
-für Betrieb / Health / Dashboard relevante Services bestimmen
-    ↓
-Core-Batch-Mitgliedschaft bestimmen
-    ↓
-konkreten Core Batch ableiten
+meshagent
+ssh
+lightdm
+rc-local
+systemd-timesyncd
+dhcpcd
 ```
 
-Dabei gilt:
+Dabei gilt weiterhin:
 
 Nicht jeder installierte oder laufende Linux-Dienst ist automatisch ein
 LoggerPi-Service im Sinne des Data Models.
 
-Dabei wird nicht allein danach unterschieden, ob ein Dienst eine
-fachliche Messfunktion besitzt. Auch Dienste für Erreichbarkeit,
-Administration, Recovery und andere für den LoggerPi-Betrieb relevante
-Funktionen können Bestandteil des Service-Modells sein.
+Auch Dienste für Erreichbarkeit, Administration, Recovery,
+Netzwerkverwaltung und Zeitsynchronisation können aufgrund ihrer
+Betriebsrelevanz Bestandteil des Service-Modells sein.
 
-Nicht jeder installierte Linux-Dienst ist deshalb relevant, aber ein
-Dienst wird nicht allein aufgrund seiner technischen Nähe zum
-Betriebssystem ausgeschlossen.
+Der daraus abgeleitete Core Batch v1 wurde in
 
-Die bestehende Legacy-`observer.py` bleibt dabei zunächst als Ist-Zustand
-und Referenz erhalten. Ihre Ablösung oder Migration erfolgt erst auf Basis
-der neuen Architektur und wird nicht durch die reine Runtime-Inventur
-vorweggenommen.
+```text
+docs/data-model/core-batch-v1.md
+```
+
+festgehalten und committed.
+
+Die Legacy-`observer.py` bleibt weiterhin als Ist-Zustand und Referenz
+erhalten.
+
+`rc-local.service` bleibt so lange im Core-Batch-Service-Modell, wie
+`rc-local` die Legacy-`observer.py` startet. Erst nach erfolgreicher
+Ablösung der Legacy-Anwendung wird geprüft, ob `rc-local.service` aus dem
+Modell entfernt werden kann.
+
+Der nächste Arbeitsschritt ist nun die technische Spezifikation der noch
+offenen Übertragungs- und API-Mechanismen.
 
 ---
 
 ## Danach
 
-Nach der Servicebewertung wird der konkrete Core Batch aus dem bereits abgeschlossenen Feldkatalog abgeleitet.
+Der konkrete Core Batch v1 ist aus dem Feldkatalog abgeleitet und unter
 
-Anschließend werden die noch offenen technischen Details der API und Zustellung spezifiziert.
+```text
+docs/data-model/core-batch-v1.md
+```
+
+dokumentiert und committed.
+
+Als nächstes werden die noch offenen technischen Details der API und
+Zustellung spezifiziert.
+
+Insbesondere:
+
+```text
+Core Batch v1
+    ↓
+API Contract
+    ↓
+ACK / Retry / Duplicate Handling
+    ↓
+Queue / Delivery
+    ↓
+Metadata Change
+    ↓
+Events
+```
 
 ---
 
