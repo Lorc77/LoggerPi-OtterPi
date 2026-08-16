@@ -444,7 +444,14 @@ Vorgesehen sind insbesondere Informationen zu:
 - `upload`
 - `queue`
 
-Die genaue endgültige Unterstruktur wird beim späteren Batch-/API-Design festgelegt.
+Die Bereiche `connectivity.upload` und `connectivity.queue` sind als
+technische Connectivity-Telemetrie vorgesehen.
+
+Die konkrete Unterstruktur dieser beiden Bereiche ist noch nicht
+spezifiziert und wird in einem separaten Designschritt festgelegt.
+
+Die API-/Delivery-Spezifikation definiert nicht die fachliche
+Unterstruktur dieser Connectivity-Telemetrie.
 
 ### Grundprinzip
 
