@@ -3,7 +3,7 @@
 ## Core Batch v1
 
 **Data Model:** v1  
-**Status:** fachlicher Entwurf / Ableitung aus Data Model v1  
+**Status:** fachlich definiert / eingefroren  
 **Zweck:** Definition der regelmäßig übertragenen Betriebsdaten des LoggerPi
 
 ---
