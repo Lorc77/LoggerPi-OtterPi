@@ -20,7 +20,6 @@ LoggerPi und OtterPi.
 Insbesondere werden festgelegt:
 
 - Bedeutung der erfolgreichen HTTP-Annahme
-- ACK-/Acceptance-Semantik
 - Verhalten bei Verbindungsfehlern
 - Retry-Grundprinzip
 - Retry-fähige und nicht retry-fähige Fehler
@@ -195,7 +194,7 @@ POST
     ↓
 202 Accepted
     ↓
-Batch A bestätigt
+Batch A angenommen
     ↓
 Batch A kann aus der Pending-Queue entfernt werden
 ```
@@ -227,7 +226,7 @@ LoggerPi
 Der LoggerPi kann in diesem Fall nicht sicher wissen, ob der OtterPi den
 Batch bereits angenommen hat.
 
-Der Batch bleibt deshalb lokal als nicht bestätigt erhalten.
+Der Batch bleibt deshalb lokal als nicht erfolgreich zugestellt erhalten.
 
 Der LoggerPi darf ihn erneut übertragen.
 
@@ -242,7 +241,7 @@ Batch A ist bereits angenommen
     ↓
 202 Accepted
     ↓
-LoggerPi bestätigt Batch A
+LoggerPi behandelt Batch A als erfolgreich zugestellt
 ```
 
 Damit wird verhindert, dass ein verlorener HTTP Response zu einem
@@ -449,7 +448,8 @@ Wenn der Inhalt identisch ist:
 → HTTP 202
 ```
 
-Der OtterPi darf den bereits angenommenen Batch dabei erneut bestätigen.
+Der OtterPi darf die erneute Zustellung desselben bereits angenommenen
+Batches erneut mit `202 Accepted` beantworten.
 
 ---
 
@@ -618,7 +618,7 @@ Beispiel:
 7. LoggerPi sendet Batch A erneut
 8. OtterPi erkennt Duplicate
 9. OtterPi antwortet mit 202
-10. LoggerPi markiert Batch A als bestätigt
+10. LoggerPi markiert Batch A als erfolgreich zugestellt
 ```
 
 Damit bleibt die Zustellung robust gegenüber verlorenen Responses.
@@ -708,8 +708,8 @@ für diesen Batch.
 
 # 22. Verhalten bei OtterPi-Ausfall
 
-Wenn der OtterPi nicht erreichbar ist, bleiben noch nicht bestätigte
-Batches lokal persistent erhalten.
+Wenn der OtterPi nicht erreichbar ist, bleiben noch nicht erfolgreich
+zugestellte Batches lokal persistent erhalten.
 
 Der LoggerPi versucht die Zustellung später erneut.
 
@@ -752,7 +752,7 @@ Es gibt keinen Mechanismus:
 OtterPi → LoggerPi
 ```
 
-für nachträgliche ACKs oder Retry-Anweisungen.
+für nachträgliche Zustellbestätigungen oder Retry-Anweisungen.
 
 Ein verlorener Response wird ausschließlich dadurch behandelt, dass der
 LoggerPi den ursprünglichen Batch erneut sendet.
