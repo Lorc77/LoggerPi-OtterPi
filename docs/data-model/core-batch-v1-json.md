@@ -1456,10 +1456,12 @@ connectivity.upload
 connectivity.queue
 ```
 
-Die konkrete JSON-Struktur dieser beiden Bereiche wird erst im
-API-/Delivery-Design verbindlich festgelegt.
+Die konkrete JSON-Struktur dieser beiden Bereiche ist noch nicht
+spezifiziert und ist nicht Bestandteil der aktuellen API-/Delivery-
+Spezifikation.
 
-Bis dahin dürfen Implementierungen keine eigenen Unterfelder erfinden.
+Bis zur separaten Spezifikation dieser Connectivity-Telemetrie dürfen
+Implementierungen keine eigenen Unterfelder erfinden.
 
 Das bedeutet insbesondere:
 
