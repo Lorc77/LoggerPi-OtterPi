@@ -478,8 +478,4 @@ Festgelegt sind:
 
 Noch separat zu definieren sind:
 
-- Authentication
-- exakte Duplicate-Handling-Semantik
-- Retry-Policy
-- Queue-/Delivery-Semantik
-- Persistenz-/Annahme-Semantik
+  * Authentication
