@@ -5,7 +5,7 @@
 **Data Model:** v1  
 **Core Batch:** v1  
 **Status:** technische Definition  
-**Basis:** `core-batch-v1.md` und `LoggerPi_OtterPi_DataModel_v1_Feldkatalog.md`
+**Basis:** `core-batch-v1.md` und `data-model-v1-field-catalog.md`
 
 ---
 
@@ -25,7 +25,7 @@ definiert.
 Der zugrunde liegende fachliche Feldkatalog ist:
 
 ```text
-docs/data-model/LoggerPi_OtterPi_DataModel_v1_Feldkatalog.md
+docs/data-model/data-model-v1-field-catalog.md
 ```
 
 Dieses Dokument konkretisiert insbesondere:
