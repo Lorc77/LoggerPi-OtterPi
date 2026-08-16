@@ -874,6 +874,24 @@ Der Project State ist das zentrale Wiedereinstiegsdokument für den aktuellen En
 
 ---
 
+### Technische Untersuchungen
+
+Das Reverse Engineering des WeatherHub-Observer-Datenkanals ist separat
+dokumentiert unter:
+
+```text
+docs/research/weatherhub-observer.md
+```
+
+Der aktuelle Stand umfasst einen reproduzierten `ChartData`-Datenkanal,
+doppelte Base64-Dekodierung und die experimentelle Dekodierung eines
+Temperaturwertes.
+
+Der WeatherHub-Strang ist kein Bestandteil des Core-Batch-Design-Freeze.
+Eine spätere Integration erfolgt ausschließlich über einen LoggerPi-Adapter,
+wenn Timestamp, Binärformat und automatisierter Zugriff ausreichend
+reproduzierbar geklärt sind.
+
 ## Arbeitsregel
 
 Der Project State wird während der Entwicklung aktiv gepflegt.
