@@ -121,8 +121,11 @@ Core Batch v1
 
 abgeschlossen.
 
-Der nächste Arbeitsschritt betrifft nun die noch offenen technischen
-Details des Übertragungs- und API-Modells.
+Die fachliche Ableitung des Core Batch v1 sowie dessen JSON-Repräsentation
+und der technische API-/Delivery-Stand sind dokumentiert und committed.
+
+Der nächste Arbeitsschritt betrifft nun die noch offenen bzw. separat zu
+spezifizierenden Bereiche wie Metadata Change und Events.
 
 ---
 
@@ -690,6 +693,7 @@ Die folgenden Designschritte sind abgeschlossen und committed:
 2. Core Batch v1
 3. Core Batch JSON Definition v1
 4. Core Batch API v1
+5. Core Batch Delivery v1
 
 Damit sind insbesondere festgelegt:
 
@@ -704,19 +708,12 @@ Damit sind insbesondere festgelegt:
 - HTTP Response über die vom LoggerPi initiierte Verbindung
 - kein eingehender Rückkanal zum LoggerPi
 - keine Mesh-Agent-Abhängigkeit für die API
-
-Noch nicht abschließend spezifiziert sind:
-
-- ACK-/Acceptance-Semantik
+- persistente lokale Queue
 - Retry-Verhalten
 - Duplicate Handling
-- Queue-/Delivery-Semantik
-- Authentication
-- Metadata Change
-- Event-Protokoll
-
-Der nächste Designschritt ist die eigenständige Spezifikation von
-ACK, Retry und Duplicate Handling.
+- erfolgreiche technische HTTP-Annahme als Zustellentscheidung
+- keine separate ACK-Synchronisation
+- keine nachgelagerte Rückverbindung vom OtterPi zum LoggerPi
 
 ---
 
@@ -744,9 +741,7 @@ Core Batch JSON v1
     ↓
 Core Batch API v1
     ↓
-ACK / Retry / Duplicate Handling
-    ↓
-Queue / Delivery
+Core Batch Delivery v1
     ↓
 Metadata Change
     ↓
@@ -757,20 +752,15 @@ Events
 
 ## Offene Entscheidungen
 
-- finale Liste der fachlich relevanten LoggerPi-Services
-- finale Core-Batch-Mitgliedschaft
-- Routing-/DNS-Platzierung
-- Behandlung statischer Netzwerk-/Storage-Metadata
 - vollständiges Metadata-Synchronisationsprotokoll
 - finale Validitätssemantik
 - Event-Schema
-- Queue-/Delivery-Semantik
-- Duplicate Handling
-- API Contract
-- Authentication
-- Schema-Versionierung
+- Routing-/DNS-Platzierung
+- Behandlung statischer Netzwerk-/Storage-Metadata
 - genaue technische Umsetzung der Legacy-Ablösung
-- genaue Zuordnung der vorhandenen Runtime-Komponenten zum neuen Service-Modell
+- genaue Zuordnung der vorhandenen Runtime-Komponenten zum neuen
+  Service-Modell
+- Schema-Versionierung
 
 ---
 
