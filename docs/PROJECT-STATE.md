@@ -883,14 +883,17 @@ dokumentiert unter:
 docs/research/weatherhub-observer.md
 ```
 
-Der aktuelle Stand umfasst einen reproduzierten `ChartData`-Datenkanal,
-doppelte Base64-Dekodierung und die experimentelle Dekodierung eines
-Temperaturwertes.
+Der aktuelle Stand umfasst einen reproduzierten ChartData-Datenkanal,
+doppelte Base64-Dekodierung sowie erste experimentelle Erkenntnisse zur
+Binärstruktur. Zusätzlich wurde festgestellt, dass das WeatherHub-Dashboard
+für die aktuellen Sensorwerte separate XHR-POST-Requests pro Sensor
+verwendet. Diese deutlich kleineren Datenkanäle werden aktuell als möglicher
+bevorzugter Zugriff für die benötigten Momentanwerte untersucht.
 
 Der WeatherHub-Strang ist kein Bestandteil des Core-Batch-Design-Freeze.
 Eine spätere Integration erfolgt ausschließlich über einen LoggerPi-Adapter,
-wenn Timestamp, Binärformat und automatisierter Zugriff ausreichend
-reproduzierbar geklärt sind.
+sobald der für die Momentanwerte relevante Zugriff und die erforderliche
+Datenstruktur ausreichend reproduzierbar geklärt sind.
 
 ## Arbeitsregel
 
