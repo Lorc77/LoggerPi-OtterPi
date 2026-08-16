@@ -1091,28 +1091,36 @@ finaler API Contract.
 
 ---
 
-# 23. Status
+## 23. Status
 
 Mit diesem Dokument ist die fachliche Struktur des Core Batch v1 aus dem
 Data Model v1 abgeleitet.
 
-Die technische Übertragung und Zustellung des Core Batch werden separat
-spezifiziert.
+Die technische Übertragung und Zustellung des Core Batch sind separat
+spezifiziert in:
 
-Dazu gehören insbesondere:
+- `docs/api/core-batch-api-v1.md`
+- `docs/api/core-batch-delivery-v1.md`
+
+Damit sind insbesondere festgelegt:
 
 - API-Endpunkt und Request-/Response-Schema
-- Authentication
+- HTTP Push von LoggerPi → OtterPi
+- technische HTTP-Annahme über die vom LoggerPi initiierte Verbindung
 - Delivery- und Persistenz-Semantik
-- Retry-Verhalten
+- Retry-Grundverhalten
 - Duplicate Handling
+- persistente lokale Queue
+- keine nachgelagerte Rückverbindung zum LoggerPi
+
+Die konkrete Authentication ist noch nicht final festgelegt.
 
 Die konkrete Unterstruktur von `connectivity.upload` und
 `connectivity.queue` wird separat im API-/Delivery-Design festgelegt.
 
 Die JSON-Repräsentation des Core Batch v1 einschließlich
-Required-/Optional-/Nullable-Semantik, `null`-Semantik, Validity-Semantik
-und Units ist in `core-batch-v1-json.md` festgelegt.
+Required-/Optional-/Nullable-Semantik, `null`-Semantik,
+Validity-Semantik und Units ist in `core-batch-v1-json.md` festgelegt.
 
 Event- und Metadata-Change-Schemata werden separat definiert.
 
