@@ -44,7 +44,6 @@ Dieses Dokument definiert noch nicht:
 
 - HTTP-Endpunkte
 - Authentication
-- ACK-Protokoll
 - Retry-Mechanismus
 - Duplicate Handling
 - lokale Queue-Implementierung
@@ -1764,14 +1763,13 @@ sind:
 
 Dieses Dokument definiert die Datenstruktur.
 
-Es definiert ausdrücklich noch nicht:
+Es definiert ausdrücklich nicht:
 
 ```text
 HTTP method
 URL
 request headers
 authentication
-ACK
 retry
 duplicate handling
 timeout
@@ -1779,7 +1777,8 @@ queue persistence
 delivery state machine
 ```
 
-Diese Punkte werden im nächsten API-/Delivery-Schritt definiert.
+Die technische Übertragung und Zustellung des Core Batch werden separat
+im API- und Delivery-Design definiert.
 
 ---
 
@@ -1814,15 +1813,8 @@ Damit sind insbesondere festgelegt:
 - technische Wertebereiche, soweit bereits festgelegt
 
 Noch separat zu definieren sind:
-
 - konkrete `connectivity.upload`-Struktur
 - konkrete `connectivity.queue`-Struktur
-- API Contract
-- Authentication
-- ACK
-- Retry
-- Duplicate Handling
-- Queue-/Delivery-State-Machine
 - Metadata Change
 - Events
 
