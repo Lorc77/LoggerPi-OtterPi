@@ -1129,7 +1129,11 @@ Konzeptioneller Bereich:
 - `connectivity_change`
 - `device_event`
 
-Die endgültige Event-Struktur ist Bestandteil des nächsten Arbeitsschrittes.
+Die endgültige Event-Struktur wird in einer späteren Erweiterungsphase
+separat definiert.
+
+Sie ist nicht Bestandteil der aktuellen Core-Batch-v1-
+Implementierungsphase.
 
 ## 41. Metadata
 
@@ -1267,7 +1271,8 @@ Der regelmäßige Core-Batch soll nur die für den laufenden Betrieb sinnvollen 
 - relevante Services
 - relevante Sensorwerte
 - relevante Geräte-/Serial-Zustände
-- notwendige Upload-/Queue-Informationen
+- reservierte Connectivity-Bereiche für eine spätere Upload-/Queue-
+  Telemetrie
 
 ## 48. Connectivity-Prinzip
 
@@ -1285,30 +1290,29 @@ Das entspricht dem übergeordneten Projektprinzip:
 
 **So wenig Tests wie möglich, aber so viele Informationen wie für einen zuverlässigen Betrieb tatsächlich nötig sind.**
 
-## 49. Spätere Queue-/Disconnect-Logik
+## 49. Delivery und Connectivity-Telemetrie
 
-Noch nicht Bestandteil des endgültigen Feldschemas, aber konzeptionell vorgesehen:
+Die technische Delivery-Semantik von Queue, Retry, Store-and-Forward und
+Duplicate Handling ist separat in
 
-```text
-LoggerPi offline
-      ↓
-lokale Queue
-      ↓
-Verbindung wieder verfügbar
-      ↓
-Batches nachliefern
-      ↓
-OtterPi verarbeitet Sequenzen und Zeitstempel
-```
+`docs/api/core-batch-delivery-v1.md`
 
-Dabei müssen insbesondere:
+definiert.
 
-- `sequence`
-- `created_at`
-- `measured_at`
-- `received_at`
+Diese Delivery-Mechanismen sind nicht mit den fachlichen
+Connectivity-Telemetriebereichen
 
-sauber auseinandergehalten werden.
+`connectivity.upload`
+`connectivity.queue`
+
+gleichzusetzen.
+
+Für diese beiden Connectivity-Telemetriebereiche ist weiterhin keine
+konkrete JSON-Unterstruktur definiert.
+
+Implementierungen dürfen dort keine eigenen Unterfelder erfinden, solange
+keine entsprechende Erweiterung des Data-Model-/JSON-Vertrags beschlossen
+wurde.
 
 ## 50. Feldkatalog – Kategorienübersicht
 
