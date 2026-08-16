@@ -60,8 +60,11 @@ und nicht vorgesehen.
 
 # 3. Grundprinzip der Zustellung
 
-Ein Core Batch wird auf dem LoggerPi zunächst lokal als noch nicht
-bestätigt betrachtet.
+Ein Core Batch wird auf dem LoggerPi zunächst lokal als `pending`
+betrachtet.
+
+Erst eine erfolgreiche HTTP-Annahme durch den OtterPi erlaubt dem LoggerPi,
+den Batch als erfolgreich zugestellt zu behandeln.
 
 Grundsätzlich gilt:
 
@@ -78,7 +81,7 @@ erfolgreiche Annahme
     ↓
 HTTP 202
     ↓
-LoggerPi darf Batch als bestätigt markieren
+LoggerPi darf Batch als erfolgreich zugestellt markieren
     ↓
 Batch kann aus der lokalen Zustell-Queue entfernt werden
 ```
@@ -89,9 +92,9 @@ gesendet wurde.
 
 ---
 
-# 4. ACK-/Acceptance-Semantik
+# 4. HTTP-Annahme / Delivery Acceptance
 
-## 4.1 HTTP 202 als technische Annahmebestätigung
+## 4.1 HTTP 202 als technische Annahme
 
 Der OtterPi antwortet mit:
 
@@ -107,7 +110,8 @@ Für die Delivery-Semantik bedeutet `202`:
 > ein Verlust des Batches durch einen unmittelbaren Neustart des OtterPi
 > nicht zu erwarten ist.
 
-Damit ist die Zustellung für den LoggerPi bestätigt.
+Damit gilt der Zustellversuch für den LoggerPi als erfolgreich
+angenommen.
 
 ---
 
@@ -671,7 +675,8 @@ Dokuments.
 # 21. Batch-Löschung auf dem LoggerPi
 
 Ein Batch darf erst dann endgültig aus der lokalen Pending-Queue entfernt
-werden, wenn eine erfolgreiche Annahme bestätigt wurde.
+werden, wenn der LoggerPi eine erfolgreiche HTTP-Annahme für diesen
+Zustellversuch erhalten hat.
 
 Insbesondere nicht ausreichend sind:
 
@@ -770,8 +775,8 @@ Der Batch selbst enthält keine Authentication-Daten.
 
 | Situation | OtterPi | LoggerPi |
 |---|---|---|
-| Batch neu und gültig | `202 Accepted` | Batch bestätigt |
-| Batch bereits identisch angenommen | `202 Accepted` | Batch bestätigt |
+| Batch neu und gültig | `202 Accepted` | Batch erfolgreich zugestellt |
+| Batch bereits identisch angenommen | `202 Accepted` | Batch erfolgreich zugestellt |
 | gleiche `batch_id`, anderer Inhalt | `409 Conflict` | nicht unverändert retryen |
 | gleiche `logger_id` + `sequence`, andere `batch_id` | `409 Conflict` | nicht unverändert retryen |
 | `400` | Ablehnung | nicht automatisch retryen |
