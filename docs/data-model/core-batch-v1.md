@@ -887,8 +887,13 @@ Batch eingebaut.
 
 # 22. Beispiel eines Core Batch
 
-Das folgende Beispiel zeigt die fachliche Struktur. Es ist noch kein
-finaler API Contract.
+Das folgende Beispiel zeigt die fachliche Struktur des Core Batch v1.
+
+Die verbindliche JSON-Repräsentation ist in
+`docs/data-model/core-batch-v1-json.md` definiert.
+
+Der technische HTTP-Contract ist in
+`docs/api/core-batch-api-v1.md` definiert.
 
 ```json
 {
