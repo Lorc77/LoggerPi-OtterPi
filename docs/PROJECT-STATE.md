@@ -514,8 +514,7 @@ relevante LoggerPi-Services weiterverfolgt:
 - `bluetooth.service` – Bluetooth ist für den aktuellen LoggerPi-Betrieb
   nicht vorgesehen
 - `avahi-daemon.service` – für den vorgesehenen Betrieb nicht erforderlich
-- `teamviewerd.service` – obsolet und soll zu einem späteren Zeitpunkt
-  deinstalliert werden
+- `teamviewerd.service` – obsolet; TeamViewer wird aus der LoggerPi-Installation entfernt
 
 Diese Einordnung bezieht sich auf den aktuellen Zielzustand. Durch die
 weitere Umstellung des LoggerPi können später zusätzliche Dienste
