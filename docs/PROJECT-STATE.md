@@ -727,11 +727,6 @@ docs/data-model/core-batch-v1.md
 
 dokumentiert und committed.
 
-Als nächstes werden die noch offenen technischen Details der API und
-Zustellung spezifiziert.
-
-Insbesondere:
-
 ```text
 Data Model v1
     ↓
@@ -753,7 +748,6 @@ Events
 ## Offene Entscheidungen
 
 - vollständiges Metadata-Synchronisationsprotokoll
-- finale Validitätssemantik
 - Event-Schema
 - Routing-/DNS-Platzierung
 - Behandlung statischer Netzwerk-/Storage-Metadata
