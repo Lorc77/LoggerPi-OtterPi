@@ -401,7 +401,7 @@ Transport- oder Rückkanal.
 
 - ein Core Batch übertragen wird
 - eine HTTP Response zurückgegeben wird
-- ein Batch bestätigt wird
+- eine erfolgreiche technische Annahme erfolgt
 - Retry technisch möglich ist
 
 Der reguläre Datenweg bleibt:
@@ -424,7 +424,7 @@ Nicht abschließend definiert werden hier:
 - Verhalten bei dauerhaftem OtterPi-Ausfall
 - Duplicate-Handling-Algorithmus
 - Persistenz vor bzw. nach HTTP-Annahme
-- ACK-Persistenz
+- Persistenz-/Annahme-Semantik
 - Event-Protokoll
 - Metadata-Change-Protokoll
 
@@ -482,4 +482,4 @@ Noch separat zu definieren sind:
 - exakte Duplicate-Handling-Semantik
 - Retry-Policy
 - Queue-/Delivery-Semantik
-- Persistenz-/ACK-Semantik
+- Persistenz-/Annahme-Semantik
