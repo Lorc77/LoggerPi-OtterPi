@@ -1115,8 +1115,15 @@ Damit sind insbesondere festgelegt:
 
 Die konkrete Authentication ist noch nicht final festgelegt.
 
-Die konkrete Unterstruktur von `connectivity.upload` und
-`connectivity.queue` wird separat im API-/Delivery-Design festgelegt.
+Die Bereiche `connectivity.upload` und `connectivity.queue` sind als
+technische Connectivity-Telemetrie vorgesehen.
+
+Ihre konkrete Unterstruktur ist noch nicht spezifiziert und ist nicht
+Bestandteil der aktuellen API-/Delivery-Spezifikation.
+
+Bis zur separaten Spezifikation dieser Connectivity-Telemetrie werden
+unter `connectivity.upload` und `connectivity.queue` keine verbindlichen
+Unterfelder definiert.
 
 Die JSON-Repräsentation des Core Batch v1 einschließlich
 Required-/Optional-/Nullable-Semantik, `null`-Semantik,
