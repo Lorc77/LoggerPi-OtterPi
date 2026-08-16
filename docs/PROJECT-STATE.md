@@ -4,9 +4,9 @@
 
 **Projekt:** LoggerPi → OtterPi  
 **Data Model:** v1  
-**Projektphase:** Data Model v1 / API Design  
+**Projektphase:** Implementierung / Core Batch v1  
 **Status:** In aktiver Entwicklung  
-**Stand:** 2026-08-15
+**Stand:** 2026-08-16
 
 ---
 
@@ -124,8 +124,12 @@ abgeschlossen.
 Die fachliche Ableitung des Core Batch v1 sowie dessen JSON-Repräsentation
 und der technische API-/Delivery-Stand sind dokumentiert und committed.
 
-Der nächste Arbeitsschritt betrifft nun die noch offenen bzw. separat zu
-spezifizierenden Bereiche wie Metadata Change und Events.
+Die Planungs- und Spezifikationsphase für den ersten
+Core-Batch-v1-Implementierungsschnitt ist damit abgeschlossen.
+
+Die noch offenen Bereiche Metadata Change, Events,
+`connectivity.upload` und `connectivity.queue` sind bewusst nicht Teil
+dieses Implementierungsschnitts und blockieren dessen Umsetzung nicht.
 
 ---
 
@@ -716,44 +720,121 @@ Damit sind insbesondere festgelegt:
 
 ---
 
-## Danach
+## Planungs-Freeze / Übergang in die Implementierung
 
-Der konkrete Core Batch v1 ist aus dem Feldkatalog abgeleitet und unter
+Mit diesem Stand wird die Planung für den ersten
+Core-Batch-v1-Implementierungsschnitt eingefroren.
+
+Die folgenden Dokumente bilden die verbindliche Planungsgrundlage:
 
 ```text
+docs/data-model/data-model-v1-field-catalog.md
 docs/data-model/core-batch-v1.md
+docs/data-model/core-batch-v1-json.md
+docs/api/core-batch-api-v1.md
+docs/api/core-batch-delivery-v1.md
 ```
 
-dokumentiert und committed.
+Ab jetzt werden diese Dokumente nicht mehr aus Gründen sprachlicher
+Optimierung oder weiterer theoretischer Vervollständigung überarbeitet.
+
+Eine Änderung erfolgt nur noch, wenn:
+
+1. die Implementierung einen echten Widerspruch oder eine nicht
+   implementierbare Vorgabe aufzeigt,
+2. eine bereits getroffene technische Entscheidung nachweislich falsch ist
+   oder
+3. eine konkrete Implementierungsanforderung eine Änderung des Vertrags
+   zwingend erforderlich macht.
+
+Die folgenden Bereiche bleiben bewusst offen und werden nicht vorab
+vollständig spezifiziert:
+
+- Metadata Change
+- Events
+- `connectivity.upload`
+- `connectivity.queue`
+- weitere spätere Erweiterungen
+
+Diese offenen Bereiche dürfen die aktuelle Core-Batch-v1-Implementierung
+nicht blockieren.
+
+## Erster Implementierungsfahrplan
+
+Die Umsetzung beginnt mit einem vertikalen End-to-End-Schnitt:
 
 ```text
-Data Model v1
+LoggerPi
     ↓
-Core Batch v1
+Core-Batch-Erzeugung
     ↓
-Core Batch JSON v1
+persistente lokale Queue
     ↓
-Core Batch API v1
+HTTP POST /api/v1/batches
     ↓
-Core Batch Delivery v1
+OtterPi
     ↓
-Metadata Change
+JSON-/Contract-Validierung
     ↓
-Events
+Duplicate Handling
+    ↓
+HTTP 202
+    ↓
+Queue-Eintrag erfolgreich abgeschlossen
 ```
+
+Danach folgen:
+
+```text
+1. Retry bei nicht erfolgreicher / unklarer Zustellung
+2. Store-and-Forward bei OtterPi-Ausfall
+3. Duplicate-/Identity-Conflict-Tests
+4. Persistenz- und Wiederanlaufverhalten
+5. erste reale LoggerPi-Datenquellen
+6. Integration der relevanten System- und Service-Daten
+7. Tests gegen den realen LoggerPi-/OtterPi-Datenpfad
+```
+
+Der Project State ist ab diesem Punkt der Wiedereinstiegspunkt für die
+Implementierungsphase.
+
+Bei einem späteren Wiedereinstieg ist nicht erneut in die abgeschlossene
+Planungsphase zurückzukehren. Zuerst wird der tatsächliche
+Implementierungsstand des Repositories geprüft und anschließend der
+nächste konkrete Implementierungsschritt bestimmt.
 
 ---
 
-## Offene Entscheidungen
+## Bewusst offene spätere Erweiterungen
+
+Die folgenden Punkte sind für den aktuellen
+Core-Batch-v1-Implementierungsschnitt bewusst offen:
 
 - vollständiges Metadata-Synchronisationsprotokoll
 - Event-Schema
 - Routing-/DNS-Platzierung
 - Behandlung statischer Netzwerk-/Storage-Metadata
-- genaue technische Umsetzung der Legacy-Ablösung
-- genaue Zuordnung der vorhandenen Runtime-Komponenten zum neuen
-  Service-Modell
-- Schema-Versionierung
+- weitere Details der Legacy-Ablösung
+- weitere Zuordnung zusätzlicher Runtime-Komponenten
+- Schema-Evolution über v1 hinaus
+- konkrete Struktur von `connectivity.upload`
+- konkrete Struktur von `connectivity.queue`
+- konkrete Authentication-/Authorization-Methode für den produktiven
+  HTTP-Betrieb
+
+Authentication ist bewusst außerhalb des Core-Batch-Datenmodells gehalten.
+
+Für den ersten lokalen End-to-End-Implementierungsschnitt ist keine
+finale Authentication-/Authorization-Lösung erforderlich.
+
+Vor einem produktiven bzw. entsprechend abgesicherten Betrieb muss die
+konkrete Authentication-/Authorization-Methode festgelegt werden.
+
+Credentials, Tokens oder vergleichbare Authentifizierungsinformationen
+sind nicht Bestandteil des Core-Batch-JSON.
+
+Diese Punkte werden erst wieder aufgenommen, wenn die laufende
+Implementierung einen konkreten Bedarf dafür zeigt.
 
 ---
 
