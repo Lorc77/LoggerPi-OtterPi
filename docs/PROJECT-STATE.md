@@ -759,17 +759,29 @@ Events
 
 ## Referenzdokumente
 
-Der detaillierte Feldkatalog und der Einheitenkatalog werden separat unter
+Der detaillierte Feldkatalog wird unter
 
 ```text
-docs/data-model/
+docs/data-model/data-model-v1-field-catalog.md
 ```
 
 geführt.
 
 Der Feldkatalog beschreibt das verfügbare Data Model.
+Er definiert nicht automatisch, welche Felder in jedem regulären Core Batch
+enthalten sein müssen.
 
-Er definiert nicht automatisch, welche Felder in jedem regulären Core Batch enthalten sein müssen.
+Die übrigen zentralen Spezifikationsdokumente sind:
+
+```text
+docs/data-model/core-batch-v1.md
+docs/data-model/core-batch-v1-json.md
+docs/api/core-batch-api-v1.md
+docs/api/core-batch-delivery-v1.md
+```
+
+Diese Dokumente bilden gemeinsam die eingefrorene Planungsgrundlage für
+die aktuelle Core-Batch-v1-Implementierungsphase.
 
 Die historische Legacy-Implementierung und ihre Dokumentation befinden sich unter:
 
