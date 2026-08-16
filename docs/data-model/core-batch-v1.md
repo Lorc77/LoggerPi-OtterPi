@@ -842,7 +842,7 @@ Metadata Change
     ↓
 LoggerPi → OtterPi
     ↓
-ACK
+erfolgreiche technische Annahme
     ↓
 Änderung synchronisiert
 ```
@@ -1096,26 +1096,25 @@ finaler API Contract.
 Mit diesem Dokument ist die fachliche Struktur des Core Batch v1 aus dem
 Data Model v1 abgeleitet.
 
-Noch nicht finalisiert sind:
+Die technische Übertragung und Zustellung des Core Batch werden separat
+spezifiziert.
 
-- konkrete Unterstruktur von `connectivity.upload`
-- konkrete Unterstruktur von `connectivity.queue`
-- Pflicht-/Optional-Semantik auf API-Ebene
-- Event-Schema
-- Metadata-Change-Schema
-- API-Endpunkte
-- Request-/Response-Schema
+Dazu gehören insbesondere:
+
+- API-Endpunkt und Request-/Response-Schema
 - Authentication
-- ACK-/Retry-Semantik
+- Delivery- und Persistenz-Semantik
+- Retry-Verhalten
 - Duplicate Handling
-- Schema-Versionierung
 
-Die JSON-Struktur des Core Batch v1 einschließlich der
+Die konkrete Unterstruktur von `connectivity.upload` und
+`connectivity.queue` wird separat im API-/Delivery-Design festgelegt.
+
+Die JSON-Repräsentation des Core Batch v1 einschließlich
 Required-/Optional-/Nullable-Semantik, `null`-Semantik, Validity-Semantik
-und der für die aktuellen Core-Measurements definierten Units ist in
-`core-batch-v1-json.md` festgelegt.
+und Units ist in `core-batch-v1-json.md` festgelegt.
 
-Diese Punkte gehören in die nachfolgenden API-/Delivery-Designschritte.
+Event- und Metadata-Change-Schemata werden separat definiert.
 
 ---
 
