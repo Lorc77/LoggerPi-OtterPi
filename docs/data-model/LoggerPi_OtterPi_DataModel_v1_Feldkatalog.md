@@ -1426,20 +1426,21 @@ Folgende Punkte gelten als entschieden:
 
 ## 52. Was ausdrücklich noch NICHT abgeschlossen ist
 
-Der Feldkatalog ist abgeschlossen, aber daraus müssen noch abgeleitet werden:
+Der Feldkatalog selbst ist abgeschlossen.
 
-- konkrete Core-Batch-JSON-Struktur
-- welche Felder tatsächlich regelmäßig übertragen werden
-- welche Felder nur bei Änderung übertragen werden
-- Metadata-/Discovery-Mechanismus
-- vollständige Unit-Tabelle
-- finale Validity-Semantik
+Die daraus abgeleiteten Core-Batch-, JSON-, API- und Delivery-Definitionen
+sind inzwischen separat dokumentiert.
+
+Noch nicht abgeschlossen sind insbesondere:
+
+- vollständiges Metadata-Change-/Synchronisationsprotokoll
 - Event-Schema
-- API-Endpunkte
-- Request-/Response-Schema
-- Idempotenz / Duplicate Handling
-- Retry-/Queue-Verhalten
-- Authentifizierung
+- Authentication
 - Schema-Versionierung
+- Routing-/DNS-Platzierung
+- Behandlung statischer Netzwerk-/Storage-Metadata
+- genaue technische Umsetzung der Legacy-Ablösung
+- finale Zuordnung weiterer Runtime-Komponenten zum neuen Service-Modell
 
-Damit ist der Feldkatalog selbst sauber abgeschlossen, ohne uns an dieser Stelle bereits die nächste Designphase vorwegzunehmen.
+Damit bleibt der Feldkatalog die verbindliche Data-Model-Referenz, ohne
+bereits offene nachgelagerte Designbereiche vorwegzunehmen.
