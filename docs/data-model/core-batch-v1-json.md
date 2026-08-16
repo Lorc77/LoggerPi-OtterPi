@@ -801,10 +801,11 @@ Routing und DNS gehören nicht zum regulären Core Batch.
 
 Der Core Batch reserviert den Bereich:
 
-    `connectivity
+```text
+connectivity
     ├── upload
     └── queue
-    `
+```
 
 Die konkrete Unterstruktur von `upload` und `queue` ist noch nicht
 spezifiziert und ist nicht Bestandteil der aktuellen API-/Delivery-
