@@ -310,8 +310,8 @@ Der Service enthält noch einen Legacy-Verweis auf:
 
 den systemd aktuell auf den entsprechenden `/run/...`-Pfad normalisiert.
 
-TeamViewer ist daher als installierte, aber inaktive Legacy-/Recovery-
-Komponente zu betrachten, bis seine Rolle ausdrücklich entschieden wurde.
+TeamViewer ist als obsolette, inaktive Legacy-Komponente eingestuft und
+soll aus der LoggerPi-Installation entfernt werden.
 
 ---
 
@@ -366,7 +366,8 @@ sind:
    HTTP-Endpunkten ab.
 7. `rsync` ist installiert und aktiviert, aber aufgrund der fehlenden
    Konfigurationsdatei nicht aktiv.
-8. TeamViewer ist installiert, aber inaktiv.
+8. TeamViewer ist installiert, aber inaktiv und soll aus der
+   LoggerPi-Installation entfernt werden.
 9. ModemManager und Bluetooth laufen, es wurde jedoch derzeit keine
    Anwendungsebene-Nutzung dieser Geräte beobachtet.
 10. Kein Service darf allein aufgrund dieses Inventars deaktiviert oder
