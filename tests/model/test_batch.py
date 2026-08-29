@@ -70,6 +70,34 @@ def test_optional_batch_sections_are_omitted():
     }
 
 
+def test_batch_can_contain_measurements():
+    measurement = Measurement(
+        value=21.5,
+        unit="celsius",
+        measured_at="2026-08-29T20:00:00+02:00",
+        validity="valid",
+        source="test",
+    )
+
+    batch = Batch(
+        batch_id="batch-001",
+        logger_id="logger-001",
+        sequence=1,
+        created_at="2026-08-29T20:00:00+02:00",
+        measurements={"temperature": measurement},
+    )
+
+    assert batch.to_dict()["measurements"] == {
+        "temperature": {
+            "value": 21.5,
+            "unit": "celsius",
+            "measured_at": "2026-08-29T20:00:00+02:00",
+            "validity": "valid",
+            "source": "test",
+        }
+    }
+
+
 def test_measurement_contains_required_fields():
     measurement = Measurement(
         value=21.5,
