@@ -231,6 +231,64 @@ Umgebungen erhalten.
 
 ---
 
+## DEC-012 — Versionierung der Entwicklungswerkzeuge
+
+**Status:** Angenommen
+
+Für die Python-Entwicklung werden `pytest` und Ruff als
+Entwicklungswerkzeuge eingesetzt.
+
+Die Entwicklungswerkzeuge sind keine Runtime-Abhängigkeiten der Anwendung
+und werden nicht auf LoggerPi oder OtterPi vorausgesetzt.
+
+### Festgelegte Werkzeuge
+
+Für die Entwicklungsumgebung gelten derzeit folgende Versionsbereiche:
+
+- `pytest >=9.1.1,<10`
+- `ruff >=0.16.5,<0.17`
+
+Die konkret auf dem Entwicklungsrechner installierten Versionen können
+innerhalb dieser Bereiche aktualisiert werden.
+
+### Begründung
+
+Tests und statische Codeprüfung sollen auf dem Entwicklungsrechner
+ausgeführt werden, ohne die Runtime-Umgebungen der Zielsysteme mit
+zusätzlichen Entwicklungsabhängigkeiten zu belasten.
+
+Die Versionen werden über die Python-Projektkonfiguration
+(`pyproject.toml`) reproduzierbar festgelegt.
+
+### Zielsysteme
+
+Auf den Zielsystemen gelten ausschließlich die für den Betrieb der
+Anwendung erforderlichen Runtime-Abhängigkeiten.
+
+`pytest` und Ruff müssen dort nicht installiert sein.
+
+Die derzeit bekannten Python-Versionen der Zielsysteme sind:
+
+- LoggerPi: Python 3.9.2
+- OtterPi: Python 3.13.5
+
+Diese Python-Versionen werden bei der späteren Festlegung der
+Runtime-Kompatibilität berücksichtigt.
+
+### Konsequenzen
+
+- Development Dependencies und Runtime Dependencies werden getrennt
+  behandelt.
+- Ein frischer Entwicklungsrechner soll die definierten Werkzeuge über
+  die Projektkonfiguration reproduzierbar installieren können.
+- Änderungen an den Entwicklungswerkzeugen können unabhängig von den
+  Runtime-Abhängigkeiten erfolgen.
+- Die Python-Kompatibilität der Anwendung bleibt eine separate
+  Architekturentscheidung und wird nicht durch die Versionen von pytest
+  oder Ruff festgelegt.
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:
