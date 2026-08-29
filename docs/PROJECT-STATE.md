@@ -718,6 +718,123 @@ Damit sind insbesondere festgelegt:
 - keine separate ACK-Synchronisation
 - keine nachgelagerte Rückverbindung vom OtterPi zum LoggerPi
 
+### Erste Core-Batch-Implementierung
+
+Die technische Implementierung des Core-Batch-Datenmodells wurde begonnen.
+
+Aktuell existieren:
+
+```text
+src/loggerpi_otterpi/model/
+├── batch.py
+└── measurement.py
+```
+
+`Batch` bildet den Batch Envelope ab und enthält:
+
+- `schema_version`
+- `batch_id`
+- `logger_id`
+- `sequence`
+- `created_at`
+- optionale `measurements`
+
+`Measurement` bildet einen einzelnen Messwert ab und enthält:
+
+- `value`
+- `unit`
+- `measured_at`
+- `validity`
+- `source`
+
+Die fachlichen Validierungsregeln für `Batch` und `Measurement` sind
+implementiert und durch Tests abgesichert.
+
+Ein `Batch` kann mehrere benannte Measurements enthalten, beispielsweise:
+
+```text
+measurements
+└── temperature
+    ├── value
+    ├── unit
+    ├── measured_at
+    ├── validity
+    └── source
+```
+
+Beim Serialisieren werden Measurements in die definierte JSON-Struktur
+überführt.
+
+Ein leeres `measurements`-Objekt wird nicht in den Batch aufgenommen.
+
+### Abgrenzung zur Datenerfassung
+
+Das aktuelle Datenmodell erzeugt oder liest noch keine realen Messwerte.
+
+Insbesondere ist noch nicht implementiert:
+
+```text
+Sensor / Systemabfrage
+        ↓
+konkrete Datenerfassung
+        ↓
+Measurement
+        ↓
+Batch
+```
+
+`Measurement` ist dabei bewusst das bereits vorhandene gemeinsame
+Datenmodell und keine zusätzliche generische Messwert-Erzeugungsschicht.
+
+Die eigentliche Datenerfassung erfolgt später durch konkrete Adapter bzw.
+Reader für die jeweiligen Datenquellen.
+
+Dabei werden die von der Datenquelle gelieferten Werte einschließlich der
+zugehörigen Einheit und des Erfassungszeitpunkts in das bestehende
+`Measurement`-Modell überführt.
+
+Der Core Batch entscheidet nicht selbst, wie ein Messwert technisch
+ermittelt wird.
+
+Damit bleibt die Trennung:
+
+```text
+konkrete Datenquelle
+        ↓
+Adapter / Reader
+        ↓
+Measurement
+        ↓
+Core Batch
+```
+
+erhalten.
+
+### Aktueller Teststand
+
+Der aktuelle Implementierungsstand ist durch automatisierte Tests
+abgesichert.
+
+Derzeit bestehen:
+
+```text
+11 Tests
+```
+
+Alle Tests bestehen.
+
+Zusätzlich gilt:
+
+```text
+ruff check .
+→ All checks passed!
+
+ruff format --check .
+→ alle Dateien formatiert
+```
+
+Der aktuelle Implementierungsstand ist committed.
+
 ---
 
 ## Planungs-Freeze / Übergang in die Implementierung
@@ -761,7 +878,41 @@ nicht blockieren.
 
 ## Erster Implementierungsfahrplan
 
-Die Umsetzung beginnt mit einem vertikalen End-to-End-Schnitt:
+Die Umsetzung erfolgt weiterhin als vertikaler End-to-End-Schnitt.
+
+Der erste nächste Implementierungsschritt ist die Anbindung einer
+konkreten realen LoggerPi-Datenquelle.
+
+Dabei wird keine zusätzliche generische Messwert-Erzeugungsschicht
+eingeführt.
+
+Stattdessen wird eine konkrete Datenquelle über einen passenden Adapter
+bzw. Reader direkt in das bereits vorhandene `Measurement`-Modell
+überführt:
+
+```text
+reale Datenquelle
+    ↓
+konkreter Adapter / Reader
+    ↓
+Measurement
+    ↓
+Batch
+```
+
+Als erste Datenquelle wird eine bereits durch die Runtime-Inventur
+identifizierte und technisch zugängliche Quelle ausgewählt.
+
+Dabei werden insbesondere folgende Punkte praktisch überprüft:
+
+- tatsächliche Messwertabfrage
+- tatsächliche Einheit
+- tatsächlicher Messzeitpunkt
+- Umgang mit fehlenden oder ungültigen Werten
+- Zuordnung zum `validity`-Feld
+- Einordnung des Wertes in das bestehende Core-Batch-Modell
+
+Danach wird der vollständige technische Transportpfad umgesetzt:
 
 ```text
 LoggerPi
@@ -783,25 +934,45 @@ HTTP 202
 Queue-Eintrag erfolgreich abgeschlossen
 ```
 
-Danach folgen:
+Die weitere Implementierungsreihenfolge ist:
 
 ```text
-1. Retry bei nicht erfolgreicher / unklarer Zustellung
-2. Store-and-Forward bei OtterPi-Ausfall
-3. Duplicate-/Identity-Conflict-Tests
-4. Persistenz- und Wiederanlaufverhalten
-5. erste reale LoggerPi-Datenquellen
-6. Integration der relevanten System- und Service-Daten
-7. Tests gegen den realen LoggerPi-/OtterPi-Datenpfad
+1. konkrete reale Datenquelle anbinden
+2. Datenquelle → Measurement
+3. Measurement → Core Batch
+4. Core Batch lokal erzeugen und prüfen
+5. persistente lokale Queue
+6. HTTP POST /api/v1/batches
+7. OtterPi-Validierung
+8. Duplicate Handling
+9. HTTP 202
+10. Queue-Eintrag erfolgreich abschließen
+11. Retry bei nicht erfolgreicher / unklarer Zustellung
+12. Store-and-Forward bei OtterPi-Ausfall
+13. Duplicate-/Identity-Conflict-Tests
+14. Persistenz- und Wiederanlaufverhalten
+15. weitere reale LoggerPi-Datenquellen
+16. Integration der relevanten System- und Service-Daten
+17. Tests gegen den realen LoggerPi-/OtterPi-Datenpfad
 ```
 
-Der Project State ist ab diesem Punkt der Wiedereinstiegspunkt für die
+Die konkrete Auswahl der ersten Datenquelle erfolgt auf Basis des bereits
+dokumentierten Runtime- und Legacy-Stands und nicht durch Einführung einer
+zusätzlichen generischen Abstraktionsschicht.
+
+Der Project State ist der zentrale Wiedereinstiegspunkt für die
 Implementierungsphase.
 
 Bei einem späteren Wiedereinstieg ist nicht erneut in die abgeschlossene
 Planungsphase zurückzukehren. Zuerst wird der tatsächliche
 Implementierungsstand des Repositories geprüft und anschließend der
 nächste konkrete Implementierungsschritt bestimmt.
+
+Der Implementierungsfahrplan darf sich durch konkrete technische
+Erkenntnisse verändern. Bereits getroffene Architektur- und
+Datenmodellentscheidungen werden jedoch nicht ohne konkreten technischen
+Grund neu aufgerollt.
+
 
 ---
 
