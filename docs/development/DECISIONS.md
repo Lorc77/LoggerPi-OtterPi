@@ -192,6 +192,45 @@ Existenz der neuen Implementierung abgeschaltet werden.
 
 ---
 
+## DEC-011 — Projektlokale Python-Umgebung
+
+**Status:** Angenommen
+
+Die Python-Entwicklung erfolgt innerhalb einer projektlokalen virtuellen
+Umgebung (`.venv`).
+
+Für das Repository `LoggerPi-OtterPi` liegt diese Umgebung im
+Projekt-Root:
+
+`.venv\`
+
+VS Code verwendet die projektlokale Umgebung als Python-Interpreter.
+
+### Begründung
+
+Die Entwicklungsumgebung soll unabhängig von anderen Python-Projekten auf
+dem Windows-Entwicklungsrechner bleiben.
+
+Eine projektlokale virtuelle Umgebung verhindert, dass
+Projektabhängigkeiten unkontrolliert in die systemweite Python-Installation
+gelangen.
+
+Gleichzeitig bleibt die systemweite Python-Installation als gemeinsame
+technische Basis für die Erstellung und Verwaltung der virtuellen
+Umgebungen erhalten.
+
+### Konsequenzen
+
+- Projektabhängigkeiten werden innerhalb der `.venv` installiert.
+- Die `.venv` wird nicht in Git versioniert.
+- VS Code verwendet für dieses Repository die `.venv`.
+- Andere Python-Projekte können eigene virtuelle Umgebungen und
+  Abhängigkeiten verwenden.
+- Die Verwendung von Python 3.13.15 als Entwicklungsbasis legt weiterhin
+  nicht die endgültige Python-Kompatibilität der Anwendung fest.
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:

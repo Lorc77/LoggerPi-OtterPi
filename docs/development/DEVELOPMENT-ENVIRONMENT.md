@@ -72,19 +72,92 @@ Bei der ersten Prüfung:
 
 ## Python
 
-Zu Beginn der Einrichtung war Python auf dem Windows-Entwicklungsrechner
-noch nicht installiert.
+Für die Windows-Entwicklung wird aktuell Python 3.13.15 verwendet.
 
-Vorgesehene Version für die Windows-Entwicklung:
+Installationspfad:
 
-- Python 3.13.15
+`C:\Program Files\Python313\`
 
-Status der Installation:
+Die Installation wurde im VS-Code-Terminal erfolgreich überprüft:
 
-**Ausstehend**
+- `python --version` → Python 3.13.15
+- `py --version` → Python 3.13.15
+- `python -m pip --version` → pip für Python 3.13
+- `python` verweist auf `C:\Program Files\Python313\python.exe`
 
-Die Installation gilt erst als abgeschlossen, wenn sie anschließend
-im VS-Code-Terminal überprüft wurde.
+Die systemweite Python-Installation dient als Basis für die
+Entwicklungsumgebung. Projektabhängigkeiten werden nicht direkt in dieser
+globalen Installation installiert.
+
+### Virtuelle Umgebung
+
+Jedes Python-Projekt verwendet eine eigene virtuelle Umgebung.
+
+Für dieses Repository liegt sie unter:
+
+`.venv\`
+
+Die Umgebung wird mit
+
+```powershell
+python -m venv .venv
+```
+
+erstellt und kann in PowerShell mit
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+aktiviert werden.
+
+Falls PowerShell die Ausführung von Skripten verhindert, wird für den
+aktuellen Benutzer folgende Ausführungsrichtlinie verwendet:
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+Eine systemweite Änderung der PowerShell-Ausführungsrichtlinie ist nicht
+erforderlich.
+
+Die virtuelle Umgebung wurde erfolgreich verifiziert. Innerhalb der
+aktivierten Umgebung verweist `python` auf den Interpreter der
+projektlokalen `.venv`.
+
+Die `.venv` wird nicht versioniert.
+
+
+### VS-Code-Python-Unterstützung
+
+Für die Python-Entwicklung sind derzeit folgende VS-Code-Erweiterungen
+installiert:
+
+- Python
+- Pylance
+- Python Debugger
+- Python Environments
+
+VS Code verwendet für dieses Repository die projektlokale virtuelle
+Umgebung.
+
+Die Workspace-Konfiguration liegt unter:
+
+`.vscode/settings.json`
+
+und verwendet einen relativen Pfad:
+
+```json
+{
+    "python.defaultInterpreterPath": "${workspaceFolder}\\.venv\\Scripts\\python.exe"
+}
+```
+
+Damit ist die Konfiguration nicht an einen persönlichen absoluten
+Installationspfad gebunden.
+
+Die automatische Aktivierung der `.venv` in einem neuen integrierten
+PowerShell-Terminal wurde erfolgreich verifiziert.
 
 ## Zielsysteme
 
@@ -148,8 +221,27 @@ Entwicklungsrechner.
 
 ## Status
 
-Dieses Dokument beschreibt den Stand der Entwicklungsumgebung zum
-Zeitpunkt seiner Erstellung.
+Die grundlegende Windows-Entwicklungsumgebung wurde eingerichtet und
+erfolgreich verifiziert.
 
-Es ersetzt nicht die technischen Baselines oder die
+Verifiziert sind:
+
+- Windows 11
+- stabile Version von Visual Studio Code
+- Python 3.13.15
+- pip
+- Python Launcher (`py`)
+- projektlokale virtuelle Umgebung `.venv`
+- VS-Code-Python-Unterstützung
+- Pylance
+- Python Debugger
+- Python Environments
+- automatische Verwendung der `.venv` durch VS Code
+- automatische Aktivierung der `.venv` im integrierten PowerShell-Terminal
+
+Die konkrete Python-Kompatibilität des neuen Anwendungscodes bleibt
+weiterhin offen und wird nicht allein durch die verwendete
+Entwicklungs-Python-Version festgelegt.
+
+Dieses Dokument ersetzt nicht die technischen Baselines oder die
 Architekturdokumentation des Projekts.
