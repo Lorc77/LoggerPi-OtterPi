@@ -1,7 +1,7 @@
 import json
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any
+from typing import Any, Optional
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
@@ -14,7 +14,7 @@ class AtmoWebDevice:
     port: int
     serial_number: str
     device_type: str
-    software_revision: str | None = None
+    software_revision: Optional[str] = None
 
 
 class AtmoWebError(RuntimeError):
@@ -191,7 +191,7 @@ class AtmoWebReader:
         return states, operation
 
 
-def _parse_timestamp(value: object) -> str | None:
+def _parse_timestamp(value: object) -> Optional[str]:
     if value is None:
         return None
 
@@ -218,7 +218,7 @@ def _measurement_from_atmoweb(
     key: str,
     value: object,
     unit: str,
-    measured_at: str | None,
+    measured_at: Optional[str],
 ) -> Measurement:
     if value == "N/A":
         return Measurement(
@@ -270,7 +270,7 @@ def _measurement_from_atmoweb(
     )
 
 
-def _optional_bool(value: object) -> bool | None:
+def _optional_bool(value: object) -> Optional[bool]:
     if value in {"N/A", "N/D", None, "PermissionDenied"}:
         return None
 
