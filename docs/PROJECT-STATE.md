@@ -785,10 +785,16 @@ getrennt.
 
 ### Abgrenzung zur realen Datenerfassung
 
-Das aktuelle System erzeugt gültige Batches, liest aber noch keine
-vollständigen realen LoggerPi-Sensor- oder Systemdaten.
+Die grundlegende Erfassung von LoggerPi-Systemdaten ist inzwischen
+implementiert.
 
-Die Architektur für reale Datenquellen bleibt:
+Dazu gehören insbesondere Zeit, Boot/Uptime, CPU, CPU Load Average und
+Memory. Diese Daten können bereits in einen Core Batch übernommen werden.
+
+Weitere konkrete Sensor- und Gerätedaten sind davon getrennt zu betrachten
+und werden schrittweise über konkrete Adapter bzw. Reader angebunden.
+
+Die Architektur für weitere reale Datenquellen bleibt:
 
 reale Datenquelle
     ↓
@@ -925,6 +931,83 @@ Der nächste fachlich sinnvolle Schritt ist daher nicht eine weitere
 generische Batch- oder Measurement-Abstraktion, sondern die Anbindung
 einer konkreten realen LoggerPi-Datenquelle.
 
+## Implementierungsstand: reale Systemdaten
+
+Die zuvor geplante Anbindung der grundlegenden LoggerPi-Systemdaten ist
+inzwischen technisch umgesetzt.
+
+Bereits implementiert und getestet sind:
+
+- `system.time`
+- `system.boot`
+- `system.cpu`
+- CPU Load Average
+- `memory`
+
+Die entsprechenden Reader befinden sich in:
+
+```text
+src/loggerpi_otterpi/system_info.py
+```
+
+Die Daten werden bereits in das vorhandene Core-Batch-Modell integriert.
+
+`Batch` unterstützt dafür optionale:
+
+```text
+system
+memory
+```
+
+und `create_batch()` kann diese Daten übernehmen.
+
+Damit ist für diese Systemdaten **kein weiterer Reader- oder
+Systemdaten-Modellierungsschritt** erforderlich.
+
+Insbesondere wird nicht erneut gebaut:
+
+- ein weiterer Temperatur-/Systemdaten-Reader für bereits abgedeckte Werte
+- eine zusätzliche generische MeasurementFactory
+- ein zusätzlicher MeasurementBuilder
+- eine weitere Batch-Abstraktion
+
+Die bestehenden Reader und das bestehende Batch-Modell sind für den
+nächsten Implementierungsschritt zu verwenden.
+
+### Nächster Implementierungsschritt
+
+Der nächste Schritt ist jetzt der **vertikale End-to-End-Datenpfad**.
+
+Dabei wird eine bereits vorhandene konkrete Datenquelle durch den
+bestehenden technischen Pfad geführt:
+
+```text
+konkrete Datenquelle
+        ↓
+bestehender Reader / Adapter
+        ↓
+Measurement bzw. vorhandene Systemdaten
+        ↓
+Batch
+        ↓
+persistente Queue
+        ↓
+HTTP Delivery
+        ↓
+OtterPi
+```
+
+Der nächste Arbeitsschritt ist daher **nicht** die erneute Implementierung
+von System-, Memory-, CPU- oder Load-Daten.
+
+Ziel ist zunächst ein kleiner, reproduzierbarer E2E-Schnitt, der nachweist,
+dass ein real bzw. realistisch erfasster Wert vom vorhandenen Reader bis
+zur HTTP-Zustellung durch den bestehenden Batch-/Queue-/Delivery-Pfad
+gelangt.
+
+Erst wenn dieser vertikale Pfad funktioniert, werden weitere reale
+LoggerPi-Datenquellen schrittweise ergänzt.
+
 ### Aktueller Teststand
 
 Der aktuelle Implementierungsstand ist durch automatisierte Tests
@@ -932,7 +1015,7 @@ abgesichert.
 
 Derzeit bestehen:
 
-20 Tests
+27 Tests
 
 Alle Tests bestehen.
 
@@ -951,6 +1034,11 @@ Abgedeckt sind insbesondere:
 - Behandlung nicht erfolgreicher HTTP-Responses
 - erfolgreiches Entfernen eines zugestellten Batches
 - Beibehalten eines Batches bei fehlgeschlagener Zustellung
+- Systemdaten
+- Memory-Daten
+- CPU-Daten
+- CPU Load Average
+- Integration von `system` und `memory` in den Batch
 
 Zusätzlich gilt:
 
@@ -963,7 +1051,12 @@ ruff format --check .
 Der aktuelle technische Implementierungsstand ist damit lokal getestet
 und für den bisherigen Batch-/Queue-/Delivery-Schnitt abgeschlossen.
 
-Der nächste Schritt ist die konkrete reale LoggerPi-Datenquelle.
+Der nächste Schritt ist jetzt der vertikale End-to-End-Datenpfad mit einer
+bereits vorhandenen konkreten LoggerPi-Datenquelle.
+
+Dabei werden die bereits implementierten Reader und der bestehende
+Batch-/Queue-/Delivery-Pfad wiederverwendet. Es wird keine bereits
+implementierte Systemdatenerfassung erneut aufgebaut.
 
 ---
 
