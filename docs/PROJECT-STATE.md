@@ -1075,11 +1075,11 @@ Die weitere Implementierungsreihenfolge ist:
 4. real erzeugten Core Batch lokal prüfen
 5. Integration mit der bereits vorhandenen persistenten Queue
 6. Integration mit dem bereits vorhandenen HTTP Delivery
-7. reale Fehler- und Wiederanlaufszenarien prüfen
-8. Retry bei nicht erfolgreicher / unklarer Zustellung
-9. Store-and-Forward bei OtterPi-Ausfall
-10. Duplicate-/Identity-Conflict-Tests
-11. Persistenz- und Wiederanlaufverhalten
+7. realen End-to-End-Datenpfad prüfen
+8. reale Fehler- und Wiederanlaufszenarien prüfen
+9. Retry-Verhalten anhand des realen Datenpfads vervollständigen
+10. Duplicate-/Identity-Conflict-Tests ergänzen
+11. Persistenz- und Wiederanlaufverhalten gegen den realen Pfad prüfen
 12. weitere reale LoggerPi-Datenquellen
 13. Integration der relevanten System- und Service-Daten
 14. Tests gegen den realen LoggerPi-/OtterPi-Datenpfad
