@@ -33,6 +33,7 @@ select = [
     "F",
     "I",
     "UP",
+    "FA102",
 ]
 
 [tool.ruff.format]
