@@ -4,6 +4,7 @@ from pathlib import Path
 from loggerpi_otterpi.system_info import (
     get_boot_info,
     get_cpu_info,
+    get_load_info,
     get_memory_info,
     get_system_time,
 )
@@ -81,3 +82,17 @@ def test_get_memory_info_reads_proc_meminfo(tmp_path: Path) -> None:
     assert result["total_bytes"] == 102400 * 1024.0
     assert result["available_bytes"] == 25600 * 1024.0
     assert result["used_bytes"] == 76800 * 1024.0
+
+
+def test_get_load_info_reads_proc_loadavg(tmp_path: Path) -> None:
+    loadavg = tmp_path / "loadavg"
+    loadavg.write_text(
+        "0.42 0.35 0.28 1/123 45678\n",
+        encoding="utf-8",
+    )
+
+    result = get_load_info(proc_loadavg=loadavg)
+
+    assert result["load_1m"] == 0.42
+    assert result["load_5m"] == 0.35
+    assert result["load_15m"] == 0.28

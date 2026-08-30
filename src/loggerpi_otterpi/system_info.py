@@ -66,6 +66,19 @@ def get_memory_info(
     }
 
 
+def get_load_info(
+    proc_loadavg: Path = Path("/proc/loadavg"),
+) -> dict[str, float]:
+    """Return system load averages from /proc/loadavg."""
+    values = proc_loadavg.read_text(encoding="utf-8").split()
+
+    return {
+        "load_1m": float(values[0]),
+        "load_5m": float(values[1]),
+        "load_15m": float(values[2]),
+    }
+
+
 def _read_uptime(proc_uptime: Path) -> float:
     """Read uptime in seconds from /proc/uptime."""
     content = proc_uptime.read_text(encoding="utf-8")
