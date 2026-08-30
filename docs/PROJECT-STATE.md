@@ -1112,12 +1112,11 @@ abgesichert.
 
 Derzeit bestehen:
 
-38 Tests
+39 Tests
 
 Alle Tests bestehen.
 
 Abgedeckt sind insbesondere:
-
   * Batch-Modell
   * Measurement-Modell
   * Batch-Validierung
@@ -1145,6 +1144,8 @@ Abgedeckt sind insbesondere:
   * AtmoWEB-State-Mapping
   * AtmoWEB-Fehlerbehandlung
   * AtmoWEB-Gerätekonfiguration
+  * AtmoWEB → Measurement → Core Batch → Queue → HTTP Delivery
+  * AtmoWEB-Messwerte im tatsächlich erzeugten und übertragenen Batch
 
 Zusätzlich gilt:
 
@@ -1154,15 +1155,34 @@ ruff check .
 ruff format --check .
 → alle Dateien formatiert
 
-Der aktuelle technische Implementierungsstand ist damit lokal getestet
-und für den bisherigen Batch-/Queue-/Delivery-Schnitt abgeschlossen.
+git diff --check
+→ keine inhaltlichen Whitespace-Fehler
 
-Der nächste Schritt ist jetzt der vertikale End-to-End-Datenpfad mit einer
-bereits vorhandenen konkreten LoggerPi-Datenquelle.
+Der aktuelle technische Implementierungsstand ist damit lokal getestet.
 
-Dabei werden die bereits implementierten Reader und der bestehende
-Batch-/Queue-/Delivery-Pfad wiederverwendet. Es wird keine bereits
-implementierte Systemdatenerfassung erneut aufgebaut.
+Der vertikale Implementierungsschnitt mit AtmoWEB als konkreter
+LoggerPi-Datenquelle ist abgeschlossen.
+
+Praktisch verifiziert wurde damit:
+
+AtmoWEB
+    ↓
+AtmoWebReader
+    ↓
+Measurement
+    ↓
+Core Batch
+    ↓
+persistente lokale Queue
+    ↓
+HTTP POST
+    ↓
+HTTP 202
+    ↓
+Queue-Eintrag entfernen
+
+Dabei wurde insbesondere auch die tatsächliche AtmoWEB-Einheit
+`mbar` für den Druckwert durch den gesamten Pfad erhalten.
 
 ---
 
@@ -1207,8 +1227,6 @@ nicht blockieren.
 
 ## Erster Implementierungsfahrplan
 
-Die Umsetzung erfolgt weiterhin als vertikaler End-to-End-Schnitt.
-
 Der bisherige technische Grundpfad ist inzwischen implementiert:
 
 Batch-Erzeugung
@@ -1226,25 +1244,20 @@ Queue-Eintrag entfernen
 Damit sind die grundlegenden Bausteine für Erzeugung, lokale Persistenz
 und technische Zustellung vorhanden.
 
-Was weiterhin fehlt, ist die reale LoggerPi-Datenerfassung.
+Der erste vertikale End-to-End-Implementierungsschnitt ist abgeschlossen.
 
-Der nächste Implementierungsschritt ist deshalb die Anbindung einer
-konkreten realen LoggerPi-Datenquelle.
+Mit AtmoWEB wurde eine bereits vorhandene konkrete LoggerPi-Datenquelle
+in den bestehenden Core-Batch-/Queue-/HTTP-Delivery-Pfad integriert.
 
-Dabei wird keine zusätzliche generische Messwert-Erzeugungsschicht
-eingeführt.
+Der implementierte Pfad lautet:
 
-Stattdessen wird eine konkrete Datenquelle über einen passenden Adapter
-bzw. Reader direkt in das bereits vorhandene Measurement-Modell
-überführt:
-
-reale Datenquelle
+AtmoWEB
     ↓
-konkreter Adapter / Reader
+AtmoWebReader
     ↓
 Measurement
     ↓
-Batch
+Core Batch
     ↓
 persistente Queue
     ↓
@@ -1252,40 +1265,43 @@ HTTP Delivery
     ↓
 OtterPi
 
-Als erste Datenquelle wird eine bereits durch die Runtime-Inventur
-identifizierte und technisch zugängliche Quelle ausgewählt.
+Der Pfad ist durch einen automatisierten E2E-Test abgesichert.
 
-Dabei werden insbesondere folgende Punkte praktisch überprüft:
+Damit ist die technische Grundlage für die weitere Runtime-Integration
+vorhanden.
 
-- tatsächliche Messwertabfrage
-- tatsächliche Einheit
-- tatsächlicher Messzeitpunkt
-- Umgang mit fehlenden oder ungültigen Werten
-- Zuordnung zum validity-Feld
-- Einordnung des Wertes in das bestehende Core-Batch-Modell
+### Nächster Arbeitsschritt
 
-Danach wird der reale Datenpfad schrittweise erweitert.
+Als nächstes wird die konkrete Runtime-Orchestrierung des bereits
+implementierten Pfades konzipiert.
 
-Die weitere Implementierungsreihenfolge ist:
+Dabei ist zunächst zu klären:
 
-1. konkrete reale Datenquelle anbinden
-2. Datenquelle → Measurement
-3. Measurement → Core Batch
-4. real erzeugten Core Batch lokal prüfen
-5. Integration mit der bereits vorhandenen persistenten Queue
-6. Integration mit dem bereits vorhandenen HTTP Delivery
-7. realen End-to-End-Datenpfad prüfen
-8. reale Fehler- und Wiederanlaufszenarien prüfen
-9. Retry-Verhalten anhand des realen Datenpfads vervollständigen
-10. Duplicate-/Identity-Conflict-Tests ergänzen
-11. Persistenz- und Wiederanlaufverhalten gegen den realen Pfad prüfen
-12. weitere reale LoggerPi-Datenquellen
-13. Integration der relevanten System- und Service-Daten
-14. Tests gegen den realen LoggerPi-/OtterPi-Datenpfad
+- wie und wann eine Messrunde ausgelöst wird
+- wie die konfigurierten AtmoWEB-Datenquellen in einer Messrunde behandelt werden
+- wann ein Core Batch erzeugt wird
+- wann der Batch in die persistente Queue gelangt
+- wann ausstehende Batches zugestellt werden
+- wie Wiederanlauf und Fehlerfälle im Runtime-Ablauf behandelt werden
+- wie der neue Pfad später kontrolliert neben der bestehenden Legacy-Runtime
+  auf dem LoggerPi betrieben werden kann
+- welcher konkrete Prozess-/Service-Mechanismus dafür verwendet wird
 
-Die konkrete Auswahl der ersten Datenquelle erfolgt auf Basis des bereits
-dokumentierten Runtime- und Legacy-Stands und nicht durch Einführung einer
-zusätzlichen generischen Abstraktionsschicht.
+Diese Runtime-Orchestrierung ist noch nicht implementiert.
+
+Sie wird zunächst gegen den bestehenden Vertrag und die bereits getroffenen
+Architekturentscheidungen geprüft, bevor ein konkreter Runner bzw.
+dauerhafter Prozess implementiert wird.
+
+Der bestehende Legacy-Observer bleibt bis dahin unverändert produktiv.
+
+### Danach
+
+Nach Festlegung und Implementierung der Runtime-Orchestrierung wird der
+bereits getestete AtmoWEB-Datenpfad praktisch auf dem LoggerPi verifiziert.
+
+Erst danach werden weitere konkrete LoggerPi-Datenquellen schrittweise
+ergänzt.
 
 ### Was ausdrücklich nicht gebaut wird
 
