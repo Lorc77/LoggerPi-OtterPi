@@ -147,3 +147,44 @@ def test_stale_measurement_requires_value():
             validity="stale",
             source="test",
         )
+
+
+def test_batch_serializes_system_and_memory() -> None:
+    batch = Batch(
+        batch_id="batch-001",
+        logger_id="logger-001",
+        sequence=0,
+        created_at="2026-08-30T12:00:00+00:00",
+        system={
+            "time": {
+                "current": "2026-08-30T12:00:00+00:00",
+                "timezone": "CEST",
+                "clock_state": "unknown",
+            },
+            "boot": {
+                "last_boot_at": "2026-08-30T10:00:00+00:00",
+                "uptime_seconds": 7200,
+            },
+            "cpu": {
+                "usage_percent": 15.0,
+                "load": {
+                    "1m": 0.42,
+                    "5m": 0.35,
+                    "15m": 0.28,
+                },
+            },
+        },
+        memory={
+            "total_bytes": 104857600,
+            "available_bytes": 26214400,
+            "used_bytes": 78643200,
+        },
+    )
+
+    result = batch.to_dict()
+
+    assert result["system"]["time"]["timezone"] == "CEST"
+    assert result["system"]["boot"]["uptime_seconds"] == 7200
+    assert result["system"]["cpu"]["usage_percent"] == 15.0
+    assert result["system"]["cpu"]["load"]["1m"] == 0.42
+    assert result["memory"]["total_bytes"] == 104857600

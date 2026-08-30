@@ -23,6 +23,8 @@ def create_batch(
     logger_id: str,
     sequence_store: SequenceStore,
     measurements: Optional[dict[str, Measurement]] = None,
+    system: Optional[dict] = None,
+    memory: Optional[dict] = None,
 ) -> Batch:
     return Batch(
         batch_id=str(uuid4()),
@@ -30,4 +32,6 @@ def create_batch(
         sequence=sequence_store.next(),
         created_at=datetime.now(timezone.utc).isoformat(),
         measurements=measurements or {},
+        system=system,
+        memory=memory,
     )

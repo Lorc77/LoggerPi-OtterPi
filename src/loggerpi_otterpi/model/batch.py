@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Optional
 
 from .measurement import BatchValidationError, Measurement
 
@@ -11,6 +12,8 @@ class Batch:
     sequence: int
     created_at: str
     schema_version: str = "1.0"
+    system: Optional[dict] = None
+    memory: Optional[dict] = None
     measurements: dict[str, Measurement] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
@@ -41,6 +44,12 @@ class Batch:
             "sequence": self.sequence,
             "created_at": self.created_at,
         }
+
+        if self.system is not None:
+            result["system"] = self.system
+
+        if self.memory is not None:
+            result["memory"] = self.memory
 
         if self.measurements:
             result["measurements"] = {
