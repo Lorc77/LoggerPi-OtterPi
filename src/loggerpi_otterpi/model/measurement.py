@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Optional
 
 
 class BatchValidationError(ValueError):
@@ -10,7 +11,7 @@ class BatchValidationError(ValueError):
 class Measurement:
     value: object
     unit: str
-    measured_at: str | None
+    measured_at: Optional[str]
     validity: str
     source: str
 

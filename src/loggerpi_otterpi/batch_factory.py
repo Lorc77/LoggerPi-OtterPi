@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Optional, Union
 from uuid import uuid4
 
 from .model.batch import Batch
@@ -7,7 +8,7 @@ from .model.measurement import Measurement
 
 
 class SequenceStore:
-    def __init__(self, path: str | Path) -> None:
+    def __init__(self, path: Union[str, Path]) -> None:
         self.path = Path(path)
 
     def next(self) -> int:
@@ -21,7 +22,7 @@ class SequenceStore:
 def create_batch(
     logger_id: str,
     sequence_store: SequenceStore,
-    measurements: dict[str, Measurement] | None = None,
+    measurements: Optional[dict[str, Measurement]] = None,
 ) -> Batch:
     return Batch(
         batch_id=str(uuid4()),

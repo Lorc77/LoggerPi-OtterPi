@@ -1,12 +1,13 @@
 import json
 from pathlib import Path
+from typing import Union
 
 from .model.batch import Batch
 from .model.measurement import Measurement
 
 
 class BatchQueue:
-    def __init__(self, path: str | Path) -> None:
+    def __init__(self, path: Union[str, Path]) -> None:
         self.path = Path(path)
 
     def enqueue(self, batch: Batch) -> None:
