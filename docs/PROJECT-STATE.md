@@ -783,13 +783,35 @@ Measurement bleibt das gemeinsame fachliche Datenmodell.
 Die Batch-Erzeugung ist damit von der konkreten späteren Datenerfassung
 getrennt.
 
+### Batch Composer
+
+Für die Zusammenführung bereits erfasster Daten existiert:
+
+`src/loggerpi_otterpi/composer.py`
+
+Der Composer übernimmt die aktuell verfügbaren LoggerPi-Systemdaten und führt sie gemeinsam mit optionalen Measurements in einen vollständigen Core Batch.
+
+Dabei werden aktuell insbesondere:
+
+* `system.time`
+* `system.boot`
+* `system.cpu`
+* `system.cpu.temperature_celsius`
+* `memory`
+
+übernommen.
+
+Der Composer ist keine zusätzliche generische Messwert-Erzeugungsschicht. Konkrete externe Sensor- und Gerätedaten werden weiterhin durch ihre jeweiligen Adapter bzw. Reader in das vorhandene `Measurement`-Modell überführt.
+
 ### Abgrenzung zur realen Datenerfassung
 
-Die grundlegende Erfassung von LoggerPi-Systemdaten ist inzwischen
-implementiert.
+Die grundlegende Erfassung von LoggerPi-Systemdaten ist inzwischen implementiert.
 
-Dazu gehören insbesondere Zeit, Boot/Uptime, CPU, CPU Load Average und
-Memory. Diese Daten können bereits in einen Core Batch übernommen werden.
+Dazu gehören insbesondere Zeit, Boot/Uptime, CPU, CPU Load Average, CPU-Temperatur und Memory. Diese Daten können bereits in einen Core Batch übernommen werden.
+
+Die Systemdaten werden über `system_info.py` gesammelt und über den Composer in den Core Batch integriert.
+
+Die CPU-Temperatur ist dabei eine Systeminformation des LoggerPi und kein externer Sensor-Reader.
 
 Weitere konkrete Sensor- und Gerätedaten sind davon getrennt zu betrachten
 und werden schrittweise über konkrete Adapter bzw. Reader angebunden.
@@ -938,11 +960,20 @@ inzwischen technisch umgesetzt.
 
 Bereits implementiert und getestet sind:
 
-- `system.time`
-- `system.boot`
-- `system.cpu`
-- CPU Load Average
-- `memory`
+  * `system.time`
+  * `system.boot`
+  * `system.cpu`
+  * CPU Load Average
+  * CPU-Temperatur
+  * `memory`
+
+Die CPU-Temperatur wird als:
+
+`system.cpu.temperature_celsius`
+
+geführt und stammt aus der LoggerPi-Systeminformation.
+
+Sie ist ausdrücklich kein externer Sensor-Reader.
 
 Die entsprechenden Reader befinden sich in:
 
@@ -1015,30 +1046,33 @@ abgesichert.
 
 Derzeit bestehen:
 
-27 Tests
+31 Tests
 
 Alle Tests bestehen.
 
 Abgedeckt sind insbesondere:
 
-- Batch-Modell
-- Measurement-Modell
-- Batch-Validierung
-- Batch-Erzeugung
-- persistente Sequence
-- Queue-Persistenz
-- Queue-Wiederherstellung
-- Entfernen eines spezifischen Queue-Eintrags
-- HTTP-JSON-Delivery
-- HTTP-202-Erfolg
-- Behandlung nicht erfolgreicher HTTP-Responses
-- erfolgreiches Entfernen eines zugestellten Batches
-- Beibehalten eines Batches bei fehlgeschlagener Zustellung
-- Systemdaten
-- Memory-Daten
-- CPU-Daten
-- CPU Load Average
-- Integration von `system` und `memory` in den Batch
+  * Batch-Modell
+  * Measurement-Modell
+  * Batch-Validierung
+  * Batch-Erzeugung
+  * Batch Composer
+  * persistente Sequence
+  * Queue-Persistenz
+  * Queue-Wiederherstellung
+  * Entfernen eines spezifischen Queue-Eintrags
+  * HTTP-JSON-Delivery
+  * HTTP-202-Erfolg
+  * Behandlung nicht erfolgreicher HTTP-Responses
+  * erfolgreiches Entfernen eines zugestellten Batches
+  * Beibehalten eines Batches bei fehlgeschlagener Zustellung
+  * Systemdaten
+  * Memory-Daten
+  * CPU-Daten
+  * CPU Load Average
+  * CPU-Temperatur
+  * Integration von `system` und `memory` in den Batch
+  * E2E-Pfad von Batch-Erzeugung über Queue bis HTTP-Delivery
 
 Zusätzlich gilt:
 
