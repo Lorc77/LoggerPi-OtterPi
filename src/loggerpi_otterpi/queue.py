@@ -39,3 +39,24 @@ class BatchQueue:
                 )
 
         return batches
+
+    def remove(self, batch: Batch) -> None:
+        if not self.path.exists():
+            return
+
+        remaining = []
+
+        with self.path.open("r", encoding="utf-8") as file:
+            for line in file:
+                data = json.loads(line)
+
+                if (
+                    data.get("batch_id") == batch.batch_id
+                    and data.get("sequence") == batch.sequence
+                ):
+                    continue
+
+                remaining.append(line)
+
+        with self.path.open("w", encoding="utf-8") as file:
+            file.writelines(remaining)
