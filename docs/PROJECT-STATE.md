@@ -6,7 +6,7 @@
 **Data Model:** v1  
 **Projektphase:** Implementierung / Core Batch v1  
 **Status:** In aktiver Entwicklung  
-**Stand:** 2026-08-16
+**Stand:** 2026-08-30
 
 ---
 
@@ -720,95 +720,210 @@ Damit sind insbesondere festgelegt:
 
 ### Erste Core-Batch-Implementierung
 
-Die technische Implementierung des Core-Batch-Datenmodells wurde begonnen.
+Die technische Implementierung des Core-Batch-Datenmodells wurde begonnen
+und schrittweise bis zur lokalen Queue und zum HTTP-Delivery-Pfad erweitert.
 
 Aktuell existieren:
 
-```text
 src/loggerpi_otterpi/model/
 ├── batch.py
 └── measurement.py
-```
 
-`Batch` bildet den Batch Envelope ab und enthält:
+Batch bildet den Batch Envelope ab und enthält:
 
-- `schema_version`
-- `batch_id`
-- `logger_id`
-- `sequence`
-- `created_at`
-- optionale `measurements`
+- schema_version
+- batch_id
+- logger_id
+- sequence
+- created_at
+- optionale measurements
 
-`Measurement` bildet einen einzelnen Messwert ab und enthält:
+Measurement bildet einen einzelnen Messwert ab und enthält:
 
-- `value`
-- `unit`
-- `measured_at`
-- `validity`
-- `source`
+- value
+- unit
+- measured_at
+- validity
+- source
 
-Die fachlichen Validierungsregeln für `Batch` und `Measurement` sind
+Die fachlichen Validierungsregeln für Batch und Measurement sind
 implementiert und durch Tests abgesichert.
 
-Ein `Batch` kann mehrere benannte Measurements enthalten, beispielsweise:
-
-```text
-measurements
-└── temperature
-    ├── value
-    ├── unit
-    ├── measured_at
-    ├── validity
-    └── source
-```
+Ein Batch kann mehrere benannte Measurements enthalten.
 
 Beim Serialisieren werden Measurements in die definierte JSON-Struktur
 überführt.
 
-Ein leeres `measurements`-Objekt wird nicht in den Batch aufgenommen.
+Ein leeres measurements-Objekt wird nicht in den Batch aufgenommen.
 
-### Abgrenzung zur Datenerfassung
+### Batch-Erzeugung
 
-Das aktuelle Datenmodell erzeugt oder liest noch keine realen Messwerte.
+Die Batch-Erzeugung erfolgt über eine kleine, gezielte Factory:
 
-Insbesondere ist noch nicht implementiert:
+src/loggerpi_otterpi/batch_factory.py
 
-```text
-Sensor / Systemabfrage
-        ↓
-konkrete Datenerfassung
-        ↓
+Die Factory erzeugt einen vollständigen Batch und verwendet dabei eine
+persistente Sequence pro LoggerPi.
+
+Die Sequence wird vor der Queue-Ablage vergeben und ist pro LoggerPi
+monoton fortlaufend.
+
+Dabei wurde bewusst keine zusätzliche generische Messwert-Erzeugungsschicht
+eingeführt.
+
+Insbesondere existieren bewusst keine:
+
+- MeasurementFactory
+- MeasurementBuilder
+- zusätzliche system/time.py nur für die JSON-Struktur
+- vorsorgliche Modellierung aller möglichen Core-Batch-Sections
+
+Measurement bleibt das gemeinsame fachliche Datenmodell.
+
+Die Batch-Erzeugung ist damit von der konkreten späteren Datenerfassung
+getrennt.
+
+### Abgrenzung zur realen Datenerfassung
+
+Das aktuelle System erzeugt gültige Batches, liest aber noch keine
+vollständigen realen LoggerPi-Sensor- oder Systemdaten.
+
+Die Architektur für reale Datenquellen bleibt:
+
+reale Datenquelle
+    ↓
+konkreter Adapter / Reader
+    ↓
 Measurement
-        ↓
+    ↓
 Batch
-```
 
-`Measurement` ist dabei bewusst das bereits vorhandene gemeinsame
-Datenmodell und keine zusätzliche generische Messwert-Erzeugungsschicht.
+Die konkrete Datenquelle wird später angebunden.
 
-Die eigentliche Datenerfassung erfolgt später durch konkrete Adapter bzw.
-Reader für die jeweiligen Datenquellen.
+Es wird dabei keine zusätzliche generische Messwert-Erzeugungsschicht
+zwischen Datenquelle und Measurement eingeführt.
 
-Dabei werden die von der Datenquelle gelieferten Werte einschließlich der
-zugehörigen Einheit und des Erfassungszeitpunkts in das bestehende
-`Measurement`-Modell überführt.
+Damit ist insbesondere geklärt:
 
-Der Core Batch entscheidet nicht selbst, wie ein Messwert technisch
-ermittelt wird.
+Wir müssen jetzt keinen künstlichen "Messwert-Erzeuger" bauen.
 
-Damit bleibt die Trennung:
+Die bereits implementierte Batch-Erzeugung stellt den Core-Batch-Rahmen
+bereit. Reale Werte werden später durch konkrete Adapter bzw. Reader in
+das vorhandene Measurement-Modell überführt.
 
-```text
-konkrete Datenquelle
-        ↓
-Adapter / Reader
-        ↓
-Measurement
-        ↓
-Core Batch
-```
+### Persistente lokale Queue
 
-erhalten.
+Die persistente lokale Queue ist implementiert:
+
+src/loggerpi_otterpi/queue.py
+
+Die Queue speichert vollständige Batches lokal als JSON Lines.
+
+Ein bereits erzeugter Batch kann dadurch den Prozess bzw. einen
+Verbindungsabbruch überstehen.
+
+Die Queue kann:
+
+- Batches persistent ablegen
+- ausstehende Batches wieder einlesen
+- einen spezifischen erfolgreich zugestellten Batch entfernen
+
+Die Entfernung erfolgt anhand der stabilen Batch-Identität aus
+batch_id und sequence.
+
+Ein fehlgeschlagener Delivery-Versuch entfernt den Batch nicht aus der
+Queue.
+
+Damit ist der grundlegende Store-and-Forward-Baustein vorbereitet.
+
+### HTTP Delivery
+
+Der HTTP-Delivery-Baustein ist implementiert:
+
+src/loggerpi_otterpi/delivery.py
+
+Ein Batch wird als JSON per
+
+POST /api/v1/batches
+
+an den konfigurierten OtterPi-Endpunkt übertragen.
+
+Als erfolgreiche technische Annahme gilt ausschließlich HTTP 202.
+
+Andere HTTP-Statuscodes sowie HTTP-/Verbindungsfehler gelten als nicht
+erfolgreiche Zustellung.
+
+Die technische HTTP-Response erfolgt weiterhin über die vom LoggerPi
+initiierte Verbindung.
+
+Dies ist kein separates ACK-Synchronisationsprotokoll.
+
+### Queue Delivery
+
+Der Queue-Delivery-Schritt ist implementiert:
+
+src/loggerpi_otterpi/queue_delivery.py
+
+Der Delivery-Ablauf ist:
+
+persistente Queue
+    ↓
+pending Batch
+    ↓
+HTTP Delivery
+    ↓
+HTTP 202
+    ↓
+Batch aus Queue entfernen
+
+Bei nicht erfolgreicher Zustellung bleibt der Batch in der Queue.
+
+Damit ist die entscheidende Eigenschaft des Push-Modells umgesetzt:
+
+Ein Batch wird erst nach erfolgreicher technischer Annahme durch den
+OtterPi aus der lokalen Queue entfernt.
+
+Ein Retry verwendet denselben bereits erzeugten Batch und erzeugt keinen
+neuen fachlichen Batch.
+
+Damit bleiben insbesondere batch_id und sequence unverändert.
+
+### Aktueller technischer Datenpfad
+
+Der bisher implementierte technische Pfad ist damit:
+
+Batch-Erzeugung
+    ↓
+persistente Sequence
+    ↓
+lokale Queue
+    ↓
+HTTP POST /api/v1/batches
+    ↓
+HTTP 202
+    ↓
+Queue-Eintrag entfernen
+
+Bei Fehler:
+
+Batch-Erzeugung
+    ↓
+persistente Sequence
+    ↓
+lokale Queue
+    ↓
+HTTP Delivery fehlgeschlagen
+    ↓
+Batch bleibt in Queue
+    ↓
+späterer erneuter Zustellversuch
+
+Der vollständige reale Datenpfad ist noch nicht abgeschlossen, weil die
+konkrete LoggerPi-Datenerfassung noch aussteht.
+
+Der nächste fachlich sinnvolle Schritt ist daher nicht eine weitere
+generische Batch- oder Measurement-Abstraktion, sondern die Anbindung
+einer konkreten realen LoggerPi-Datenquelle.
 
 ### Aktueller Teststand
 
@@ -817,23 +932,38 @@ abgesichert.
 
 Derzeit bestehen:
 
-```text
-11 Tests
-```
+20 Tests
 
 Alle Tests bestehen.
 
+Abgedeckt sind insbesondere:
+
+- Batch-Modell
+- Measurement-Modell
+- Batch-Validierung
+- Batch-Erzeugung
+- persistente Sequence
+- Queue-Persistenz
+- Queue-Wiederherstellung
+- Entfernen eines spezifischen Queue-Eintrags
+- HTTP-JSON-Delivery
+- HTTP-202-Erfolg
+- Behandlung nicht erfolgreicher HTTP-Responses
+- erfolgreiches Entfernen eines zugestellten Batches
+- Beibehalten eines Batches bei fehlgeschlagener Zustellung
+
 Zusätzlich gilt:
 
-```text
 ruff check .
 → All checks passed!
 
 ruff format --check .
 → alle Dateien formatiert
-```
 
-Der aktuelle Implementierungsstand ist committed.
+Der aktuelle technische Implementierungsstand ist damit lokal getestet
+und für den bisherigen Batch-/Queue-/Delivery-Schnitt abgeschlossen.
+
+Der nächste Schritt ist die konkrete reale LoggerPi-Datenquelle.
 
 ---
 
@@ -880,17 +1010,35 @@ nicht blockieren.
 
 Die Umsetzung erfolgt weiterhin als vertikaler End-to-End-Schnitt.
 
-Der erste nächste Implementierungsschritt ist die Anbindung einer
+Der bisherige technische Grundpfad ist inzwischen implementiert:
+
+Batch-Erzeugung
+    ↓
+persistente Sequence
+    ↓
+lokale Queue
+    ↓
+HTTP POST /api/v1/batches
+    ↓
+HTTP 202
+    ↓
+Queue-Eintrag entfernen
+
+Damit sind die grundlegenden Bausteine für Erzeugung, lokale Persistenz
+und technische Zustellung vorhanden.
+
+Was weiterhin fehlt, ist die reale LoggerPi-Datenerfassung.
+
+Der nächste Implementierungsschritt ist deshalb die Anbindung einer
 konkreten realen LoggerPi-Datenquelle.
 
 Dabei wird keine zusätzliche generische Messwert-Erzeugungsschicht
 eingeführt.
 
 Stattdessen wird eine konkrete Datenquelle über einen passenden Adapter
-bzw. Reader direkt in das bereits vorhandene `Measurement`-Modell
+bzw. Reader direkt in das bereits vorhandene Measurement-Modell
 überführt:
 
-```text
 reale Datenquelle
     ↓
 konkreter Adapter / Reader
@@ -898,7 +1046,12 @@ konkreter Adapter / Reader
 Measurement
     ↓
 Batch
-```
+    ↓
+persistente Queue
+    ↓
+HTTP Delivery
+    ↓
+OtterPi
 
 Als erste Datenquelle wird eine bereits durch die Runtime-Inventur
 identifizierte und technisch zugängliche Quelle ausgewählt.
@@ -909,70 +1062,73 @@ Dabei werden insbesondere folgende Punkte praktisch überprüft:
 - tatsächliche Einheit
 - tatsächlicher Messzeitpunkt
 - Umgang mit fehlenden oder ungültigen Werten
-- Zuordnung zum `validity`-Feld
+- Zuordnung zum validity-Feld
 - Einordnung des Wertes in das bestehende Core-Batch-Modell
 
-Danach wird der vollständige technische Transportpfad umgesetzt:
-
-```text
-LoggerPi
-    ↓
-Core-Batch-Erzeugung
-    ↓
-persistente lokale Queue
-    ↓
-HTTP POST /api/v1/batches
-    ↓
-OtterPi
-    ↓
-JSON-/Contract-Validierung
-    ↓
-Duplicate Handling
-    ↓
-HTTP 202
-    ↓
-Queue-Eintrag erfolgreich abgeschlossen
-```
+Danach wird der reale Datenpfad schrittweise erweitert.
 
 Die weitere Implementierungsreihenfolge ist:
 
-```text
 1. konkrete reale Datenquelle anbinden
 2. Datenquelle → Measurement
 3. Measurement → Core Batch
-4. Core Batch lokal erzeugen und prüfen
-5. persistente lokale Queue
-6. HTTP POST /api/v1/batches
-7. OtterPi-Validierung
-8. Duplicate Handling
-9. HTTP 202
-10. Queue-Eintrag erfolgreich abschließen
-11. Retry bei nicht erfolgreicher / unklarer Zustellung
-12. Store-and-Forward bei OtterPi-Ausfall
-13. Duplicate-/Identity-Conflict-Tests
-14. Persistenz- und Wiederanlaufverhalten
-15. weitere reale LoggerPi-Datenquellen
-16. Integration der relevanten System- und Service-Daten
-17. Tests gegen den realen LoggerPi-/OtterPi-Datenpfad
-```
+4. real erzeugten Core Batch lokal prüfen
+5. Integration mit der bereits vorhandenen persistenten Queue
+6. Integration mit dem bereits vorhandenen HTTP Delivery
+7. reale Fehler- und Wiederanlaufszenarien prüfen
+8. Retry bei nicht erfolgreicher / unklarer Zustellung
+9. Store-and-Forward bei OtterPi-Ausfall
+10. Duplicate-/Identity-Conflict-Tests
+11. Persistenz- und Wiederanlaufverhalten
+12. weitere reale LoggerPi-Datenquellen
+13. Integration der relevanten System- und Service-Daten
+14. Tests gegen den realen LoggerPi-/OtterPi-Datenpfad
 
 Die konkrete Auswahl der ersten Datenquelle erfolgt auf Basis des bereits
 dokumentierten Runtime- und Legacy-Stands und nicht durch Einführung einer
 zusätzlichen generischen Abstraktionsschicht.
 
+### Was ausdrücklich nicht gebaut wird
+
+Die bisherige Implementierung hat gezeigt, dass der Core-Batch-Schnitt
+keine zusätzlichen Abstraktionen benötigt.
+
+Bewusst nicht vorgesehen sind insbesondere:
+
+- zweite batch.py
+- MeasurementFactory
+- MeasurementBuilder
+- zusätzliche generische Messwert-Erzeuger
+- system/time.py nur wegen der JSON-Struktur
+- vorsorgliche Modellierung aller 15 Core-Batch-Sections
+
+Die Architektur bleibt:
+
+konkrete Datenquelle
+    ↓
+Adapter / Reader
+    ↓
+Measurement
+    ↓
+Core Batch
+
+Damit bleibt der aktuelle Code bewusst klein und auf den tatsächlich
+benötigten Implementierungsschnitt begrenzt.
+
 Der Project State ist der zentrale Wiedereinstiegspunkt für die
 Implementierungsphase.
 
 Bei einem späteren Wiedereinstieg ist nicht erneut in die abgeschlossene
-Planungsphase zurückzukehren. Zuerst wird der tatsächliche
-Implementierungsstand des Repositories geprüft und anschließend der
-nächste konkrete Implementierungsschritt bestimmt.
+Planungsphase zurückzukehren.
+
+Zuerst wird der tatsächliche Implementierungsstand des Repositories
+geprüft und anschließend der nächste konkrete Implementierungsschritt
+bestimmt.
 
 Der Implementierungsfahrplan darf sich durch konkrete technische
 Erkenntnisse verändern. Bereits getroffene Architektur- und
 Datenmodellentscheidungen werden jedoch nicht ohne konkreten technischen
 Grund neu aufgerollt.
-
 
 ---
 
