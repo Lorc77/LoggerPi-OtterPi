@@ -1234,7 +1234,7 @@ Grundprinzip:
 
 - temperature → celsius
 - humidity → percent
-- pressure → pascal / definierte Druckeinheit
+- pressure → mbar
 - co2 → definierte Konzentrationseinheit
 - o2 → definierte Konzentrationseinheit
 - frequency → hz

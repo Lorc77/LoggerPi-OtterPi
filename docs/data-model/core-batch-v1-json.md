@@ -1228,7 +1228,7 @@ fachliche Einheiten:
 | `temperature_3` | `celsius` |
 | `temperature_4` | `celsius` |
 | `humidity` | `percent` |
-| `vacuum` | `pascal` |
+| `vacuum` | `mbar` |
 | `co2` | `ppm` |
 | `o2` | `percent` |
 | `fan_speed` | `rpm` |
@@ -1680,8 +1680,8 @@ Nicht jedes optionale Feld muss in jedem realen Batch vorhanden sein.
       "source": "atmoweb"
     },
     "vacuum": {
-      "value": 101325,
-      "unit": "pascal",
+      "value": 1013.25,
+      "unit": "mbar",
       "measured_at": "2026-08-15T10:44:50+02:00",
       "validity": "valid",
       "source": "atmoweb"
