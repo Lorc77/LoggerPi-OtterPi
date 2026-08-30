@@ -34,7 +34,7 @@ def test_get_boot_info_reads_proc_files(tmp_path: Path) -> None:
         proc_stat=stat,
     )
 
-    assert result["uptime_seconds"] == 1234.56
+    assert result["uptime_seconds"] == 1234
     boot_time = datetime.fromisoformat(result["last_boot_at"])
     assert boot_time.timestamp() == 1750000000
 
@@ -54,7 +54,7 @@ def test_get_boot_info_falls_back_to_uptime(tmp_path: Path) -> None:
         proc_stat=stat,
     )
 
-    assert result["uptime_seconds"] == 100.0
+    assert result["uptime_seconds"] == 100
     datetime.fromisoformat(result["last_boot_at"])
 
 

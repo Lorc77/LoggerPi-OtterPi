@@ -23,7 +23,7 @@ def get_boot_info(
 
     return {
         "last_boot_at": last_boot_at,
-        "uptime_seconds": uptime_seconds,
+        "uptime_seconds": int(uptime_seconds),
     }
 
 
@@ -60,9 +60,9 @@ def get_memory_info(
     available_kib = values["MemAvailable"]
 
     return {
-        "total_bytes": total_kib * 1024.0,
-        "available_bytes": available_kib * 1024.0,
-        "used_bytes": (total_kib - available_kib) * 1024.0,
+        "total_bytes": int(total_kib * 1024),
+        "available_bytes": int(available_kib * 1024),
+        "used_bytes": int((total_kib - available_kib) * 1024),
     }
 
 
