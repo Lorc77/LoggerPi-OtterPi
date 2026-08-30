@@ -4,6 +4,7 @@ from pathlib import Path
 from loggerpi_otterpi.system_info import (
     get_boot_info,
     get_cpu_info,
+    get_memory_info,
     get_system_time,
 )
 
@@ -66,3 +67,17 @@ def test_get_cpu_info_reads_proc_stat(tmp_path: Path) -> None:
     result = get_cpu_info(proc_stat=stat)
 
     assert result["usage_percent"] == 15.0
+
+
+def test_get_memory_info_reads_proc_meminfo(tmp_path: Path) -> None:
+    meminfo = tmp_path / "meminfo"
+    meminfo.write_text(
+        "MemTotal:       102400 kB\nMemAvailable:    25600 kB\nMemFree:         12800 kB\n",
+        encoding="utf-8",
+    )
+
+    result = get_memory_info(proc_meminfo=meminfo)
+
+    assert result["total_bytes"] == 102400 * 1024.0
+    assert result["available_bytes"] == 25600 * 1024.0
+    assert result["used_bytes"] == 76800 * 1024.0

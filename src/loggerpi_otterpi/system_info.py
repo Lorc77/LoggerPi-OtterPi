@@ -50,6 +50,22 @@ def get_cpu_info(
     }
 
 
+def get_memory_info(
+    proc_meminfo: Path = Path("/proc/meminfo"),
+) -> dict[str, float]:
+    """Return memory information from /proc/meminfo."""
+    values = _read_meminfo(proc_meminfo)
+
+    total_kib = values["MemTotal"]
+    available_kib = values["MemAvailable"]
+
+    return {
+        "total_bytes": total_kib * 1024.0,
+        "available_bytes": available_kib * 1024.0,
+        "used_bytes": (total_kib - available_kib) * 1024.0,
+    }
+
+
 def _read_uptime(proc_uptime: Path) -> float:
     """Read uptime in seconds from /proc/uptime."""
     content = proc_uptime.read_text(encoding="utf-8")
@@ -88,3 +104,16 @@ def _read_cpu_line(proc_stat: Path) -> str:
             return line
 
     raise ValueError("CPU information not found in /proc/stat")
+
+
+def _read_meminfo(proc_meminfo: Path) -> dict[str, float]:
+    """Read memory values from /proc/meminfo."""
+    values = {}
+
+    for line in proc_meminfo.read_text(encoding="utf-8").splitlines():
+        parts = line.split()
+
+        if len(parts) >= 2:
+            values[parts[0].rstrip(":")] = float(parts[1])
+
+    return values
