@@ -51,9 +51,7 @@ class AtmoWebReader:
         try:
             data = json.loads(body)
         except json.JSONDecodeError as exc:
-            raise AtmoWebError(
-                "AtmoWEB hat keine gültige JSON-Antwort geliefert."
-            ) from exc
+            raise AtmoWebError("AtmoWEB hat keine gültige JSON-Antwort geliefert.") from exc
 
         if not isinstance(data, dict):
             raise AtmoWebError("AtmoWEB-Antwort muss ein JSON-Objekt sein.")
@@ -201,14 +199,10 @@ def _parse_timestamp(value: object) -> Optional[str]:
     try:
         timestamp = datetime.fromisoformat(value)
     except ValueError as exc:
-        raise AtmoWebError(
-            f"Ungültiger AtmoWEB-Zeitstempel: {value!r}"
-        ) from exc
+        raise AtmoWebError(f"Ungültiger AtmoWEB-Zeitstempel: {value!r}") from exc
 
     if timestamp.tzinfo is None:
-        raise AtmoWebError(
-            "AtmoWEB Time muss eine Zeitzoneninformation enthalten."
-        )
+        raise AtmoWebError("AtmoWEB Time muss eine Zeitzoneninformation enthalten.")
 
     return timestamp.isoformat()
 
@@ -257,9 +251,7 @@ def _measurement_from_atmoweb(
         )
 
     if isinstance(value, bool) or not isinstance(value, (int, float)):
-        raise AtmoWebError(
-            f"AtmoWEB liefert für {key} einen nicht numerischen Wert: {value!r}"
-        )
+        raise AtmoWebError(f"AtmoWEB liefert für {key} einen nicht numerischen Wert: {value!r}")
 
     return Measurement(
         value=value,

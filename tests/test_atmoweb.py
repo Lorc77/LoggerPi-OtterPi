@@ -45,9 +45,7 @@ def test_identify_reads_serial_number_and_device_type(monkeypatch) -> None:
     assert device.device_type == "VO101"
     assert device.software_revision == "02.04.23"
 
-    assert captured["url"] == (
-        "http://192.168.100.101:80/atmoweb?SN=&DevType=&SWRev="
-    )
+    assert captured["url"] == ("http://192.168.100.101:80/atmoweb?SN=&DevType=&SWRev=")
     assert captured["timeout"] == 5.0
 
 
@@ -114,9 +112,7 @@ def test_read_measurements_maps_nd_to_unknown(monkeypatch) -> None:
 
     monkeypatch.setattr("loggerpi_otterpi.atmoweb.urlopen", fake_urlopen)
 
-    measurement = AtmoWebReader(
-        "192.168.100.101"
-    ).read_measurements()["temperature_1"]
+    measurement = AtmoWebReader("192.168.100.101").read_measurements()["temperature_1"]
 
     assert measurement.value is None
     assert measurement.validity == "unknown"
