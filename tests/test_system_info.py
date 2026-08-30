@@ -4,8 +4,10 @@ from pathlib import Path
 from loggerpi_otterpi.system_info import (
     get_boot_info,
     get_cpu_info,
+    get_cpu_temperature,
     get_load_info,
     get_memory_info,
+    get_system_info,
     get_system_time,
 )
 
@@ -96,3 +98,48 @@ def test_get_load_info_reads_proc_loadavg(tmp_path: Path) -> None:
     assert result["load_1m"] == 0.42
     assert result["load_5m"] == 0.35
     assert result["load_15m"] == 0.28
+
+
+def test_get_cpu_temperature_reads_sysfs(tmp_path: Path) -> None:
+    temperature = tmp_path / "temp"
+    temperature.write_text("47774\n", encoding="utf-8")
+
+    result = get_cpu_temperature(proc_temperature=temperature)
+
+    assert result == 47.774
+
+
+def test_get_system_info_contains_system_data(tmp_path: Path) -> None:
+    uptime = tmp_path / "uptime"
+    uptime.write_text("7200.00 0.00\n", encoding="utf-8")
+
+    stat = tmp_path / "stat"
+    stat.write_text(
+        "btime 1750000000\ncpu  100 20 30 850 0 0 0 0 0 0\n",
+        encoding="utf-8",
+    )
+
+    meminfo = tmp_path / "meminfo"
+    meminfo.write_text(
+        "MemTotal:       102400 kB\nMemAvailable:    25600 kB\n",
+        encoding="utf-8",
+    )
+
+    loadavg = tmp_path / "loadavg"
+    loadavg.write_text("0.42 0.35 0.28 1/100 1234\n", encoding="utf-8")
+
+    temperature = tmp_path / "temp"
+    temperature.write_text("47774\n", encoding="utf-8")
+
+    result = get_system_info(
+        proc_uptime=uptime,
+        proc_stat=stat,
+        proc_meminfo=meminfo,
+        proc_loadavg=loadavg,
+        proc_temperature=temperature,
+    )
+
+    assert result["boot"]["uptime_seconds"] == 7200
+    assert result["cpu"]["load"]["load_1m"] == 0.42
+    assert result["cpu"]["temperature_celsius"] == 47.774
+    assert result["memory"]["total_bytes"] == 104857600

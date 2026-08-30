@@ -79,6 +79,33 @@ def get_load_info(
     }
 
 
+def get_cpu_temperature(
+    proc_temperature: Path = Path("/sys/class/thermal/thermal_zone0/temp"),
+) -> float:
+    """Return CPU temperature in degrees Celsius."""
+    return int(proc_temperature.read_text(encoding="utf-8").strip()) / 1000.0
+
+
+def get_system_info(
+    proc_uptime: Path = Path("/proc/uptime"),
+    proc_stat: Path = Path("/proc/stat"),
+    proc_meminfo: Path = Path("/proc/meminfo"),
+    proc_loadavg: Path = Path("/proc/loadavg"),
+    proc_temperature: Path = Path("/sys/class/thermal/thermal_zone0/temp"),
+) -> dict[str, object]:
+    """Return the collected system information."""
+    return {
+        "time": get_system_time(),
+        "boot": get_boot_info(proc_uptime, proc_stat),
+        "cpu": {
+            **get_cpu_info(proc_stat),
+            "load": get_load_info(proc_loadavg),
+            "temperature_celsius": get_cpu_temperature(proc_temperature),
+        },
+        "memory": get_memory_info(proc_meminfo),
+    }
+
+
 def _read_uptime(proc_uptime: Path) -> float:
     """Read uptime in seconds from /proc/uptime."""
     content = proc_uptime.read_text(encoding="utf-8")
