@@ -159,6 +159,39 @@ Installationspfad gebunden.
 Die automatische Aktivierung der `.venv` in einem neuen integrierten
 PowerShell-Terminal wurde erfolgreich verifiziert.
 
+
+## Python-Versionen
+
+LoggerPi-OtterPi unterstützt aktuell Python **3.9 und höher**.
+
+Python 3.9 ist dabei die minimale unterstützte Version und damit Teil des Kompatibilitätsvertrags des Projekts.
+
+Für die lokale Entwicklung wird aktuell Python **3.13** verwendet. Die projektlokale virtuelle Umgebung `.venv` wird mit diesem Interpreter betrieben.
+
+Die lokale Entwicklungsumgebung und die minimale unterstützte Python-Version sind bewusst nicht identisch:
+
+```text
+Lokale Entwicklung:        Python 3.13
+Minimale Unterstützung:    Python 3.9
+CI-Kompatibilitätstest:     Python 3.9 + Python 3.13
+```
+
+Der Python-3.9-CI-Lauf ist notwendig, weil ein erfolgreicher Testlauf unter Python 3.13 allein keine Kompatibilität mit Python 3.9 garantiert.
+
+Die Python-Kompatibilitäts- und Quality-Gate-Regeln sind ausführlich in `docs/development/DEVELOPMENT-QUALITY.md` dokumentiert.
+
+Wesentliche technische Vorgaben:
+
+- `pyproject.toml` definiert `requires-python = ">=3.9"`.
+- Ruff verwendet `target-version = "py39"`.
+- Python-3.9-kompatible Type-Annotation-Syntax wird verwendet.
+- Ruff `FA102` dient als statisches Teil-Gate für Type-Annotation-
+  Kompatibilität. Die Regel erkennt insbesondere PEP-604-/PEP-585-
+  Annotationen, die bei einer Unterstützung von Python 3.9 problematisch
+  sein können. `FA102` ersetzt nicht den tatsächlichen Python-3.9-CI-Lauf.
+- Die GitHub Actions testen den Code unter Python 3.9 und Python 3.13.
+
+
 ## Zielsysteme
 
 LoggerPi und OtterPi verwenden bewusst ihre vorhandenen nativen
@@ -185,23 +218,6 @@ Aktueller Stand:
 - Architektur: ARM64 (`aarch64`)
 - System-Python: Python 3.13.5
 
-## Python-Kompatibilitätsstrategie
-
-LoggerPi und OtterPi müssen nicht dieselbe Python-Version verwenden.
-
-Die Kommunikation zwischen beiden Systemen erfolgt über den
-versionierten HTTP-/JSON-Contract und nicht über eine gemeinsame
-Python-Laufzeitumgebung.
-
-Der neue Anwendungscode soll zunächst möglichst mit der vorhandenen
-Python-3.9-Umgebung des LoggerPi kompatibel sein.
-
-Python 3.9 ist allerdings bereits End-of-Life und soll deshalb nicht
-automatisch als langfristige Entwicklungsbasis festgelegt werden.
-
-Die endgültige Python-Kompatibilitätsanforderung bleibt offen, bis die
-benötigten Abhängigkeiten und die tatsächlichen Laufzeitanforderungen
-geprüft wurden.
 
 ## Grundsätze für die Zielsysteme
 

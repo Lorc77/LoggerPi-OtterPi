@@ -100,7 +100,7 @@ bestehenden Umgebung eingeführt.
 
 ## DEC-006 — Python 3.13.15 für die Windows-Entwicklung
 
-**Status:** Vorgeschlagen
+**Status:** Angenommen
 
 Python 3.13.15 ist die derzeit vorgesehene Python-Version für den
 Windows-Entwicklungsrechner.
@@ -245,7 +245,7 @@ und werden nicht auf LoggerPi oder OtterPi vorausgesetzt.
 
 Für die Entwicklungsumgebung gelten derzeit folgende Versionsbereiche:
 
-- `pytest >=9.1.1,<10`
+- `pytest >=8.4,<9`
 - `ruff >=0.16.5,<0.17`
 
 Die konkret auf dem Entwicklungsrechner installierten Versionen können
@@ -286,6 +286,54 @@ Runtime-Kompatibilität berücksichtigt.
 - Die Python-Kompatibilität der Anwendung bleibt eine separate
   Architekturentscheidung und wird nicht durch die Versionen von pytest
   oder Ruff festgelegt.
+
+---
+
+## DEC-013 — Python-Kompatibilität und Quality Gates
+
+**Status:** Accepted
+**Datum:** 2026-08-30
+
+### Kontext
+
+LoggerPi-OtterPi soll aktuell mindestens mit Python 3.9 kompatibel bleiben, während die lokale Entwicklung derzeit mit Python 3.13 erfolgt.
+
+Ein ausschließlich unter Python 3.13 ausgeführter Testlauf kann jedoch Python-3.9-Inkompatibilitäten übersehen.
+
+Genau dies ist bereits bei Type-Annotationen mit PEP-604-Syntax (`str | None`, `str | Path`) aufgetreten.
+
+### Entscheidung
+
+Python 3.9 bleibt derzeit die minimale unterstützte Python-Version.
+
+Die Kompatibilität wird auf mehreren Ebenen abgesichert:
+
+- `requires-python = ">=3.9"` definiert die minimale Version.
+- Ruff verwendet `target-version = "py39"`.
+- Ruff prüft zusätzlich mit `FA102` auf problematische Type-Annotationen.
+- Für Type-Annotationen wird grundsätzlich Python-3.9-kompatible Syntax verwendet.
+- `from __future__ import annotations` wird nicht pauschal als Lösung verwendet, um neuere Annotation-Syntax unter Python 3.9 zu ermöglichen.
+- Die CI testet den Code sowohl unter Python 3.9 als auch unter Python 3.13.
+- Lokale Entwicklung verwendet Python 3.13 in der projektlokalen `.venv`.
+- `FA102` wird dabei ausdrücklich als statisches Teil-Gate für
+  Type-Annotation-Kompatibilität verstanden und nicht als vollständiger
+  Python-3.9-Kompatibilitätstest.
+
+### Begründung
+
+Die Kombination aus statischer Analyse und tatsächlicher Ausführung unter der minimal unterstützten Python-Version verhindert, dass Kompatibilitätsprobleme ausschließlich durch einen Wechsel des lokalen Interpreters unbemerkt bleiben.
+
+Die klassische Python-3.9-Type-Annotation-Syntax mit `Optional` und `Union` wurde bewusst gewählt, weil sie ohne zusätzliche Laufzeitsemantik unmittelbar mit der minimal unterstützten Version kompatibel ist.
+
+`from __future__ import annotations` ist nicht grundsätzlich abzulehnen, wird für diesen Zweck aber nicht als Standardmechanismus des Projekts verwendet.
+
+### Konsequenz
+
+Eine erfolgreiche lokale Test-Suite unter Python 3.13 ist nicht ausreichend.
+
+Vor einem Commit müssen die lokalen Quality Gates erfolgreich sein. Vor dem Zusammenführen einer Änderung müssen außerdem die Python-3.9- und Python-3.13-CI-Läufe erfolgreich sein.
+
+Die konkreten Entwicklungs- und Prüfregeln sind in `docs/development/DEVELOPMENT-QUALITY.md` dokumentiert.
 
 ---
 

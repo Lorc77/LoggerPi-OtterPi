@@ -25,6 +25,7 @@ line-length = 100
 target-version = "py39"
 exclude = [
     "docs/legacy",
+    "docs/development/DEVELOPMENT-QUALITY.md",
 ]
 
 [tool.ruff.lint]
