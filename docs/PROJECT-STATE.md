@@ -688,6 +688,15 @@ erhalten.
 Ablösung der Legacy-Anwendung wird geprüft, ob `rc-local.service` aus dem
 Modell entfernt werden kann.
 
+### Aktueller nächster Schritt
+
+AtmoWEB als bereits implementierte konkrete Datenquelle vollständig
+in den bestehenden Core-Batch-/Queue-/HTTP-Delivery-Pfad integrieren
+und den daraus entstehenden vertikalen E2E-Datenpfad auf dem LoggerPi
+praktisch verifizieren.
+
+Danach werden weitere konkrete Datenquellen schrittweise ergänzt.
+
 ## Aktueller technischer Stand
 
 Die folgenden Designschritte sind abgeschlossen und committed:
@@ -946,8 +955,9 @@ Batch bleibt in Queue
     ↓
 späterer erneuter Zustellversuch
 
-Der vollständige reale Datenpfad ist noch nicht abgeschlossen, weil die
-konkrete LoggerPi-Datenerfassung noch aussteht.
+Der vollständige reale Datenpfad ist noch nicht abgeschlossen, weil neben
+den bereits angebundenen AtmoWEB-Daten weitere konkrete LoggerPi-Datenquellen
+und deren Integration in den vollständigen Laufzeitpfad noch ausstehen.
 
 Der nächste fachlich sinnvolle Schritt ist daher nicht eine weitere
 generische Batch- oder Measurement-Abstraktion, sondern die Anbindung
@@ -1005,28 +1015,84 @@ Insbesondere wird nicht erneut gebaut:
 Die bestehenden Reader und das bestehende Batch-Modell sind für den
 nächsten Implementierungsschritt zu verwenden.
 
+## Implementierungsstand: AtmoWEB
+
+Die AtmoWEB-Anbindung ist als konkreter externer Reader implementiert:
+
+src/loggerpi_otterpi/atmoweb.py
+
+Der Reader übernimmt:
+
+- AtmoWEB-Geräteidentifikation
+- Auslesen der AtmoWEB-Messwerte
+- Mapping von Temperatur
+- Mapping von Feuchte
+- Mapping von Vakuum
+- Mapping der optionalen CO₂-, O₂- und Lüfterwerte
+- Mapping von Gerätezuständen
+- Mapping des Betriebsmodus
+- Behandlung von `N/A`
+- Behandlung von `N/D`
+- Validierung und Normalisierung des AtmoWEB-Zeitstempels
+- Behandlung ungültiger bzw. nicht numerischer Werte
+
+Die herstellerspezifischen AtmoWEB-Feldnamen werden dabei nicht in das
+gemeinsame Data Model übernommen.
+
+Die AtmoWEB-Gerätekonfiguration ist separat gehalten:
+
+src/loggerpi_otterpi/atmoweb_config.py
+
+Damit bleiben Reader-Logik und gerätespezifische Konfiguration getrennt.
+
+Die derzeit bekannte AtmoWEB-Gerätekonfiguration wird dort zentral
+definiert und kann unabhängig vom Reader erweitert werden.
+
+Die AtmoWEB-Zustände und Betriebsinformationen werden derzeit technisch
+erfasst und in die gemeinsamen Strukturen übersetzt.
+
+Eine endgültige Entscheidung über Change Detection und darüber, welche
+States bzw. Operations nur bei Änderung übertragen werden, ist noch nicht
+getroffen. Der Reader trifft diese fachliche Transportentscheidung daher
+nicht.
+
 ### Nächster Implementierungsschritt
 
-Der nächste Schritt ist jetzt der **vertikale End-to-End-Datenpfad**.
+Der vertikale End-to-End-Datenpfad wird jetzt schrittweise mit konkreten
+realen LoggerPi-Datenquellen erweitert.
 
-Dabei wird eine bereits vorhandene konkrete Datenquelle durch den
-bestehenden technischen Pfad geführt:
+Als erste konkrete externe Datenquelle wurde AtmoWEB angebunden.
 
-```text
+Der AtmoWEB-Reader übernimmt die herstellerspezifische Kommunikation und
+übersetzt die AtmoWEB-Werte in das gemeinsame Measurement-Modell.
+
+Die Architektur bleibt:
+
 konkrete Datenquelle
-        ↓
-bestehender Reader / Adapter
-        ↓
-Measurement bzw. vorhandene Systemdaten
-        ↓
+    ↓
+konkreter Adapter / Reader
+    ↓
+Measurement
+    ↓
 Batch
-        ↓
+    ↓
 persistente Queue
-        ↓
+    ↓
 HTTP Delivery
-        ↓
+    ↓
 OtterPi
-```
+
+Die AtmoWEB-Gerätekonfiguration ist separat vom Reader gehalten und enthält
+die Zuordnung der bekannten AtmoWEB-Geräte.
+
+Die Change-Detection-Architektur für States und Operations ist noch nicht
+finalisiert. Der AtmoWEB-Reader liefert deshalb zunächst die technischen
+Zustände und Betriebsinformationen; die Entscheidung, welche dieser Werte
+später nur bei Änderung übertragen werden, bleibt Bestandteil des noch
+offenen Change-Detection-/Batch-Designs.
+
+Als nächstes wird der AtmoWEB-Pfad in den bestehenden Batch-/Queue-/Delivery-
+Pfad integriert und anschließend gegen den realen LoggerPi-Betrieb geprüft.
 
 Der nächste Arbeitsschritt ist daher **nicht** die erneute Implementierung
 von System-, Memory-, CPU- oder Load-Daten.
@@ -1046,7 +1112,7 @@ abgesichert.
 
 Derzeit bestehen:
 
-31 Tests
+38 Tests
 
 Alle Tests bestehen.
 
@@ -1073,6 +1139,12 @@ Abgedeckt sind insbesondere:
   * CPU-Temperatur
   * Integration von `system` und `memory` in den Batch
   * E2E-Pfad von Batch-Erzeugung über Queue bis HTTP-Delivery
+  * AtmoWEB-Geräteidentifikation
+  * AtmoWEB-Messwert-Mapping
+  * AtmoWEB-Validity-Mapping
+  * AtmoWEB-State-Mapping
+  * AtmoWEB-Fehlerbehandlung
+  * AtmoWEB-Gerätekonfiguration
 
 Zusätzlich gilt:
 
