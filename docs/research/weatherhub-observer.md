@@ -3,43 +3,45 @@
 ## Status
 
 **Subprojekt:** WeatherHub Observer  
-**Stand:** 2026-08-15  
-**Status:** Technischer Datenkanal gefunden, Binärformat teilweise dekodiert  
-**Nächster Schritt:** Timestamp-Feld identifizieren und anschließend einen reproduzierbaren automatisierten Abruf bauen.
+**Stand:** 2026-09-02  
+**Status:** Authentifizierter Datenabruf reproduzierbar, SparkLineChartData dekodiert, Datenstruktur für mehrere Sensortypen untersucht  
+**Nächster Schritt:** Login, Sensorliste und automatisierten 19-Sensor-Abruf als robuste Komponente zusammenführen.
 
 Dieses Dokument beschreibt die technische Untersuchung des proprietären
-WeatherHub-/Observer-Datenkanals.
+WeatherHub-/Observer-Datenkanals sowie den inzwischen reproduzierbaren
+automatisierten Datenabruf.
 
-Die Untersuchung ist zunächst vom eigentlichen LoggerPi-/OtterPi-Core
-getrennt. Eine spätere Integration als LoggerPi-Adapter ist möglich, wenn
-der direkte Zugriff reproduzierbar und ausreichend stabil umgesetzt werden
-kann.
+Die Untersuchung ist vom eigentlichen LoggerPi-/OtterPi-Core getrennt.
+WeatherHub-spezifische Strukturen sollen ausschließlich im WeatherHub-Adapter
+behandelt werden.
 
 ---
 
 ## 1. Ziel
 
 Untersucht wird, ob sich die Daten der vorhandenen WeatherHub-/Observer-
-Sensoren automatisiert abrufen und später über einen LoggerPi-Adapter in das
-gemeinsame Data Model übernehmen lassen.
+Sensoren automatisiert abrufen und anschließend über einen WeatherHub-Adapter
+in das gemeinsame LoggerPi Data Model übernehmen lassen.
 
-Im Bestand befinden sich 19 Sensoren, überwiegend des untersuchten Typs,
-sowie mindestens ein weiterer Sensortyp.
+Im Bestand befinden sich derzeit 19 Sensoren.
 
 Ziel ist ausdrücklich nicht, WeatherHub-spezifische Strukturen in das
 allgemeine Data Model zu übernehmen.
 
-Bei erfolgreicher Integration soll die Architektur grundsätzlich sein:
+Die geplante Architektur ist:
 
-    WeatherHub
+    WeatherHub Observer
         ↓
-    WeatherHub-Adapter
+    WeatherHub Adapter
         ↓
     gemeinsames LoggerPi Data Model
         ↓
     Core Batch
         ↓
     OtterPi
+
+Der WeatherHub-Adapter soll die komplette proprietäre Kommunikation und
+Dekodierung kapseln.
 
 ---
 
@@ -61,13 +63,13 @@ Vereinfachter Datenweg:
 Eine offensichtliche öffentliche API zum direkten Abruf war zunächst nicht
 auffindbar.
 
-Die Plattform bietet einen CSV-Export. Dieser war für die Untersuchung
-zunächst nur manuell über die Weboberfläche nutzbar und daher für einen
-späteren automatisierten LoggerPi-Betrieb unpraktisch.
+Die Webplattform stellt unter anderem Diagramm- und CSV-Funktionen bereit.
+Für einen automatisierten LoggerPi-/OtterPi-Betrieb ist eine direkte
+Reproduktion der vom Browser verwendeten Requests jedoch wesentlich
+interessanter als ein manueller Export.
 
-Die entscheidende Untersuchungsmethode war deshalb, die von der
-Weboberfläche selbst verwendeten Requests mit den Browser Developer Tools
-zu untersuchen.
+Die Untersuchung wurde deshalb über die Browser Developer Tools und
+anschließende Reproduktion mit PowerShell durchgeführt.
 
 ---
 
@@ -77,445 +79,1760 @@ zu untersuchen.
 
 **Werkzeug:** Firefox Developer Tools → Network
 
-Beim Öffnen bzw. Anzeigen des Sensor-Diagramms wurde folgender Request
-identifiziert:
+Bei der Untersuchung der Weboberfläche wurden mehrere relevante Requests
+identifiziert.
+
+Dabei sind zwei Datenpfade zu unterscheiden:
+
+### 3.1 Sensor-Detailseite / ChartData
+
+Beim Öffnen eines Sensor-Diagramms wurde folgender Endpoint beobachtet:
 
     POST https://www.wh-observer.de/DeviceDetails/ChartData
 
+Dieser Endpoint liefert einen größeren Datenbestand für die
+Diagrammdarstellung.
+
 Beobachtete Eigenschaften:
 
-- HTTP/1.1 200 OK
+- HTTP `200 OK`
 - Request Content-Type: `application/json; charset=utf-8`
 - Response Content-Type: `application/text; charset=utf-8`
-- Server: Microsoft-IIS/10.0
-- ASP.NET
-- ASP.NET MVC 5.2
+- Microsoft IIS / ASP.NET
+- ASP.NET MVC
 - `X-Requested-With: XMLHttpRequest`
 
-Damit ist bewiesen, dass die Weboberfläche einen konkreten
-`ChartData`-Endpoint zur Abfrage der Diagrammdaten verwendet.
+Die Response kann deutlich größer sein als die Sparkline-Responses und
+wurde während der Untersuchung mit ungefähr 168 KiB beobachtet.
 
----
+Dieser Endpoint ist deshalb von dem später identifizierten
+`SparkLineChartData`-Endpoint zu unterscheiden.
 
-## 4. Request
+### 3.2 Dashboard / SparkLineChartData
 
-Der Browser sendet JSON.
+Auf der Dashboard-/Übersichtsseite werden für die vorhandenen Sensoren
+offenbar jeweils einzelne Requests ausgeführt:
+
+    POST https://www.wh-observer.de/Devices/SparkLineChartData
 
 Beispiel:
 
     {
-      "deviceID": "XYZ",
-      "from": "01.08.2026",
-      "to": "01.09.2026",
-      "detailLevel": "month"
+      "deviceID": "016783F33A2A"
     }
 
-Beobachtete Parameter:
-
-| Feld | Bedeutung |
-|---|---|
-| `deviceID` | Sensor-/Gerätekennung |
-| `from` | Startdatum |
-| `to` | Enddatum |
-| `detailLevel` | gewünschte Detailstufe |
-
-Die genaue Bedeutung und alle zulässigen `detailLevel`-Werte sind noch
-nicht vollständig untersucht.
+Dieser Endpoint ist für den geplanten periodischen OtterPi-Abruf besonders
+interessant, da er pro Sensor eine kompakte aktuelle Diagramm-/Status-
+Payload liefert.
 
 ---
 
-## 5. Authentifizierung
+## 4. Entscheidende Erkenntnis: Authentifizierung
 
-Der Browser verwendet eine authentifizierte Session.
+Der WeatherHub-Observer-Datenkanal ist nicht einfach eine öffentliche,
+unauthentifizierte HTTP-API.
 
-Unter anderem wurde ein `.ASPXAUTH`-Cookie beobachtet.
+Der Zugriff auf `SparkLineChartData` wurde mit und ohne authentifizierte
+Session getestet.
 
-Außerdem wurden folgende Cookies beobachtet:
+### Ohne funktionierende Session
+
+Der Request führte zu:
+
+    HTTP/1.1 500 Internal Server Error
+
+mit einer HTML-Fehlerseite:
+
+    <h1>Error.</h1>
+    <h2>An error occurred while processing your request.</h2>
+
+Das ist kein Beweis dafür, dass der Endpoint selbst defekt ist.
+
+Der entscheidende Gegenversuch wurde mit einer über den Login aufgebauten
+PowerShell-WebSession durchgeführt.
+
+### Mit authentifizierter Session
+
+Derselbe Endpoint wurde mit:
+
+    -WebSession $session
+
+aufgerufen.
+
+Ergebnis:
+
+    StatusCode        : 200
+    StatusDescription : OK
+    Content-Length    : 2944
+    Content-Type      : application/text; charset=utf-8
+
+Damit ist reproduzierbar bewiesen:
+
+> `POST /Devices/SparkLineChartData` funktioniert mit einer gültigen
+> authentifizierten Session.
+
+---
+
+## 5. Login
+
+Der Login erfolgt über:
+
+    POST https://www.wh-observer.de/Account/LogOn
+
+Request Content-Type:
+
+    application/x-www-form-urlencoded
+
+Der relevante Form-Body enthält:
+
+    ResendActivationMail=
+    &ErrorMessage=
+    &Lang=de
+    &Username=<USERNAME>
+    &Password=<PASSWORD>
+
+Die tatsächlichen Zugangsdaten werden niemals in Dokumentation,
+Versionskontrolle oder Logs gespeichert.
+
+Für einen automatisierten Client sollen die Zugangsdaten über eine geeignete
+lokale Konfiguration bzw. Secret-Verwaltung bereitgestellt werden.
+
+---
+
+## 6. Authentifizierte PowerShell-WebSession
+
+Der funktionierende Mechanismus verwendet eine gemeinsame:
+
+    $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+
+Diese Session wird zunächst für den Login verwendet.
+
+Anschließend wird dieselbe Session für alle weiteren Requests verwendet:
+
+    -WebSession $session
+
+Dadurch verwaltet PowerShell die vom Server gesetzten Cookies automatisch.
+
+Der Ablauf ist:
+
+    Login
+      ↓
+    $session
+      ↓
+    authentifizierte Cookies
+      ↓
+    /Devices
+      ↓
+    SparkLineChartData
+
+Es ist ausdrücklich nicht notwendig, für jeden Sensor einen neuen Login
+durchzuführen.
+
+---
+
+## 7. Relevante Session-Cookies
+
+In der funktionierenden Session wurden unter anderem folgende Cookies
+beobachtet:
 
 - `ARRAffinity`
 - `ARRAffinitySameSite`
+- `.ASPXAUTH`
 
-Daraus folgt:
+Insbesondere `.ASPXAUTH` ist das relevante Authentifizierungs-Cookie.
 
-Der gefundene `ChartData`-Endpoint ist nicht als öffentliche,
-unauthentifizierte API anzusehen.
+Die konkreten Werte werden nicht dokumentiert und nicht gespeichert.
 
-Bewiesen ist derzeit nur:
+Beispiel:
 
-> Ein eingeloggter Browser kann den Endpoint erfolgreich verwenden.
+    ARRAffinity = [REDACTED]
+    ARRAffinitySameSite = [REDACTED]
+    .ASPXAUTH = [REDACTED]
 
-Noch offen ist:
+Die wichtige Erkenntnis ist nicht der Cookie-Wert selbst, sondern:
 
-> Ob ein LoggerPi den Endpoint mit einer reproduzierbaren Login-/Session-
-> Logik automatisiert nutzen kann.
+> Die Authentifizierung wird vom Server über die Session-/Cookie-Struktur
+> bereitgestellt und kann von PowerShell automatisch weitergeführt werden.
 
-**Wichtig:** Zugangsdaten, Session-Cookies oder sonstige Authentifizierungs-
-informationen werden nicht in die Projektdokumentation oder in
-Versionskontrolle übernommen.
+Manuelles Kopieren von Browser-Cookies ist daher für die spätere
+Implementierung nicht erforderlich.
 
 ---
 
-## 6. Response
+## 8. Login erfolgreich reproduziert
 
-Die Response ist nicht direkt lesbares JSON.
+Nach dem Login wurde mit derselben `$session` die Devices-Seite aufgerufen:
 
-Sie besteht aus einer langen Base64-Zeichenkette.
+    $devices = Invoke-WebRequest `
+        -UseBasicParsing `
+        -Uri "https://www.wh-observer.de/Devices" `
+        -Method GET `
+        -WebSession $session
+
+Ergebnis:
+
+    Devices HTTP: 200
+    URL: https://www.wh-observer.de/Devices
+
+Damit ist zusätzlich bewiesen, dass die PowerShell-Session nach dem Login
+tatsächlich als authentifizierte WebSession akzeptiert wird.
+
+Der erfolgreiche Ablauf ist damit:
+
+    POST /Account/LogOn
+          ↓
+    authentifizierte $session
+          ↓
+    GET /Devices
+          ↓
+    HTTP 200
+
+---
+
+## 9. SparkLineChartData
+
+Der für den automatisierten Dashboard-Abruf relevante Endpoint lautet:
+
+    POST https://www.wh-observer.de/Devices/SparkLineChartData
+
+Request:
+
+    POST /Devices/SparkLineChartData HTTP/1.1
+    Host: www.wh-observer.de
+    Content-Type: application/json
+    X-Requested-With: XMLHttpRequest
+    Origin: https://www.wh-observer.de
+    Referer: https://www.wh-observer.de/devices
+
+Body:
+
+    {"deviceID":"016783F33A2A"}
+
+Die Device-ID identifiziert den konkreten Sensor.
+
+---
+
+## 10. Browser-Request
+
+Der Browser verwendet sinngemäß einen Request dieser Form:
+
+    POST /Devices/SparkLineChartData HTTP/1.1
+    Host: www.wh-observer.de
+    User-Agent: Mozilla/5.0 ...
+    Accept: */*
+    Accept-Language: de,en-US;q=0.9,en;q=0.8
+    Accept-Encoding: gzip, deflate, br, zstd
+    Content-Type: application/json
+    X-Requested-With: XMLHttpRequest
+    Origin: https://www.wh-observer.de
+    Referer: https://www.wh-observer.de/devices
+    Cookie: ARRAffinity=...; ARRAffinitySameSite=...; .ASPXAUTH=...
+    Sec-Fetch-Dest: empty
+    Sec-Fetch-Mode: cors
+    Sec-Fetch-Site: same-origin
+
+    {"deviceID":"016783F33A2A"}
+
+Für PowerShell müssen jedoch nicht zwangsläufig sämtliche Browser-Header
+künstlich nachgebaut werden.
+
+Der erfolgreiche Test zeigt, dass insbesondere die authentifizierte Session
+entscheidend ist.
+
+---
+
+## 11. Reproduzierbarer PowerShell-Abruf
+
+Der entscheidende erfolgreiche Test war sinngemäß:
+
+    $response = Invoke-WebRequest `
+        -UseBasicParsing `
+        -Uri "https://www.wh-observer.de/Devices/SparkLineChartData" `
+        -Method "POST" `
+        -WebSession $session `
+        -UserAgent "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:153.0) Gecko/20100101 Firefox/153.0" `
+        -Headers @{
+            "Accept" = "*/*"
+            "Accept-Language" = "de,en-US;q=0.9,en;q=0.8"
+            "Accept-Encoding" = "gzip, deflate, br, zstd"
+            "X-Requested-With" = "XMLHttpRequest"
+            "Origin" = "https://www.wh-observer.de"
+            "Sec-GPC" = "1"
+            "Referer" = "https://www.wh-observer.de/devices"
+            "Sec-Fetch-Dest" = "empty"
+            "Sec-Fetch-Mode" = "cors"
+            "Sec-Fetch-Site" = "same-origin"
+        } `
+        -ContentType "application/json; charset=utf-8" `
+        -Body '{"deviceID":"016783F33A2A"}'
+
+Ergebnis:
+
+    StatusCode: 200
+    Content-Length: 2944
+
+Damit ist der grundlegende automatisierte Datenabruf reproduzierbar.
+
+---
+
+## 12. Response
+
+Die Response des `SparkLineChartData`-Endpoints ist kein JSON.
+
+Sie besteht aus Base64-kodierten Daten.
 
 Beispielanfang:
 
-    CuLFCgoLVGVtcGVyYXR1cmUSCQkAAIDtqft5QhISCQAAuDeq+3lCEWZmZmZmZjBA...
+    CswICgxUZW1wZXJhdHVyZTESEgkAAKD3wAB6QhGamZmZmZk0QBISCQCA5V7BAHpCEQAAAAAAgDRA...
 
-Die untersuchte Response hatte:
+Für den konkret getesteten Sensor:
 
-    614216 Zeichen
+    Device ID: 016783F33A2A
+    Response-Länge: 2944 Zeichen
+    Content-Length: 2944
 
-Die erste Base64-Dekodierung ergab:
+Die Base64-Eigenschaften wurden geprüft:
 
-    460660 Bytes
+    First char: C
+    Last char: =
+    Länge % 4: 0
+
+Damit ist die Response formal eine gültige Base64-Darstellung.
 
 ---
 
-## 7. Doppelte Base64-Kodierung
+## 13. Base64-Dekodierung
 
-Nach der ersten Dekodierung waren die resultierenden Bytes erneut als
-Base64-Text erkennbar.
+Die Response wird zunächst von Text in Binärdaten dekodiert:
 
-Die Prüfung ergab:
+    Base64
+        ↓
+    byte[]
 
-    $text2 -match '^[A-Za-z0-9+/=]+$'
+Der Decoder arbeitet direkt auf diesen Binärdaten.
 
-Ergebnis:
+Wichtig ist die Unterscheidung zwischen:
 
-    True
+    $response.Content
 
-Damit wurde eine zweite Base64-Dekodierung durchgeführt.
+und:
 
-Ergebnis:
+    $responseText
 
-    345493 Bytes
+Bei `Invoke-WebRequest` war `$response.Content` in der verwendeten
+PowerShell-Umgebung zunächst ein `System.Byte[]`.
 
-Die ersten Bytes lauteten:
+Deshalb funktionierte beispielsweise:
 
-    0A E2 C5 0A 0A 0B 54 65 6D 70 65 72 61 74 75 72 65 12 09 ...
+    $response.Content.Substring(...)
 
-Als ASCII ist unter anderem erkennbar:
+nicht.
 
-    Temperature
+Für weitere Verarbeitung muss der Inhalt sauber als Text bzw. Byte-Array
+behandelt werden.
 
-Damit ist der Datenweg reproduziert:
+---
+
+## 14. Response-Datei
+
+Eine Response wurde erfolgreich lokal gespeichert:
+
+    C:\Users\Lorc\WeatherHub\sparkline-016783F33A2A.txt
+
+Der direkte Schreibversuch nach:
+
+    C:\
+
+führte wegen fehlender Berechtigungen zu einem Fehler.
+
+Für weitere Tests soll deshalb ein beschreibbarer Arbeitsordner verwendet
+werden, beispielsweise:
+
+    $workDir = Join-Path $env:USERPROFILE "WeatherHub"
+
+    New-Item -ItemType Directory -Path $workDir -Force | Out-Null
+
+Anschließend können Response-Dateien beispielsweise unterhalb von:
+
+    C:\Users\<USER>\WeatherHub\
+
+gespeichert werden.
+
+---
+
+## 15. Abgrenzung zum größeren ChartData-Abruf
+
+Während der Untersuchung wurde zeitweise eine deutlich größere Response
+von ungefähr:
+
+    168 KiB
+    bzw. ca. 174 KB
+
+beobachtet.
+
+Diese Größe darf nicht mit einem einzelnen
+`SparkLineChartData`-Request gleichgesetzt werden.
+
+Der konkret getestete einzelne Request:
+
+    POST /Devices/SparkLineChartData
+    {"deviceID":"016783F33A2A"}
+
+liefert:
+
+    2944 Bytes
+
+Bei 19 Sensoren ergibt das überschlägig:
+
+    19 × 2944 = 55.936 Bytes
+
+also ungefähr:
+
+    54,6 KiB
+
+Die früher beobachtete Größenordnung von etwa 168 KiB stammt daher sehr
+wahrscheinlich aus einem anderen Datenabruf bzw. einer anderen Datenmenge.
+
+Die beiden Datenpfade müssen getrennt betrachtet werden:
+
+    Dashboard
+        ↓
+    19 × SparkLineChartData
+        ↓
+    kompakte Einzelresponses
+
+und:
+
+    Sensor-Detailseite
+        ↓
+    ChartData
+        ↓
+    größerer Datenbestand
+
+---
+
+## 16. Bereits reverse-engineerte Datenstruktur
+
+Der entscheidende Fortschritt gegenüber der ursprünglichen Untersuchung ist,
+dass die Response inzwischen nicht nur als „Base64-Daten“ erkannt wurde.
+
+Der Binärdatenstrom wurde byteweise analysiert.
+
+Dabei konnte eine strukturierte, protobuf-artige Nachrichtenstruktur
+rekonstruiert werden.
+
+Der aktuelle Decoder verwendet folgende logische Struktur:
+
+    ChartData
+      field 1 = Series (repeated ChartSeries)
+
+    ChartSeries
+      field 1  = SeriesID
+      field 2  = Datasets (repeated ChartDataset)
+      field 3  = LineColor
+      field 4  = FormattedTimestamp
+      field 5  = FormattedMeasurement
+      field 6  = ConnectionLost
+      field 7  = LowBattery
+      field 8  = AlertWasActive
+      field 9  = CardStatus
+      field 10 = AlertActive
+      field 11 = AlertSettingActive
+
+    ChartDataset
+      field 1  = Timestamp
+      field 2  = Value
+      field 3  = AlertIsActive
+      field 4  = Measurement
+      field 5  = Tooltip
+      field 6  = HiAlert
+      field 7  = HiStartEvent
+      field 8  = HiEndEvent
+      field 9  = HiSetting
+      field 10 = LoAlert
+      field 11 = LoStartEvent
+      field 12 = LoEndEvent
+      field 13 = LoSetting
+
+Die Struktur ist damit für den aktuell untersuchten Datenstrom weitgehend
+rekonstruiert.
+
+---
+
+## 17. Proto-Wire-Types
+
+Der Decoder berücksichtigt derzeit die folgenden Wire-Types:
+
+    0 = varint
+    1 = fixed64
+    2 = length-delimited
+    5 = fixed32
+
+Die relevanten Datentypen sind unter anderem:
+
+    string
+    bool
+    double
+    nested message
+
+Die Byte-Tags und die daraus resultierende Feldstruktur sind mit den
+beobachteten Payloads konsistent.
+
+Die Bezeichnung „protobuf-artig“ bleibt dennoch bewusst bestehen, solange
+keine originale `.proto`-Definition oder Server-Schemaquelle vorliegt.
+
+---
+
+## 18. Aktueller Decoder
+
+Der vorhandene PowerShell-Decoder kann:
+
+- Base64 einlesen
+- Binärdaten erzeugen
+- Varints lesen
+- Fixed64-/Double-Werte lesen
+- Length-delimited Felder lesen
+- UTF-8-Strings lesen
+- unbekannte Felder überspringen
+- `ChartData` dekodieren
+- `ChartSeries` dekodieren
+- `ChartDataset` dekodieren
+- Status-/Alert-Felder auswerten
+- mehrere Series erkennen
+- mehrere Datasets pro Series erkennen
+- Timestamp-Werte in eine lesbare Zeitdarstellung umwandeln
+
+Der Decoder ist damit bereits als eigenständige technische Komponente
+vorhanden.
+
+---
+
+## 19. Proto2-Semantik
+
+Ein wichtiger Punkt des Decoders ist die Behandlung optionaler Felder.
+
+Bei der untersuchten Struktur gilt konzeptionell:
+
+    absent != explicit false
+
+Das bedeutet:
+
+Ein nicht vorhandenes boolesches Feld darf nicht automatisch als
+explizit gesetztes `false` interpretiert werden.
+
+Der Decoder gibt deshalb nur Felder aus, die tatsächlich in der Payload
+vorhanden sind.
+
+Das ist insbesondere für Status- und Alert-Felder relevant.
+
+---
+
+## 20. ChartSeries – bekannte Felder
+
+Eine `ChartSeries` enthält derzeit folgende rekonstruierten Felder:
+
+| Feld | Typ | Bedeutung |
+|---:|---|---|
+| 1 | string | SeriesID |
+| 2 | message | Datasets |
+| 3 | string | LineColor |
+| 4 | string | FormattedTimestamp |
+| 5 | string | FormattedMeasurement |
+| 6 | bool | ConnectionLost |
+| 7 | bool | LowBattery |
+| 8 | bool | AlertWasActive |
+| 9 | string | CardStatus |
+| 10 | bool | AlertActive |
+| 11 | bool | AlertSettingActive |
+
+Die Felder `ConnectionLost` und `LowBattery` sind für die spätere
+Überwachung besonders interessant.
+
+---
+
+## 21. ChartDataset – bekannte Felder
+
+Ein `ChartDataset` enthält derzeit:
+
+| Feld | Typ | Bedeutung |
+|---:|---|---|
+| 1 | double | Timestamp |
+| 2 | double | Value |
+| 3 | bool | AlertIsActive |
+| 4 | message | Measurement |
+| 5 | string | Tooltip |
+| 6 | bool | HiAlert |
+| 7 | bool | HiStartEvent |
+| 8 | bool | HiEndEvent |
+| 9 | double | HiSetting |
+| 10 | bool | LoAlert |
+| 11 | bool | LoStartEvent |
+| 12 | bool | LoEndEvent |
+| 13 | double | LoSetting |
+
+Die Felder sind für den aktuellen Decoder bereits technisch abbildbar.
+
+Das Feld `Measurement` wird derzeit noch übersprungen und ist damit ein
+Kandidat für eine spätere Untersuchung.
+
+---
+
+## 22. Timestamp
+
+Der Timestamp ist inzwischen Bestandteil der rekonstruierten
+`ChartDataset`-Struktur:
+
+    field 1 = Timestamp
+    wire type = 1
+    representation = 64-bit double
+
+Der Decoder verwendet derzeit:
+
+    [DateTimeOffset]::FromUnixTimeMilliseconds(
+        [Int64]$ds.Timestamp
+    )
+
+Damit wird der Wert aktuell als Unix-Zeit in Millisekunden interpretiert.
+
+Die Verwendung dieser Zeitbasis ist mit den beobachteten Messdaten
+konsistent und wird im Decoder bereits praktisch verwendet.
+
+---
+
+## 23. Messwerte
+
+Das Feld:
+
+    ChartDataset.field 2
+
+wird als:
+
+    fixed64 / IEEE-754 double
+
+dekodiert.
+
+Damit können die Messwerte direkt als numerische Werte übernommen werden.
+
+Beispielhaft wurden bei der Untersuchung Temperaturwerte wie:
+
+    16.4
+    16.0
+    16.0
+    16.1
+    16.1
+
+dekodiert.
+
+Diese Werte sind für den untersuchten Sensor physikalisch plausibel.
+
+---
+
+## 24. Sensor- und Gerätetypen
+
+Während der Untersuchung wurden mehrere TFA-Sensortypen betrachtet.
+
+Bekannte Modelle:
+
+| Kat.-Nr. | ID-Typ | Bekannte Eigenschaften |
+|---|---:|---|
+| 30.3302.02 | 09 | interne Temperatur, Kabelfühler-Temperatur, Luftfeuchte, Batterie |
+| 30.3312.02 | 0E | Temperatur, Luftfeuchte |
+| 30.3313.02 | 01 | interne Temperatur, externe/Kabelfühler-Temperatur |
+| 30.3308.02 | 01 | interne Temperatur, externe/Kabelfühler-Temperatur |
+
+Die Funkintervalle der untersuchten Geräte liegen je nach Modell ungefähr
+bei 3½ bzw. 7 Minuten.
+
+Die exakten Sensorcharakteristika sollten für die spätere Implementierung
+nicht ausschließlich aus der Artikelnummer abgeleitet werden.
+
+---
+
+## 25. ID-Typ als Decoder-Konzept
+
+Eine wichtige Erkenntnis ist die Wiederverwendung desselben ID-Typs bei
+unterschiedlichen Artikelnummern.
+
+Beispielsweise:
+
+    30.3313.02 → ID-Typ 01
+    30.3308.02 → ID-Typ 01
+
+Daher sollte die spätere Architektur nicht primär:
+
+    Artikelnummer
+        ↓
+    Decoder
+
+verwenden.
+
+Sinnvoller ist:
+
+    ID-Typ
+        ↓
+    Payload-/Kanalstruktur
+        ↓
+    verfügbare Messkanäle
+
+Die konkrete Sensor-Konfiguration wird davon getrennt behandelt.
+
+Beispiel:
+
+    Device
+        ├── deviceID
+        ├── article/model
+        ├── idType
+        └── expected channels
+
+und:
+
+    Decoder
+        └── idType → payload structure
+
+---
+
+## 26. Für Monitoring relevante Daten
+
+Für das geplante OtterPi-Monitoring sind nicht alle Portalinformationen
+gleich wichtig.
+
+Die primär interessanten Daten sind:
+
+- Temperatur
+- Luftfeuchte
+- weitere vorhandene Messkanäle
+- Batterie-/Batteriestatus
+- Sensor-/Messfehler
+- Verbindungs-/Übertragungsstatus
+- Kanal-/Sensortyp
+- Timestamp
+
+Das WeatherHub-Portal selbst soll dabei nicht die eigentliche Alerting-Logik
+für den OtterPi übernehmen.
+
+Der OtterPi soll die Rohinformationen in einen eigenen Health-/Alert-State
+überführen.
+
+---
+
+## 27. Batterieüberwachung
+
+Der Decoder liefert auf `ChartSeries`-Ebene unter anderem:
+
+    LowBattery
+
+Damit kann der OtterPi einen eigenen Batterie-Status ableiten.
+
+Beispiel:
+
+    LowBattery = false
+        ↓
+    Batterie aktuell unauffällig
+
+    LowBattery = true
+        ↓
+    Battery warning
+
+Die genaue Alarmstrategie wird später im Monitoring-Core definiert.
+
+---
+
+## 28. Sensor-/Messfehler
+
+Ein wichtiger Status ist:
+
+    ConnectionLost
+
+Zusätzlich existieren auf Dataset-Ebene verschiedene Alert-/Statusfelder.
+
+Die spätere Monitoring-Logik soll zwischen unterschiedlichen Fehlerarten
+unterscheiden können.
+
+Beispiel:
+
+    Messwert vorhanden
+    + kein Fehlerstatus
+        ↓
+    Sensor OK
+
+gegen:
+
+    Messwert fehlt
+    oder
+    ConnectionLost = true
+        ↓
+    Sensor-/Kommunikationsproblem
+
+Die konkrete Health-State-Matrix ist noch als separates Engineering-Thema
+zu definieren.
+
+---
+
+## 29. Funk-/Übertragungsstatus
+
+Für die lokale Überwachung ist insbesondere die Unterscheidung zwischen:
+
+    Sensor misst nicht
+
+und:
+
+    Sensor misst,
+    aber die Datenübertragung funktioniert nicht
+
+interessant.
+
+`ConnectionLost` kann hierfür eine direkte Informationsquelle sein.
+
+Zusätzlich kann der OtterPi anhand des Alters des letzten gültigen
+Messpunkts selbst feststellen, ob ein Sensor über längere Zeit keine neuen
+Daten geliefert hat.
+
+Damit kann später beispielsweise zwischen:
+
+    OK
+    STALE
+    CONNECTION_LOST
+    SENSOR_ERROR
+    LOW_BATTERY
+
+unterschieden werden.
+
+Die endgültige Zustandslogik gehört jedoch in den Monitoring-/Core-Bereich
+und nicht in den WeatherHub-Decoder.
+
+---
+
+## 30. Kanal-/Sensortyp-Plausibilität
+
+Der rekonstruierte Datenstrom enthält genügend Informationen, um später
+auch Plausibilitätsprüfungen zu ermöglichen.
+
+Grundsätzlich:
+
+    Sensor-ID
+        ↓
+    ID-Typ
+        ↓
+    erwartete Kanäle
+        ↓
+    tatsächlich gelieferte Series
+        ↓
+    Plausibilitätsprüfung
+
+Damit kann beispielsweise erkannt werden:
+
+- erwarteter externer Fühler fehlt
+- unerwarteter Kanal erscheint
+- erwartete Measurement Series fehlt
+- Payload passt nicht zum erwarteten Sensortyp
+- Sensor-Konfiguration hat sich verändert
+
+Das ist für einen robusten Langzeitbetrieb wertvoll.
+
+---
+
+## 31. 19 Sensoren – geplanter Abruf
+
+Auf dem Dashboard befinden sich aktuell 19 Sensoren.
+
+Das beobachtete Verhalten entspricht:
+
+    Dashboard
+        ↓
+    Sensor 1 → SparkLineChartData
+    Sensor 2 → SparkLineChartData
+    Sensor 3 → SparkLineChartData
+    ...
+    Sensor 19 → SparkLineChartData
+
+Für den automatisierten Betrieb ist daher der folgende Ablauf geplant:
+
+    LOGIN
+      ↓
+    $session
+      ↓
+    Sensor-/Device-Liste
+      ↓
+    foreach deviceID
+      ↓
+    POST /Devices/SparkLineChartData
+      ↓
+    Base64
+      ↓
+    Decoder
+      ↓
+    gemeinsames Data Model
+
+---
+
+## 32. Kein Login pro Sensor
+
+Es ist ausdrücklich nicht notwendig, für jeden Sensor einen separaten
+Login durchzuführen.
+
+Die Session wird einmal aufgebaut:
+
+    LOGIN
+      ↓
+    $session
+
+Danach können alle Sensoren über dieselbe Session abgefragt werden:
+
+    Sensor 1
+    Sensor 2
+    Sensor 3
+    ...
+    Sensor 19
+
+Das reduziert die Zahl der Authentifizierungsvorgänge erheblich.
+
+---
+
+## 33. Session-Lebensdauer
+
+Die genaue Lebensdauer von `.ASPXAUTH` wurde noch nicht systematisch
+bestimmt.
+
+Für die erste robuste OtterPi-Version ist deshalb ein konservativer Ablauf
+sinnvoll:
+
+    Scheduler startet
+        ↓
+    Login
+        ↓
+    neue $session
+        ↓
+    Sensoren abrufen
+        ↓
+    Daten verarbeiten
+        ↓
+    Zyklus beendet
+
+Bei einem 15-Minuten-Intervall ist dieser Ansatz zunächst ausreichend.
+
+Eine spätere Optimierung kann eine Session-Wiederverwendung ermöglichen:
+
+    vorhandene Session
+        ↓
+    Request
+        ↓
+    Session weiterhin gültig
+        ↓
+    weiterverwenden
+
+oder bei erkennbarer Authentifizierungsproblematik:
+
+    401 / Login-Redirect / ungültige Session
+        ↓
+    neu einloggen
+        ↓
+    Request wiederholen
+
+Diese Optimierung ist nicht Teil des ersten stabilen Implementierungsschritts.
+
+---
+
+## 34. Geplanter Abrufintervall
+
+Für das OtterPi-Monitoring genügt ein Abruf ungefähr alle:
+
+    15 Minuten
+
+Die Sensoren selbst übertragen je nach Modell wesentlich häufiger.
+
+Der OtterPi muss daher nicht jeden einzelnen Sensor-Übertragungszyklus
+mitverfolgen.
+
+Der 15-Minuten-Abruf dient der lokalen Überwachung und Statusbewertung.
+
+---
+
+## 35. PowerShell-Spezialproblem
+
+Bei `Invoke-WebRequest` trat in der verwendeten PowerShell-Umgebung
+zunächst eine Sicherheits-/Parsing-Warnung auf.
+
+Die verwendete Lösung ist:
+
+    -UseBasicParsing
+
+Für die reproduzierbare PowerShell-Implementierung sollte deshalb
+konsequent verwendet werden:
+
+    Invoke-WebRequest -UseBasicParsing
+
+---
+
+## 36. Frühere curl-Problematik
+
+Frühe Tests mit `curl.exe` lieferten unter anderem:
+
+    curl exit code: 3
+
+ohne erwartete Response-Datei.
+
+Das war eine lokale Quoting-/Argument-Problematik und kein belastbarer
+Nachweis dafür, dass der Server den Request grundsätzlich ablehnt.
+
+Später konnte mit `curl.exe` zwar eine HTTP-500-Response sichtbar gemacht
+werden, der entscheidende erfolgreiche Test wurde jedoch mit:
+
+    Invoke-WebRequest
+    +
+    -WebSession $session
+
+durchgeführt.
+
+Für die weitere Entwicklung sollte deshalb zunächst PowerShell mit
+`WebRequestSession` verwendet werden.
+
+---
+
+## 37. Golden Path
+
+Der aktuell reproduzierbare technische Golden Path lautet:
+
+    WeatherHub Observer
+          │
+          ▼
+    POST /Account/LogOn
+          │
+          ▼
+    authentifizierte PowerShell-WebSession
+          │
+          ├── ARRAffinity
+          ├── ARRAffinitySameSite
+          └── .ASPXAUTH
+          │
+          ▼
+    GET /Devices
+          │
+          ▼
+    HTTP 200
+          │
+          ▼
+    Device-ID
+          │
+          ▼
+    POST /Devices/SparkLineChartData
+          │
+          ▼
+    HTTP 200
+          │
+          ▼
+    Base64-Response
+          │
+          ▼
+    Binärdaten
+          │
+          ▼
+    ChartData / ChartSeries / ChartDataset
+          │
+          ▼
+    Messwerte + Statusinformationen
+          │
+          ▼
+    gemeinsames LoggerPi Data Model
+
+Dieser Ablauf ist der derzeit wichtigste technische Baseline-Test.
+
+---
+
+## 38. Was inzwischen bewiesen ist
+
+Folgende Punkte sind praktisch reproduziert:
+
+1. WeatherHub Observer besitzt einen authentifizierten Webzugang.
+2. Der Login erfolgt über `POST /Account/LogOn`.
+3. PowerShell kann den Login reproduzierbar durchführen.
+4. Eine `WebRequestSession` kann die Authentifizierung weiterführen.
+5. `/Devices` liefert mit der authentifizierten Session HTTP 200.
+6. `POST /Devices/SparkLineChartData` funktioniert mit derselben Session.
+7. Ein einzelner Sparkline-Request liefert ungefähr 2,9 KiB Payload.
+8. Die Response ist Base64-kodiert.
+9. Die Base64-Daten lassen sich in Binärdaten zurückführen.
+10. Die Binärdaten besitzen eine protobuf-artige strukturierte Feldkodierung.
+11. `ChartData`, `ChartSeries` und `ChartDataset` konnten rekonstruiert werden.
+12. Timestamp und Value können dekodiert werden.
+13. Status-/Alert-Felder können dekodiert werden.
+14. Mindestens ID-Typ `0E` wurde praktisch getestet.
+15. Mindestens ID-Typ `01` wurde praktisch getestet.
+16. Mehrere TFA-Sensorfamilien konnten der Untersuchung zugeordnet werden.
+17. Die grundlegende Kette Login → Session → Sensorrequest → Decoder
+    funktioniert.
+
+Damit ist die Untersuchung vom reinen Reverse Engineering in eine
+Engineering-/Integrationsphase übergegangen.
+
+---
+
+## 39. Was noch nicht vollständig geklärt ist
+
+Trotz des weit fortgeschrittenen Standes sind einige Punkte weiterhin offen:
+
+- vollständige automatische Extraktion der Device-Liste
+- vollständige Zuordnung aller 19 Sensoren
+- vollständige Abdeckung aller vorkommenden ID-Typen
+- vollständige Bedeutung des `Measurement`-Nested-Messages
+- vollständige Bedeutung aller Statusfelder
+- exakte Session-Lebensdauer
+- Verhalten bei abgelaufener Session
+- Verhalten bei temporären HTTP-Fehlern
+- Verhalten bei einzelnen nicht erreichbaren Sensoren
+- mögliche Rate Limits
+- mögliche serverseitige Nutzungsbeschränkungen
+- langfristige Stabilität des Web-Endpoints
+- endgültige Health-State-Matrix für den OtterPi
+
+Diese Punkte sind jedoch keine grundlegende Blockade mehr für einen ersten
+automatisierten Abruf.
+
+---
+
+## 40. Sensorliste automatisch bestimmen
+
+Der nächste wichtige Engineering-Schritt ist die automatische Ermittlung
+der Device-IDs.
+
+Derzeit ist mindestens folgende Device-ID bekannt:
+
+    016783F33A2A
+
+Die spätere Implementierung soll nicht dauerhaft 19 IDs manuell im Code
+hinterlegen.
+
+Ziel:
+
+    GET /Devices
+        ↓
+    HTML / eingebettete Daten / JavaScript
+        ↓
+    Device-Liste
+        ↓
+    deviceID[]
+        ↓
+    SparkLineChartData
+
+Dabei soll zunächst untersucht werden, wo die Dashboard-Seite die IDs
+selbst bezieht.
+
+Mögliche Quellen sind:
+
+- HTML-Attribute
+- JavaScript-Objekte
+- eingebettete JSON-Daten
+- Links
+- Formulare
+- weitere Requests beim Seitenaufbau
+
+---
+
+## 41. Automatisierter 19-Sensor-Abruf
+
+Sobald die Device-Liste zuverlässig verfügbar ist, soll der Abruf
+konzeptionell ungefähr so aussehen:
+
+    foreach ($deviceID in $deviceIds) {
+
+        POST /Devices/SparkLineChartData
+            {"deviceID":"..."}
+
+        ↓
+
+        Base64
+            ↓
+        Decoder
+            ↓
+        normalisierte Messdaten
+    }
+
+Die Requests sollen dieselbe authentifizierte `$session` verwenden.
+
+Ein Fehler bei einem einzelnen Sensor darf dabei nicht automatisch den
+gesamten Zyklus abbrechen.
+
+Der Adapter soll pro Device einen eigenen Abruf-/Fehlerstatus erzeugen.
+
+---
+
+## 42. Speicherung
+
+Für die Entwicklung können Rohresponses zunächst getrennt gespeichert
+werden:
+
+    WeatherHub\
+        SparkLine\
+            <deviceID>.txt
+
+Für den produktiven Betrieb ist eine solche Rohdatenablage vermutlich nicht
+bei jedem Zyklus notwendig.
+
+Sinnvoller ist langfristig:
 
     HTTP Response
         ↓
+    Decoder
+        ↓
+    normalisierte Messdaten
+        ↓
+    LoggerPi Data Model
+        ↓
+    persistente Speicherung
+
+Rohpayloads können bei Debugging oder Fehlerfällen optional und zeitlich
+begrenzt gespeichert werden.
+
+---
+
+## 43. Decoder als eigenständige Komponente
+
+Der vorhandene Decoder soll nicht direkt mit HTTP oder Login vermischt
+werden.
+
+Sinnvolle Trennung:
+
+    WeatherHub Client
+        └── Login / Session / HTTP
+
+    WeatherHub Decoder
+        └── Base64 / Binary / Proto-Struktur
+
+    WeatherHub Adapter
+        └── Mapping auf gemeinsames Data Model
+
+Damit bleiben Netzwerkzugriff und Binärdekodierung unabhängig testbar.
+
+---
+
+## 44. Vorgesehene Adapterstruktur
+
+Konzeptionell:
+
+    WeatherHubClient
+        ├── Login()
+        ├── GetDevices()
+        └── GetSparkLineChartData(deviceID)
+
+    WeatherHubDecoder
+        ├── DecodeBase64()
+        ├── DecodeChartData()
+        ├── DecodeChartSeries()
+        └── DecodeChartDataset()
+
+    WeatherHubAdapter
+        ├── Fetch()
+        ├── Normalize()
+        └── Return Data Model
+
+Dadurch kann der Decoder mit gespeicherten Response-Dateien getestet werden,
+ohne jedes Mal den WeatherHub-Server aufzurufen.
+
+---
+
+## 45. Gemeinsames Data Model
+
+WeatherHub-spezifische Namen sollen nicht in den Core durchsickern.
+
+Beispielsweise soll aus:
+
+    ChartSeries
+    ChartDataset
+    LowBattery
+    ConnectionLost
+
+im Adapter ein neutrales Modell entstehen.
+
+Konzeptionell:
+
+    Sensor
+      ├── sensor_id
+      ├── timestamp
+      ├── measurements[]
+      └── health
+            ├── battery
+            ├── connection
+            ├── sensor_error
+            └── status
+
+Die genaue Struktur richtet sich nach dem bestehenden LoggerPi Data Model.
+
+---
+
+## 46. Monitoring-Logik
+
+Der WeatherHub-Adapter soll möglichst Rohinformationen und normalisierte
+Zustände liefern.
+
+Die eigentliche Alarmentscheidung gehört in den Monitoring-Core.
+
+Beispiel:
+
+    WeatherHub:
+        LowBattery = true
+
+        ↓
+
+    Adapter:
+        battery.status = "warning"
+
+        ↓
+
+    Core:
+        Alert: sensor battery low
+
+Ebenso:
+
+    ConnectionLost = true
+
+        ↓
+
+    Adapter:
+        connection.status = "lost"
+
+        ↓
+
+    Core:
+        Alert: sensor connection lost
+
+Dadurch bleibt WeatherHub nur eine Datenquelle unter mehreren möglichen
+Datenquellen.
+
+---
+
+## 47. Fehlerbehandlung
+
+Der produktive Adapter muss mindestens folgende Fälle behandeln:
+
+### Login-Fehler
+
+    Login
+      ↓
+    nicht authentifiziert
+      ↓
+    Zyklus schlägt kontrolliert fehl
+
+### Session-Ablauf
+
+    Request
+      ↓
+    Authentifizierung nicht mehr gültig
+      ↓
+    neu einloggen
+      ↓
+    Request wiederholen
+
+### Einzelner Sensor fehlerhaft
+
+    Sensor 7
+      ↓
+    HTTP-/Decode-Fehler
+
+Die anderen Sensoren sollen trotzdem verarbeitet werden.
+
+### Ungültige Payload
+
+    HTTP 200
+      ↓
+    Base64 ungültig
+      ↓
+    Decode-Fehler
+
+Dieser Fehler muss pro Sensor protokolliert werden.
+
+### Unbekannter ID-Typ
+
+    Device
+      ↓
+    unbekannte Payload-Struktur
+
+Der Adapter soll den Sensor nicht stillschweigend verwerfen, sondern einen
+klaren Decode-/Compatibility-Status erzeugen.
+
+---
+
+## 48. Logging
+
+Produktionslogs dürfen keine sensiblen Authentifizierungsinformationen
+enthalten.
+
+Insbesondere niemals loggen:
+
+- Username
+- Passwort
+- `.ASPXAUTH`
+- andere Session-Cookies
+- vollständige Authorization-Header
+
+Sinnvoll sind dagegen:
+
+    timestamp
+    deviceID
+    HTTP status
+    decode status
+    measurement count
+    last measurement timestamp
+    health state
+    error category
+
+Bei Debugging können Rohpayloads gezielt lokal gespeichert werden, sofern
+sie nicht unkontrolliert in ein Repository gelangen.
+
+---
+
+## 49. Sicherheit
+
+Die Zugangsdaten müssen außerhalb des Quellcodes gespeichert werden.
+
+Nicht in:
+
+    Git
+    Markdown
+    Logs
+    Beispielcode
+    Response-Dateien
+    Screenshots
+
+Die lokale Konfiguration soll stattdessen über eine geeignete
+Secret-/Credential-Quelle erfolgen.
+
+Auch echte `.ASPXAUTH`- oder andere Session-Cookie-Werte dürfen niemals in
+Repository-Dateien übernommen werden.
+
+---
+
+## 50. Teststrategie
+
+Die weitere Entwicklung sollte in Stufen erfolgen.
+
+### Test 1 – Login
+
+    Login
+      ↓
+    Session
+      ↓
+    /Devices = HTTP 200
+
+### Test 2 – ein Sensor
+
+    deviceID
+      ↓
+    SparkLineChartData
+      ↓
+    HTTP 200
+      ↓
     Base64
+      ↓
+    Decoder
+
+### Test 3 – mehrere Sensoren
+
+    deviceID[]
+      ↓
+    mehrere Requests
+      ↓
+    alle Responses dekodieren
+
+### Test 4 – alle 19 Sensoren
+
+    19 deviceIDs
+      ↓
+    19 Requests
+      ↓
+    19 Decodergebnisse
+
+### Test 5 – Fehlerfälle
+
+Gezielt testen:
+
+- ungültige Zugangsdaten
+- abgelaufene Session
+- ungültige Device-ID
+- HTTP-500-Response
+- ungültige Base64-Payload
+- unbekannte Payload-Struktur
+- einzelner nicht erreichbarer Sensor
+
+### Test 6 – Scheduler
+
+    alle 15 Minuten
+        ↓
+    vollständiger Abrufzyklus
+        ↓
+    persistente Daten
+        ↓
+    Monitoring
+
+---
+
+## 51. 15-Minuten-Scheduler
+
+Für den ersten produktiven Betrieb ist ein periodischer Prozess
+ausreichend:
+
+    ┌───────────────────────────────┐
+    │ alle 15 Minuten               │
+    └───────────────┬───────────────┘
+                    ↓
+                  Login
+                    ↓
+              Device-Liste
+                    ↓
+              Sensorabrufe
+                    ↓
+                 Decoder
+                    ↓
+              Normalisierung
+                    ↓
+              Data Model
+                    ↓
+             Monitoring/Storage
+                    ↓
+                  Ende
+
+Beim nächsten Zyklus wird zunächst wieder eine frische Session verwendet.
+
+---
+
+## 52. Spätere Optimierung: Session-Reuse
+
+Wenn der erste stabile Betrieb funktioniert, kann die Session-Wiederverwendung
+optimiert werden.
+
+Möglicher Ablauf:
+
+    vorhandene Session
+          ↓
+       Requests
+          ↓
+    Session gültig?
+       /       \
+     ja         nein
+     ↓           ↓
+  weiter      Login
+                ↓
+            neue Session
+
+Die Optimierung ist bewusst nachrangig.
+
+Robustheit hat Vorrang vor der Einsparung einzelner Login-Requests.
+
+---
+
+## 53. Aktueller technischer Baseline-Test
+
+Der derzeitige Baseline-Test lautet:
+
+    # Session
+    $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+
+    # Login
+    $login = Invoke-WebRequest `
+        -UseBasicParsing `
+        -Uri "https://www.wh-observer.de/Account/LogOn" `
+        -Method POST `
+        -WebSession $session `
+        ...
+
+    # Session prüfen
+    $devices = Invoke-WebRequest `
+        -UseBasicParsing `
+        -Uri "https://www.wh-observer.de/Devices" `
+        -Method GET `
+        -WebSession $session
+
+    # Sensordaten
+    $response = Invoke-WebRequest `
+        -UseBasicParsing `
+        -Uri "https://www.wh-observer.de/Devices/SparkLineChartData" `
+        -Method POST `
+        -WebSession $session `
+        -ContentType "application/json; charset=utf-8" `
+        -Body '{"deviceID":"016783F33A2A"}'
+
+Erwartetes Ergebnis:
+
+    Login       → erfolgreich
+    /Devices    → HTTP 200
+    Sparkline   → HTTP 200
+    Payload     → Base64
+    Decoder     → erfolgreich
+
+Dieser Test ist die aktuelle technische Referenz.
+
+---
+
+## 54. Reproduktionsmaterial
+
+Eine konkrete Sparkline-Response wurde lokal gespeichert unter:
+
+    C:\Users\Lorc\WeatherHub\sparkline-016783F33A2A.txt
+
+Solche Dateien können reale Sensorwerte enthalten und gehören deshalb
+nicht automatisch in das öffentliche Repository.
+
+Insbesondere dürfen keine Zugangsdaten oder Session-Cookies gespeichert
+werden.
+
+Für automatisierte Unit-/Regressionstests sollen möglichst bereinigte,
+nicht-sensitive Testproben verwendet werden.
+
+Die Decoderlogik kann mit solchen Fixtures unabhängig vom Live-Server
+getestet werden.
+
+---
+
+## 55. Status der ursprünglichen Untersuchung
+
+Die ursprüngliche Untersuchung ging von folgendem Stand aus:
+
+    Browser
+        ↓
+    ChartData
+        ↓
+    doppelte Base64-Dekodierung
+        ↓
+    unbekannte Binärstruktur
+        ↓
+    Timestamp noch offen
+
+Dieser Stand ist inzwischen überholt.
+
+Der aktuelle Stand ist:
+
+    Login
+        ↓
+    authentifizierte WebSession
+        ↓
+    /Devices
+        ↓
+    SparkLineChartData
         ↓
     Base64
         ↓
     Binärdaten
-
----
-
-## 8. Erste dekodierte Messreihen
-
-Eine ASCII-Suche innerhalb der dekodierten Binärdaten ergab unter anderem:
-
-    Temperature
-    Humidity
-
-sowie weitere technische bzw. formatbedingte Strings.
-
-Damit ist bewiesen, dass die dekodierten Binärdaten tatsächlich
-Messreihenbezeichnungen enthalten.
-
----
-
-## 9. Format-Hypothese
-
-Ein Ausschnitt des Datenanfangs:
-
-    0A E2 C5 0A
-    0A 0B
-    54 65 6D 70 65 72 61 74 75 72 65
-    12 09
-    09 00 00 80 ED A9 FB 79 42
-    12 12
-    09 00 00 B8 37 AA FB 79 42
-    11 66 66 66 66 66 66 30 40
-    12 12
-    09 00 00 04 55 AA FB 79 42
-    11 00 00 00 00 00 00 30 40
-
-Die Byte-Struktur weist deutliche Ähnlichkeiten mit Protocol Buffers bzw.
-einer protobuf-artigen Wire-Struktur auf.
-
-Insbesondere die Bytewerte
-
-    0A
-    12
-    09
-    11
-
-passen zu typischen Protobuf-Tags/Wire-Types.
-
-**Dies ist ausdrücklich nur eine Arbeitshypothese und noch kein
-abschließend bewiesenes Binärformat.**
-
----
-
-## 10. Messpunktstruktur
-
-Ein wiederkehrender Block hat beispielsweise die Form:
-
-    12 12
-    09 [8 Bytes]
-    11 [8 Bytes]
-
-Die Bedeutung des zweiten 8-Byte-Werts konnte experimentell bestätigt
-werden.
-
----
-
-## 11. Bestätigter Temperaturwert
-
-Bei einem untersuchten Messpunkt befindet sich das relevante
-8-Byte-Feld bei Offset 40.
-
-Die Dekodierung mit:
-
-    [BitConverter]::ToDouble($bytes2, 40)
-
-ergab:
-
-    16.4
-
-Damit ist für diesen untersuchten Datenpunkt bewiesen:
-
-- das betreffende Feld ist ein 64-Bit-Wert,
-- es kann als IEEE-754 Double dekodiert werden,
-- der daraus dekodierte Temperaturwert beträgt 16,4 °C.
-
-Weitere unmittelbar folgende Werte lagen beispielsweise bei:
-
-    16.4
-    16.0
-    16.0
-    16.1
-    16.1
-
-Die Werte sind für den untersuchten Sensor physikalisch plausibel.
-
----
-
-## 12. Aktuelle Rekonstruktion
-
-Die Struktur ist noch nicht vollständig formalisiert.
-
-Aktuelle Arbeitshypothese:
-
+        ↓
     ChartData
         ↓
+    ChartSeries
+        ↓
+    ChartDataset
+        ↓
+    Timestamp / Value / Status
+        ↓
+    normalisierbare Sensordaten
+
+Die Dokumentation wurde entsprechend von einer reinen Reverse-Engineering-
+Untersuchung zu einer technischen Integrationsdokumentation erweitert.
+
+---
+
+## 56. Aktueller Gesamtstand
+
+Der entscheidende Meilenstein ist erreicht:
+
+> Der relevante WeatherHub-Observer-Datenpfad ist praktisch reproduziert.
+
+Bewiesen ist die Kette:
+
+    Login
+      ↓
+    authentifizierte $session
+      ↓
+    /Devices
+      ↓
+    Device-ID
+      ↓
+    /Devices/SparkLineChartData
+      ↓
+    HTTP 200
+      ↓
     Base64
-        ↓
-    Base64
-        ↓
-    Binärstruktur
-        ↓
-    Measurement Series
-        ├── "Temperature"
-        │      ├── Measurement Point
-        │      │      ├── Feld 1 → 8-Byte-Wert
-        │      │      └── Feld 2 → 8-Byte-Double
-        │      │                       ↓
-        │      │                     16.4 °C
-        │      └── ...
-        │
-        ├── "Humidity"
-        └── ...
+      ↓
+    Binärdaten
+      ↓
+    vorhandener Decoder
+      ↓
+    Messwerte + Statusinformationen
+
+Der nächste Entwicklungsabschnitt ist deshalb nicht mehr primär
+Reverse Engineering.
+
+Es geht jetzt um:
+
+- saubere Client-/Adapterstruktur
+- automatische Device-Liste
+- Abruf aller 19 Sensoren
+- robuste Fehlerbehandlung
+- generische ID-Typ-/Kanalbehandlung
+- Normalisierung in das gemeinsame Data Model
+- Persistenz
+- Scheduler
+- Monitoring und Alerting
 
 ---
 
-## 13. Noch ungeklärtes Feld
+## 57. Nächste konkrete Schritte
 
-Direkt vor einem bekannten Temperaturwert befindet sich beispielsweise:
+Die nächsten Schritte sollten in dieser Reihenfolge erfolgen:
 
-    09
-    00 00 B8 37 AA FB 79 42
-
-Das 8-Byte-Feld beginnt nach dem `09`.
-
-Es besteht die begründete Vermutung, dass dieses Feld den Timestamp des
-Messpunkts enthält.
-
-Das ist **noch nicht bewiesen**.
-
-Zu untersuchende Möglichkeiten sind unter anderem:
-
-- Unix Timestamp
-- Unix Milliseconds
-- JavaScript Timestamp
-- .NET-/OLE-artige Zeitbasis
-- proprietäre Zeitbasis
+1. Login in eine eigene Funktion kapseln.
+2. Authentifizierungsstatus zuverlässig prüfen.
+3. `/Devices` automatisch analysieren.
+4. alle Device-IDs aus der Seite bzw. ihren Datenquellen extrahieren.
+5. einen einzelnen Sensor über die ermittelte ID abrufen.
+6. alle 19 Sensoren mit derselben Session abrufen.
+7. jede Response separat dekodieren.
+8. ID-Typen automatisch erkennen bzw. zuordnen.
+9. Measurement Series und Kanäle normalisieren.
+10. Statusinformationen in ein neutrales Health-Modell überführen.
+11. Ergebnisse in das gemeinsame LoggerPi Data Model mappen.
+12. persistente Speicherung integrieren.
+13. 15-Minuten-Scheduler aufsetzen.
+14. Fehler-/Retry-Logik implementieren.
+15. anschließend Monitoring und Alerting auf dem OtterPi integrieren.
 
 ---
 
-## 14. Bewiesen
+## 58. Wiedereinstiegspunkt
 
-Aktuell als technisch reproduziert bzw. bestätigt gelten:
+Der aktuelle Wiedereinstiegspunkt ist ausdrücklich **nicht** mehr:
 
-- Die Weboberfläche verwendet `POST /DeviceDetails/ChartData`.
-- Der Request verwendet JSON.
-- Der Endpoint liefert die Diagrammdaten direkt.
-- Die untersuchte Response ist doppelt Base64-kodiert.
-- Nach der Dekodierung erhält man strukturierte Binärdaten.
-- Die Daten enthalten Messreihenbezeichnungen wie `Temperature` und
-  `Humidity`.
-- Temperaturdaten enthalten 64-Bit-Werte.
-- Ein konkreter Wert konnte bytegenau als `16.4 °C` dekodiert werden.
-- Der Datenkanal kann grundsätzlich außerhalb der reinen
-  Diagrammdarstellung untersucht werden.
+    Browser DevTools
+    Curl
+    Cookie manuell kopieren
+    Timestamp suchen
 
----
+Diese Schritte sind für den grundlegenden Datenzugriff bereits geklärt.
 
-## 15. Arbeitshypothesen
+Der aktuelle Ausgangspunkt lautet:
 
-Noch nicht endgültig bewiesen sind:
+> PowerShell-Login funktioniert.  
+> `$session` enthält die authentifizierte Session.  
+> `/Devices` liefert HTTP 200.  
+> `POST /Devices/SparkLineChartData` mit derselben Session liefert HTTP 200
+> und eine kompakte Base64-Payload.  
+> Die Payload kann dekodiert werden.  
+> Die `ChartData`-/`ChartSeries`-/`ChartDataset`-Struktur ist rekonstruiert.  
+> Timestamp, Value und relevante Statusfelder können bereits ausgelesen
+> werden.  
+> ID-Typ `0E` und ID-Typ `01` wurden praktisch untersucht.
 
-- protobuf-/protobuf-artige Binärstruktur
-- Bedeutung sämtlicher Felder
-- Zuordnung sämtlicher Wire-Tags
-- Struktur der einzelnen Measurement Points
-- Bedeutung des ersten 8-Byte-Feldes
+Damit ist WeatherHub Observer bereit für die nächste Phase:
 
----
-
-## 16. Noch offen
-
-- exaktes Binärformat
-- Timestamp-Format
-- vollständige Messpunktstruktur
-- alle verfügbaren Measurement-Typen
-- Login-/Session-Ablauf für einen automatisierten Client
-- Zuordnung der vorhandenen Sensoren
-- Unterschiede zwischen den vorhandenen Sensortypen
-- Stabilität des `ChartData`-Endpoints
-- Rate Limits bzw. mögliche Nutzungsbeschränkungen
-- Eignung des Web-Endpoints für einen dauerhaften LoggerPi-Betrieb
-
----
-
-## 17. Nächster Untersuchungsschritt
-
-Nicht wieder bei der Browser-Suche beginnen.
-
-Der relevante Endpoint und der grundlegende Datenweg sind bereits bekannt.
-
-Als nächstes:
-
-### Schritt 1
-
-Timestamp-Feld identifizieren.
-
-### Schritt 2
-
-Einen kleinen Decoder erstellen, der zunächst nur folgende Informationen
-extrahiert:
-
-    sensor
-    temperature
-    timestamp
-    value
-
-### Schritt 3
-
-Prüfen, ob weitere Measurement Series automatisch erkannt werden können,
-z. B.:
-
-    Temperature
-    Humidity
-    ...
-
-### Schritt 4
-
-Danach den Login-/Session-Ablauf untersuchen und prüfen, ob der Abruf ohne
-manuelle Browseraktion reproduzierbar durchgeführt werden kann.
-
-### Schritt 5
-
-Erst wenn diese Punkte funktionieren, die Integration als
-LoggerPi-Adapter bewerten.
-
----
-
-## 18. Geplante Integration
-
-Bei erfolgreichem direkten Zugriff soll WeatherHub nicht als Sonderfall in
-das allgemeine Data Model eingebaut werden.
-
-Stattdessen:
-
-    WeatherHub
-        ↓
-    WeatherHub Adapter
-        ↓
-    gemeinsames LoggerPi Data Model
-        ↓
-    Core Batch
-        ↓
+    Login + Session
+          ↓
+    automatische Device-Liste
+          ↓
+    19 Sensoren
+          ↓
+    SparkLineChartData
+          ↓
+    Decoder
+          ↓
+    Data Model
+          ↓
+    Storage
+          ↓
+    Monitoring
+          ↓
     OtterPi
-
-Der Adapter übernimmt insbesondere:
-
-- Authentication / Session
-- Abruf von `ChartData`
-- Base64-Dekodierung
-- Dekodierung des proprietären Binärformats
-- Erkennung der Messreihen
-- Timestamp-Konvertierung
-- Sensor-ID-Zuordnung
-- Übersetzung in das gemeinsame Data Model
-
-Der Rest der LoggerPi-Architektur soll nicht von der proprietären
-WeatherHub-Datenrepräsentation abhängig sein.
-
----
-
-## 19. Reproduktionsmaterial
-
-Die damalige Response wurde lokal als:
-
-    C:\chartdata.txt
-
-gespeichert.
-
-Diese Datei kann reale Sensorwerte enthalten und gehört daher nicht
-automatisch in das öffentliche Repository.
-
-Insbesondere dürfen keine Zugangsdaten, Session-Cookies oder sonstigen
-Authentifizierungsinformationen in Versionskontrolle übernommen werden.
-
-Die bisher verwendeten PowerShell-Dekodierungsschritte werden in diesem
-Dokument als Reproduktionsreferenz festgehalten.
-
-Für spätere automatisierte Tests soll möglichst eine bereinigte,
-nicht-sensitive Testprobe verwendet werden.
-
----
-
-## 20. Wiedereinstiegspunkt
-
-Der nächste Wiedereinstieg erfolgt bei:
-
-> **Timestamp-Feld des dekodierten Messpunkts identifizieren.**
-
-Danach:
-
-    Timestamp
-        ↓
-    kleiner Decoder
-        ↓
-    Temperature + Timestamp + Value
-        ↓
-    weitere Measurement Series
-        ↓
-    automatisierter ChartData-Abruf
-        ↓
-    WeatherHub LoggerPi Adapter
