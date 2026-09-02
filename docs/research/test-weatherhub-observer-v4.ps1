@@ -15,8 +15,8 @@ Write-Host "  $decoderPath"
 
 . $decoderPath
 
-if (-not (Get-Command Decode-WeatherHubBase64 -ErrorAction SilentlyContinue)) {
-    throw "Decode-WeatherHubBase64 wurde nach dem Laden des Decoders nicht gefunden."
+if (-not (Get-Command Convert-WeatherHubBase64 -ErrorAction SilentlyContinue)) {
+    throw "Convert-WeatherHubBase64 wurde nach dem Laden des Decoders nicht gefunden."
 }
 
 Write-Host "Decoder: OK"
@@ -205,7 +205,7 @@ Write-Host ""
 # Decode
 # ------------------------------------------------------------
 
-$chart = Decode-WeatherHubBase64 $b64
+$chart = Convert-WeatherHubBase64 $b64
 
 if ($null -eq $chart) {
     throw "Decoder lieferte NULL."

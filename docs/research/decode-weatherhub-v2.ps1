@@ -10,7 +10,7 @@
 #
 #   . .\decode-weatherhub-v2.ps1
 #
-#   $chart = Decode-WeatherHubBase64 $base64
+#   $chart = Convert-WeatherHubBase64 $base64
 #
 # The decoder can therefore be used by:
 #
@@ -718,7 +718,7 @@ function Read-WeatherHubMessage {
 # PUBLIC DECODER FUNCTION
 # ============================================================
 
-function Decode-WeatherHubBase64 {
+function Convert-WeatherHubBase64 {
     param(
         [Parameter(Mandatory=$true)]
         [string]$Base64
@@ -774,7 +774,7 @@ function Convert-WeatherHubTimestamp {
 # without making InputFile mandatory when the file is loaded.
 # ============================================================
 
-function Decode-WeatherHubFile {
+function Convert-WeatherHubFile {
     param(
         [Parameter(Mandatory=$true)]
         [string]$InputFile
@@ -782,5 +782,5 @@ function Decode-WeatherHubFile {
 
     $b64 = (Get-Content $InputFile -Raw).Trim()
 
-    return Decode-WeatherHubBase64 $b64
+    return Convert-WeatherHubBase64 $b64
 }

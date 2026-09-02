@@ -2101,7 +2101,7 @@ Die getestete Payload hatte eine Länge von 2676 Zeichen.
 
 Die Base64-Payload kann mit:
 
-    Decode-WeatherHubBase64
+    Convert-WeatherHubBase64
 
 aus `decode-weatherhub-v2.ps1` erfolgreich dekodiert werden.
 
@@ -2170,7 +2170,7 @@ Der derzeit verifizierte Datenfluss lautet:
     Base64
         |
         v
-    Decode-WeatherHubBase64
+    Convert-WeatherHubBase64
         |
         v
     ChartData
@@ -2430,7 +2430,7 @@ Es dient als Referenzimplementierung für den aktuell verifizierten Ablauf:
         ↓
     Base64-Payload
         ↓
-    Decode-WeatherHubBase64
+    Convert-WeatherHubBase64
         ↓
     dekodierte ChartData
 
