@@ -5,7 +5,8 @@
 **Subprojekt:** WeatherHub Observer  
 **Stand:** 2026-09-02  
 **Status:** Authentifizierter Datenabruf reproduzierbar, SparkLineChartData dekodiert, Datenstruktur für mehrere Sensortypen untersucht  
-**Nächster Schritt:** Login, Sensorliste und automatisierten 19-Sensor-Abruf als robuste Komponente zusammenführen.
+**Nächster Schritt:** Login, automatische Device Discovery und
+Sensorabruf als robuste Komponente zusammenführen.
 
 Dieses Dokument beschreibt die technische Untersuchung des proprietären
 WeatherHub-/Observer-Datenkanals sowie den inzwischen reproduzierbaren
@@ -14,6 +15,37 @@ automatisierten Datenabruf.
 Die Untersuchung ist vom eigentlichen LoggerPi-/OtterPi-Core getrennt.
 WeatherHub-spezifische Strukturen sollen ausschließlich im WeatherHub-Adapter
 behandelt werden.
+
+---
+
+## Reproduzierbares Testskript
+
+Das aktuell verwendeten Referenz-/Testskripte sind:
+
+Reproduktionsskript:
+    test-weatherhub-observer-v4.ps1
+
+Decoder:
+    decode-weatherhub-v2.ps1
+
+Das Skript enthält derzeit die technische Referenzimplementierung für:
+
+- Login via `/Account/LogOn`
+- Aufbau der `WebRequestSession`
+- Authentifizierungsprüfung über `/Devices`
+- Device Discovery
+- Abruf von `SparkLineChartData`
+- Base64-Dekodierung
+- Dekodierung von `ChartData`
+- Ausgabe von `ChartSeries` und `ChartDataset`
+
+Das Skript dient aktuell als technische Referenz und Regressionstest.
+
+Die produktive Implementierung soll die darin enthaltene Logik später in
+separate Komponenten (`WeatherHubClient`, `WeatherHubDecoder`,
+`WeatherHubAdapter`) überführen.
+
+Das Skript bleibt bis dahin als Golden-Path-Test erhalten.
 
 ---
 
@@ -1189,69 +1221,327 @@ automatisierten Abruf.
 
 ---
 
-## 40. Sensorliste automatisch bestimmen
+## 40. Automatische Device Discovery
 
-Der nächste wichtige Engineering-Schritt ist die automatische Ermittlung
-der Device-IDs.
+Die Device-Liste kann inzwischen direkt aus der authentifizierten
+`/Devices`-Seite ermittelt werden.
 
-Derzeit ist mindestens folgende Device-ID bekannt:
+Ein separater manueller Eintrag der 19 Device-IDs ist damit für den
+produktiven Abruf nicht erforderlich.
 
-    016783F33A2A
+Der erfolgreiche Ablauf ist:
 
-Die spätere Implementierung soll nicht dauerhaft 19 IDs manuell im Code
-hinterlegen.
-
-Ziel:
-
+    POST /Account/LogOn
+        ↓
+    authentifizierte WebRequestSession
+        ↓
     GET /Devices
         ↓
-    HTML / eingebettete Daten / JavaScript
+    HTML der Geräteübersicht
         ↓
-    Device-Liste
+    Device Discovery
         ↓
-    deviceID[]
+    deviceID + name
         ↓
     SparkLineChartData
 
-Dabei soll zunächst untersucht werden, wo die Dashboard-Seite die IDs
-selbst bezieht.
+Beim Test vom 02.09.2026 wurden insgesamt:
 
-Mögliche Quellen sind:
+    19 Devices
 
-- HTML-Attribute
-- JavaScript-Objekte
-- eingebettete JSON-Daten
-- Links
-- Formulare
-- weitere Requests beim Seitenaufbau
+aus der `/Devices`-Seite extrahiert.
+
+Damit ist die automatische Ermittlung der technischen Geräteidentitäten
+praktisch nachgewiesen.
+
+Die Device-ID wird als stabile technische Identität verwendet.
+
+Der Anzeigename wird dagegen als veränderliches Metadatum behandelt und
+bei jedem erfolgreichen Device-Abgleich aktualisiert.
 
 ---
 
-## 41. Automatisierter 19-Sensor-Abruf
+## 40.1 Device Discovery – aktueller Test
 
-Sobald die Device-Liste zuverlässig verfügbar ist, soll der Abruf
-konzeptionell ungefähr so aussehen:
+Der reproduzierbare Test verwendet:
 
-    foreach ($deviceID in $deviceIds) {
+    GET https://www.wh-observer.de/Devices
 
-        POST /Devices/SparkLineChartData
-            {"deviceID":"..."}
+mit der zuvor authentifizierten `$session`.
 
+Ergebnis:
+
+    Devices HTTP: 200
+    Devices URL : https://www.wh-observer.de/Devices
+    Authentication: OK
+
+Anschließend wird die HTML-Seite analysiert und die vorhandene Device-Liste
+ermittelt.
+
+Der Test vom 02.09.2026 ergab:
+
+    Devices gefunden: 19
+
+Die extrahierten Informationen bestehen mindestens aus:
+
+    DeviceId
+    Name
+
+Die technische ID wird anschließend direkt für den
+`SparkLineChartData`-Request verwendet.
+
+---
+
+## 40.2 Vollständige Device-Liste vom 02.09.2026
+
+Zum Zeitpunkt des Tests waren folgende 19 Geräte auf `/Devices` vorhanden:
+
+| # | Device ID | Name |
+|---:|---|---|
+| 1 | `0E74A4597B54` | R1304 - DryAger - 17 °C, 80% rH |
+| 2 | `016783F33A2A` | R1304 - DryAger - 17 °C, 80% rH |
+| 3 | `01651662457B` | R1304 - Barbadensis rechts - 24 °C - 12/12h LD |
+| 4 | `015A4FC910F4` | R1304 - Barbadensis links - 24 °C - 12/12h LD |
+| 5 | `0167554C25BE` | R1308 - Tardiculture 2 - unten - (18 °C) - 08:00-20:00 h "Day" |
+| 6 | `015E664F727F` | R1308 - Tardiculture 2 - oben - (18 °C) - 08:00-20:00 h "Day" |
+| 7 | `015EB583B95C` | R1308 - Tardiculture 1 - unten - (18 °C) - 08:00-20:00 h "Night" |
+| 8 | `015C32E3CED1` | R1308 - Tardiculture 1 - oben - (18 °C) - 08:00-20:00 h "Night" |
+| 9 | `015D087CA01C` | Liza left - 19 °C - 12/12h LD day / 8:00-20:00 h |
+| 10 | `0146471130BF` | Liza right - 19 °C - 12/12h LD night / 20:00-8:00 h |
+| 11 | `015F9410F3EB` | R1306 - Molekularlab - Kombi |
+| 12 | `017453BF9A79` | R1306 - Molekularlab - Tür |
+| 13 | `0106CAF71038` | R1306 - Molekularlab - Fenster |
+| 14 | `017262BF9016` | R1307 - Vorraum Kühlkammer |
+| 15 | `0167CE8A9AF4` | R1309 - RNA-lab - Freezer |
+| 16 | `010678C5AB4A` | R1310 - Histolab - Cryostat |
+| 17 | `017A5CD3FC1C` | R1311 - Immunolab - Antibody - Freezer |
+| 18 | `0101F89974E0` | R1311 - Immunolab - Antibody - Kühlschrank |
+| 19 | `0169706EBE2C` | R1313 - Praktikumsraum |
+
+Die Liste stellt eine Momentaufnahme des WeatherHub-Backends vom
+02.09.2026 dar.
+
+Die Namen dürfen daher nicht als unveränderliche Identitäten betrachtet
+werden.
+
+---
+
+## 40.3 Device ID vs. Anzeigename
+
+Die Untersuchung bestätigt die geplante Trennung zwischen technischer
+Identität und Anzeigeinformationen.
+
+Beispiel:
+
+    Device ID:
+        0169706EBE2C
+
+    aktueller Name:
+        R1313 - Praktikumsraum
+
+Die `Device ID` wird als stabile Referenz für historische Messdaten
+verwendet.
+
+Der `Name` wird als veränderliches Metadatum behandelt.
+
+Wenn der Name eines Sensors im WeatherHub-Backend geändert wird, bleiben
+historische Messdaten dadurch weiterhin eindeutig demselben Gerät
+zugeordnet.
+
+Konzeptionell:
+
+    device_id = stabile technische Identität
+
+    name = aktueller Anzeigename
+
+    series_id = Messreihe innerhalb des Geräts
+
+Damit ergibt sich:
+
+    device_id
+        |
+        +--> name
+        |
+        +--> series_id
+        |      |
+        |      +--> measurements
+        |
+        +--> health/status
+
+---
+
+## 40.4 Gleiche Namen sind zulässig
+
+Die Device-Liste zeigt bereits, dass unterschiedliche Device-IDs denselben
+Anzeigenamen besitzen können.
+
+Beispiel:
+
+    0E74A4597B54
+        R1304 - DryAger - 17 °C, 80% rH
+
+    016783F33A2A
+        R1304 - DryAger - 17 °C, 80% rH
+
+Damit ist zusätzlich praktisch bewiesen:
+
+> Der Anzeigename darf nicht als Primary Key oder eindeutiger Identifier
+> verwendet werden.
+
+Ausschließlich die `deviceID` darf zur eindeutigen Identifikation eines
+WeatherHub-Geräts verwendet werden.
+
+---
+
+## 40.5 Konsequenz für den automatisierten Abruf
+
+Der produktive Ablauf kann damit vollständig dynamisch aufgebaut werden:
+
+    LOGIN
+      ↓
+    GET /Devices
+      ↓
+    19 Devices
+      ↓
+    foreach Device
+      |
+      +--> deviceID
+      +--> name
+      |
+      ↓
+    POST /Devices/SparkLineChartData
+      |
+      ↓
+    Base64
+      ↓
+    Decoder
+      ↓
+    normalisierte Messdaten
+
+Die Anzahl der Sensoren muss dabei nicht fest auf `19` codiert werden.
+
+Wenn später ein Sensor hinzugefügt oder entfernt wird, soll der nächste
+Abrufzyklus automatisch die aktuelle Device-Liste übernehmen.
+
+Damit wird aus:
+
+    19 fest codierte Sensoren
+
+ein:
+
+    N dynamisch ermittelte Sensoren
+
+---
+
+## 40.6 Device Discovery und Persistenz
+
+Für die spätere Datenhaltung empfiehlt sich eine Trennung zwischen
+Gerätestammdaten und Messdaten.
+
+Beispiel:
+
+    devices
+        device_id
+        name
+        first_seen
+        last_seen
+
+    measurements
+        device_id
+        series_id
+        timestamp
+        value
+
+Bei jedem erfolgreichen `/Devices`-Abruf wird:
+
+    device_id vorhanden?
+        |
+        +-- nein → neues Device anlegen
+        |
+        +-- ja  → name aktualisieren
+
+Dadurch können Umbenennungen des Sensors automatisch übernommen werden.
+
+Historische Messdaten benötigen keine Änderung.
+
+---
+
+## 40.7 Device Discovery ist jetzt kein offener Reverse-Engineering-Punkt mehr
+
+Die ursprüngliche Frage war:
+
+    Woher bekommt das Dashboard seine Device-IDs?
+
+Diese Frage ist für den aktuellen Integrationspfad ausreichend beantwortet.
+
+Der Server liefert mit:
+
+    GET /Devices
+
+eine HTML-Geräteübersicht, aus der die relevanten Device-Informationen
+extrahiert werden können.
+
+Damit ist für den ersten Adapter keine manuelle Device-Konfiguration
+erforderlich.
+
+Offen bleibt lediglich die Frage, wie robust die konkrete HTML-Extraktion
+gegen zukünftige Änderungen des Portals ist.
+
+Für die produktive Implementierung sollte die Discovery deshalb mit:
+
+- Validierung der gefundenen IDs
+- Erkennung von Duplikaten
+- Logging der Device-Anzahl
+- kontrolliertem Fehler bei unerwarteter HTML-Struktur
+
+abgesichert werden.
+
+---
+
+## 41. Automatisierter N-Sensor-Abruf
+
+Nach erfolgreicher Device Discovery werden alle aktuell auf `/Devices`
+vorhandenen Geräte abgefragt.
+
+Die Anzahl der Geräte wird nicht fest im Code hinterlegt.
+
+Konzeptionell:
+
+    GET /Devices
         ↓
+    devices[]
+        ↓
+    foreach device
+        |
+        +--> deviceID
+        +--> name
+        |
+        ↓
+    POST /Devices/SparkLineChartData
+        ↓
+    Base64
+        ↓
+    Decoder
+        ↓
+    normalisierte Messdaten
 
-        Base64
-            ↓
-        Decoder
-            ↓
-        normalisierte Messdaten
-    }
+Die gleiche authentifizierte `$session` wird für sämtliche Sensorrequests
+verwendet.
 
-Die Requests sollen dieselbe authentifizierte `$session` verwenden.
+Ein Fehler bei einem einzelnen Sensor darf den gesamten Abrufzyklus nicht
+abbrechen.
 
-Ein Fehler bei einem einzelnen Sensor darf dabei nicht automatisch den
-gesamten Zyklus abbrechen.
+Beispiel:
 
-Der Adapter soll pro Device einen eigenen Abruf-/Fehlerstatus erzeugen.
+    Device 1  → OK
+    Device 2  → OK
+    Device 3  → Decode Error
+    Device 4  → OK
+    ...
+    Device N  → OK
+
+Der Adapter soll den Fehler von Device 3 separat erfassen und die übrigen
+Geräte trotzdem weiterverarbeiten.
 
 ---
 
@@ -1661,7 +1951,283 @@ Dieser Test ist die aktuelle technische Referenz.
 
 ---
 
-## 54. Reproduktionsmaterial
+## 54. Verifizierter End-to-End-Test vom 02.09.2026
+
+Am 02.09.2026 wurde der komplette Zugriff auf WeatherHub-Observer
+erfolgreich reproduziert.
+
+### 54.1 Login
+
+Der Login erfolgt über:
+
+    POST https://www.wh-observer.de/Account/LogOn
+
+Verwendete Formularfelder:
+
+    Username
+    Password
+    Lang
+
+Für Tests werden die Zugangsdaten interaktiv über PowerShell
+`Get-Credential` bereitgestellt.
+
+Es werden keine Zugangsdaten im Repository gespeichert.
+
+Bei erfolgreichem Login liefert der Server HTTP 200 und leitet auf
+`/devices` weiter.
+
+Die für den Login verwendete `WebRequestSession` muss für die
+folgenden Requests wiederverwendet werden.
+
+### 54.2 Authentifizierte Session prüfen
+
+Anschließend:
+
+    GET https://www.wh-observer.de/Devices
+
+liefert HTTP 200.
+
+Die Response enthält die authentifizierte Geräteübersicht.
+
+Eine nicht authentifizierte Session liefert stattdessen die
+Sign-in-Seite mit:
+
+    <title>WeatherHub-Observer | Sign in</title>
+
+Damit kann der Authentifizierungsstatus ohne Zugriff auf Cookies
+direkt anhand der Response geprüft werden.
+
+### 54.3 Geräteidentität
+
+Die `/Devices`-Seite enthält für jedes Gerät mindestens:
+
+    deviceID
+    Anzeigename
+    Timestamp
+    Sensor-/Messreiheninformationen
+
+Beispiel eines erfolgreich ausgelesenen Geräts:
+
+    Name: R1313 - Praktikumsraum
+    ID:   0169706EBE2C
+
+Die `deviceID` wird als stabile technische Identität verwendet.
+
+Der Anzeigename ist dagegen veränderliches Metadatum und darf sich
+im WeatherHub-Backend ändern.
+
+Die historische Zuordnung von Messdaten erfolgt deshalb immer über
+`deviceID` und nicht über den Anzeigenamen.
+
+### 54.3 Device Discovery – 19 Geräte
+
+Die authentifizierte `/Devices`-Seite wurde anschließend automatisch
+ausgewertet.
+
+Ergebnis:
+
+    Devices gefunden: 19
+
+Für jedes Gerät konnten mindestens folgende Informationen ermittelt werden:
+
+    deviceID
+    name
+
+Damit ist die automatische Device Discovery praktisch verifiziert.
+
+Die vollständige zum Testzeitpunkt ermittelte Liste ist in Abschnitt 40.2
+dokumentiert.
+
+Wichtig ist, dass die Liste nicht als statische Gerätekonfiguration
+verstanden wird.
+
+Die `/Devices`-Seite stellt den aktuellen Zustand des WeatherHub-Backends
+dar und soll bei einem produktiven Abrufzyklus erneut ausgewertet werden.
+
+Die Anzahl der Geräte ist daher dynamisch.
+
+### 54.4 Device-ID als stabile Identität
+
+Die Tests zeigen außerdem, dass Anzeigenamen nicht eindeutig sein müssen.
+
+Beispielsweise besitzen:
+
+    0E74A4597B54
+    016783F33A2A
+
+beide den Namen:
+
+    R1304 - DryAger - 17 °C, 80% rH
+
+Daraus folgt:
+
+    deviceID → Primary Identifier
+    name     → Display Metadata
+
+Der Anzeigename darf jederzeit im WeatherHub-Backend geändert werden,
+ohne dass dadurch die historische Zuordnung von Messdaten verändert wird.
+
+### 54.5 Sparkline-Endpunkt
+
+Die Sensordaten werden über:
+
+    POST https://www.wh-observer.de/Devices/SparkLineChartData
+
+abgerufen.
+
+Request:
+
+    Content-Type: application/json; charset=utf-8
+
+Body:
+
+    {"deviceID":"<DEVICE_ID>"}
+
+Die Response wird in PowerShell als:
+
+    System.Byte[]
+
+geliefert.
+
+Die enthaltenen Bytes stellen UTF-8-kodierte Base64-Daten dar.
+
+Beispielanfang einer Response:
+
+    CugHCgxUZW1wZXJhdHVyZTESEgkAgE/6HwZ6QhEzMzMz...
+
+Die getestete Payload hatte eine Länge von 2676 Zeichen.
+
+### 54.6 Base64-Decoder
+
+Die Base64-Payload kann mit:
+
+    Decode-WeatherHubBase64
+
+aus `decode-weatherhub-v2.ps1` erfolgreich dekodiert werden.
+
+Der Decoder liefert ein `PSCustomObject` mit einer `Series`-Collection.
+
+Beim erfolgreichen Test:
+
+    Chart type: System.Management.Automation.PSCustomObject
+    Series count: 2
+
+### 54.7 Dekodierte Messreihen
+
+Der Test lieferte:
+
+    SeriesID: Temperature1
+    Datasets: 46
+
+    SeriesID: Temperature2
+    Datasets: 46
+
+Beispielwerte:
+
+    Temperature1:
+        22.2
+        22.3
+        22.4
+        22.6
+        22.6
+
+    Temperature2:
+        -25.7
+        -26.1
+        -26.3
+        -26.5
+        -26.6
+
+Jedes Dataset enthält unter anderem:
+
+    Timestamp
+    Value
+
+Die Timestamps werden als Unix-Zeit in Millisekunden geliefert.
+
+### 54.8 Aktueller technischer Datenfluss
+
+Der derzeit verifizierte Datenfluss lautet:
+
+    Get-Credential
+        |
+        v
+    POST /Account/LogOn
+        |
+        v
+    WebRequestSession
+        |
+        v
+    GET /Devices
+        |
+        +--> deviceID
+        +--> device name
+        |
+        v
+    POST /Devices/SparkLineChartData
+        |
+        v
+    Base64
+        |
+        v
+    Decode-WeatherHubBase64
+        |
+        v
+    ChartData
+        |
+        +--> Temperature1
+        +--> Temperature2
+        +--> Datasets
+                 |
+                 +--> Timestamp
+                 +--> Value
+
+Dieser Ablauf wurde am 02.09.2026 erfolgreich gegen den
+WeatherHub-Observer-Server getestet.
+
+### 54.9 Sicherheits-/Repository-Regeln
+
+Nicht in das Repository aufnehmen:
+
+- WeatherHub-Benutzername
+- WeatherHub-Passwort
+- Session-Cookies
+- vollständige authentifizierte Responses
+- vollständige reale Sensorpayloads
+
+Für reproduzierbare Tests werden Credentials interaktiv über
+`Get-Credential` bezogen.
+
+### 54.10 Konsequenz für die spätere Datenhaltung
+
+Die spätere Datenhaltung soll die technische Geräteidentität von
+den veränderlichen Anzeigeinformationen trennen.
+
+Empfohlene Struktur:
+
+    devices
+        device_id
+        name
+        last_seen
+
+    measurements
+        device_id
+        series_id
+        timestamp
+        value
+
+`device_id` ist die stabile technische Identität.
+
+`name` wird bei jedem erfolgreichen Geräteabgleich aktualisiert.
+
+`series_id` identifiziert die Messreihe innerhalb eines Geräts.
+
+Eine Änderung des Anzeigenamens im WeatherHub-Backend erfordert
+dadurch keine Änderung historischer Messdaten.
+
+---
+
+## 55. Reproduktionsmaterial
 
 Eine konkrete Sparkline-Response wurde lokal gespeichert unter:
 
@@ -1681,7 +2247,7 @@ getestet werden.
 
 ---
 
-## 55. Status der ursprünglichen Untersuchung
+## 56. Status der ursprünglichen Untersuchung
 
 Die ursprüngliche Untersuchung ging von folgendem Stand aus:
 
@@ -1726,7 +2292,7 @@ Untersuchung zu einer technischen Integrationsdokumentation erweitert.
 
 ---
 
-## 56. Aktueller Gesamtstand
+## 57. Aktueller Gesamtstand
 
 Der entscheidende Meilenstein ist erreicht:
 
@@ -1771,14 +2337,14 @@ Es geht jetzt um:
 
 ---
 
-## 57. Nächste konkrete Schritte
+## 58. Nächste konkrete Schritte
 
 Die nächsten Schritte sollten in dieser Reihenfolge erfolgen:
 
 1. Login in eine eigene Funktion kapseln.
 2. Authentifizierungsstatus zuverlässig prüfen.
-3. `/Devices` automatisch analysieren.
-4. alle Device-IDs aus der Seite bzw. ihren Datenquellen extrahieren.
+3. Device Discovery über `/Devices` implementieren. **erledigt / Baseline verifiziert**
+4. Device-IDs und Anzeigenamen automatisch extrahieren. **erledigt / 19 Geräte verifiziert**
 5. einen einzelnen Sensor über die ermittelte ID abrufen.
 6. alle 19 Sensoren mit derselben Session abrufen.
 7. jede Response separat dekodieren.
@@ -1793,7 +2359,7 @@ Die nächsten Schritte sollten in dieser Reihenfolge erfolgen:
 
 ---
 
-## 58. Wiedereinstiegspunkt
+## 59. Wiedereinstiegspunkt
 
 Der aktuelle Wiedereinstiegspunkt ist ausdrücklich **nicht** mehr:
 
@@ -1836,3 +2402,50 @@ Damit ist WeatherHub Observer bereit für die nächste Phase:
     Monitoring
           ↓
     OtterPi
+
+---
+
+## 60. Reproduktionsskript tes-weatherhub-observer-v4.ps1
+
+Das Skript:
+
+    tes-weatherhub-observer-v4.ps1
+
+ist das aktuelle technische Reproduktionsskript für den
+WeatherHub-Observer-Zugriff.
+
+Es dient als Referenzimplementierung für den aktuell verifizierten Ablauf:
+
+    Get-Credential
+        ↓
+    POST /Account/LogOn
+        ↓
+    authentifizierte WebRequestSession
+        ↓
+    GET /Devices
+        ↓
+    automatische Device Discovery
+        ↓
+    POST /Devices/SparkLineChartData
+        ↓
+    Base64-Payload
+        ↓
+    Decode-WeatherHubBase64
+        ↓
+    dekodierte ChartData
+
+Das Skript ist von der späteren produktiven Adapterimplementierung
+zu unterscheiden.
+
+Es ist zunächst ein technisches Test-/Reproduktionsskript und dient dazu,
+den funktionierenden Datenzugriff gegen den Live-Server nachvollziehbar
+zu halten.
+
+Die produktive Implementierung soll die darin verifizierte Logik später
+in getrennte Komponenten überführen:
+
+    WeatherHubClient
+    WeatherHubDecoder
+    WeatherHubAdapter
+
+Das Testskript bleibt dabei als Regressionstest bzw. Referenz erhalten.
