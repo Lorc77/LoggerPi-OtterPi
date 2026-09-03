@@ -1,0 +1,1689 @@
+WeatherHub Observer - ChartDataset Field Research
+================================================
+
+Run       : 20260903-224113
+Device #  : 11
+Device ID : 015F9410F3EB
+Name      : R1306 - Molekularlab - Kombi
+
+Chart CLR Type:
+  System.Management.Automation.PSCustomObject
+
+
+================================================
+Series 1
+================================================
+SeriesID: Temperature1
+Series CLR Type: System.Management.Automation.PSCustomObject
+
+------------------------------------------------
+Dataset 1
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788453741000
+  Value
+    Type : System.Double
+    Value: 22
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788453741000,
+        "Value":  22
+    }
+------------------------------------------------
+Dataset 2
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788454163000
+  Value
+    Type : System.Double
+    Value: 22
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788454163000,
+        "Value":  22
+    }
+------------------------------------------------
+Dataset 3
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788454586000
+  Value
+    Type : System.Double
+    Value: 22
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788454586000,
+        "Value":  22
+    }
+------------------------------------------------
+Dataset 4
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788455008000
+  Value
+    Type : System.Double
+    Value: 22
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788455008000,
+        "Value":  22
+    }
+------------------------------------------------
+Dataset 5
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788455430000
+  Value
+    Type : System.Double
+    Value: 22
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788455430000,
+        "Value":  22
+    }
+------------------------------------------------
+Dataset 6
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788455851000
+  Value
+    Type : System.Double
+    Value: 22
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788455851000,
+        "Value":  22
+    }
+------------------------------------------------
+Dataset 7
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788456274000
+  Value
+    Type : System.Double
+    Value: 22
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788456274000,
+        "Value":  22
+    }
+------------------------------------------------
+Dataset 8
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788456697000
+  Value
+    Type : System.Double
+    Value: 22
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788456697000,
+        "Value":  22
+    }
+------------------------------------------------
+Dataset 9
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788457126000
+  Value
+    Type : System.Double
+    Value: 22
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788457126000,
+        "Value":  22
+    }
+------------------------------------------------
+Dataset 10
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788457542000
+  Value
+    Type : System.Double
+    Value: 22
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788457542000,
+        "Value":  22
+    }
+------------------------------------------------
+Dataset 11
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788457965000
+  Value
+    Type : System.Double
+    Value: 22.1
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788457965000,
+        "Value":  22.1
+    }
+------------------------------------------------
+Dataset 12
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788458387000
+  Value
+    Type : System.Double
+    Value: 22.1
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788458387000,
+        "Value":  22.1
+    }
+------------------------------------------------
+Dataset 13
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788458810000
+  Value
+    Type : System.Double
+    Value: 22.1
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788458810000,
+        "Value":  22.1
+    }
+------------------------------------------------
+Dataset 14
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788459231000
+  Value
+    Type : System.Double
+    Value: 22.1
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788459231000,
+        "Value":  22.1
+    }
+------------------------------------------------
+Dataset 15
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788459655000
+  Value
+    Type : System.Double
+    Value: 22.1
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788459655000,
+        "Value":  22.1
+    }
+------------------------------------------------
+Dataset 16
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788460078000
+  Value
+    Type : System.Double
+    Value: 22.1
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788460078000,
+        "Value":  22.1
+    }
+------------------------------------------------
+Dataset 17
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788460500000
+  Value
+    Type : System.Double
+    Value: 22.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788460500000,
+        "Value":  22.2
+    }
+------------------------------------------------
+Dataset 18
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788460922000
+  Value
+    Type : System.Double
+    Value: 22.1
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788460922000,
+        "Value":  22.1
+    }
+------------------------------------------------
+Dataset 19
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788461344000
+  Value
+    Type : System.Double
+    Value: 22.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788461344000,
+        "Value":  22.2
+    }
+------------------------------------------------
+Dataset 20
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788461767000
+  Value
+    Type : System.Double
+    Value: 22.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788461767000,
+        "Value":  22.2
+    }
+------------------------------------------------
+Dataset 21
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788462190000
+  Value
+    Type : System.Double
+    Value: 22.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788462190000,
+        "Value":  22.2
+    }
+------------------------------------------------
+Dataset 22
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788462613000
+  Value
+    Type : System.Double
+    Value: 22.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788462613000,
+        "Value":  22.2
+    }
+------------------------------------------------
+Dataset 23
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788463039000
+  Value
+    Type : System.Double
+    Value: 22.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788463039000,
+        "Value":  22.2
+    }
+------------------------------------------------
+Dataset 24
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788463455000
+  Value
+    Type : System.Double
+    Value: 22.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788463455000,
+        "Value":  22.2
+    }
+------------------------------------------------
+Dataset 25
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788463883000
+  Value
+    Type : System.Double
+    Value: 22.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788463883000,
+        "Value":  22.2
+    }
+------------------------------------------------
+Dataset 26
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788464299000
+  Value
+    Type : System.Double
+    Value: 22.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788464299000,
+        "Value":  22.2
+    }
+------------------------------------------------
+Dataset 27
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788464721000
+  Value
+    Type : System.Double
+    Value: 22.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788464721000,
+        "Value":  22.2
+    }
+------------------------------------------------
+Dataset 28
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788465144000
+  Value
+    Type : System.Double
+    Value: 22.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788465144000,
+        "Value":  22.2
+    }
+------------------------------------------------
+Dataset 29
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788465566000
+  Value
+    Type : System.Double
+    Value: 22.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788465566000,
+        "Value":  22.2
+    }
+------------------------------------------------
+Dataset 30
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788465987000
+  Value
+    Type : System.Double
+    Value: 22.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788465987000,
+        "Value":  22.2
+    }
+------------------------------------------------
+Dataset 31
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788466412000
+  Value
+    Type : System.Double
+    Value: 22.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788466412000,
+        "Value":  22.2
+    }
+------------------------------------------------
+Dataset 32
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788466833000
+  Value
+    Type : System.Double
+    Value: 22.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788466833000,
+        "Value":  22.2
+    }
+------------------------------------------------
+Dataset 33
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788467257000
+  Value
+    Type : System.Double
+    Value: 22.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788467257000,
+        "Value":  22.2
+    }
+------------------------------------------------
+Dataset 34
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788467680000
+  Value
+    Type : System.Double
+    Value: 22.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788467680000,
+        "Value":  22.2
+    }
+------------------------------------------------
+Dataset 35
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788468102000
+  Value
+    Type : System.Double
+    Value: 22.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788468102000,
+        "Value":  22.2
+    }
+------------------------------------------------
+Dataset 36
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788468526000
+  Value
+    Type : System.Double
+    Value: 22.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788468526000,
+        "Value":  22.2
+    }
+------------------------------------------------
+Dataset 37
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788468949000
+  Value
+    Type : System.Double
+    Value: 22.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788468949000,
+        "Value":  22.2
+    }
+------------------------------------------------
+Dataset 38
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788469370000
+  Value
+    Type : System.Double
+    Value: 22.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788469370000,
+        "Value":  22.2
+    }
+------------------------------------------------
+Dataset 39
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788469799000
+  Value
+    Type : System.Double
+    Value: 22.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788469799000,
+        "Value":  22.2
+    }
+------------------------------------------------
+Dataset 40
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788470215000
+  Value
+    Type : System.Double
+    Value: 22.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788470215000,
+        "Value":  22.2
+    }
+------------------------------------------------
+Dataset 41
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788470639000
+  Value
+    Type : System.Double
+    Value: 22.1
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788470639000,
+        "Value":  22.1
+    }
+------------------------------------------------
+Dataset 42
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788471067000
+  Value
+    Type : System.Double
+    Value: 22.1
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788471067000,
+        "Value":  22.1
+    }
+------------------------------------------------
+Dataset 43
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788471483000
+  Value
+    Type : System.Double
+    Value: 22.1
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788471483000,
+        "Value":  22.1
+    }
+------------------------------------------------
+Dataset 44
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788471904000
+  Value
+    Type : System.Double
+    Value: 22.1
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788471904000,
+        "Value":  22.1
+    }
+------------------------------------------------
+Dataset 45
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788472325000
+  Value
+    Type : System.Double
+    Value: 22.1
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788472325000,
+        "Value":  22.1
+    }
+------------------------------------------------
+Dataset 46
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788472749000
+  Value
+    Type : System.Double
+    Value: 22.1
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788472749000,
+        "Value":  22.1
+    }
+------------------------------------------------
+Dataset 47
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788473176000
+  Value
+    Type : System.Double
+    Value: 22
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788473176000,
+        "Value":  22
+    }
+------------------------------------------------
+Dataset 48
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788473592000
+  Value
+    Type : System.Double
+    Value: 22
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788473592000,
+        "Value":  22
+    }
+------------------------------------------------
+Dataset 49
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788474016000
+  Value
+    Type : System.Double
+    Value: 22
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788474016000,
+        "Value":  22
+    }
+------------------------------------------------
+Dataset 50
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788474439000
+  Value
+    Type : System.Double
+    Value: 21.9
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788474439000,
+        "Value":  21.9
+    }
+------------------------------------------------
+Dataset 51
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788474862000
+  Value
+    Type : System.Double
+    Value: 21.9
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788474862000,
+        "Value":  21.9
+    }
+------------------------------------------------
+Dataset 52
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788475283000
+  Value
+    Type : System.Double
+    Value: 21.9
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788475283000,
+        "Value":  21.9
+    }
+
+================================================
+Series 2
+================================================
+SeriesID: Temperature2
+Series CLR Type: System.Management.Automation.PSCustomObject
+
+------------------------------------------------
+Dataset 1
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788453741000
+  Value
+    Type : System.Double
+    Value: -24.6
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788453741000,
+        "Value":  -24.6
+    }
+------------------------------------------------
+Dataset 2
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788454163000
+  Value
+    Type : System.Double
+    Value: -24.8
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788454163000,
+        "Value":  -24.8
+    }
+------------------------------------------------
+Dataset 3
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788454586000
+  Value
+    Type : System.Double
+    Value: -24.6
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788454586000,
+        "Value":  -24.6
+    }
+------------------------------------------------
+Dataset 4
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788455008000
+  Value
+    Type : System.Double
+    Value: -24.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788455008000,
+        "Value":  -24.2
+    }
+------------------------------------------------
+Dataset 5
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788455430000
+  Value
+    Type : System.Double
+    Value: -23.8
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788455430000,
+        "Value":  -23.8
+    }
+------------------------------------------------
+Dataset 6
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788455851000
+  Value
+    Type : System.Double
+    Value: -23.3
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788455851000,
+        "Value":  -23.3
+    }
+------------------------------------------------
+Dataset 7
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788456274000
+  Value
+    Type : System.Double
+    Value: -22.7
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788456274000,
+        "Value":  -22.7
+    }
+------------------------------------------------
+Dataset 8
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788456697000
+  Value
+    Type : System.Double
+    Value: -22.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788456697000,
+        "Value":  -22.2
+    }
+------------------------------------------------
+Dataset 9
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788457126000
+  Value
+    Type : System.Double
+    Value: -21.6
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788457126000,
+        "Value":  -21.6
+    }
+------------------------------------------------
+Dataset 10
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788457542000
+  Value
+    Type : System.Double
+    Value: -21
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788457542000,
+        "Value":  -21
+    }
+------------------------------------------------
+Dataset 11
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788457965000
+  Value
+    Type : System.Double
+    Value: -20.4
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788457965000,
+        "Value":  -20.4
+    }
+------------------------------------------------
+Dataset 12
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788458387000
+  Value
+    Type : System.Double
+    Value: -19.8
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788458387000,
+        "Value":  -19.8
+    }
+------------------------------------------------
+Dataset 13
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788458810000
+  Value
+    Type : System.Double
+    Value: -19.3
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788458810000,
+        "Value":  -19.3
+    }
+------------------------------------------------
+Dataset 14
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788459231000
+  Value
+    Type : System.Double
+    Value: -18.7
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788459231000,
+        "Value":  -18.7
+    }
+------------------------------------------------
+Dataset 15
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788459655000
+  Value
+    Type : System.Double
+    Value: -18.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788459655000,
+        "Value":  -18.2
+    }
+------------------------------------------------
+Dataset 16
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788460078000
+  Value
+    Type : System.Double
+    Value: -17.6
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788460078000,
+        "Value":  -17.6
+    }
+------------------------------------------------
+Dataset 17
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788460500000
+  Value
+    Type : System.Double
+    Value: -17.1
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788460500000,
+        "Value":  -17.1
+    }
+------------------------------------------------
+Dataset 18
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788460922000
+  Value
+    Type : System.Double
+    Value: -16.6
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788460922000,
+        "Value":  -16.6
+    }
+------------------------------------------------
+Dataset 19
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788461344000
+  Value
+    Type : System.Double
+    Value: -16.1
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788461344000,
+        "Value":  -16.1
+    }
+------------------------------------------------
+Dataset 20
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788461767000
+  Value
+    Type : System.Double
+    Value: -15.6
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788461767000,
+        "Value":  -15.6
+    }
+------------------------------------------------
+Dataset 21
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788462190000
+  Value
+    Type : System.Double
+    Value: -15.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788462190000,
+        "Value":  -15.2
+    }
+------------------------------------------------
+Dataset 22
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788462613000
+  Value
+    Type : System.Double
+    Value: -14.7
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788462613000,
+        "Value":  -14.7
+    }
+------------------------------------------------
+Dataset 23
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788463039000
+  Value
+    Type : System.Double
+    Value: -14.3
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788463039000,
+        "Value":  -14.3
+    }
+------------------------------------------------
+Dataset 24
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788463455000
+  Value
+    Type : System.Double
+    Value: -14
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788463455000,
+        "Value":  -14
+    }
+------------------------------------------------
+Dataset 25
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788463883000
+  Value
+    Type : System.Double
+    Value: -14.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788463883000,
+        "Value":  -14.2
+    }
+------------------------------------------------
+Dataset 26
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788464299000
+  Value
+    Type : System.Double
+    Value: -14.9
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788464299000,
+        "Value":  -14.9
+    }
+------------------------------------------------
+Dataset 27
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788464721000
+  Value
+    Type : System.Double
+    Value: -15.7
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788464721000,
+        "Value":  -15.7
+    }
+------------------------------------------------
+Dataset 28
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788465144000
+  Value
+    Type : System.Double
+    Value: -16.6
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788465144000,
+        "Value":  -16.6
+    }
+------------------------------------------------
+Dataset 29
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788465566000
+  Value
+    Type : System.Double
+    Value: -17.5
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788465566000,
+        "Value":  -17.5
+    }
+------------------------------------------------
+Dataset 30
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788465987000
+  Value
+    Type : System.Double
+    Value: -18.3
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788465987000,
+        "Value":  -18.3
+    }
+------------------------------------------------
+Dataset 31
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788466412000
+  Value
+    Type : System.Double
+    Value: -19.1
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788466412000,
+        "Value":  -19.1
+    }
+------------------------------------------------
+Dataset 32
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788466833000
+  Value
+    Type : System.Double
+    Value: -19.8
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788466833000,
+        "Value":  -19.8
+    }
+------------------------------------------------
+Dataset 33
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788467257000
+  Value
+    Type : System.Double
+    Value: -20.4
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788467257000,
+        "Value":  -20.4
+    }
+------------------------------------------------
+Dataset 34
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788467680000
+  Value
+    Type : System.Double
+    Value: -21
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788467680000,
+        "Value":  -21
+    }
+------------------------------------------------
+Dataset 35
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788468102000
+  Value
+    Type : System.Double
+    Value: -21.5
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788468102000,
+        "Value":  -21.5
+    }
+------------------------------------------------
+Dataset 36
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788468526000
+  Value
+    Type : System.Double
+    Value: -22
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788468526000,
+        "Value":  -22
+    }
+------------------------------------------------
+Dataset 37
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788468949000
+  Value
+    Type : System.Double
+    Value: -22.4
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788468949000,
+        "Value":  -22.4
+    }
+------------------------------------------------
+Dataset 38
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788469370000
+  Value
+    Type : System.Double
+    Value: -22.8
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788469370000,
+        "Value":  -22.8
+    }
+------------------------------------------------
+Dataset 39
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788469799000
+  Value
+    Type : System.Double
+    Value: -23.2
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788469799000,
+        "Value":  -23.2
+    }
+------------------------------------------------
+Dataset 40
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788470215000
+  Value
+    Type : System.Double
+    Value: -23.5
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788470215000,
+        "Value":  -23.5
+    }
+------------------------------------------------
+Dataset 41
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788470639000
+  Value
+    Type : System.Double
+    Value: -23.8
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788470639000,
+        "Value":  -23.8
+    }
+------------------------------------------------
+Dataset 42
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788471067000
+  Value
+    Type : System.Double
+    Value: -24.1
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788471067000,
+        "Value":  -24.1
+    }
+------------------------------------------------
+Dataset 43
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788471483000
+  Value
+    Type : System.Double
+    Value: -24.3
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788471483000,
+        "Value":  -24.3
+    }
+------------------------------------------------
+Dataset 44
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788471904000
+  Value
+    Type : System.Double
+    Value: -24.6
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788471904000,
+        "Value":  -24.6
+    }
+------------------------------------------------
+Dataset 45
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788472325000
+  Value
+    Type : System.Double
+    Value: -24.8
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788472325000,
+        "Value":  -24.8
+    }
+------------------------------------------------
+Dataset 46
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788472749000
+  Value
+    Type : System.Double
+    Value: -24.7
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788472749000,
+        "Value":  -24.7
+    }
+------------------------------------------------
+Dataset 47
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788473176000
+  Value
+    Type : System.Double
+    Value: -24.4
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788473176000,
+        "Value":  -24.4
+    }
+------------------------------------------------
+Dataset 48
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788473592000
+  Value
+    Type : System.Double
+    Value: -23.9
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788473592000,
+        "Value":  -23.9
+    }
+------------------------------------------------
+Dataset 49
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788474016000
+  Value
+    Type : System.Double
+    Value: -23.5
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788474016000,
+        "Value":  -23.5
+    }
+------------------------------------------------
+Dataset 50
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788474439000
+  Value
+    Type : System.Double
+    Value: -22.9
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788474439000,
+        "Value":  -22.9
+    }
+------------------------------------------------
+Dataset 51
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788474862000
+  Value
+    Type : System.Double
+    Value: -22.4
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788474862000,
+        "Value":  -22.4
+    }
+------------------------------------------------
+Dataset 52
+CLR Type: System.Management.Automation.PSCustomObject
+------------------------------------------------
+  Timestamp
+    Type : System.Double
+    Value: 1788475283000
+  Value
+    Type : System.Double
+    Value: -21.8
+
+  Complete Dataset JSON:
+    {
+        "Timestamp":  1788475283000,
+        "Value":  -21.8
+    }

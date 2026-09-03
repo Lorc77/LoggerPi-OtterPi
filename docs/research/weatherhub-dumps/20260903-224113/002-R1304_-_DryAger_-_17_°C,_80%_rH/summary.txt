@@ -1,0 +1,770 @@
+WeatherHub Observer Research Capture
+====================================
+
+Run       : 20260903-224113
+Device #  : 2
+Device ID : 016783F33A2A
+Name      : R1304 - DryAger - 17 °C, 80% rH
+Captured  : 2026-09-03T22:41:30.1426668+02:00
+HTTP      : 200
+Base64    : 2996 chars
+
+Decoded
+-------
+Series count: 2
+
+Series 1
+==========
+SeriesID              : Temperature1
+Datasets              : 52
+LineColor             : #FF8715
+FormattedTimestamp    : 03.09.2026&nbsp;&nbsp;22:41
+FormattedMeasurement  : 21,2°C
+ConnectionLost        : False
+LowBattery            : False
+AlertWasActive        : False
+CardStatus            : NoAlert
+AlertActive           : False
+AlertSettingActive    : True
+    --- ChartDataset Properties ---
+      Timestamp = 1788453708000
+        Type = System.Double
+      Value = 21.5
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 1 : Timestamp=1788453708000 UTC=2026-09-03T16:41:48.0000000+00:00 Value=21.5
+    --- ChartDataset Properties ---
+      Timestamp = 1788454129000
+        Type = System.Double
+      Value = 21.5
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 2 : Timestamp=1788454129000 UTC=2026-09-03T16:48:49.0000000+00:00 Value=21.5
+    --- ChartDataset Properties ---
+      Timestamp = 1788454553000
+        Type = System.Double
+      Value = 21.5
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 3 : Timestamp=1788454553000 UTC=2026-09-03T16:55:53.0000000+00:00 Value=21.5
+    --- ChartDataset Properties ---
+      Timestamp = 1788454975000
+        Type = System.Double
+      Value = 21.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 4 : Timestamp=1788454975000 UTC=2026-09-03T17:02:55.0000000+00:00 Value=21.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788455398000
+        Type = System.Double
+      Value = 21.3
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 5 : Timestamp=1788455398000 UTC=2026-09-03T17:09:58.0000000+00:00 Value=21.3
+    --- ChartDataset Properties ---
+      Timestamp = 1788455821000
+        Type = System.Double
+      Value = 21.3
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 6 : Timestamp=1788455821000 UTC=2026-09-03T17:17:01.0000000+00:00 Value=21.3
+    --- ChartDataset Properties ---
+      Timestamp = 1788456245000
+        Type = System.Double
+      Value = 21.3
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 7 : Timestamp=1788456245000 UTC=2026-09-03T17:24:05.0000000+00:00 Value=21.3
+    --- ChartDataset Properties ---
+      Timestamp = 1788456668000
+        Type = System.Double
+      Value = 21.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 8 : Timestamp=1788456668000 UTC=2026-09-03T17:31:08.0000000+00:00 Value=21.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788457092000
+        Type = System.Double
+      Value = 21.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 9 : Timestamp=1788457092000 UTC=2026-09-03T17:38:12.0000000+00:00 Value=21.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788457513000
+        Type = System.Double
+      Value = 21.3
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 10 : Timestamp=1788457513000 UTC=2026-09-03T17:45:13.0000000+00:00 Value=21.3
+    --- ChartDataset Properties ---
+      Timestamp = 1788457935000
+        Type = System.Double
+      Value = 21.3
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 11 : Timestamp=1788457935000 UTC=2026-09-03T17:52:15.0000000+00:00 Value=21.3
+    --- ChartDataset Properties ---
+      Timestamp = 1788458358000
+        Type = System.Double
+      Value = 21.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 12 : Timestamp=1788458358000 UTC=2026-09-03T17:59:18.0000000+00:00 Value=21.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788458781000
+        Type = System.Double
+      Value = 21.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 13 : Timestamp=1788458781000 UTC=2026-09-03T18:06:21.0000000+00:00 Value=21.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788459204000
+        Type = System.Double
+      Value = 21.5
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 14 : Timestamp=1788459204000 UTC=2026-09-03T18:13:24.0000000+00:00 Value=21.5
+    --- ChartDataset Properties ---
+      Timestamp = 1788459627000
+        Type = System.Double
+      Value = 21.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 15 : Timestamp=1788459627000 UTC=2026-09-03T18:20:27.0000000+00:00 Value=21.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788460051000
+        Type = System.Double
+      Value = 21.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 16 : Timestamp=1788460051000 UTC=2026-09-03T18:27:31.0000000+00:00 Value=21.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788460474000
+        Type = System.Double
+      Value = 21.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 17 : Timestamp=1788460474000 UTC=2026-09-03T18:34:34.0000000+00:00 Value=21.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788460896000
+        Type = System.Double
+      Value = 21.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 18 : Timestamp=1788460896000 UTC=2026-09-03T18:41:36.0000000+00:00 Value=21.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788461318000
+        Type = System.Double
+      Value = 21.5
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 19 : Timestamp=1788461318000 UTC=2026-09-03T18:48:38.0000000+00:00 Value=21.5
+    --- ChartDataset Properties ---
+      Timestamp = 1788461747000
+        Type = System.Double
+      Value = 21.5
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 20 : Timestamp=1788461747000 UTC=2026-09-03T18:55:47.0000000+00:00 Value=21.5
+    --- ChartDataset Properties ---
+      Timestamp = 1788462163000
+        Type = System.Double
+      Value = 21.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 21 : Timestamp=1788462163000 UTC=2026-09-03T19:02:43.0000000+00:00 Value=21.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788462586000
+        Type = System.Double
+      Value = 21.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 22 : Timestamp=1788462586000 UTC=2026-09-03T19:09:46.0000000+00:00 Value=21.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788463009000
+        Type = System.Double
+      Value = 21.3
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 23 : Timestamp=1788463009000 UTC=2026-09-03T19:16:49.0000000+00:00 Value=21.3
+    --- ChartDataset Properties ---
+      Timestamp = 1788463433000
+        Type = System.Double
+      Value = 21.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 24 : Timestamp=1788463433000 UTC=2026-09-03T19:23:53.0000000+00:00 Value=21.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788463854000
+        Type = System.Double
+      Value = 21.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 25 : Timestamp=1788463854000 UTC=2026-09-03T19:30:54.0000000+00:00 Value=21.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788464278000
+        Type = System.Double
+      Value = 21.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 26 : Timestamp=1788464278000 UTC=2026-09-03T19:37:58.0000000+00:00 Value=21.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788464701000
+        Type = System.Double
+      Value = 21.3
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 27 : Timestamp=1788464701000 UTC=2026-09-03T19:45:01.0000000+00:00 Value=21.3
+    --- ChartDataset Properties ---
+      Timestamp = 1788465125000
+        Type = System.Double
+      Value = 21.3
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 28 : Timestamp=1788465125000 UTC=2026-09-03T19:52:05.0000000+00:00 Value=21.3
+    --- ChartDataset Properties ---
+      Timestamp = 1788465547000
+        Type = System.Double
+      Value = 21.3
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 29 : Timestamp=1788465547000 UTC=2026-09-03T19:59:07.0000000+00:00 Value=21.3
+    --- ChartDataset Properties ---
+      Timestamp = 1788465970000
+        Type = System.Double
+      Value = 21.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 30 : Timestamp=1788465970000 UTC=2026-09-03T20:06:10.0000000+00:00 Value=21.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788466392000
+        Type = System.Double
+      Value = 21.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 31 : Timestamp=1788466392000 UTC=2026-09-03T20:13:12.0000000+00:00 Value=21.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788466816000
+        Type = System.Double
+      Value = 21.3
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 32 : Timestamp=1788466816000 UTC=2026-09-03T20:20:16.0000000+00:00 Value=21.3
+    --- ChartDataset Properties ---
+      Timestamp = 1788467237000
+        Type = System.Double
+      Value = 21.3
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 33 : Timestamp=1788467237000 UTC=2026-09-03T20:27:17.0000000+00:00 Value=21.3
+    --- ChartDataset Properties ---
+      Timestamp = 1788467661000
+        Type = System.Double
+      Value = 21.3
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 34 : Timestamp=1788467661000 UTC=2026-09-03T20:34:21.0000000+00:00 Value=21.3
+    --- ChartDataset Properties ---
+      Timestamp = 1788468085000
+        Type = System.Double
+      Value = 21.3
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 35 : Timestamp=1788468085000 UTC=2026-09-03T20:41:25.0000000+00:00 Value=21.3
+    --- ChartDataset Properties ---
+      Timestamp = 1788468507000
+        Type = System.Double
+      Value = 21.3
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 36 : Timestamp=1788468507000 UTC=2026-09-03T20:48:27.0000000+00:00 Value=21.3
+    --- ChartDataset Properties ---
+      Timestamp = 1788468928000
+        Type = System.Double
+      Value = 21.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 37 : Timestamp=1788468928000 UTC=2026-09-03T20:55:28.0000000+00:00 Value=21.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788469350000
+        Type = System.Double
+      Value = 21.3
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 38 : Timestamp=1788469350000 UTC=2026-09-03T21:02:30.0000000+00:00 Value=21.3
+    --- ChartDataset Properties ---
+      Timestamp = 1788469774000
+        Type = System.Double
+      Value = 21.2
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 39 : Timestamp=1788469774000 UTC=2026-09-03T21:09:34.0000000+00:00 Value=21.2
+    --- ChartDataset Properties ---
+      Timestamp = 1788470197000
+        Type = System.Double
+      Value = 21.2
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 40 : Timestamp=1788470197000 UTC=2026-09-03T21:16:37.0000000+00:00 Value=21.2
+    --- ChartDataset Properties ---
+      Timestamp = 1788470625000
+        Type = System.Double
+      Value = 21.2
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 41 : Timestamp=1788470625000 UTC=2026-09-03T21:23:45.0000000+00:00 Value=21.2
+    --- ChartDataset Properties ---
+      Timestamp = 1788471041000
+        Type = System.Double
+      Value = 21.3
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 42 : Timestamp=1788471041000 UTC=2026-09-03T21:30:41.0000000+00:00 Value=21.3
+    --- ChartDataset Properties ---
+      Timestamp = 1788471462000
+        Type = System.Double
+      Value = 21.3
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 43 : Timestamp=1788471462000 UTC=2026-09-03T21:37:42.0000000+00:00 Value=21.3
+    --- ChartDataset Properties ---
+      Timestamp = 1788471886000
+        Type = System.Double
+      Value = 21.2
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 44 : Timestamp=1788471886000 UTC=2026-09-03T21:44:46.0000000+00:00 Value=21.2
+    --- ChartDataset Properties ---
+      Timestamp = 1788472308000
+        Type = System.Double
+      Value = 21.2
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 45 : Timestamp=1788472308000 UTC=2026-09-03T21:51:48.0000000+00:00 Value=21.2
+    --- ChartDataset Properties ---
+      Timestamp = 1788472731000
+        Type = System.Double
+      Value = 21.2
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 46 : Timestamp=1788472731000 UTC=2026-09-03T21:58:51.0000000+00:00 Value=21.2
+    --- ChartDataset Properties ---
+      Timestamp = 1788473154000
+        Type = System.Double
+      Value = 21.2
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 47 : Timestamp=1788473154000 UTC=2026-09-03T22:05:54.0000000+00:00 Value=21.2
+    --- ChartDataset Properties ---
+      Timestamp = 1788473578000
+        Type = System.Double
+      Value = 21.3
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 48 : Timestamp=1788473578000 UTC=2026-09-03T22:12:58.0000000+00:00 Value=21.3
+    --- ChartDataset Properties ---
+      Timestamp = 1788473999000
+        Type = System.Double
+      Value = 21.3
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 49 : Timestamp=1788473999000 UTC=2026-09-03T22:19:59.0000000+00:00 Value=21.3
+    --- ChartDataset Properties ---
+      Timestamp = 1788474423000
+        Type = System.Double
+      Value = 21.3
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 50 : Timestamp=1788474423000 UTC=2026-09-03T22:27:03.0000000+00:00 Value=21.3
+    --- ChartDataset Properties ---
+      Timestamp = 1788474846000
+        Type = System.Double
+      Value = 21.2
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 51 : Timestamp=1788474846000 UTC=2026-09-03T22:34:06.0000000+00:00 Value=21.2
+    --- ChartDataset Properties ---
+      Timestamp = 1788475268000
+        Type = System.Double
+      Value = 21.2
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 52 : Timestamp=1788475268000 UTC=2026-09-03T22:41:08.0000000+00:00 Value=21.2
+
+Series 2
+==========
+SeriesID              : Temperature2
+Datasets              : 52
+LineColor             : #8C1437
+FormattedTimestamp    : 03.09.2026&nbsp;&nbsp;22:41
+FormattedMeasurement  : 16,4°C
+ConnectionLost        : False
+LowBattery            : False
+AlertWasActive        : False
+CardStatus            : NoAlert
+AlertActive           : False
+AlertSettingActive    : True
+    --- ChartDataset Properties ---
+      Timestamp = 1788453708000
+        Type = System.Double
+      Value = 16.6
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 1 : Timestamp=1788453708000 UTC=2026-09-03T16:41:48.0000000+00:00 Value=16.6
+    --- ChartDataset Properties ---
+      Timestamp = 1788454129000
+        Type = System.Double
+      Value = 16.7
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 2 : Timestamp=1788454129000 UTC=2026-09-03T16:48:49.0000000+00:00 Value=16.7
+    --- ChartDataset Properties ---
+      Timestamp = 1788454553000
+        Type = System.Double
+      Value = 16.6
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 3 : Timestamp=1788454553000 UTC=2026-09-03T16:55:53.0000000+00:00 Value=16.6
+    --- ChartDataset Properties ---
+      Timestamp = 1788454975000
+        Type = System.Double
+      Value = 16.6
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 4 : Timestamp=1788454975000 UTC=2026-09-03T17:02:55.0000000+00:00 Value=16.6
+    --- ChartDataset Properties ---
+      Timestamp = 1788455398000
+        Type = System.Double
+      Value = 16.5
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 5 : Timestamp=1788455398000 UTC=2026-09-03T17:09:58.0000000+00:00 Value=16.5
+    --- ChartDataset Properties ---
+      Timestamp = 1788455821000
+        Type = System.Double
+      Value = 16.5
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 6 : Timestamp=1788455821000 UTC=2026-09-03T17:17:01.0000000+00:00 Value=16.5
+    --- ChartDataset Properties ---
+      Timestamp = 1788456245000
+        Type = System.Double
+      Value = 16.5
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 7 : Timestamp=1788456245000 UTC=2026-09-03T17:24:05.0000000+00:00 Value=16.5
+    --- ChartDataset Properties ---
+      Timestamp = 1788456668000
+        Type = System.Double
+      Value = 16.5
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 8 : Timestamp=1788456668000 UTC=2026-09-03T17:31:08.0000000+00:00 Value=16.5
+    --- ChartDataset Properties ---
+      Timestamp = 1788457092000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 9 : Timestamp=1788457092000 UTC=2026-09-03T17:38:12.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788457513000
+        Type = System.Double
+      Value = 16.5
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 10 : Timestamp=1788457513000 UTC=2026-09-03T17:45:13.0000000+00:00 Value=16.5
+    --- ChartDataset Properties ---
+      Timestamp = 1788457935000
+        Type = System.Double
+      Value = 16.5
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 11 : Timestamp=1788457935000 UTC=2026-09-03T17:52:15.0000000+00:00 Value=16.5
+    --- ChartDataset Properties ---
+      Timestamp = 1788458358000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 12 : Timestamp=1788458358000 UTC=2026-09-03T17:59:18.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788458781000
+        Type = System.Double
+      Value = 16.5
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 13 : Timestamp=1788458781000 UTC=2026-09-03T18:06:21.0000000+00:00 Value=16.5
+    --- ChartDataset Properties ---
+      Timestamp = 1788459204000
+        Type = System.Double
+      Value = 16.5
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 14 : Timestamp=1788459204000 UTC=2026-09-03T18:13:24.0000000+00:00 Value=16.5
+    --- ChartDataset Properties ---
+      Timestamp = 1788459627000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 15 : Timestamp=1788459627000 UTC=2026-09-03T18:20:27.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788460051000
+        Type = System.Double
+      Value = 16.5
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 16 : Timestamp=1788460051000 UTC=2026-09-03T18:27:31.0000000+00:00 Value=16.5
+    --- ChartDataset Properties ---
+      Timestamp = 1788460474000
+        Type = System.Double
+      Value = 16.5
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 17 : Timestamp=1788460474000 UTC=2026-09-03T18:34:34.0000000+00:00 Value=16.5
+    --- ChartDataset Properties ---
+      Timestamp = 1788460896000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 18 : Timestamp=1788460896000 UTC=2026-09-03T18:41:36.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788461318000
+        Type = System.Double
+      Value = 16.5
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 19 : Timestamp=1788461318000 UTC=2026-09-03T18:48:38.0000000+00:00 Value=16.5
+    --- ChartDataset Properties ---
+      Timestamp = 1788461747000
+        Type = System.Double
+      Value = 16.5
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 20 : Timestamp=1788461747000 UTC=2026-09-03T18:55:47.0000000+00:00 Value=16.5
+    --- ChartDataset Properties ---
+      Timestamp = 1788462163000
+        Type = System.Double
+      Value = 16.5
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 21 : Timestamp=1788462163000 UTC=2026-09-03T19:02:43.0000000+00:00 Value=16.5
+    --- ChartDataset Properties ---
+      Timestamp = 1788462586000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 22 : Timestamp=1788462586000 UTC=2026-09-03T19:09:46.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788463009000
+        Type = System.Double
+      Value = 16.5
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 23 : Timestamp=1788463009000 UTC=2026-09-03T19:16:49.0000000+00:00 Value=16.5
+    --- ChartDataset Properties ---
+      Timestamp = 1788463433000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 24 : Timestamp=1788463433000 UTC=2026-09-03T19:23:53.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788463854000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 25 : Timestamp=1788463854000 UTC=2026-09-03T19:30:54.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788464278000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 26 : Timestamp=1788464278000 UTC=2026-09-03T19:37:58.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788464701000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 27 : Timestamp=1788464701000 UTC=2026-09-03T19:45:01.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788465125000
+        Type = System.Double
+      Value = 16.3
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 28 : Timestamp=1788465125000 UTC=2026-09-03T19:52:05.0000000+00:00 Value=16.3
+    --- ChartDataset Properties ---
+      Timestamp = 1788465547000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 29 : Timestamp=1788465547000 UTC=2026-09-03T19:59:07.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788465970000
+        Type = System.Double
+      Value = 16.5
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 30 : Timestamp=1788465970000 UTC=2026-09-03T20:06:10.0000000+00:00 Value=16.5
+    --- ChartDataset Properties ---
+      Timestamp = 1788466392000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 31 : Timestamp=1788466392000 UTC=2026-09-03T20:13:12.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788466816000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 32 : Timestamp=1788466816000 UTC=2026-09-03T20:20:16.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788467237000
+        Type = System.Double
+      Value = 16.5
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 33 : Timestamp=1788467237000 UTC=2026-09-03T20:27:17.0000000+00:00 Value=16.5
+    --- ChartDataset Properties ---
+      Timestamp = 1788467661000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 34 : Timestamp=1788467661000 UTC=2026-09-03T20:34:21.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788468085000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 35 : Timestamp=1788468085000 UTC=2026-09-03T20:41:25.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788468507000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 36 : Timestamp=1788468507000 UTC=2026-09-03T20:48:27.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788468928000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 37 : Timestamp=1788468928000 UTC=2026-09-03T20:55:28.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788469350000
+        Type = System.Double
+      Value = 16.3
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 38 : Timestamp=1788469350000 UTC=2026-09-03T21:02:30.0000000+00:00 Value=16.3
+    --- ChartDataset Properties ---
+      Timestamp = 1788469774000
+        Type = System.Double
+      Value = 16.5
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 39 : Timestamp=1788469774000 UTC=2026-09-03T21:09:34.0000000+00:00 Value=16.5
+    --- ChartDataset Properties ---
+      Timestamp = 1788470197000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 40 : Timestamp=1788470197000 UTC=2026-09-03T21:16:37.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788470625000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 41 : Timestamp=1788470625000 UTC=2026-09-03T21:23:45.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788471041000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 42 : Timestamp=1788471041000 UTC=2026-09-03T21:30:41.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788471462000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 43 : Timestamp=1788471462000 UTC=2026-09-03T21:37:42.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788471886000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 44 : Timestamp=1788471886000 UTC=2026-09-03T21:44:46.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788472308000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 45 : Timestamp=1788472308000 UTC=2026-09-03T21:51:48.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788472731000
+        Type = System.Double
+      Value = 16.5
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 46 : Timestamp=1788472731000 UTC=2026-09-03T21:58:51.0000000+00:00 Value=16.5
+    --- ChartDataset Properties ---
+      Timestamp = 1788473154000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 47 : Timestamp=1788473154000 UTC=2026-09-03T22:05:54.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788473578000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 48 : Timestamp=1788473578000 UTC=2026-09-03T22:12:58.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788473999000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 49 : Timestamp=1788473999000 UTC=2026-09-03T22:19:59.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788474423000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 50 : Timestamp=1788474423000 UTC=2026-09-03T22:27:03.0000000+00:00 Value=16.4
+    --- ChartDataset Properties ---
+      Timestamp = 1788474846000
+        Type = System.Double
+      Value = 16.3
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 51 : Timestamp=1788474846000 UTC=2026-09-03T22:34:06.0000000+00:00 Value=16.3
+    --- ChartDataset Properties ---
+      Timestamp = 1788475268000
+        Type = System.Double
+      Value = 16.4
+        Type = System.Double
+    --- End ChartDataset Properties ---
+  Dataset 52 : Timestamp=1788475268000 UTC=2026-09-03T22:41:08.0000000+00:00 Value=16.4

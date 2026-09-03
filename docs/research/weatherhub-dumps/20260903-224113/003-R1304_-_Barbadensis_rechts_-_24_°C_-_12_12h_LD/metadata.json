@@ -1,0 +1,22 @@
+﻿{
+    "CaptureRun":  "20260903-224113",
+    "DeviceNumber":  3,
+    "DeviceId":  "01651662457B",
+    "Name":  "R1304 - Barbadensis rechts - 24 °C - 12/12h LD",
+    "CaptureStarted":  "2026-09-03T22:41:31.3024513+02:00",
+    "Endpoint":  "https://www.wh-observer.de/Devices/SparkLineChartData",
+    "Method":  "POST",
+    "RequestBody":  {
+                        "deviceID":  "01651662457B"
+                    },
+    "Decoder":  "decode-weatherhub-v2.ps1",
+    "Research":  "ALL ChartDataset fields, CLR types and values",
+    "Status":  "OK",
+    "CaptureFinished":  "2026-09-03T22:41:31.7960927+02:00",
+    "DurationMilliseconds":  493.64140000000003,
+    "HttpStatus":  200,
+    "Base64Length":  2888,
+    "DecoderStatus":  "OK",
+    "SeriesCount":  2,
+    "DatasetFieldRecordCount":  200
+}

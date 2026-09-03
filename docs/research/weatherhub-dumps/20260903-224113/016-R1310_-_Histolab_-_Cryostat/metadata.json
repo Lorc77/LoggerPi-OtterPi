@@ -1,0 +1,22 @@
+﻿{
+    "CaptureRun":  "20260903-224113",
+    "DeviceNumber":  16,
+    "DeviceId":  "010678C5AB4A",
+    "Name":  "R1310 - Histolab - Cryostat",
+    "CaptureStarted":  "2026-09-03T22:41:38.7269161+02:00",
+    "Endpoint":  "https://www.wh-observer.de/Devices/SparkLineChartData",
+    "Method":  "POST",
+    "RequestBody":  {
+                        "deviceID":  "010678C5AB4A"
+                    },
+    "Decoder":  "decode-weatherhub-v2.ps1",
+    "Research":  "ALL ChartDataset fields, CLR types and values",
+    "Status":  "OK",
+    "CaptureFinished":  "2026-09-03T22:41:39.4123157+02:00",
+    "DurationMilliseconds":  685.39960000000008,
+    "HttpStatus":  200,
+    "Base64Length":  2944,
+    "DecoderStatus":  "OK",
+    "SeriesCount":  2,
+    "DatasetFieldRecordCount":  204
+}

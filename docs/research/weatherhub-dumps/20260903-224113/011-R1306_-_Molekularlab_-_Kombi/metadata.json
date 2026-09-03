@@ -1,0 +1,22 @@
+﻿{
+    "CaptureRun":  "20260903-224113",
+    "DeviceNumber":  11,
+    "DeviceId":  "015F9410F3EB",
+    "Name":  "R1306 - Molekularlab - Kombi",
+    "CaptureStarted":  "2026-09-03T22:41:35.8123076+02:00",
+    "Endpoint":  "https://www.wh-observer.de/Devices/SparkLineChartData",
+    "Method":  "POST",
+    "RequestBody":  {
+                        "deviceID":  "015F9410F3EB"
+                    },
+    "Decoder":  "decode-weatherhub-v2.ps1",
+    "Research":  "ALL ChartDataset fields, CLR types and values",
+    "Status":  "OK",
+    "CaptureFinished":  "2026-09-03T22:41:36.3282056+02:00",
+    "DurationMilliseconds":  515.898,
+    "HttpStatus":  200,
+    "Base64Length":  2996,
+    "DecoderStatus":  "OK",
+    "SeriesCount":  2,
+    "DatasetFieldRecordCount":  208
+}

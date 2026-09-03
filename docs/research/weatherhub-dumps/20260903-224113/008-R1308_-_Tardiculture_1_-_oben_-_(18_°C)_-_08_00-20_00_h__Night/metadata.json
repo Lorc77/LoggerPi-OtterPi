@@ -1,0 +1,22 @@
+﻿{
+    "CaptureRun":  "20260903-224113",
+    "DeviceNumber":  8,
+    "DeviceId":  "015C32E3CED1",
+    "Name":  "R1308 - Tardiculture 1 - oben - (18 °C) - 08:00-20:00 h \"Night\"",
+    "CaptureStarted":  "2026-09-03T22:41:33.8481814+02:00",
+    "Endpoint":  "https://www.wh-observer.de/Devices/SparkLineChartData",
+    "Method":  "POST",
+    "RequestBody":  {
+                        "deviceID":  "015C32E3CED1"
+                    },
+    "Decoder":  "decode-weatherhub-v2.ps1",
+    "Research":  "ALL ChartDataset fields, CLR types and values",
+    "Status":  "OK",
+    "CaptureFinished":  "2026-09-03T22:41:34.7298372+02:00",
+    "DurationMilliseconds":  881.6558,
+    "HttpStatus":  200,
+    "Base64Length":  2944,
+    "DecoderStatus":  "OK",
+    "SeriesCount":  2,
+    "DatasetFieldRecordCount":  204
+}
