@@ -663,22 +663,39 @@ Das ist insbesondere für Status- und Alert-Felder relevant.
 
 Eine `ChartSeries` enthält derzeit folgende rekonstruierten Felder:
 
-| Feld | Typ | Bedeutung |
-|---:|---|---|
-| 1 | string | SeriesID |
-| 2 | message | Datasets |
-| 3 | string | LineColor |
-| 4 | string | FormattedTimestamp |
-| 5 | string | FormattedMeasurement |
-| 6 | bool | ConnectionLost |
-| 7 | bool | LowBattery |
-| 8 | bool | AlertWasActive |
-| 9 | string | CardStatus |
-| 10 | bool | AlertActive |
-| 11 | bool | AlertSettingActive |
+Feld  | Typ  | Bedeutung
+--- | --- | ---
+1  | string  | SeriesID
+2  | message  | Datasets
+3  | string  | LineColor
+4  | string  | FormattedTimestamp
+5  | string  | FormattedMeasurement
+6  | bool  | ConnectionLost
+7  | bool  | LowBattery
+8  | bool  | AlertWasActive
+9  | string  | CardStatus
+10  | bool  | AlertActive
+11  | bool  | AlertSettingActive
 
-Die Felder `ConnectionLost` und `LowBattery` sind für die spätere
-Überwachung besonders interessant.
+`FormattedMeasurement` ist ein serverseitig bereits formatierter Messwert der jeweiligen
+Series. Die Cross-Dump-Untersuchung vom 03.09.2026 zeigt beispielsweise:
+
+- Temperature → `"17,0°C"`
+- Humidity → `"61 %"`
+- Temperature1 → `"22,3°C"`
+
+Damit handelt es sich sehr wahrscheinlich um den für die Dashboard-/Card-Darstellung
+bestimmten aktuellen Anzeigewert der jeweiligen Messreihe.
+
+Der Wert ist von `ChartDataset.field 2 = Value` zu unterscheiden:
+`Value` enthält die numerischen historischen Messpunkte, während `FormattedMeasurement`
+bereits als Darstellungstext mit Einheit und lokaler Formatierung vorliegt.
+
+Die Interpretation als Dashboard-Anzeigewert ist durch die beobachteten Payloads stark
+gestützt, aber noch nicht durch einen direkten Vergleich mit dem gerenderten Dashboard-HTML
+als endgültiges Server-Schema bewiesen.
+
+Die Felder `ConnectionLost` und `LowBattery` sind für die spätere Überwachung besonders interessant.
 
 ---
 
@@ -1202,22 +1219,28 @@ Engineering-/Integrationsphase übergegangen.
 
 Trotz des weit fortgeschrittenen Standes sind einige Punkte weiterhin offen:
 
-- vollständige automatische Extraktion der Device-Liste
-- vollständige Zuordnung aller 19 Sensoren
-- vollständige Abdeckung aller vorkommenden ID-Typen
-- vollständige Bedeutung des `Measurement`-Nested-Messages
-- vollständige Bedeutung aller Statusfelder
-- exakte Session-Lebensdauer
-- Verhalten bei abgelaufener Session
-- Verhalten bei temporären HTTP-Fehlern
-- Verhalten bei einzelnen nicht erreichbaren Sensoren
-- mögliche Rate Limits
-- mögliche serverseitige Nutzungsbeschränkungen
-- langfristige Stabilität des Web-Endpoints
-- endgültige Health-State-Matrix für den OtterPi
+  * vollständige Bedeutung des `Measurement`-Nested-Messages
+  * vollständige Bedeutung aller Statusfelder
+  * exakte Session-Lebensdauer
+  * Verhalten bei abgelaufener Session
+  * Verhalten bei temporären HTTP-Fehlern
+  * Verhalten bei einzelnen nicht erreichbaren Sensoren
+  * mögliche Rate Limits
+  * mögliche serverseitige Nutzungsbeschränkungen
+  * langfristige Stabilität des Web-Endpoints
+  * endgültige Health-State-Matrix für den OtterPi
+  * direkter UI-Abgleich von `FormattedMeasurement` mit der tatsächlich gerenderten
+    Dashboard-Anzeige
 
-Diese Punkte sind jedoch keine grundlegende Blockade mehr für einen ersten
-automatisierten Abruf.
+Nicht mehr offen sind dagegen:
+
+  * automatische Device Discovery
+  * vollständige Erfassung der aktuell vorhandenen 19 Geräte
+  * praktische Abdeckung der ID-Typen `0E` und `01`
+  * vollständiger Cross-Dump-Abgleich der 19 Sensoren
+  * Zuordnung der beiden bekannten Sensorfamilien zu ihren beobachteten Kanalstrukturen
+
+Diese Punkte sind keine grundlegende Blockade mehr für einen ersten automatisierten Abruf.
 
 ---
 
@@ -1326,7 +1349,77 @@ werden.
 
 ---
 
-## 40.3 Device ID vs. Anzeigename
+## 40.3 Vollständiger Cross-Dump-Abgleich der 19 Sensoren
+
+Am 03.09.2026 wurden mit dem automatisierten Capture-Skript alle 19 aktuell
+bekannten WeatherHub-Observer-Sensoren abgerufen und anschließend mit dem
+vorhandenen Decoder vollständig dekodiert.
+
+Der Capture-Lauf ist unter:
+
+`docs/research/weatherhub-dumps/20260903-163837/`
+
+archiviert.
+
+Der zugehörige Index ist:
+
+`docs/research/weatherhub-dumps/20260903-163837/index.json`
+
+Ergebnis:
+
+- erwartete Geräte: 19
+- gefundene Geräte: 19
+- HTTP-Erfolg: 19/19
+- alle Responses dekodierbar
+- alle Geräte liefern zwei Messreihen
+
+Der Cross-Dump-Abgleich bestätigt zwei Sensorfamilien:
+
+### ID-Typ 0E – TFA 30.3312.02
+
+Genau ein Gerät verwendet diesen Sensortyp.
+
+Der Sensor besitzt zwei Messkanäle:
+
+- `Temperature`
+- `Humidity`
+
+Der Sensor wird im vorliegenden Bestand in einem Kühler eingesetzt.
+
+Die Payload bestätigt damit nicht nur die Existenz des ID-Typs `0E`, sondern auch
+die konkrete Kanalstruktur der Sensorfamilie.
+
+### ID-Typ 01 – TFA 30.3313.02
+
+Die übrigen 18 Geräte gehören zu dieser Sensorfamilie.
+
+Jedes Gerät besitzt zwei Temperaturkanäle:
+
+- `Temperature1` – interner Temperaturfühler des WeatherHub-Geräts. Dieser befindet
+  sich außerhalb des überwachten Kühlschrank-/Gefrierraums und entspricht damit
+  praktisch der Raum-/Umgebungstemperatur.
+- `Temperature2` – externer Kabelfühler. Dieser befindet sich im überwachten
+  Kühlschrank bzw. Gefrierschrank und liefert die eigentliche Geräte-/Innenraumtemperatur.
+
+Damit ist die bisher nur anhand einzelner Sensoren angenommene Zuordnung der
+ID-Typen über den vollständigen Bestand von 19 Geräten konsistent bestätigt.
+
+Für die spätere Normalisierung sollte daher nicht nur der `SeriesID`, sondern auch
+der Sensor-/ID-Typ berücksichtigt werden:
+
+`ID-Typ 0E`
+→ Temperature + Humidity
+
+`ID-Typ 01`
+→ Temperature1 (Umgebung) + Temperature2 (überwachter Innenraum)
+
+Die konkrete fachliche Bezeichnung der Kanäle ist eine Interpretation aus
+Sensorhardware, Einsatzort und Payload-Struktur. Die technischen `SeriesID`-Namen
+bleiben die unmittelbar aus der Payload belegten Werte.
+
+---
+
+## 40.4 Device ID vs. Anzeigename
 
 Die Untersuchung bestätigt die geplante Trennung zwischen technischer
 Identität und Anzeigeinformationen.
@@ -1370,7 +1463,7 @@ Damit ergibt sich:
 
 ---
 
-## 40.4 Gleiche Namen sind zulässig
+## 40.5 Gleiche Namen sind zulässig
 
 Die Device-Liste zeigt bereits, dass unterschiedliche Device-IDs denselben
 Anzeigenamen besitzen können.
@@ -1393,7 +1486,7 @@ WeatherHub-Geräts verwendet werden.
 
 ---
 
-## 40.5 Konsequenz für den automatisierten Abruf
+## 40.6 Konsequenz für den automatisierten Abruf
 
 Der produktive Ablauf kann damit vollständig dynamisch aufgebaut werden:
 
@@ -1433,7 +1526,7 @@ ein:
 
 ---
 
-## 40.6 Device Discovery und Persistenz
+## 40.7 Device Discovery und Persistenz
 
 Für die spätere Datenhaltung empfiehlt sich eine Trennung zwischen
 Gerätestammdaten und Messdaten.
@@ -1466,7 +1559,7 @@ Historische Messdaten benötigen keine Änderung.
 
 ---
 
-## 40.7 Device Discovery ist jetzt kein offener Reverse-Engineering-Punkt mehr
+## 40.8 Device Discovery ist jetzt kein offener Reverse-Engineering-Punkt mehr
 
 Die ursprüngliche Frage war:
 
@@ -2405,11 +2498,11 @@ Damit ist WeatherHub Observer bereit für die nächste Phase:
 
 ---
 
-## 60. Reproduktionsskript tes-weatherhub-observer-v4.ps1
+## 60. Reproduktionsskript test-weatherhub-observer-v4.ps1
 
 Das Skript:
 
-    tes-weatherhub-observer-v4.ps1
+    test-weatherhub-observer-v4.ps1
 
 ist das aktuelle technische Reproduktionsskript für den
 WeatherHub-Observer-Zugriff.
@@ -2449,3 +2542,129 @@ in getrennte Komponenten überführen:
     WeatherHubAdapter
 
 Das Testskript bleibt dabei als Regressionstest bzw. Referenz erhalten.
+
+---
+
+## 61. Vollständiger Cross-Dump-Test vom 03.09.2026
+
+Am 03.09.2026 wurde der bisher wichtigste Regressionstest durchgeführt:
+
+Das neue Capture-Skript
+
+`docs/research/capture-weatherhub-research-all.ps1`
+
+ruft automatisch die aktuell vorhandenen WeatherHub-Observer-Geräte ab und
+speichert für jedes Gerät die Rohpayload sowie die dekodierten Ergebnisse.
+
+Zusätzlich steht für die Untersuchung einzelner Sparkline-Payloads das Skript
+
+`docs/research/dump-weatherhub-sparkline.ps1`
+
+zur Verfügung.
+
+### 61.1 Vollständiger Abruf
+
+Der Testlauf:
+
+`20260903-163837`
+
+enthält:
+
+- 19 erwartete Geräte
+- 19 tatsächlich gefundene Geräte
+- 19 erfolgreiche HTTP-Responses
+- 19 dekodierte Ergebnisse
+- jeweils zwei Messreihen pro Gerät
+
+Die Ergebnisse sind unter:
+
+`docs/research/weatherhub-dumps/20260903-163837/`
+
+gespeichert.
+
+Der maschinenlesbare Gesamtindex ist:
+
+`docs/research/weatherhub-dumps/20260903-163837/index.json`
+
+Damit ist der komplette Datenabruf nicht mehr nur für einzelne exemplarische
+Sensoren reproduziert, sondern für den gesamten aktuell vorhandenen Sensorbestand.
+
+### 61.2 Bestätigte Sensorfamilien
+
+Der Cross-Dump-Abgleich bestätigt:
+
+`ID-Typ 0E`
+→ TFA 30.3312.02
+→ `Temperature` + `Humidity`
+→ 1 Sensor im aktuellen Bestand
+
+`ID-Typ 01`
+→ TFA 30.3313.02
+→ `Temperature1` + `Temperature2`
+→ 18 Sensoren im aktuellen Bestand
+
+Bei ID-Typ `01` entspricht `Temperature1` dem internen Fühler des WeatherHub-
+Geräts und damit praktisch der Umgebungstemperatur außerhalb des überwachten
+Kühlschrank-/Gefrierraums.
+
+`Temperature2` stammt vom externen Kabelfühler und entspricht der Temperatur
+innerhalb des überwachten Kühlschranks bzw. Gefrierschranks.
+
+### 61.3 FormattedMeasurement / ChartSeries.field 5
+
+Die vollständigen Dumps liefern zusätzlich eine wichtige Bestätigung für
+`ChartSeries.field 5`.
+
+Das Feld ist als:
+
+`FormattedMeasurement`
+
+rekonstruiert.
+
+Beobachtete Beispiele:
+
+`Temperature` → `"17,0°C"`
+
+`Humidity` → `"61 %"`
+
+`Temperature1` → `"22,3°C"`
+
+Das Feld enthält damit offenbar den serverseitig bereits formatierten aktuellen
+Messwert der jeweiligen Series.
+
+Die historischen numerischen Messpunkte liegen dagegen in:
+
+`ChartDataset.field 2 = Value`
+
+`FormattedMeasurement` ist daher nicht als Ersatz für `Value` zu betrachten.
+Vielmehr handelt es sich sehr wahrscheinlich um einen für die Dashboard-/Card-
+Darstellung vorbereiteten Anzeigewert inklusive Einheit und lokaler Formatierung.
+
+Ein direkter Vergleich mit dem tatsächlich gerenderten Dashboard ist noch
+ausstehend; deshalb bleibt die Bezeichnung „sehr wahrscheinlich“ bewusst erhalten.
+
+### 61.4 Neuer technischer Status
+
+Mit diesem Test ist der Reverse-Engineering-Teil für den grundlegenden
+Sparkline-Datenabruf weitgehend abgeschlossen.
+
+Bewiesen ist nun:
+
+`Login`
+→ `WebRequestSession`
+→ `/Devices`
+→ automatische Device Discovery
+→ 19 Geräte
+→ `SparkLineChartData`
+→ Base64
+→ Binärdaten
+→ `ChartData`
+→ `ChartSeries`
+→ zwei Series pro Gerät
+→ `Timestamp` + `Value`
+→ Statusinformationen
+→ `FormattedMeasurement`
+
+Der nächste Arbeitsschritt ist damit nicht mehr die Suche nach weiteren
+grundlegenden Datenstrukturen, sondern die saubere technische Normalisierung
+der bereits bekannten Daten in den WeatherHub-Adapter.
