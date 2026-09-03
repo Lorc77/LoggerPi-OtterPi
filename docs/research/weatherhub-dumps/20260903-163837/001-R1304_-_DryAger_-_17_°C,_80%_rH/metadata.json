@@ -1,0 +1,20 @@
+﻿{
+    "CaptureRun":  "20260903-163837",
+    "DeviceNumber":  1,
+    "DeviceId":  "0E74A4597B54",
+    "Name":  "R1304 - DryAger - 17 °C, 80% rH",
+    "CaptureStarted":  "2026-09-03T16:39:03.5962753+02:00",
+    "Endpoint":  "https://www.wh-observer.de/Devices/SparkLineChartData",
+    "Method":  "POST",
+    "RequestBody":  {
+                        "deviceID":  "0E74A4597B54"
+                    },
+    "Decoder":  "decode-weatherhub-v2.ps1",
+    "Status":  "OK",
+    "CaptureFinished":  "2026-09-03T16:39:04.4146246+02:00",
+    "DurationMilliseconds":  818.34930000000008,
+    "HttpStatus":  200,
+    "Base64Length":  7464,
+    "DecoderStatus":  "OK",
+    "SeriesCount":  2
+}

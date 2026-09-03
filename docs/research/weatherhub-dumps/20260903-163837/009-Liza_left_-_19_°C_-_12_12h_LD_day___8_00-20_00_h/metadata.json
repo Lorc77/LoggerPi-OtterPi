@@ -1,0 +1,20 @@
+﻿{
+    "CaptureRun":  "20260903-163837",
+    "DeviceNumber":  9,
+    "DeviceId":  "015D087CA01C",
+    "Name":  "Liza left - 19 °C - 12/12h LD day / 8:00-20:00 h",
+    "CaptureStarted":  "2026-09-03T16:39:07.8545141+02:00",
+    "Endpoint":  "https://www.wh-observer.de/Devices/SparkLineChartData",
+    "Method":  "POST",
+    "RequestBody":  {
+                        "deviceID":  "015D087CA01C"
+                    },
+    "Decoder":  "decode-weatherhub-v2.ps1",
+    "Status":  "OK",
+    "CaptureFinished":  "2026-09-03T16:39:08.3566534+02:00",
+    "DurationMilliseconds":  502.13930000000005,
+    "HttpStatus":  200,
+    "Base64Length":  2944,
+    "DecoderStatus":  "OK",
+    "SeriesCount":  2
+}

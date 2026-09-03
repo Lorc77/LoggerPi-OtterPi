@@ -1,0 +1,3804 @@
+﻿MESSAGE ChartData  offset=0 length=5878
+  FIELD 1  wire=2  tagOffset=0
+    LENGTH = 2939
+    HEX    = 0A 0B 54 65 6D 70 65 72 61 74 75 72 65 12 12 09 00 80 EE CD 6B 06 7A 42 11 00 00 00 00 00 00 31 40 12 12 09 00 00 79 EB 6B 06 7A 42 11 00 00 00 00 00 00 31 40 12 12 09 00 00 42 09 6C 06 7A 42 11 66 66 66 66 66 E6 30 40 12 12 09 00 80 CC 26 6C 06 7A 42 11 66 66 66 66 66 E6 30 40 12 12 09 00 80 95 44 6C 06 7A 42 11 CD CC CC CC CC CC 30 40 12 12 09 00 00 79 68 6C 06 7A 42 11 CD CC CC CC CC CC 30 40 12 12 09 00 00 C5 85 6C 06 7A 42 11 66 66 66 66 66 E6 30 40 12 12 09 00 00 0B A4 6C 06 7A 42 11 00 00 00 00 00 00 31 40 12 12 09 00 00 57 C1 6C 06 7A 42 11 00 00 00 00 00 00 31 40 12 12 09 00 00 20 DF 6C 06 7A 42 11 00 00 00 00 00 00 31 40 12 12 09 00 80 AA FC 6C 06 7A 42 11 00 00 00 00 00 00 31 40 12 12 09 00 80 F0 1A 6D 06 7A 42 11 00 00 00 00 00 00 31 40 12 12 09 00 80 3C 38 6D 06 7A 42 11 00 00 00 00 00 00 31 40 12 12 09 00 00 C7 55 6D 06 7A 42 11 66 66 66 66 66 E6 30 40 12 12 09 00 80 A1 B9 6D 06 7A 42 11 CD CC CC CC CC CC 30 40 12 12 09 00 80 ED D6 6D 06 7A 42 11 CD CC CC CC CC CC 30 40 12 12 09 00 00 F5 F4 6D 06 7A 42 11 66 66 66 66 66 E6 30 40 12 12 09 00 00 41 12 6E 06 7A 42 11 66 66 66 66 66 E6 30 40 12 12 09 00 80 CB 2F 6E 06 7A 42 11 00 00 00 00 00 00 31 40 12 12 09 00 80 94 4D 6E 06 7A 42 11 9A 99 99 99 99 19 31 40 12 12 09 00 80 5D 6B 6E 06 7A 42 11 33 33 33 33 33 33 31 40 12 12 09 00 80 BA 9A 6E 06 7A 42 11 9A 99 99 99 99 19 31 40 12 12 09 00 80 83 B8 6E 06 7A 42 11 9A 99 99 99 99 19 31 40 12 12 09 00 80 CF D5 6E 06 7A 42 11 00 00 00 00 00 00 31 40 12 12 09 00 80 98 F3 6E 06 7A 42 11 00 00 00 00 00 00 31 40 12 12 09 00 80 61 11 6F 06 7A 42 11 00 00 00 00 00 00 31 40 12 12 09 00 00 EC 2E 6F 06 7A 42 11 00 00 00 00 00 00 31 40 12 12 09 00 80 76 4C 6F 06 7A 42 11 66 66 66 66 66 E6 30 40 12 12 09 00 80 3F 6A 6F 06 7A 42 11 66 66 66 66 66 E6 30 40 12 12 09 00 80 08 88 6F 06 7A 42 11 00 00 00 00 00 00 31 40 12 12 09 00 80 9B AE 6F 06 7A 42 11 00 00 00 00 00 00 31 40 12 12 09 00 80 64 CC 6F 06 7A 42 11 66 66 66 66 66 E6 30 40 12 12 09 00 80 2D EA 6F 06 7A 42 11 66 66 66 66 66 E6 30 40 12 12 09 00 00 B8 07 70 06 7A 42 11 00 00 00 00 00 00 31 40 12 12 09 00 00 81 25 70 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 00 4A 43 70 06 7A 42 11 00 00 00 00 00 80 31 40 12 12 09 00 80 D4 60 70 06 7A 42 11 9A 99 99 99 99 99 31 40 12 12 09 00 80 9D 7E 70 06 7A 42 11 9A 99 99 99 99 99 31 40 12 12 09 00 00 28 9C 70 06 7A 42 11 00 00 00 00 00 80 31 40 12 12 09 00 00 BA D7 70 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 00 06 F5 70 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 00 4C 13 71 06 7A 42 11 66 66 66 66 66 66 31 40 12 12 09 00 00 FD 34 71 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 80 87 52 71 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 80 C7 71 71 06 7A 42 11 33 33 33 33 33 33 31 40 12 12 09 00 80 0D 90 71 06 7A 42 11 00 00 00 00 00 00 31 40 12 12 09 00 80 59 AD 71 06 7A 42 11 00 00 00 00 00 00 31 40 12 12 09 00 80 22 CB 71 06 7A 42 11 66 66 66 66 66 E6 30 40 12 12 09 00 80 6E E8 71 06 7A 42 11 66 66 66 66 66 E6 30 40 12 12 09 00 80 37 06 72 06 7A 42 11 CD CC CC CC CC CC 30 40 12 12 09 00 00 3F 24 72 06 7A 42 11 00 00 00 00 00 00 31 40 12 12 09 00 00 8B 41 72 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 00 54 5F 72 06 7A 42 11 66 66 66 66 66 66 31 40 12 12 09 00 00 A0 7C 72 06 7A 42 11 00 00 00 00 00 80 31 40 12 12 09 00 00 69 9A 72 06 7A 42 11 00 00 00 00 00 80 31 40 12 12 09 00 80 F3 B7 72 06 7A 42 11 00 00 00 00 00 80 31 40 12 12 09 00 00 FB D5 72 06 7A 42 11 00 00 00 00 00 80 31 40 12 12 09 00 00 47 F3 72 06 7A 42 11 CD CC CC CC CC CC 31 40 12 12 09 00 80 4E 11 73 06 7A 42 11 CD CC CC CC CC CC 31 40 12 12 09 00 80 2E 40 73 06 7A 42 11 00 00 00 00 00 00 32 40 12 12 09 00 80 F7 5D 73 06 7A 42 11 00 00 00 00 00 00 32 40 12 12 09 00 80 3D 7C 73 06 7A 42 11 66 66 66 66 66 E6 31 40 12 12 09 00 80 82 AF 73 06 7A 42 11 00 00 00 00 00 00 32 40 12 12 09 00 80 4B CD 73 06 7A 42 11 00 00 00 00 00 00 32 40 12 12 09 00 80 14 EB 73 06 7A 42 11 00 00 00 00 00 00 32 40 12 12 09 00 80 60 08 74 06 7A 42 11 00 00 00 00 00 00 32 40 12 12 09 00 80 A6 26 74 06 7A 42 11 00 00 00 00 00 00 32 40 12 12 09 00 80 F2 43 74 06 7A 42 11 00 00 00 00 00 00 32 40 12 12 09 00 00 7D 61 74 06 7A 42 11 66 66 66 66 66 E6 31 40 12 12 09 00 00 46 7F 74 06 7A 42 11 66 66 66 66 66 E6 31 40 12 12 09 00 00 0F 9D 74 06 7A 42 11 CD CC CC CC CC CC 31 40 12 12 09 00 00 D8 BA 74 06 7A 42 11 66 66 66 66 66 E6 31 40 12 12 09 00 00 A1 D8 74 06 7A 42 11 66 66 66 66 66 E6 31 40 12 12 09 00 80 90 FA 74 06 7A 42 11 66 66 66 66 66 E6 31 40 12 12 09 00 80 59 18 75 06 7A 42 11 66 66 66 66 66 E6 31 40 12 12 09 00 80 22 36 75 06 7A 42 11 66 66 66 66 66 E6 31 40 12 12 09 00 80 EB 53 75 06 7A 42 11 CD CC CC CC CC CC 31 40 12 12 09 00 00 BC 8F 75 06 7A 42 11 33 33 33 33 33 B3 31 40 12 12 09 00 00 08 AD 75 06 7A 42 11 33 33 33 33 33 B3 31 40 12 12 09 00 80 D8 E8 75 06 7A 42 11 9A 99 99 99 99 99 31 40 12 12 09 00 80 24 06 76 06 7A 42 11 9A 99 99 99 99 99 31 40 12 12 09 00 80 70 23 76 06 7A 42 11 00 00 00 00 00 80 31 40 12 12 09 00 80 7F 5F 76 06 7A 42 11 00 00 00 00 00 80 31 40 12 12 09 00 80 95 85 76 06 7A 42 11 9A 99 99 99 99 99 31 40 12 12 09 00 80 5E A3 76 06 7A 42 11 00 00 00 00 00 80 31 40 12 12 09 00 80 AA C0 76 06 7A 42 11 00 00 00 00 00 80 31 40 12 12 09 00 00 35 DE 76 06 7A 42 11 00 00 00 00 00 80 31 40 12 12 09 00 80 3C FC 76 06 7A 42 11 00 00 00 00 00 80 31 40 12 12 09 00 00 D6 55 77 06 7A 42 11 00 00 00 00 00 80 31 40 12 12 09 00 00 22 73 77 06 7A 42 11 66 66 66 66 66 66 31 40 12 12 09 00 80 AC 90 77 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 00 37 AE 77 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 80 07 EA 77 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 80 53 07 78 06 7A 42 11 33 33 33 33 33 33 31 40 12 12 09 00 00 5B 25 78 06 7A 42 11 33 33 33 33 33 33 31 40 12 12 09 00 00 95 45 78 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 00 5E 63 78 06 7A 42 11 66 66 66 66 66 66 31 40 12 12 09 00 00 39 FB 78 06 7A 42 11 9A 99 99 99 99 99 31 40 12 12 09 00 00 85 18 79 06 7A 42 11 9A 99 99 99 99 99 31 40 12 12 09 00 00 17 54 79 06 7A 42 11 00 00 00 00 00 80 31 40 12 12 09 00 00 63 71 79 06 7A 42 11 00 00 00 00 00 80 31 40 12 12 09 00 00 D8 9C 79 06 7A 42 11 66 66 66 66 66 66 31 40 12 12 09 00 00 24 BA 79 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 00 7F 13 7A 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 00 CB 30 7A 06 7A 42 11 33 33 33 33 33 33 31 40 12 12 09 00 80 2D A8 7A 06 7A 42 11 00 00 00 00 00 80 31 40 12 12 09 00 80 79 C5 7A 06 7A 42 11 00 00 00 00 00 80 31 40 12 12 09 00 80 1E E9 7A 06 7A 42 11 00 00 00 00 00 80 31 40 12 12 09 00 00 A9 06 7B 06 7A 42 11 00 00 00 00 00 80 31 40 12 12 09 00 00 E9 25 7B 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 80 FC 41 7B 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 80 3C 61 7B 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 80 05 7F 7B 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 80 51 9C 7B 06 7A 42 11 33 33 33 33 33 33 31 40 12 12 09 00 00 59 BA 7B 06 7A 42 11 33 33 33 33 33 33 31 40 12 12 09 00 00 A5 D7 7B 06 7A 42 11 33 33 33 33 33 33 31 40 12 12 09 00 00 A6 3F 7C 06 7A 42 11 66 66 66 66 66 66 31 40 12 12 09 00 00 F2 5C 7C 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 80 F9 7A 7C 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 80 45 98 7C 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 00 4D B6 7C 06 7A 42 11 33 33 33 33 33 33 31 40 12 12 09 00 80 FB 4A 7D 06 7A 42 11 33 33 33 33 33 33 31 40 12 12 09 00 80 47 68 7D 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 80 10 86 7D 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 80 5C A3 7D 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 80 25 C1 7D 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 80 EE DE 7D 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 00 79 FC 7D 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 00 42 1A 7E 06 7A 42 11 33 33 33 33 33 33 31 40 12 12 09 00 00 8E 37 7E 06 7A 42 11 33 33 33 33 33 33 31 40 12 12 09 00 80 95 55 7E 06 7A 42 11 9A 99 99 99 99 19 31 40 12 12 09 00 80 3A 79 7E 06 7A 42 11 9A 99 99 99 99 19 31 40 12 12 09 00 00 C5 96 7E 06 7A 42 11 9A 99 99 99 99 19 31 40 12 12 09 00 00 45 D5 7E 06 7A 42 11 00 00 00 00 00 00 31 40 12 12 09 00 00 91 F2 7E 06 7A 42 11 9A 99 99 99 99 19 31 40 12 12 09 00 80 E4 2D 7F 06 7A 42 11 66 66 66 66 66 66 31 40 12 12 09 00 80 30 4B 7F 06 7A 42 11 00 00 00 00 00 80 31 40 12 12 09 00 80 F9 68 7F 06 7A 42 11 00 00 00 00 00 80 31 40 12 12 09 00 80 54 C2 7F 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 80 A0 DF 7F 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 00 84 03 80 06 7A 42 11 33 33 33 33 33 33 31 40 12 12 09 00 00 D0 20 80 06 7A 42 11 CD CC CC CC CC 4C 31 40 12 12 09 00 00 99 3E 80 06 7A 42 11 CD CC CC CC CC 4C 31 40 1A 07 23 46 46 38 37 31 35 22 1B 30 33 2E 30 39 2E 32 30 32 36 26 6E 62 73 70 3B 26 6E 62 73 70 3B 31 36 3A 30 34 2A 07 31 37 2C 33 C2 B0 43 30 00 38 00 40 00 4A 07 4E 6F 41 6C 65 72 74 50 00 58 01
+    ASCII  = ..Temperature.......k.zB.......1@.....y.k.zB.......1@.....B.l.zB.fffff.0@......&l.zB.fffff.0@......Dl.zB.......0@.....yhl.zB.......0@.......l.zB.fffff.0@.......l.zB.......1@.....W.l.zB.......1@..... .l.zB.......1@.......l.zB.......1@.......m.zB.......1@.....<8m.zB.......1@......Um.zB.fffff.0@.......m.zB.......0@.......m.zB.......0@.......m.zB.fffff.0@.....A.n.zB.fffff.0@....../n.zB.......1@......Mn.zB.......1@.....]kn.zB.3333331@.......n.zB.......1@.......n.zB.......1@.......n.zB.......1@.......n.zB.......1@.....a.o.zB.......1@.......o.zB.......1@.....vLo.zB.fffff.0@.....?jo.zB.fffff.0@.......o.zB.......1@.......o.zB.......1@.....d.o.zB.fffff.0@.....-.o.zB.fffff.0@.......p.zB.......1@......%p.zB......L1@.....JCp.zB.......1@......`p.zB.......1@......~p.zB.......1@.....(.p.zB.......1@.......p.zB......L1@.......p.zB......L1@.....L.q.zB.ffffff1@......4q.zB......L1@......Rq.zB......L1@......qq.zB.3333331@.......q.zB.......1@.....Y.q.zB.......1@.....".q.zB.fffff.0@.....n.q.zB.fffff.0@.....7.r.zB.......0@.....?$r.zB.......1@......Ar.zB......L1@.....T_r.zB.ffffff1@......|r.zB.......1@.....i.r.zB.......1@.......r.zB.......1@.......r.zB.......1@.....G.r.zB.......1@.....N.s.zB.......1@......@s.zB.......2@......]s.zB.......2@.....=|s.zB.fffff.1@.......s.zB.......2@.....K.s.zB.......2@.......s.zB.......2@.....`.t.zB.......2@......&t.zB.......2@......Ct.zB.......2@.....}at.zB.fffff.1@.....F.t.zB.fffff.1@.......t.zB.......1@.......t.zB.fffff.1@.......t.zB.fffff.1@.......t.zB.fffff.1@.....Y.u.zB.fffff.1@....."6u.zB.fffff.1@......Su.zB.......1@.......u.zB.33333.1@.......u.zB.33333.1@.......u.zB.......1@.....$.v.zB.......1@.....p#v.zB.......1@......_v.zB.......1@.......v.zB.......1@.....^.v.zB.......1@.......v.zB.......1@.....5.v.zB.......1@.....<.v.zB.......1@......Uw.zB.......1@....."sw.zB.ffffff1@.......w.zB......L1@.....7.w.zB......L1@.......w.zB......L1@.....S.x.zB.3333331@.....[%x.zB.3333331@......Ex.zB......L1@.....^cx.zB.ffffff1@.....9.x.zB.......1@.......y.zB.......1@......Ty.zB.......1@.....cqy.zB.......1@.......y.zB.ffffff1@.....$.y.zB......L1@.......z.zB......L1@......0z.zB.3333331@.....-.z.zB.......1@.....y.z.zB.......1@.......z.zB.......1@.......{.zB.......1@......%{.zB......L1@......A{.zB......L1@.....<a{.zB......L1@.......{.zB......L1@.....Q.{.zB.3333331@.....Y.{.zB.3333331@.......{.zB.3333331@......?|.zB.ffffff1@......\|.zB......L1@......z|.zB......L1@.....E.|.zB......L1@.....M.|.zB.3333331@......J}.zB.3333331@.....Gh}.zB......L1@.......}.zB......L1@.....\.}.zB......L1@.....%.}.zB......L1@.......}.zB......L1@.....y.}.zB......L1@.....B.~.zB.3333331@......7~.zB.3333331@......U~.zB.......1@.....:y~.zB.......1@.......~.zB.......1@.....E.~.zB.......1@.......~.zB.......1@......-..zB.ffffff1@.....0K..zB.......1@......h..zB.......1@.....T...zB......L1@.........zB......L1@.........zB.3333331@...... ..zB......L1@......>..zB......L1@..#FF8715".03.09.2026&nbsp;&nbsp;16:04*.17,3..C0.8.@.J.NoAlertP.X.
+    --- NESTED MESSAGE ---
+  MESSAGE ChartData.field1  offset=0 length=2939
+    FIELD 1  wire=2  tagOffset=0
+      LENGTH = 11
+      HEX    = 54 65 6D 70 65 72 61 74 75 72 65
+      ASCII  = Temperature
+    FIELD 2  wire=2  tagOffset=13
+      LENGTH = 18
+      HEX    = 09 00 80 EE CD 6B 06 7A 42 11 00 00 00 00 00 00 31 40
+      ASCII  = .....k.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788430049000
+        RAW            = 00 80 EE CD 6B 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17
+        RAW            = 00 00 00 00 00 00 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=33
+      LENGTH = 18
+      HEX    = 09 00 00 79 EB 6B 06 7A 42 11 00 00 00 00 00 00 31 40
+      ASCII  = ...y.k.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788430170000
+        RAW            = 00 00 79 EB 6B 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17
+        RAW            = 00 00 00 00 00 00 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=53
+      LENGTH = 18
+      HEX    = 09 00 00 42 09 6C 06 7A 42 11 66 66 66 66 66 E6 30 40
+      ASCII  = ...B.l.zB.fffff.0@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788430292000
+        RAW            = 00 00 42 09 6C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 16.9
+        RAW            = 66 66 66 66 66 E6 30 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=73
+      LENGTH = 18
+      HEX    = 09 00 80 CC 26 6C 06 7A 42 11 66 66 66 66 66 E6 30 40
+      ASCII  = ....&l.zB.fffff.0@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788430413000
+        RAW            = 00 80 CC 26 6C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 16.9
+        RAW            = 66 66 66 66 66 E6 30 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=93
+      LENGTH = 18
+      HEX    = 09 00 80 95 44 6C 06 7A 42 11 CD CC CC CC CC CC 30 40
+      ASCII  = ....Dl.zB.......0@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788430535000
+        RAW            = 00 80 95 44 6C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 16.8
+        RAW            = CD CC CC CC CC CC 30 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=113
+      LENGTH = 18
+      HEX    = 09 00 00 79 68 6C 06 7A 42 11 CD CC CC CC CC CC 30 40
+      ASCII  = ...yhl.zB.......0@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788430682000
+        RAW            = 00 00 79 68 6C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 16.8
+        RAW            = CD CC CC CC CC CC 30 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=133
+      LENGTH = 18
+      HEX    = 09 00 00 C5 85 6C 06 7A 42 11 66 66 66 66 66 E6 30 40
+      ASCII  = .....l.zB.fffff.0@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788430802000
+        RAW            = 00 00 C5 85 6C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 16.9
+        RAW            = 66 66 66 66 66 E6 30 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=153
+      LENGTH = 18
+      HEX    = 09 00 00 0B A4 6C 06 7A 42 11 00 00 00 00 00 00 31 40
+      ASCII  = .....l.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788430926000
+        RAW            = 00 00 0B A4 6C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17
+        RAW            = 00 00 00 00 00 00 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=173
+      LENGTH = 18
+      HEX    = 09 00 00 57 C1 6C 06 7A 42 11 00 00 00 00 00 00 31 40
+      ASCII  = ...W.l.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788431046000
+        RAW            = 00 00 57 C1 6C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17
+        RAW            = 00 00 00 00 00 00 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=193
+      LENGTH = 18
+      HEX    = 09 00 00 20 DF 6C 06 7A 42 11 00 00 00 00 00 00 31 40
+      ASCII  = ... .l.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788431168000
+        RAW            = 00 00 20 DF 6C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17
+        RAW            = 00 00 00 00 00 00 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=213
+      LENGTH = 18
+      HEX    = 09 00 80 AA FC 6C 06 7A 42 11 00 00 00 00 00 00 31 40
+      ASCII  = .....l.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788431289000
+        RAW            = 00 80 AA FC 6C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17
+        RAW            = 00 00 00 00 00 00 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=233
+      LENGTH = 18
+      HEX    = 09 00 80 F0 1A 6D 06 7A 42 11 00 00 00 00 00 00 31 40
+      ASCII  = .....m.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788431413000
+        RAW            = 00 80 F0 1A 6D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17
+        RAW            = 00 00 00 00 00 00 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=253
+      LENGTH = 18
+      HEX    = 09 00 80 3C 38 6D 06 7A 42 11 00 00 00 00 00 00 31 40
+      ASCII  = ...<8m.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788431533000
+        RAW            = 00 80 3C 38 6D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17
+        RAW            = 00 00 00 00 00 00 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=273
+      LENGTH = 18
+      HEX    = 09 00 00 C7 55 6D 06 7A 42 11 66 66 66 66 66 E6 30 40
+      ASCII  = ....Um.zB.fffff.0@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788431654000
+        RAW            = 00 00 C7 55 6D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 16.9
+        RAW            = 66 66 66 66 66 E6 30 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=293
+      LENGTH = 18
+      HEX    = 09 00 80 A1 B9 6D 06 7A 42 11 CD CC CC CC CC CC 30 40
+      ASCII  = .....m.zB.......0@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788432063000
+        RAW            = 00 80 A1 B9 6D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 16.8
+        RAW            = CD CC CC CC CC CC 30 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=313
+      LENGTH = 18
+      HEX    = 09 00 80 ED D6 6D 06 7A 42 11 CD CC CC CC CC CC 30 40
+      ASCII  = .....m.zB.......0@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788432183000
+        RAW            = 00 80 ED D6 6D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 16.8
+        RAW            = CD CC CC CC CC CC 30 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=333
+      LENGTH = 18
+      HEX    = 09 00 00 F5 F4 6D 06 7A 42 11 66 66 66 66 66 E6 30 40
+      ASCII  = .....m.zB.fffff.0@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788432306000
+        RAW            = 00 00 F5 F4 6D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 16.9
+        RAW            = 66 66 66 66 66 E6 30 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=353
+      LENGTH = 18
+      HEX    = 09 00 00 41 12 6E 06 7A 42 11 66 66 66 66 66 E6 30 40
+      ASCII  = ...A.n.zB.fffff.0@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788432426000
+        RAW            = 00 00 41 12 6E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 16.9
+        RAW            = 66 66 66 66 66 E6 30 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=373
+      LENGTH = 18
+      HEX    = 09 00 80 CB 2F 6E 06 7A 42 11 00 00 00 00 00 00 31 40
+      ASCII  = ..../n.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788432547000
+        RAW            = 00 80 CB 2F 6E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17
+        RAW            = 00 00 00 00 00 00 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=393
+      LENGTH = 18
+      HEX    = 09 00 80 94 4D 6E 06 7A 42 11 9A 99 99 99 99 19 31 40
+      ASCII  = ....Mn.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788432669000
+        RAW            = 00 80 94 4D 6E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.1
+        RAW            = 9A 99 99 99 99 19 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=413
+      LENGTH = 18
+      HEX    = 09 00 80 5D 6B 6E 06 7A 42 11 33 33 33 33 33 33 31 40
+      ASCII  = ...]kn.zB.3333331@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788432791000
+        RAW            = 00 80 5D 6B 6E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.2
+        RAW            = 33 33 33 33 33 33 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=433
+      LENGTH = 18
+      HEX    = 09 00 80 BA 9A 6E 06 7A 42 11 9A 99 99 99 99 19 31 40
+      ASCII  = .....n.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788432985000
+        RAW            = 00 80 BA 9A 6E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.1
+        RAW            = 9A 99 99 99 99 19 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=453
+      LENGTH = 18
+      HEX    = 09 00 80 83 B8 6E 06 7A 42 11 9A 99 99 99 99 19 31 40
+      ASCII  = .....n.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788433107000
+        RAW            = 00 80 83 B8 6E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.1
+        RAW            = 9A 99 99 99 99 19 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=473
+      LENGTH = 18
+      HEX    = 09 00 80 CF D5 6E 06 7A 42 11 00 00 00 00 00 00 31 40
+      ASCII  = .....n.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788433227000
+        RAW            = 00 80 CF D5 6E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17
+        RAW            = 00 00 00 00 00 00 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=493
+      LENGTH = 18
+      HEX    = 09 00 80 98 F3 6E 06 7A 42 11 00 00 00 00 00 00 31 40
+      ASCII  = .....n.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788433349000
+        RAW            = 00 80 98 F3 6E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17
+        RAW            = 00 00 00 00 00 00 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=513
+      LENGTH = 18
+      HEX    = 09 00 80 61 11 6F 06 7A 42 11 00 00 00 00 00 00 31 40
+      ASCII  = ...a.o.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788433471000
+        RAW            = 00 80 61 11 6F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17
+        RAW            = 00 00 00 00 00 00 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=533
+      LENGTH = 18
+      HEX    = 09 00 00 EC 2E 6F 06 7A 42 11 00 00 00 00 00 00 31 40
+      ASCII  = .....o.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788433592000
+        RAW            = 00 00 EC 2E 6F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17
+        RAW            = 00 00 00 00 00 00 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=553
+      LENGTH = 18
+      HEX    = 09 00 80 76 4C 6F 06 7A 42 11 66 66 66 66 66 E6 30 40
+      ASCII  = ...vLo.zB.fffff.0@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788433713000
+        RAW            = 00 80 76 4C 6F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 16.9
+        RAW            = 66 66 66 66 66 E6 30 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=573
+      LENGTH = 18
+      HEX    = 09 00 80 3F 6A 6F 06 7A 42 11 66 66 66 66 66 E6 30 40
+      ASCII  = ...?jo.zB.fffff.0@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788433835000
+        RAW            = 00 80 3F 6A 6F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 16.9
+        RAW            = 66 66 66 66 66 E6 30 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=593
+      LENGTH = 18
+      HEX    = 09 00 80 08 88 6F 06 7A 42 11 00 00 00 00 00 00 31 40
+      ASCII  = .....o.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788433957000
+        RAW            = 00 80 08 88 6F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17
+        RAW            = 00 00 00 00 00 00 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=613
+      LENGTH = 18
+      HEX    = 09 00 80 9B AE 6F 06 7A 42 11 00 00 00 00 00 00 31 40
+      ASCII  = .....o.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788434115000
+        RAW            = 00 80 9B AE 6F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17
+        RAW            = 00 00 00 00 00 00 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=633
+      LENGTH = 18
+      HEX    = 09 00 80 64 CC 6F 06 7A 42 11 66 66 66 66 66 E6 30 40
+      ASCII  = ...d.o.zB.fffff.0@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788434237000
+        RAW            = 00 80 64 CC 6F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 16.9
+        RAW            = 66 66 66 66 66 E6 30 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=653
+      LENGTH = 18
+      HEX    = 09 00 80 2D EA 6F 06 7A 42 11 66 66 66 66 66 E6 30 40
+      ASCII  = ...-.o.zB.fffff.0@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788434359000
+        RAW            = 00 80 2D EA 6F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 16.9
+        RAW            = 66 66 66 66 66 E6 30 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=673
+      LENGTH = 18
+      HEX    = 09 00 00 B8 07 70 06 7A 42 11 00 00 00 00 00 00 31 40
+      ASCII  = .....p.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788434480000
+        RAW            = 00 00 B8 07 70 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17
+        RAW            = 00 00 00 00 00 00 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=693
+      LENGTH = 18
+      HEX    = 09 00 00 81 25 70 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = ....%p.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788434602000
+        RAW            = 00 00 81 25 70 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=713
+      LENGTH = 18
+      HEX    = 09 00 00 4A 43 70 06 7A 42 11 00 00 00 00 00 80 31 40
+      ASCII  = ...JCp.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788434724000
+        RAW            = 00 00 4A 43 70 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.5
+        RAW            = 00 00 00 00 00 80 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=733
+      LENGTH = 18
+      HEX    = 09 00 80 D4 60 70 06 7A 42 11 9A 99 99 99 99 99 31 40
+      ASCII  = ....`p.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788434845000
+        RAW            = 00 80 D4 60 70 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.6
+        RAW            = 9A 99 99 99 99 99 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=753
+      LENGTH = 18
+      HEX    = 09 00 80 9D 7E 70 06 7A 42 11 9A 99 99 99 99 99 31 40
+      ASCII  = ....~p.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788434967000
+        RAW            = 00 80 9D 7E 70 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.6
+        RAW            = 9A 99 99 99 99 99 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=773
+      LENGTH = 18
+      HEX    = 09 00 00 28 9C 70 06 7A 42 11 00 00 00 00 00 80 31 40
+      ASCII  = ...(.p.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788435088000
+        RAW            = 00 00 28 9C 70 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.5
+        RAW            = 00 00 00 00 00 80 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=793
+      LENGTH = 18
+      HEX    = 09 00 00 BA D7 70 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = .....p.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788435332000
+        RAW            = 00 00 BA D7 70 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=813
+      LENGTH = 18
+      HEX    = 09 00 00 06 F5 70 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = .....p.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788435452000
+        RAW            = 00 00 06 F5 70 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=833
+      LENGTH = 18
+      HEX    = 09 00 00 4C 13 71 06 7A 42 11 66 66 66 66 66 66 31 40
+      ASCII  = ...L.q.zB.ffffff1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788435576000
+        RAW            = 00 00 4C 13 71 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.4
+        RAW            = 66 66 66 66 66 66 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=853
+      LENGTH = 18
+      HEX    = 09 00 00 FD 34 71 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = ....4q.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788435714000
+        RAW            = 00 00 FD 34 71 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=873
+      LENGTH = 18
+      HEX    = 09 00 80 87 52 71 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = ....Rq.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788435835000
+        RAW            = 00 80 87 52 71 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=893
+      LENGTH = 18
+      HEX    = 09 00 80 C7 71 71 06 7A 42 11 33 33 33 33 33 33 31 40
+      ASCII  = ....qq.zB.3333331@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788435963000
+        RAW            = 00 80 C7 71 71 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.2
+        RAW            = 33 33 33 33 33 33 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=913
+      LENGTH = 18
+      HEX    = 09 00 80 0D 90 71 06 7A 42 11 00 00 00 00 00 00 31 40
+      ASCII  = .....q.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788436087000
+        RAW            = 00 80 0D 90 71 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17
+        RAW            = 00 00 00 00 00 00 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=933
+      LENGTH = 18
+      HEX    = 09 00 80 59 AD 71 06 7A 42 11 00 00 00 00 00 00 31 40
+      ASCII  = ...Y.q.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788436207000
+        RAW            = 00 80 59 AD 71 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17
+        RAW            = 00 00 00 00 00 00 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=953
+      LENGTH = 18
+      HEX    = 09 00 80 22 CB 71 06 7A 42 11 66 66 66 66 66 E6 30 40
+      ASCII  = ...".q.zB.fffff.0@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788436329000
+        RAW            = 00 80 22 CB 71 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 16.9
+        RAW            = 66 66 66 66 66 E6 30 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=973
+      LENGTH = 18
+      HEX    = 09 00 80 6E E8 71 06 7A 42 11 66 66 66 66 66 E6 30 40
+      ASCII  = ...n.q.zB.fffff.0@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788436449000
+        RAW            = 00 80 6E E8 71 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 16.9
+        RAW            = 66 66 66 66 66 E6 30 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=993
+      LENGTH = 18
+      HEX    = 09 00 80 37 06 72 06 7A 42 11 CD CC CC CC CC CC 30 40
+      ASCII  = ...7.r.zB.......0@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788436571000
+        RAW            = 00 80 37 06 72 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 16.8
+        RAW            = CD CC CC CC CC CC 30 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1013
+      LENGTH = 18
+      HEX    = 09 00 00 3F 24 72 06 7A 42 11 00 00 00 00 00 00 31 40
+      ASCII  = ...?$r.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788436694000
+        RAW            = 00 00 3F 24 72 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17
+        RAW            = 00 00 00 00 00 00 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1033
+      LENGTH = 18
+      HEX    = 09 00 00 8B 41 72 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = ....Ar.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788436814000
+        RAW            = 00 00 8B 41 72 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1053
+      LENGTH = 18
+      HEX    = 09 00 00 54 5F 72 06 7A 42 11 66 66 66 66 66 66 31 40
+      ASCII  = ...T_r.zB.ffffff1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788436936000
+        RAW            = 00 00 54 5F 72 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.4
+        RAW            = 66 66 66 66 66 66 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1073
+      LENGTH = 18
+      HEX    = 09 00 00 A0 7C 72 06 7A 42 11 00 00 00 00 00 80 31 40
+      ASCII  = ....|r.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788437056000
+        RAW            = 00 00 A0 7C 72 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.5
+        RAW            = 00 00 00 00 00 80 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1093
+      LENGTH = 18
+      HEX    = 09 00 00 69 9A 72 06 7A 42 11 00 00 00 00 00 80 31 40
+      ASCII  = ...i.r.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788437178000
+        RAW            = 00 00 69 9A 72 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.5
+        RAW            = 00 00 00 00 00 80 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1113
+      LENGTH = 18
+      HEX    = 09 00 80 F3 B7 72 06 7A 42 11 00 00 00 00 00 80 31 40
+      ASCII  = .....r.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788437299000
+        RAW            = 00 80 F3 B7 72 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.5
+        RAW            = 00 00 00 00 00 80 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1133
+      LENGTH = 18
+      HEX    = 09 00 00 FB D5 72 06 7A 42 11 00 00 00 00 00 80 31 40
+      ASCII  = .....r.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788437422000
+        RAW            = 00 00 FB D5 72 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.5
+        RAW            = 00 00 00 00 00 80 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1153
+      LENGTH = 18
+      HEX    = 09 00 00 47 F3 72 06 7A 42 11 CD CC CC CC CC CC 31 40
+      ASCII  = ...G.r.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788437542000
+        RAW            = 00 00 47 F3 72 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.8
+        RAW            = CD CC CC CC CC CC 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1173
+      LENGTH = 18
+      HEX    = 09 00 80 4E 11 73 06 7A 42 11 CD CC CC CC CC CC 31 40
+      ASCII  = ...N.s.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788437665000
+        RAW            = 00 80 4E 11 73 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.8
+        RAW            = CD CC CC CC CC CC 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1193
+      LENGTH = 18
+      HEX    = 09 00 80 2E 40 73 06 7A 42 11 00 00 00 00 00 00 32 40
+      ASCII  = ....@s.zB.......2@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788437857000
+        RAW            = 00 80 2E 40 73 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 18
+        RAW            = 00 00 00 00 00 00 32 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1213
+      LENGTH = 18
+      HEX    = 09 00 80 F7 5D 73 06 7A 42 11 00 00 00 00 00 00 32 40
+      ASCII  = ....]s.zB.......2@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788437979000
+        RAW            = 00 80 F7 5D 73 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 18
+        RAW            = 00 00 00 00 00 00 32 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1233
+      LENGTH = 18
+      HEX    = 09 00 80 3D 7C 73 06 7A 42 11 66 66 66 66 66 E6 31 40
+      ASCII  = ...=|s.zB.fffff.1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788438103000
+        RAW            = 00 80 3D 7C 73 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.9
+        RAW            = 66 66 66 66 66 E6 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1253
+      LENGTH = 18
+      HEX    = 09 00 80 82 AF 73 06 7A 42 11 00 00 00 00 00 00 32 40
+      ASCII  = .....s.zB.......2@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788438313000
+        RAW            = 00 80 82 AF 73 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 18
+        RAW            = 00 00 00 00 00 00 32 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1273
+      LENGTH = 18
+      HEX    = 09 00 80 4B CD 73 06 7A 42 11 00 00 00 00 00 00 32 40
+      ASCII  = ...K.s.zB.......2@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788438435000
+        RAW            = 00 80 4B CD 73 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 18
+        RAW            = 00 00 00 00 00 00 32 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1293
+      LENGTH = 18
+      HEX    = 09 00 80 14 EB 73 06 7A 42 11 00 00 00 00 00 00 32 40
+      ASCII  = .....s.zB.......2@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788438557000
+        RAW            = 00 80 14 EB 73 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 18
+        RAW            = 00 00 00 00 00 00 32 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1313
+      LENGTH = 18
+      HEX    = 09 00 80 60 08 74 06 7A 42 11 00 00 00 00 00 00 32 40
+      ASCII  = ...`.t.zB.......2@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788438677000
+        RAW            = 00 80 60 08 74 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 18
+        RAW            = 00 00 00 00 00 00 32 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1333
+      LENGTH = 18
+      HEX    = 09 00 80 A6 26 74 06 7A 42 11 00 00 00 00 00 00 32 40
+      ASCII  = ....&t.zB.......2@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788438801000
+        RAW            = 00 80 A6 26 74 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 18
+        RAW            = 00 00 00 00 00 00 32 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1353
+      LENGTH = 18
+      HEX    = 09 00 80 F2 43 74 06 7A 42 11 00 00 00 00 00 00 32 40
+      ASCII  = ....Ct.zB.......2@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788438921000
+        RAW            = 00 80 F2 43 74 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 18
+        RAW            = 00 00 00 00 00 00 32 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1373
+      LENGTH = 18
+      HEX    = 09 00 00 7D 61 74 06 7A 42 11 66 66 66 66 66 E6 31 40
+      ASCII  = ...}at.zB.fffff.1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788439042000
+        RAW            = 00 00 7D 61 74 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.9
+        RAW            = 66 66 66 66 66 E6 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1393
+      LENGTH = 18
+      HEX    = 09 00 00 46 7F 74 06 7A 42 11 66 66 66 66 66 E6 31 40
+      ASCII  = ...F.t.zB.fffff.1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788439164000
+        RAW            = 00 00 46 7F 74 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.9
+        RAW            = 66 66 66 66 66 E6 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1413
+      LENGTH = 18
+      HEX    = 09 00 00 0F 9D 74 06 7A 42 11 CD CC CC CC CC CC 31 40
+      ASCII  = .....t.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788439286000
+        RAW            = 00 00 0F 9D 74 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.8
+        RAW            = CD CC CC CC CC CC 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1433
+      LENGTH = 18
+      HEX    = 09 00 00 D8 BA 74 06 7A 42 11 66 66 66 66 66 E6 31 40
+      ASCII  = .....t.zB.fffff.1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788439408000
+        RAW            = 00 00 D8 BA 74 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.9
+        RAW            = 66 66 66 66 66 E6 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1453
+      LENGTH = 18
+      HEX    = 09 00 00 A1 D8 74 06 7A 42 11 66 66 66 66 66 E6 31 40
+      ASCII  = .....t.zB.fffff.1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788439530000
+        RAW            = 00 00 A1 D8 74 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.9
+        RAW            = 66 66 66 66 66 E6 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1473
+      LENGTH = 18
+      HEX    = 09 00 80 90 FA 74 06 7A 42 11 66 66 66 66 66 E6 31 40
+      ASCII  = .....t.zB.fffff.1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788439669000
+        RAW            = 00 80 90 FA 74 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.9
+        RAW            = 66 66 66 66 66 E6 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1493
+      LENGTH = 18
+      HEX    = 09 00 80 59 18 75 06 7A 42 11 66 66 66 66 66 E6 31 40
+      ASCII  = ...Y.u.zB.fffff.1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788439791000
+        RAW            = 00 80 59 18 75 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.9
+        RAW            = 66 66 66 66 66 E6 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1513
+      LENGTH = 18
+      HEX    = 09 00 80 22 36 75 06 7A 42 11 66 66 66 66 66 E6 31 40
+      ASCII  = ..."6u.zB.fffff.1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788439913000
+        RAW            = 00 80 22 36 75 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.9
+        RAW            = 66 66 66 66 66 E6 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1533
+      LENGTH = 18
+      HEX    = 09 00 80 EB 53 75 06 7A 42 11 CD CC CC CC CC CC 31 40
+      ASCII  = ....Su.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788440035000
+        RAW            = 00 80 EB 53 75 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.8
+        RAW            = CD CC CC CC CC CC 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1553
+      LENGTH = 18
+      HEX    = 09 00 00 BC 8F 75 06 7A 42 11 33 33 33 33 33 B3 31 40
+      ASCII  = .....u.zB.33333.1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788440280000
+        RAW            = 00 00 BC 8F 75 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.7
+        RAW            = 33 33 33 33 33 B3 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1573
+      LENGTH = 18
+      HEX    = 09 00 00 08 AD 75 06 7A 42 11 33 33 33 33 33 B3 31 40
+      ASCII  = .....u.zB.33333.1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788440400000
+        RAW            = 00 00 08 AD 75 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.7
+        RAW            = 33 33 33 33 33 B3 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1593
+      LENGTH = 18
+      HEX    = 09 00 80 D8 E8 75 06 7A 42 11 9A 99 99 99 99 99 31 40
+      ASCII  = .....u.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788440645000
+        RAW            = 00 80 D8 E8 75 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.6
+        RAW            = 9A 99 99 99 99 99 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1613
+      LENGTH = 18
+      HEX    = 09 00 80 24 06 76 06 7A 42 11 9A 99 99 99 99 99 31 40
+      ASCII  = ...$.v.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788440765000
+        RAW            = 00 80 24 06 76 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.6
+        RAW            = 9A 99 99 99 99 99 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1633
+      LENGTH = 18
+      HEX    = 09 00 80 70 23 76 06 7A 42 11 00 00 00 00 00 80 31 40
+      ASCII  = ...p#v.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788440885000
+        RAW            = 00 80 70 23 76 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.5
+        RAW            = 00 00 00 00 00 80 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1653
+      LENGTH = 18
+      HEX    = 09 00 80 7F 5F 76 06 7A 42 11 00 00 00 00 00 80 31 40
+      ASCII  = ...._v.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788441131000
+        RAW            = 00 80 7F 5F 76 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.5
+        RAW            = 00 00 00 00 00 80 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1673
+      LENGTH = 18
+      HEX    = 09 00 80 95 85 76 06 7A 42 11 9A 99 99 99 99 99 31 40
+      ASCII  = .....v.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788441287000
+        RAW            = 00 80 95 85 76 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.6
+        RAW            = 9A 99 99 99 99 99 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1693
+      LENGTH = 18
+      HEX    = 09 00 80 5E A3 76 06 7A 42 11 00 00 00 00 00 80 31 40
+      ASCII  = ...^.v.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788441409000
+        RAW            = 00 80 5E A3 76 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.5
+        RAW            = 00 00 00 00 00 80 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1713
+      LENGTH = 18
+      HEX    = 09 00 80 AA C0 76 06 7A 42 11 00 00 00 00 00 80 31 40
+      ASCII  = .....v.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788441529000
+        RAW            = 00 80 AA C0 76 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.5
+        RAW            = 00 00 00 00 00 80 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1733
+      LENGTH = 18
+      HEX    = 09 00 00 35 DE 76 06 7A 42 11 00 00 00 00 00 80 31 40
+      ASCII  = ...5.v.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788441650000
+        RAW            = 00 00 35 DE 76 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.5
+        RAW            = 00 00 00 00 00 80 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1753
+      LENGTH = 18
+      HEX    = 09 00 80 3C FC 76 06 7A 42 11 00 00 00 00 00 80 31 40
+      ASCII  = ...<.v.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788441773000
+        RAW            = 00 80 3C FC 76 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.5
+        RAW            = 00 00 00 00 00 80 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1773
+      LENGTH = 18
+      HEX    = 09 00 00 D6 55 77 06 7A 42 11 00 00 00 00 00 80 31 40
+      ASCII  = ....Uw.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788442140000
+        RAW            = 00 00 D6 55 77 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.5
+        RAW            = 00 00 00 00 00 80 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1793
+      LENGTH = 18
+      HEX    = 09 00 00 22 73 77 06 7A 42 11 66 66 66 66 66 66 31 40
+      ASCII  = ..."sw.zB.ffffff1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788442260000
+        RAW            = 00 00 22 73 77 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.4
+        RAW            = 66 66 66 66 66 66 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1813
+      LENGTH = 18
+      HEX    = 09 00 80 AC 90 77 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = .....w.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788442381000
+        RAW            = 00 80 AC 90 77 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1833
+      LENGTH = 18
+      HEX    = 09 00 00 37 AE 77 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = ...7.w.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788442502000
+        RAW            = 00 00 37 AE 77 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1853
+      LENGTH = 18
+      HEX    = 09 00 80 07 EA 77 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = .....w.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788442747000
+        RAW            = 00 80 07 EA 77 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1873
+      LENGTH = 18
+      HEX    = 09 00 80 53 07 78 06 7A 42 11 33 33 33 33 33 33 31 40
+      ASCII  = ...S.x.zB.3333331@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788442867000
+        RAW            = 00 80 53 07 78 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.2
+        RAW            = 33 33 33 33 33 33 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1893
+      LENGTH = 18
+      HEX    = 09 00 00 5B 25 78 06 7A 42 11 33 33 33 33 33 33 31 40
+      ASCII  = ...[%x.zB.3333331@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788442990000
+        RAW            = 00 00 5B 25 78 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.2
+        RAW            = 33 33 33 33 33 33 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1913
+      LENGTH = 18
+      HEX    = 09 00 00 95 45 78 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = ....Ex.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788443122000
+        RAW            = 00 00 95 45 78 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1933
+      LENGTH = 18
+      HEX    = 09 00 00 5E 63 78 06 7A 42 11 66 66 66 66 66 66 31 40
+      ASCII  = ...^cx.zB.ffffff1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788443244000
+        RAW            = 00 00 5E 63 78 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.4
+        RAW            = 66 66 66 66 66 66 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1953
+      LENGTH = 18
+      HEX    = 09 00 00 39 FB 78 06 7A 42 11 9A 99 99 99 99 99 31 40
+      ASCII  = ...9.x.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788443866000
+        RAW            = 00 00 39 FB 78 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.6
+        RAW            = 9A 99 99 99 99 99 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1973
+      LENGTH = 18
+      HEX    = 09 00 00 85 18 79 06 7A 42 11 9A 99 99 99 99 99 31 40
+      ASCII  = .....y.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788443986000
+        RAW            = 00 00 85 18 79 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.6
+        RAW            = 9A 99 99 99 99 99 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1993
+      LENGTH = 18
+      HEX    = 09 00 00 17 54 79 06 7A 42 11 00 00 00 00 00 80 31 40
+      ASCII  = ....Ty.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788444230000
+        RAW            = 00 00 17 54 79 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.5
+        RAW            = 00 00 00 00 00 80 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2013
+      LENGTH = 18
+      HEX    = 09 00 00 63 71 79 06 7A 42 11 00 00 00 00 00 80 31 40
+      ASCII  = ...cqy.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788444350000
+        RAW            = 00 00 63 71 79 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.5
+        RAW            = 00 00 00 00 00 80 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2033
+      LENGTH = 18
+      HEX    = 09 00 00 D8 9C 79 06 7A 42 11 66 66 66 66 66 66 31 40
+      ASCII  = .....y.zB.ffffff1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788444528000
+        RAW            = 00 00 D8 9C 79 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.4
+        RAW            = 66 66 66 66 66 66 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2053
+      LENGTH = 18
+      HEX    = 09 00 00 24 BA 79 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = ...$.y.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788444648000
+        RAW            = 00 00 24 BA 79 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2073
+      LENGTH = 18
+      HEX    = 09 00 00 7F 13 7A 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = .....z.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788445014000
+        RAW            = 00 00 7F 13 7A 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2093
+      LENGTH = 18
+      HEX    = 09 00 00 CB 30 7A 06 7A 42 11 33 33 33 33 33 33 31 40
+      ASCII  = ....0z.zB.3333331@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788445134000
+        RAW            = 00 00 CB 30 7A 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.2
+        RAW            = 33 33 33 33 33 33 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2113
+      LENGTH = 18
+      HEX    = 09 00 80 2D A8 7A 06 7A 42 11 00 00 00 00 00 80 31 40
+      ASCII  = ...-.z.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788445623000
+        RAW            = 00 80 2D A8 7A 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.5
+        RAW            = 00 00 00 00 00 80 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2133
+      LENGTH = 18
+      HEX    = 09 00 80 79 C5 7A 06 7A 42 11 00 00 00 00 00 80 31 40
+      ASCII  = ...y.z.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788445743000
+        RAW            = 00 80 79 C5 7A 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.5
+        RAW            = 00 00 00 00 00 80 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2153
+      LENGTH = 18
+      HEX    = 09 00 80 1E E9 7A 06 7A 42 11 00 00 00 00 00 80 31 40
+      ASCII  = .....z.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788445889000
+        RAW            = 00 80 1E E9 7A 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.5
+        RAW            = 00 00 00 00 00 80 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2173
+      LENGTH = 18
+      HEX    = 09 00 00 A9 06 7B 06 7A 42 11 00 00 00 00 00 80 31 40
+      ASCII  = .....{.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788446010000
+        RAW            = 00 00 A9 06 7B 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.5
+        RAW            = 00 00 00 00 00 80 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2193
+      LENGTH = 18
+      HEX    = 09 00 00 E9 25 7B 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = ....%{.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788446138000
+        RAW            = 00 00 E9 25 7B 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2213
+      LENGTH = 18
+      HEX    = 09 00 80 FC 41 7B 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = ....A{.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788446253000
+        RAW            = 00 80 FC 41 7B 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2233
+      LENGTH = 18
+      HEX    = 09 00 80 3C 61 7B 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = ...<a{.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788446381000
+        RAW            = 00 80 3C 61 7B 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2253
+      LENGTH = 18
+      HEX    = 09 00 80 05 7F 7B 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = .....{.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788446503000
+        RAW            = 00 80 05 7F 7B 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2273
+      LENGTH = 18
+      HEX    = 09 00 80 51 9C 7B 06 7A 42 11 33 33 33 33 33 33 31 40
+      ASCII  = ...Q.{.zB.3333331@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788446623000
+        RAW            = 00 80 51 9C 7B 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.2
+        RAW            = 33 33 33 33 33 33 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2293
+      LENGTH = 18
+      HEX    = 09 00 00 59 BA 7B 06 7A 42 11 33 33 33 33 33 33 31 40
+      ASCII  = ...Y.{.zB.3333331@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788446746000
+        RAW            = 00 00 59 BA 7B 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.2
+        RAW            = 33 33 33 33 33 33 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2313
+      LENGTH = 18
+      HEX    = 09 00 00 A5 D7 7B 06 7A 42 11 33 33 33 33 33 33 31 40
+      ASCII  = .....{.zB.3333331@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788446866000
+        RAW            = 00 00 A5 D7 7B 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.2
+        RAW            = 33 33 33 33 33 33 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2333
+      LENGTH = 18
+      HEX    = 09 00 00 A6 3F 7C 06 7A 42 11 66 66 66 66 66 66 31 40
+      ASCII  = ....?|.zB.ffffff1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788447292000
+        RAW            = 00 00 A6 3F 7C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.4
+        RAW            = 66 66 66 66 66 66 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2353
+      LENGTH = 18
+      HEX    = 09 00 00 F2 5C 7C 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = ....\|.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788447412000
+        RAW            = 00 00 F2 5C 7C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2373
+      LENGTH = 18
+      HEX    = 09 00 80 F9 7A 7C 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = ....z|.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788447535000
+        RAW            = 00 80 F9 7A 7C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2393
+      LENGTH = 18
+      HEX    = 09 00 80 45 98 7C 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = ...E.|.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788447655000
+        RAW            = 00 80 45 98 7C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2413
+      LENGTH = 18
+      HEX    = 09 00 00 4D B6 7C 06 7A 42 11 33 33 33 33 33 33 31 40
+      ASCII  = ...M.|.zB.3333331@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788447778000
+        RAW            = 00 00 4D B6 7C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.2
+        RAW            = 33 33 33 33 33 33 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2433
+      LENGTH = 18
+      HEX    = 09 00 80 FB 4A 7D 06 7A 42 11 33 33 33 33 33 33 31 40
+      ASCII  = ....J}.zB.3333331@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788448387000
+        RAW            = 00 80 FB 4A 7D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.2
+        RAW            = 33 33 33 33 33 33 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2453
+      LENGTH = 18
+      HEX    = 09 00 80 47 68 7D 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = ...Gh}.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788448507000
+        RAW            = 00 80 47 68 7D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2473
+      LENGTH = 18
+      HEX    = 09 00 80 10 86 7D 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = .....}.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788448629000
+        RAW            = 00 80 10 86 7D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2493
+      LENGTH = 18
+      HEX    = 09 00 80 5C A3 7D 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = ...\.}.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788448749000
+        RAW            = 00 80 5C A3 7D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2513
+      LENGTH = 18
+      HEX    = 09 00 80 25 C1 7D 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = ...%.}.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788448871000
+        RAW            = 00 80 25 C1 7D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2533
+      LENGTH = 18
+      HEX    = 09 00 80 EE DE 7D 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = .....}.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788448993000
+        RAW            = 00 80 EE DE 7D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2553
+      LENGTH = 18
+      HEX    = 09 00 00 79 FC 7D 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = ...y.}.zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788449114000
+        RAW            = 00 00 79 FC 7D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2573
+      LENGTH = 18
+      HEX    = 09 00 00 42 1A 7E 06 7A 42 11 33 33 33 33 33 33 31 40
+      ASCII  = ...B.~.zB.3333331@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788449236000
+        RAW            = 00 00 42 1A 7E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.2
+        RAW            = 33 33 33 33 33 33 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2593
+      LENGTH = 18
+      HEX    = 09 00 00 8E 37 7E 06 7A 42 11 33 33 33 33 33 33 31 40
+      ASCII  = ....7~.zB.3333331@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788449356000
+        RAW            = 00 00 8E 37 7E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.2
+        RAW            = 33 33 33 33 33 33 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2613
+      LENGTH = 18
+      HEX    = 09 00 80 95 55 7E 06 7A 42 11 9A 99 99 99 99 19 31 40
+      ASCII  = ....U~.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788449479000
+        RAW            = 00 80 95 55 7E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.1
+        RAW            = 9A 99 99 99 99 19 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2633
+      LENGTH = 18
+      HEX    = 09 00 80 3A 79 7E 06 7A 42 11 9A 99 99 99 99 19 31 40
+      ASCII  = ...:y~.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788449625000
+        RAW            = 00 80 3A 79 7E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.1
+        RAW            = 9A 99 99 99 99 19 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2653
+      LENGTH = 18
+      HEX    = 09 00 00 C5 96 7E 06 7A 42 11 9A 99 99 99 99 19 31 40
+      ASCII  = .....~.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788449746000
+        RAW            = 00 00 C5 96 7E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.1
+        RAW            = 9A 99 99 99 99 19 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2673
+      LENGTH = 18
+      HEX    = 09 00 00 45 D5 7E 06 7A 42 11 00 00 00 00 00 00 31 40
+      ASCII  = ...E.~.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788450002000
+        RAW            = 00 00 45 D5 7E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17
+        RAW            = 00 00 00 00 00 00 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2693
+      LENGTH = 18
+      HEX    = 09 00 00 91 F2 7E 06 7A 42 11 9A 99 99 99 99 19 31 40
+      ASCII  = .....~.zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788450122000
+        RAW            = 00 00 91 F2 7E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.1
+        RAW            = 9A 99 99 99 99 19 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2713
+      LENGTH = 18
+      HEX    = 09 00 80 E4 2D 7F 06 7A 42 11 66 66 66 66 66 66 31 40
+      ASCII  = ....-..zB.ffffff1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788450365000
+        RAW            = 00 80 E4 2D 7F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.4
+        RAW            = 66 66 66 66 66 66 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2733
+      LENGTH = 18
+      HEX    = 09 00 80 30 4B 7F 06 7A 42 11 00 00 00 00 00 80 31 40
+      ASCII  = ...0K..zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788450485000
+        RAW            = 00 80 30 4B 7F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.5
+        RAW            = 00 00 00 00 00 80 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2753
+      LENGTH = 18
+      HEX    = 09 00 80 F9 68 7F 06 7A 42 11 00 00 00 00 00 80 31 40
+      ASCII  = ....h..zB.......1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788450607000
+        RAW            = 00 80 F9 68 7F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.5
+        RAW            = 00 00 00 00 00 80 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2773
+      LENGTH = 18
+      HEX    = 09 00 80 54 C2 7F 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = ...T...zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788450973000
+        RAW            = 00 80 54 C2 7F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2793
+      LENGTH = 18
+      HEX    = 09 00 80 A0 DF 7F 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = .......zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788451093000
+        RAW            = 00 80 A0 DF 7F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2813
+      LENGTH = 18
+      HEX    = 09 00 00 84 03 80 06 7A 42 11 33 33 33 33 33 33 31 40
+      ASCII  = .......zB.3333331@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788451240000
+        RAW            = 00 00 84 03 80 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.2
+        RAW            = 33 33 33 33 33 33 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2833
+      LENGTH = 18
+      HEX    = 09 00 00 D0 20 80 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = .... ..zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788451360000
+        RAW            = 00 00 D0 20 80 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2853
+      LENGTH = 18
+      HEX    = 09 00 00 99 3E 80 06 7A 42 11 CD CC CC CC CC 4C 31 40
+      ASCII  = ....>..zB......L1@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788451482000
+        RAW            = 00 00 99 3E 80 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 17.3
+        RAW            = CD CC CC CC CC 4C 31 40
+      --- END NESTED ---
+    FIELD 3  wire=2  tagOffset=2873
+      LENGTH = 7
+      HEX    = 23 46 46 38 37 31 35
+      ASCII  = #FF8715
+    FIELD 4  wire=2  tagOffset=2882
+      LENGTH = 27
+      HEX    = 30 33 2E 30 39 2E 32 30 32 36 26 6E 62 73 70 3B 26 6E 62 73 70 3B 31 36 3A 30 34
+      ASCII  = 03.09.2026&nbsp;&nbsp;16:04
+    FIELD 5  wire=2  tagOffset=2911
+      LENGTH = 7
+      HEX    = 31 37 2C 33 C2 B0 43
+      ASCII  = 17,3..C
+      UTF8   = 17,3°C
+    FIELD 6  wire=0  tagOffset=2920
+      VARINT = 0
+      RAW    = 00
+    FIELD 7  wire=0  tagOffset=2922
+      VARINT = 0
+      RAW    = 00
+    FIELD 8  wire=0  tagOffset=2924
+      VARINT = 0
+      RAW    = 00
+    FIELD 9  wire=2  tagOffset=2926
+      LENGTH = 7
+      HEX    = 4E 6F 41 6C 65 72 74
+      ASCII  = NoAlert
+    FIELD 10  wire=0  tagOffset=2935
+      VARINT = 0
+      RAW    = 00
+    FIELD 11  wire=0  tagOffset=2937
+      VARINT = 1
+      RAW    = 01
+    --- END NESTED ---
+  FIELD 1  wire=2  tagOffset=2942
+    LENGTH = 2933
+    HEX    = 0A 08 48 75 6D 69 64 69 74 79 12 12 09 00 80 EE CD 6B 06 7A 42 11 33 33 33 33 33 53 50 40 12 12 09 00 00 79 EB 6B 06 7A 42 11 00 00 00 00 00 80 4F 40 12 12 09 00 00 42 09 6C 06 7A 42 11 CD CC CC CC CC 4C 51 40 12 12 09 00 80 CC 26 6C 06 7A 42 11 9A 99 99 99 99 F9 51 40 12 12 09 00 80 95 44 6C 06 7A 42 11 00 00 00 00 00 80 4F 40 12 12 09 00 00 79 68 6C 06 7A 42 11 66 66 66 66 66 86 50 40 12 12 09 00 00 C5 85 6C 06 7A 42 11 33 33 33 33 33 13 52 40 12 12 09 00 00 0B A4 6C 06 7A 42 11 33 33 33 33 33 33 51 40 12 12 09 00 00 57 C1 6C 06 7A 42 11 9A 99 99 99 99 19 4F 40 12 12 09 00 00 20 DF 6C 06 7A 42 11 66 66 66 66 66 E6 50 40 12 12 09 00 80 AA FC 6C 06 7A 42 11 33 33 33 33 33 13 52 40 12 12 09 00 80 F0 1A 6D 06 7A 42 11 CD CC CC CC CC 6C 50 40 12 12 09 00 80 3C 38 6D 06 7A 42 11 00 00 00 00 00 80 4F 40 12 12 09 00 00 C7 55 6D 06 7A 42 11 CD CC CC CC CC 4C 51 40 12 12 09 00 80 A1 B9 6D 06 7A 42 11 00 00 00 00 00 A0 50 40 12 12 09 00 80 ED D6 6D 06 7A 42 11 33 33 33 33 33 13 52 40 12 12 09 00 00 F5 F4 6D 06 7A 42 11 66 66 66 66 66 E6 50 40 12 12 09 00 00 41 12 6E 06 7A 42 11 CD CC CC CC CC 4C 4F 40 12 12 09 00 80 CB 2F 6E 06 7A 42 11 CD CC CC CC CC 4C 51 40 12 12 09 00 80 94 4D 6E 06 7A 42 11 66 66 66 66 66 46 52 40 12 12 09 00 80 5D 6B 6E 06 7A 42 11 9A 99 99 99 99 39 50 40 12 12 09 00 80 BA 9A 6E 06 7A 42 11 00 00 00 00 00 00 51 40 12 12 09 00 80 83 B8 6E 06 7A 42 11 33 33 33 33 33 13 52 40 12 12 09 00 80 CF D5 6E 06 7A 42 11 66 66 66 66 66 86 50 40 12 12 09 00 80 98 F3 6E 06 7A 42 11 CD CC CC CC CC 4C 4F 40 12 12 09 00 80 61 11 6F 06 7A 42 11 33 33 33 33 33 33 51 40 12 12 09 00 00 EC 2E 6F 06 7A 42 11 33 33 33 33 33 13 52 40 12 12 09 00 80 76 4C 6F 06 7A 42 11 00 00 00 00 00 80 4F 40 12 12 09 00 80 3F 6A 6F 06 7A 42 11 00 00 00 00 00 A0 50 40 12 12 09 00 80 08 88 6F 06 7A 42 11 9A 99 99 99 99 99 51 40 12 12 09 00 80 9B AE 6F 06 7A 42 11 CD CC CC CC CC CC 50 40 12 12 09 00 80 64 CC 6F 06 7A 42 11 66 66 66 66 66 E6 4E 40 12 12 09 00 80 2D EA 6F 06 7A 42 11 9A 99 99 99 99 19 51 40 12 12 09 00 00 B8 07 70 06 7A 42 11 33 33 33 33 33 13 52 40 12 12 09 00 00 81 25 70 06 7A 42 11 33 33 33 33 33 B3 51 40 12 12 09 00 00 4A 43 70 06 7A 42 11 33 33 33 33 33 B3 4D 40 12 12 09 00 80 D4 60 70 06 7A 42 11 66 66 66 66 66 66 51 40 12 12 09 00 80 9D 7E 70 06 7A 42 11 00 00 00 00 00 E0 52 40 12 12 09 00 00 28 9C 70 06 7A 42 11 33 33 33 33 33 53 50 40 12 12 09 00 00 BA D7 70 06 7A 42 11 9A 99 99 99 99 99 51 40 12 12 09 00 00 06 F5 70 06 7A 42 11 CD CC CC CC CC AC 52 40 12 12 09 00 00 4C 13 71 06 7A 42 11 66 66 66 66 66 E6 4E 40 12 12 09 00 00 FD 34 71 06 7A 42 11 9A 99 99 99 99 39 50 40 12 12 09 00 80 87 52 71 06 7A 42 11 CD CC CC CC CC 2C 52 40 12 12 09 00 80 C7 71 71 06 7A 42 11 CD CC CC CC CC 4C 51 40 12 12 09 00 80 0D 90 71 06 7A 42 11 33 33 33 33 33 B3 4D 40 12 12 09 00 80 59 AD 71 06 7A 42 11 66 66 66 66 66 E6 50 40 12 12 09 00 80 22 CB 71 06 7A 42 11 33 33 33 33 33 93 52 40 12 12 09 00 80 6E E8 71 06 7A 42 11 00 00 00 00 00 A0 50 40 12 12 09 00 80 37 06 72 06 7A 42 11 9A 99 99 99 99 19 4E 40 12 12 09 00 00 3F 24 72 06 7A 42 11 33 33 33 33 33 13 52 40 12 12 09 00 00 8B 41 72 06 7A 42 11 CD CC CC CC CC 0C 53 40 12 12 09 00 00 54 5F 72 06 7A 42 11 66 66 66 66 66 06 50 40 12 12 09 00 00 A0 7C 72 06 7A 42 11 66 66 66 66 66 E6 4E 40 12 12 09 00 00 69 9A 72 06 7A 42 11 9A 99 99 99 99 99 51 40 12 12 09 00 80 F3 B7 72 06 7A 42 11 00 00 00 00 00 60 52 40 12 12 09 00 00 FB D5 72 06 7A 42 11 CD CC CC CC CC CC 50 40 12 12 09 00 00 47 F3 72 06 7A 42 11 33 33 33 33 33 B3 4E 40 12 12 09 00 80 4E 11 73 06 7A 42 11 9A 99 99 99 99 19 51 40 12 12 09 00 80 2E 40 73 06 7A 42 11 33 33 33 33 33 53 50 40 12 12 09 00 80 F7 5D 73 06 7A 42 11 66 66 66 66 66 E6 4D 40 12 12 09 00 80 3D 7C 73 06 7A 42 11 9A 99 99 99 99 B9 50 40 12 12 09 00 80 82 AF 73 06 7A 42 11 66 66 66 66 66 A6 4F 40 12 12 09 00 80 4B CD 73 06 7A 42 11 66 66 66 66 66 E6 4D 40 12 12 09 00 80 14 EB 73 06 7A 42 11 9A 99 99 99 99 B9 50 40 12 12 09 00 80 60 08 74 06 7A 42 11 CD CC CC CC CC CC 51 40 12 12 09 00 80 A6 26 74 06 7A 42 11 66 66 66 66 66 E6 4E 40 12 12 09 00 80 F2 43 74 06 7A 42 11 CD CC CC CC CC 4C 4E 40 12 12 09 00 00 7D 61 74 06 7A 42 11 00 00 00 00 00 00 51 40 12 12 09 00 00 46 7F 74 06 7A 42 11 9A 99 99 99 99 99 51 40 12 12 09 00 00 0F 9D 74 06 7A 42 11 33 33 33 33 33 B3 4D 40 12 12 09 00 00 D8 BA 74 06 7A 42 11 9A 99 99 99 99 B9 50 40 12 12 09 00 00 A1 D8 74 06 7A 42 11 00 00 00 00 00 E0 51 40 12 12 09 00 80 90 FA 74 06 7A 42 11 9A 99 99 99 99 19 51 40 12 12 09 00 80 59 18 75 06 7A 42 11 33 33 33 33 33 B3 4D 40 12 12 09 00 80 22 36 75 06 7A 42 11 66 66 66 66 66 86 50 40 12 12 09 00 80 EB 53 75 06 7A 42 11 00 00 00 00 00 E0 51 40 12 12 09 00 00 BC 8F 75 06 7A 42 11 66 66 66 66 66 E6 4D 40 12 12 09 00 00 08 AD 75 06 7A 42 11 CD CC CC CC CC CC 50 40 12 12 09 00 80 D8 E8 75 06 7A 42 11 9A 99 99 99 99 19 4F 40 12 12 09 00 80 24 06 76 06 7A 42 11 33 33 33 33 33 B3 4E 40 12 12 09 00 80 70 23 76 06 7A 42 11 33 33 33 33 33 33 51 40 12 12 09 00 80 7F 5F 76 06 7A 42 11 9A 99 99 99 99 19 4F 40 12 12 09 00 80 95 85 76 06 7A 42 11 33 33 33 33 33 53 50 40 12 12 09 00 80 5E A3 76 06 7A 42 11 CD CC CC CC CC CC 51 40 12 12 09 00 80 AA C0 76 06 7A 42 11 CD CC CC CC CC CC 50 40 12 12 09 00 00 35 DE 76 06 7A 42 11 33 33 33 33 33 B3 4D 40 12 12 09 00 80 3C FC 76 06 7A 42 11 00 00 00 00 00 A0 50 40 12 12 09 00 00 D6 55 77 06 7A 42 11 66 66 66 66 66 E6 4D 40 12 12 09 00 00 22 73 77 06 7A 42 11 CD CC CC CC CC CC 50 40 12 12 09 00 80 AC 90 77 06 7A 42 11 00 00 00 00 00 E0 51 40 12 12 09 00 00 37 AE 77 06 7A 42 11 00 00 00 00 00 80 4F 40 12 12 09 00 80 07 EA 77 06 7A 42 11 9A 99 99 99 99 19 51 40 12 12 09 00 80 53 07 78 06 7A 42 11 33 33 33 33 33 B3 51 40 12 12 09 00 00 5B 25 78 06 7A 42 11 CD CC CC CC CC 4C 4E 40 12 12 09 00 00 95 45 78 06 7A 42 11 9A 99 99 99 99 D9 4F 40 12 12 09 00 00 5E 63 78 06 7A 42 11 00 00 00 00 00 E0 51 40 12 12 09 00 00 39 FB 78 06 7A 42 11 00 00 00 00 00 20 50 40 12 12 09 00 00 85 18 79 06 7A 42 11 00 00 00 00 00 80 4E 40 12 12 09 00 00 17 54 79 06 7A 42 11 00 00 00 00 00 E0 51 40 12 12 09 00 00 63 71 79 06 7A 42 11 9A 99 99 99 99 19 4F 40 12 12 09 00 00 D8 9C 79 06 7A 42 11 33 33 33 33 33 53 50 40 12 12 09 00 00 24 BA 79 06 7A 42 11 CD CC CC CC CC CC 51 40 12 12 09 00 00 7F 13 7A 06 7A 42 11 9A 99 99 99 99 B9 50 40 12 12 09 00 00 CB 30 7A 06 7A 42 11 9A 99 99 99 99 F9 51 40 12 12 09 00 80 2D A8 7A 06 7A 42 11 CD CC CC CC CC CC 51 40 12 12 09 00 80 79 C5 7A 06 7A 42 11 33 33 33 33 33 B3 4E 40 12 12 09 00 80 1E E9 7A 06 7A 42 11 00 00 00 00 00 20 50 40 12 12 09 00 00 A9 06 7B 06 7A 42 11 33 33 33 33 33 B3 51 40 12 12 09 00 00 E9 25 7B 06 7A 42 11 CD CC CC CC CC CC 50 40 12 12 09 00 80 FC 41 7B 06 7A 42 11 66 66 66 66 66 E6 4D 40 12 12 09 00 80 3C 61 7B 06 7A 42 11 00 00 00 00 00 A0 50 40 12 12 09 00 80 05 7F 7B 06 7A 42 11 9A 99 99 99 99 F9 51 40 12 12 09 00 80 51 9C 7B 06 7A 42 11 33 33 33 33 33 53 50 40 12 12 09 00 00 59 BA 7B 06 7A 42 11 CD CC CC CC CC 4C 4E 40 12 12 09 00 00 A5 D7 7B 06 7A 42 11 66 66 66 66 66 E6 50 40 12 12 09 00 00 A6 3F 7C 06 7A 42 11 66 66 66 66 66 86 50 40 12 12 09 00 00 F2 5C 7C 06 7A 42 11 9A 99 99 99 99 F9 51 40 12 12 09 00 80 F9 7A 7C 06 7A 42 11 00 00 00 00 00 A0 50 40 12 12 09 00 80 45 98 7C 06 7A 42 11 CD CC CC CC CC 4C 4E 40 12 12 09 00 00 4D B6 7C 06 7A 42 11 CD CC CC CC CC CC 50 40 12 12 09 00 80 FB 4A 7D 06 7A 42 11 9A 99 99 99 99 79 52 40 12 12 09 00 80 47 68 7D 06 7A 42 11 00 00 00 00 00 00 51 40 12 12 09 00 80 10 86 7D 06 7A 42 11 33 33 33 33 33 B3 4E 40 12 12 09 00 80 5C A3 7D 06 7A 42 11 66 66 66 66 66 E6 50 40 12 12 09 00 80 25 C1 7D 06 7A 42 11 CD CC CC CC CC 2C 52 40 12 12 09 00 80 EE DE 7D 06 7A 42 11 9A 99 99 99 99 39 50 40 12 12 09 00 00 79 FC 7D 06 7A 42 11 66 66 66 66 66 E6 4E 40 12 12 09 00 00 42 1A 7E 06 7A 42 11 33 33 33 33 33 33 51 40 12 12 09 00 00 8E 37 7E 06 7A 42 11 9A 99 99 99 99 F9 51 40 12 12 09 00 80 95 55 7E 06 7A 42 11 9A 99 99 99 99 19 4F 40 12 12 09 00 80 3A 79 7E 06 7A 42 11 33 33 33 33 33 53 50 40 12 12 09 00 00 C5 96 7E 06 7A 42 11 CD CC CC CC CC CC 51 40 12 12 09 00 00 45 D5 7E 06 7A 42 11 CD CC CC CC CC 4C 4E 40 12 12 09 00 00 91 F2 7E 06 7A 42 11 CD CC CC CC CC CC 50 40 12 12 09 00 80 E4 2D 7F 06 7A 42 11 9A 99 99 99 99 39 50 40 12 12 09 00 80 30 4B 7F 06 7A 42 11 00 00 00 00 00 80 4F 40 12 12 09 00 80 F9 68 7F 06 7A 42 11 00 00 00 00 00 80 51 40 12 12 09 00 80 54 C2 7F 06 7A 42 11 9A 99 99 99 99 39 50 40 12 12 09 00 80 A0 DF 7F 06 7A 42 11 00 00 00 00 00 E0 51 40 12 12 09 00 00 84 03 80 06 7A 42 11 CD CC CC CC CC AC 52 40 12 12 09 00 00 D0 20 80 06 7A 42 11 00 00 00 00 00 80 4F 40 12 12 09 00 00 99 3E 80 06 7A 42 11 9A 99 99 99 99 B9 50 40 1A 07 23 30 30 39 43 44 45 22 1B 30 33 2E 30 39 2E 32 30 32 36 26 6E 62 73 70 3B 26 6E 62 73 70 3B 31 36 3A 30 34 2A 04 36 37 20 25 30 00 38 00 40 00 4A 07 4E 6F 41 6C 65 72 74 50 00 58 01
+    ASCII  = ..Humidity.......k.zB.33333SP@.....y.k.zB.......O@.....B.l.zB......LQ@......&l.zB.......Q@......Dl.zB.......O@.....yhl.zB.fffff.P@.......l.zB.33333.R@.......l.zB.333333Q@.....W.l.zB.......O@..... .l.zB.fffff.P@.......l.zB.33333.R@.......m.zB......lP@.....<8m.zB.......O@......Um.zB......LQ@.......m.zB.......P@.......m.zB.33333.R@.......m.zB.fffff.P@.....A.n.zB......LO@....../n.zB......LQ@......Mn.zB.fffffFR@.....]kn.zB......9P@.......n.zB.......Q@.......n.zB.33333.R@.......n.zB.fffff.P@.......n.zB......LO@.....a.o.zB.333333Q@.......o.zB.33333.R@.....vLo.zB.......O@.....?jo.zB.......P@.......o.zB.......Q@.......o.zB.......P@.....d.o.zB.fffff.N@.....-.o.zB.......Q@.......p.zB.33333.R@......%p.zB.33333.Q@.....JCp.zB.33333.M@......`p.zB.ffffffQ@......~p.zB.......R@.....(.p.zB.33333SP@.......p.zB.......Q@.......p.zB.......R@.....L.q.zB.fffff.N@......4q.zB......9P@......Rq.zB......,R@......qq.zB......LQ@.......q.zB.33333.M@.....Y.q.zB.fffff.P@.....".q.zB.33333.R@.....n.q.zB.......P@.....7.r.zB.......N@.....?$r.zB.33333.R@......Ar.zB.......S@.....T_r.zB.fffff.P@......|r.zB.fffff.N@.....i.r.zB.......Q@.......r.zB......`R@.......r.zB.......P@.....G.r.zB.33333.N@.....N.s.zB.......Q@......@s.zB.33333SP@......]s.zB.fffff.M@.....=|s.zB.......P@.......s.zB.fffff.O@.....K.s.zB.fffff.M@.......s.zB.......P@.....`.t.zB.......Q@......&t.zB.fffff.N@......Ct.zB......LN@.....}at.zB.......Q@.....F.t.zB.......Q@.......t.zB.33333.M@.......t.zB.......P@.......t.zB.......Q@.......t.zB.......Q@.....Y.u.zB.33333.M@....."6u.zB.fffff.P@......Su.zB.......Q@.......u.zB.fffff.M@.......u.zB.......P@.......u.zB.......O@.....$.v.zB.33333.N@.....p#v.zB.333333Q@......_v.zB.......O@.......v.zB.33333SP@.....^.v.zB.......Q@.......v.zB.......P@.....5.v.zB.33333.M@.....<.v.zB.......P@......Uw.zB.fffff.M@....."sw.zB.......P@.......w.zB.......Q@.....7.w.zB.......O@.......w.zB.......Q@.....S.x.zB.33333.Q@.....[%x.zB......LN@......Ex.zB.......O@.....^cx.zB.......Q@.....9.x.zB...... P@.......y.zB.......N@......Ty.zB.......Q@.....cqy.zB.......O@.......y.zB.33333SP@.....$.y.zB.......Q@.......z.zB.......P@......0z.zB.......Q@.....-.z.zB.......Q@.....y.z.zB.33333.N@.......z.zB...... P@.......{.zB.33333.Q@......%{.zB.......P@......A{.zB.fffff.M@.....<a{.zB.......P@.......{.zB.......Q@.....Q.{.zB.33333SP@.....Y.{.zB......LN@.......{.zB.fffff.P@......?|.zB.fffff.P@......\|.zB.......Q@......z|.zB.......P@.....E.|.zB......LN@.....M.|.zB.......P@......J}.zB......yR@.....Gh}.zB.......Q@.......}.zB.33333.N@.....\.}.zB.fffff.P@.....%.}.zB......,R@.......}.zB......9P@.....y.}.zB.fffff.N@.....B.~.zB.333333Q@......7~.zB.......Q@......U~.zB.......O@.....:y~.zB.33333SP@.......~.zB.......Q@.....E.~.zB......LN@.......~.zB.......P@......-..zB......9P@.....0K..zB.......O@......h..zB.......Q@.....T...zB......9P@.........zB.......Q@.........zB.......R@...... ..zB.......O@......>..zB.......P@..#009CDE".03.09.2026&nbsp;&nbsp;16:04*.67 %0.8.@.J.NoAlertP.X.
+    --- NESTED MESSAGE ---
+  MESSAGE ChartData.field1  offset=0 length=2933
+    FIELD 1  wire=2  tagOffset=0
+      LENGTH = 8
+      HEX    = 48 75 6D 69 64 69 74 79
+      ASCII  = Humidity
+    FIELD 2  wire=2  tagOffset=10
+      LENGTH = 18
+      HEX    = 09 00 80 EE CD 6B 06 7A 42 11 33 33 33 33 33 53 50 40
+      ASCII  = .....k.zB.33333SP@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788430049000
+        RAW            = 00 80 EE CD 6B 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 65.3
+        RAW            = 33 33 33 33 33 53 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=30
+      LENGTH = 18
+      HEX    = 09 00 00 79 EB 6B 06 7A 42 11 00 00 00 00 00 80 4F 40
+      ASCII  = ...y.k.zB.......O@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788430170000
+        RAW            = 00 00 79 EB 6B 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 63
+        RAW            = 00 00 00 00 00 80 4F 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=50
+      LENGTH = 18
+      HEX    = 09 00 00 42 09 6C 06 7A 42 11 CD CC CC CC CC 4C 51 40
+      ASCII  = ...B.l.zB......LQ@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788430292000
+        RAW            = 00 00 42 09 6C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 69.2
+        RAW            = CD CC CC CC CC 4C 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=70
+      LENGTH = 18
+      HEX    = 09 00 80 CC 26 6C 06 7A 42 11 9A 99 99 99 99 F9 51 40
+      ASCII  = ....&l.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788430413000
+        RAW            = 00 80 CC 26 6C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 71.9
+        RAW            = 9A 99 99 99 99 F9 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=90
+      LENGTH = 18
+      HEX    = 09 00 80 95 44 6C 06 7A 42 11 00 00 00 00 00 80 4F 40
+      ASCII  = ....Dl.zB.......O@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788430535000
+        RAW            = 00 80 95 44 6C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 63
+        RAW            = 00 00 00 00 00 80 4F 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=110
+      LENGTH = 18
+      HEX    = 09 00 00 79 68 6C 06 7A 42 11 66 66 66 66 66 86 50 40
+      ASCII  = ...yhl.zB.fffff.P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788430682000
+        RAW            = 00 00 79 68 6C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 66.1
+        RAW            = 66 66 66 66 66 86 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=130
+      LENGTH = 18
+      HEX    = 09 00 00 C5 85 6C 06 7A 42 11 33 33 33 33 33 13 52 40
+      ASCII  = .....l.zB.33333.R@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788430802000
+        RAW            = 00 00 C5 85 6C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 72.3
+        RAW            = 33 33 33 33 33 13 52 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=150
+      LENGTH = 18
+      HEX    = 09 00 00 0B A4 6C 06 7A 42 11 33 33 33 33 33 33 51 40
+      ASCII  = .....l.zB.333333Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788430926000
+        RAW            = 00 00 0B A4 6C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 68.8
+        RAW            = 33 33 33 33 33 33 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=170
+      LENGTH = 18
+      HEX    = 09 00 00 57 C1 6C 06 7A 42 11 9A 99 99 99 99 19 4F 40
+      ASCII  = ...W.l.zB.......O@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788431046000
+        RAW            = 00 00 57 C1 6C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 62.2
+        RAW            = 9A 99 99 99 99 19 4F 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=190
+      LENGTH = 18
+      HEX    = 09 00 00 20 DF 6C 06 7A 42 11 66 66 66 66 66 E6 50 40
+      ASCII  = ... .l.zB.fffff.P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788431168000
+        RAW            = 00 00 20 DF 6C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 67.6
+        RAW            = 66 66 66 66 66 E6 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=210
+      LENGTH = 18
+      HEX    = 09 00 80 AA FC 6C 06 7A 42 11 33 33 33 33 33 13 52 40
+      ASCII  = .....l.zB.33333.R@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788431289000
+        RAW            = 00 80 AA FC 6C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 72.3
+        RAW            = 33 33 33 33 33 13 52 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=230
+      LENGTH = 18
+      HEX    = 09 00 80 F0 1A 6D 06 7A 42 11 CD CC CC CC CC 6C 50 40
+      ASCII  = .....m.zB......lP@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788431413000
+        RAW            = 00 80 F0 1A 6D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 65.7
+        RAW            = CD CC CC CC CC 6C 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=250
+      LENGTH = 18
+      HEX    = 09 00 80 3C 38 6D 06 7A 42 11 00 00 00 00 00 80 4F 40
+      ASCII  = ...<8m.zB.......O@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788431533000
+        RAW            = 00 80 3C 38 6D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 63
+        RAW            = 00 00 00 00 00 80 4F 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=270
+      LENGTH = 18
+      HEX    = 09 00 00 C7 55 6D 06 7A 42 11 CD CC CC CC CC 4C 51 40
+      ASCII  = ....Um.zB......LQ@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788431654000
+        RAW            = 00 00 C7 55 6D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 69.2
+        RAW            = CD CC CC CC CC 4C 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=290
+      LENGTH = 18
+      HEX    = 09 00 80 A1 B9 6D 06 7A 42 11 00 00 00 00 00 A0 50 40
+      ASCII  = .....m.zB.......P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788432063000
+        RAW            = 00 80 A1 B9 6D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 66.5
+        RAW            = 00 00 00 00 00 A0 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=310
+      LENGTH = 18
+      HEX    = 09 00 80 ED D6 6D 06 7A 42 11 33 33 33 33 33 13 52 40
+      ASCII  = .....m.zB.33333.R@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788432183000
+        RAW            = 00 80 ED D6 6D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 72.3
+        RAW            = 33 33 33 33 33 13 52 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=330
+      LENGTH = 18
+      HEX    = 09 00 00 F5 F4 6D 06 7A 42 11 66 66 66 66 66 E6 50 40
+      ASCII  = .....m.zB.fffff.P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788432306000
+        RAW            = 00 00 F5 F4 6D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 67.6
+        RAW            = 66 66 66 66 66 E6 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=350
+      LENGTH = 18
+      HEX    = 09 00 00 41 12 6E 06 7A 42 11 CD CC CC CC CC 4C 4F 40
+      ASCII  = ...A.n.zB......LO@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788432426000
+        RAW            = 00 00 41 12 6E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 62.6
+        RAW            = CD CC CC CC CC 4C 4F 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=370
+      LENGTH = 18
+      HEX    = 09 00 80 CB 2F 6E 06 7A 42 11 CD CC CC CC CC 4C 51 40
+      ASCII  = ..../n.zB......LQ@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788432547000
+        RAW            = 00 80 CB 2F 6E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 69.2
+        RAW            = CD CC CC CC CC 4C 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=390
+      LENGTH = 18
+      HEX    = 09 00 80 94 4D 6E 06 7A 42 11 66 66 66 66 66 46 52 40
+      ASCII  = ....Mn.zB.fffffFR@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788432669000
+        RAW            = 00 80 94 4D 6E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 73.1
+        RAW            = 66 66 66 66 66 46 52 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=410
+      LENGTH = 18
+      HEX    = 09 00 80 5D 6B 6E 06 7A 42 11 9A 99 99 99 99 39 50 40
+      ASCII  = ...]kn.zB......9P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788432791000
+        RAW            = 00 80 5D 6B 6E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 64.9
+        RAW            = 9A 99 99 99 99 39 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=430
+      LENGTH = 18
+      HEX    = 09 00 80 BA 9A 6E 06 7A 42 11 00 00 00 00 00 00 51 40
+      ASCII  = .....n.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788432985000
+        RAW            = 00 80 BA 9A 6E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 68
+        RAW            = 00 00 00 00 00 00 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=450
+      LENGTH = 18
+      HEX    = 09 00 80 83 B8 6E 06 7A 42 11 33 33 33 33 33 13 52 40
+      ASCII  = .....n.zB.33333.R@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788433107000
+        RAW            = 00 80 83 B8 6E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 72.3
+        RAW            = 33 33 33 33 33 13 52 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=470
+      LENGTH = 18
+      HEX    = 09 00 80 CF D5 6E 06 7A 42 11 66 66 66 66 66 86 50 40
+      ASCII  = .....n.zB.fffff.P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788433227000
+        RAW            = 00 80 CF D5 6E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 66.1
+        RAW            = 66 66 66 66 66 86 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=490
+      LENGTH = 18
+      HEX    = 09 00 80 98 F3 6E 06 7A 42 11 CD CC CC CC CC 4C 4F 40
+      ASCII  = .....n.zB......LO@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788433349000
+        RAW            = 00 80 98 F3 6E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 62.6
+        RAW            = CD CC CC CC CC 4C 4F 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=510
+      LENGTH = 18
+      HEX    = 09 00 80 61 11 6F 06 7A 42 11 33 33 33 33 33 33 51 40
+      ASCII  = ...a.o.zB.333333Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788433471000
+        RAW            = 00 80 61 11 6F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 68.8
+        RAW            = 33 33 33 33 33 33 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=530
+      LENGTH = 18
+      HEX    = 09 00 00 EC 2E 6F 06 7A 42 11 33 33 33 33 33 13 52 40
+      ASCII  = .....o.zB.33333.R@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788433592000
+        RAW            = 00 00 EC 2E 6F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 72.3
+        RAW            = 33 33 33 33 33 13 52 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=550
+      LENGTH = 18
+      HEX    = 09 00 80 76 4C 6F 06 7A 42 11 00 00 00 00 00 80 4F 40
+      ASCII  = ...vLo.zB.......O@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788433713000
+        RAW            = 00 80 76 4C 6F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 63
+        RAW            = 00 00 00 00 00 80 4F 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=570
+      LENGTH = 18
+      HEX    = 09 00 80 3F 6A 6F 06 7A 42 11 00 00 00 00 00 A0 50 40
+      ASCII  = ...?jo.zB.......P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788433835000
+        RAW            = 00 80 3F 6A 6F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 66.5
+        RAW            = 00 00 00 00 00 A0 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=590
+      LENGTH = 18
+      HEX    = 09 00 80 08 88 6F 06 7A 42 11 9A 99 99 99 99 99 51 40
+      ASCII  = .....o.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788433957000
+        RAW            = 00 80 08 88 6F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 70.4
+        RAW            = 9A 99 99 99 99 99 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=610
+      LENGTH = 18
+      HEX    = 09 00 80 9B AE 6F 06 7A 42 11 CD CC CC CC CC CC 50 40
+      ASCII  = .....o.zB.......P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788434115000
+        RAW            = 00 80 9B AE 6F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 67.2
+        RAW            = CD CC CC CC CC CC 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=630
+      LENGTH = 18
+      HEX    = 09 00 80 64 CC 6F 06 7A 42 11 66 66 66 66 66 E6 4E 40
+      ASCII  = ...d.o.zB.fffff.N@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788434237000
+        RAW            = 00 80 64 CC 6F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 61.8
+        RAW            = 66 66 66 66 66 E6 4E 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=650
+      LENGTH = 18
+      HEX    = 09 00 80 2D EA 6F 06 7A 42 11 9A 99 99 99 99 19 51 40
+      ASCII  = ...-.o.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788434359000
+        RAW            = 00 80 2D EA 6F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 68.4
+        RAW            = 9A 99 99 99 99 19 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=670
+      LENGTH = 18
+      HEX    = 09 00 00 B8 07 70 06 7A 42 11 33 33 33 33 33 13 52 40
+      ASCII  = .....p.zB.33333.R@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788434480000
+        RAW            = 00 00 B8 07 70 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 72.3
+        RAW            = 33 33 33 33 33 13 52 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=690
+      LENGTH = 18
+      HEX    = 09 00 00 81 25 70 06 7A 42 11 33 33 33 33 33 B3 51 40
+      ASCII  = ....%p.zB.33333.Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788434602000
+        RAW            = 00 00 81 25 70 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 70.8
+        RAW            = 33 33 33 33 33 B3 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=710
+      LENGTH = 18
+      HEX    = 09 00 00 4A 43 70 06 7A 42 11 33 33 33 33 33 B3 4D 40
+      ASCII  = ...JCp.zB.33333.M@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788434724000
+        RAW            = 00 00 4A 43 70 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 59.4
+        RAW            = 33 33 33 33 33 B3 4D 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=730
+      LENGTH = 18
+      HEX    = 09 00 80 D4 60 70 06 7A 42 11 66 66 66 66 66 66 51 40
+      ASCII  = ....`p.zB.ffffffQ@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788434845000
+        RAW            = 00 80 D4 60 70 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 69.6
+        RAW            = 66 66 66 66 66 66 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=750
+      LENGTH = 18
+      HEX    = 09 00 80 9D 7E 70 06 7A 42 11 00 00 00 00 00 E0 52 40
+      ASCII  = ....~p.zB.......R@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788434967000
+        RAW            = 00 80 9D 7E 70 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 75.5
+        RAW            = 00 00 00 00 00 E0 52 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=770
+      LENGTH = 18
+      HEX    = 09 00 00 28 9C 70 06 7A 42 11 33 33 33 33 33 53 50 40
+      ASCII  = ...(.p.zB.33333SP@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788435088000
+        RAW            = 00 00 28 9C 70 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 65.3
+        RAW            = 33 33 33 33 33 53 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=790
+      LENGTH = 18
+      HEX    = 09 00 00 BA D7 70 06 7A 42 11 9A 99 99 99 99 99 51 40
+      ASCII  = .....p.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788435332000
+        RAW            = 00 00 BA D7 70 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 70.4
+        RAW            = 9A 99 99 99 99 99 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=810
+      LENGTH = 18
+      HEX    = 09 00 00 06 F5 70 06 7A 42 11 CD CC CC CC CC AC 52 40
+      ASCII  = .....p.zB.......R@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788435452000
+        RAW            = 00 00 06 F5 70 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 74.7
+        RAW            = CD CC CC CC CC AC 52 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=830
+      LENGTH = 18
+      HEX    = 09 00 00 4C 13 71 06 7A 42 11 66 66 66 66 66 E6 4E 40
+      ASCII  = ...L.q.zB.fffff.N@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788435576000
+        RAW            = 00 00 4C 13 71 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 61.8
+        RAW            = 66 66 66 66 66 E6 4E 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=850
+      LENGTH = 18
+      HEX    = 09 00 00 FD 34 71 06 7A 42 11 9A 99 99 99 99 39 50 40
+      ASCII  = ....4q.zB......9P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788435714000
+        RAW            = 00 00 FD 34 71 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 64.9
+        RAW            = 9A 99 99 99 99 39 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=870
+      LENGTH = 18
+      HEX    = 09 00 80 87 52 71 06 7A 42 11 CD CC CC CC CC 2C 52 40
+      ASCII  = ....Rq.zB......,R@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788435835000
+        RAW            = 00 80 87 52 71 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 72.7
+        RAW            = CD CC CC CC CC 2C 52 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=890
+      LENGTH = 18
+      HEX    = 09 00 80 C7 71 71 06 7A 42 11 CD CC CC CC CC 4C 51 40
+      ASCII  = ....qq.zB......LQ@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788435963000
+        RAW            = 00 80 C7 71 71 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 69.2
+        RAW            = CD CC CC CC CC 4C 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=910
+      LENGTH = 18
+      HEX    = 09 00 80 0D 90 71 06 7A 42 11 33 33 33 33 33 B3 4D 40
+      ASCII  = .....q.zB.33333.M@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788436087000
+        RAW            = 00 80 0D 90 71 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 59.4
+        RAW            = 33 33 33 33 33 B3 4D 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=930
+      LENGTH = 18
+      HEX    = 09 00 80 59 AD 71 06 7A 42 11 66 66 66 66 66 E6 50 40
+      ASCII  = ...Y.q.zB.fffff.P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788436207000
+        RAW            = 00 80 59 AD 71 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 67.6
+        RAW            = 66 66 66 66 66 E6 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=950
+      LENGTH = 18
+      HEX    = 09 00 80 22 CB 71 06 7A 42 11 33 33 33 33 33 93 52 40
+      ASCII  = ...".q.zB.33333.R@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788436329000
+        RAW            = 00 80 22 CB 71 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 74.3
+        RAW            = 33 33 33 33 33 93 52 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=970
+      LENGTH = 18
+      HEX    = 09 00 80 6E E8 71 06 7A 42 11 00 00 00 00 00 A0 50 40
+      ASCII  = ...n.q.zB.......P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788436449000
+        RAW            = 00 80 6E E8 71 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 66.5
+        RAW            = 00 00 00 00 00 A0 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=990
+      LENGTH = 18
+      HEX    = 09 00 80 37 06 72 06 7A 42 11 9A 99 99 99 99 19 4E 40
+      ASCII  = ...7.r.zB.......N@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788436571000
+        RAW            = 00 80 37 06 72 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 60.2
+        RAW            = 9A 99 99 99 99 19 4E 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1010
+      LENGTH = 18
+      HEX    = 09 00 00 3F 24 72 06 7A 42 11 33 33 33 33 33 13 52 40
+      ASCII  = ...?$r.zB.33333.R@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788436694000
+        RAW            = 00 00 3F 24 72 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 72.3
+        RAW            = 33 33 33 33 33 13 52 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1030
+      LENGTH = 18
+      HEX    = 09 00 00 8B 41 72 06 7A 42 11 CD CC CC CC CC 0C 53 40
+      ASCII  = ....Ar.zB.......S@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788436814000
+        RAW            = 00 00 8B 41 72 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 76.2
+        RAW            = CD CC CC CC CC 0C 53 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1050
+      LENGTH = 18
+      HEX    = 09 00 00 54 5F 72 06 7A 42 11 66 66 66 66 66 06 50 40
+      ASCII  = ...T_r.zB.fffff.P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788436936000
+        RAW            = 00 00 54 5F 72 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 64.1
+        RAW            = 66 66 66 66 66 06 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1070
+      LENGTH = 18
+      HEX    = 09 00 00 A0 7C 72 06 7A 42 11 66 66 66 66 66 E6 4E 40
+      ASCII  = ....|r.zB.fffff.N@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788437056000
+        RAW            = 00 00 A0 7C 72 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 61.8
+        RAW            = 66 66 66 66 66 E6 4E 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1090
+      LENGTH = 18
+      HEX    = 09 00 00 69 9A 72 06 7A 42 11 9A 99 99 99 99 99 51 40
+      ASCII  = ...i.r.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788437178000
+        RAW            = 00 00 69 9A 72 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 70.4
+        RAW            = 9A 99 99 99 99 99 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1110
+      LENGTH = 18
+      HEX    = 09 00 80 F3 B7 72 06 7A 42 11 00 00 00 00 00 60 52 40
+      ASCII  = .....r.zB......`R@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788437299000
+        RAW            = 00 80 F3 B7 72 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 73.5
+        RAW            = 00 00 00 00 00 60 52 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1130
+      LENGTH = 18
+      HEX    = 09 00 00 FB D5 72 06 7A 42 11 CD CC CC CC CC CC 50 40
+      ASCII  = .....r.zB.......P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788437422000
+        RAW            = 00 00 FB D5 72 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 67.2
+        RAW            = CD CC CC CC CC CC 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1150
+      LENGTH = 18
+      HEX    = 09 00 00 47 F3 72 06 7A 42 11 33 33 33 33 33 B3 4E 40
+      ASCII  = ...G.r.zB.33333.N@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788437542000
+        RAW            = 00 00 47 F3 72 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 61.4
+        RAW            = 33 33 33 33 33 B3 4E 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1170
+      LENGTH = 18
+      HEX    = 09 00 80 4E 11 73 06 7A 42 11 9A 99 99 99 99 19 51 40
+      ASCII  = ...N.s.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788437665000
+        RAW            = 00 80 4E 11 73 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 68.4
+        RAW            = 9A 99 99 99 99 19 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1190
+      LENGTH = 18
+      HEX    = 09 00 80 2E 40 73 06 7A 42 11 33 33 33 33 33 53 50 40
+      ASCII  = ....@s.zB.33333SP@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788437857000
+        RAW            = 00 80 2E 40 73 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 65.3
+        RAW            = 33 33 33 33 33 53 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1210
+      LENGTH = 18
+      HEX    = 09 00 80 F7 5D 73 06 7A 42 11 66 66 66 66 66 E6 4D 40
+      ASCII  = ....]s.zB.fffff.M@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788437979000
+        RAW            = 00 80 F7 5D 73 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 59.8
+        RAW            = 66 66 66 66 66 E6 4D 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1230
+      LENGTH = 18
+      HEX    = 09 00 80 3D 7C 73 06 7A 42 11 9A 99 99 99 99 B9 50 40
+      ASCII  = ...=|s.zB.......P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788438103000
+        RAW            = 00 80 3D 7C 73 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 66.9
+        RAW            = 9A 99 99 99 99 B9 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1250
+      LENGTH = 18
+      HEX    = 09 00 80 82 AF 73 06 7A 42 11 66 66 66 66 66 A6 4F 40
+      ASCII  = .....s.zB.fffff.O@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788438313000
+        RAW            = 00 80 82 AF 73 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 63.3
+        RAW            = 66 66 66 66 66 A6 4F 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1270
+      LENGTH = 18
+      HEX    = 09 00 80 4B CD 73 06 7A 42 11 66 66 66 66 66 E6 4D 40
+      ASCII  = ...K.s.zB.fffff.M@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788438435000
+        RAW            = 00 80 4B CD 73 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 59.8
+        RAW            = 66 66 66 66 66 E6 4D 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1290
+      LENGTH = 18
+      HEX    = 09 00 80 14 EB 73 06 7A 42 11 9A 99 99 99 99 B9 50 40
+      ASCII  = .....s.zB.......P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788438557000
+        RAW            = 00 80 14 EB 73 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 66.9
+        RAW            = 9A 99 99 99 99 B9 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1310
+      LENGTH = 18
+      HEX    = 09 00 80 60 08 74 06 7A 42 11 CD CC CC CC CC CC 51 40
+      ASCII  = ...`.t.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788438677000
+        RAW            = 00 80 60 08 74 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 71.2
+        RAW            = CD CC CC CC CC CC 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1330
+      LENGTH = 18
+      HEX    = 09 00 80 A6 26 74 06 7A 42 11 66 66 66 66 66 E6 4E 40
+      ASCII  = ....&t.zB.fffff.N@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788438801000
+        RAW            = 00 80 A6 26 74 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 61.8
+        RAW            = 66 66 66 66 66 E6 4E 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1350
+      LENGTH = 18
+      HEX    = 09 00 80 F2 43 74 06 7A 42 11 CD CC CC CC CC 4C 4E 40
+      ASCII  = ....Ct.zB......LN@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788438921000
+        RAW            = 00 80 F2 43 74 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 60.6
+        RAW            = CD CC CC CC CC 4C 4E 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1370
+      LENGTH = 18
+      HEX    = 09 00 00 7D 61 74 06 7A 42 11 00 00 00 00 00 00 51 40
+      ASCII  = ...}at.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788439042000
+        RAW            = 00 00 7D 61 74 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 68
+        RAW            = 00 00 00 00 00 00 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1390
+      LENGTH = 18
+      HEX    = 09 00 00 46 7F 74 06 7A 42 11 9A 99 99 99 99 99 51 40
+      ASCII  = ...F.t.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788439164000
+        RAW            = 00 00 46 7F 74 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 70.4
+        RAW            = 9A 99 99 99 99 99 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1410
+      LENGTH = 18
+      HEX    = 09 00 00 0F 9D 74 06 7A 42 11 33 33 33 33 33 B3 4D 40
+      ASCII  = .....t.zB.33333.M@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788439286000
+        RAW            = 00 00 0F 9D 74 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 59.4
+        RAW            = 33 33 33 33 33 B3 4D 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1430
+      LENGTH = 18
+      HEX    = 09 00 00 D8 BA 74 06 7A 42 11 9A 99 99 99 99 B9 50 40
+      ASCII  = .....t.zB.......P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788439408000
+        RAW            = 00 00 D8 BA 74 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 66.9
+        RAW            = 9A 99 99 99 99 B9 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1450
+      LENGTH = 18
+      HEX    = 09 00 00 A1 D8 74 06 7A 42 11 00 00 00 00 00 E0 51 40
+      ASCII  = .....t.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788439530000
+        RAW            = 00 00 A1 D8 74 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 71.5
+        RAW            = 00 00 00 00 00 E0 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1470
+      LENGTH = 18
+      HEX    = 09 00 80 90 FA 74 06 7A 42 11 9A 99 99 99 99 19 51 40
+      ASCII  = .....t.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788439669000
+        RAW            = 00 80 90 FA 74 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 68.4
+        RAW            = 9A 99 99 99 99 19 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1490
+      LENGTH = 18
+      HEX    = 09 00 80 59 18 75 06 7A 42 11 33 33 33 33 33 B3 4D 40
+      ASCII  = ...Y.u.zB.33333.M@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788439791000
+        RAW            = 00 80 59 18 75 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 59.4
+        RAW            = 33 33 33 33 33 B3 4D 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1510
+      LENGTH = 18
+      HEX    = 09 00 80 22 36 75 06 7A 42 11 66 66 66 66 66 86 50 40
+      ASCII  = ..."6u.zB.fffff.P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788439913000
+        RAW            = 00 80 22 36 75 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 66.1
+        RAW            = 66 66 66 66 66 86 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1530
+      LENGTH = 18
+      HEX    = 09 00 80 EB 53 75 06 7A 42 11 00 00 00 00 00 E0 51 40
+      ASCII  = ....Su.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788440035000
+        RAW            = 00 80 EB 53 75 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 71.5
+        RAW            = 00 00 00 00 00 E0 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1550
+      LENGTH = 18
+      HEX    = 09 00 00 BC 8F 75 06 7A 42 11 66 66 66 66 66 E6 4D 40
+      ASCII  = .....u.zB.fffff.M@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788440280000
+        RAW            = 00 00 BC 8F 75 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 59.8
+        RAW            = 66 66 66 66 66 E6 4D 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1570
+      LENGTH = 18
+      HEX    = 09 00 00 08 AD 75 06 7A 42 11 CD CC CC CC CC CC 50 40
+      ASCII  = .....u.zB.......P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788440400000
+        RAW            = 00 00 08 AD 75 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 67.2
+        RAW            = CD CC CC CC CC CC 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1590
+      LENGTH = 18
+      HEX    = 09 00 80 D8 E8 75 06 7A 42 11 9A 99 99 99 99 19 4F 40
+      ASCII  = .....u.zB.......O@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788440645000
+        RAW            = 00 80 D8 E8 75 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 62.2
+        RAW            = 9A 99 99 99 99 19 4F 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1610
+      LENGTH = 18
+      HEX    = 09 00 80 24 06 76 06 7A 42 11 33 33 33 33 33 B3 4E 40
+      ASCII  = ...$.v.zB.33333.N@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788440765000
+        RAW            = 00 80 24 06 76 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 61.4
+        RAW            = 33 33 33 33 33 B3 4E 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1630
+      LENGTH = 18
+      HEX    = 09 00 80 70 23 76 06 7A 42 11 33 33 33 33 33 33 51 40
+      ASCII  = ...p#v.zB.333333Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788440885000
+        RAW            = 00 80 70 23 76 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 68.8
+        RAW            = 33 33 33 33 33 33 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1650
+      LENGTH = 18
+      HEX    = 09 00 80 7F 5F 76 06 7A 42 11 9A 99 99 99 99 19 4F 40
+      ASCII  = ...._v.zB.......O@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788441131000
+        RAW            = 00 80 7F 5F 76 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 62.2
+        RAW            = 9A 99 99 99 99 19 4F 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1670
+      LENGTH = 18
+      HEX    = 09 00 80 95 85 76 06 7A 42 11 33 33 33 33 33 53 50 40
+      ASCII  = .....v.zB.33333SP@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788441287000
+        RAW            = 00 80 95 85 76 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 65.3
+        RAW            = 33 33 33 33 33 53 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1690
+      LENGTH = 18
+      HEX    = 09 00 80 5E A3 76 06 7A 42 11 CD CC CC CC CC CC 51 40
+      ASCII  = ...^.v.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788441409000
+        RAW            = 00 80 5E A3 76 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 71.2
+        RAW            = CD CC CC CC CC CC 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1710
+      LENGTH = 18
+      HEX    = 09 00 80 AA C0 76 06 7A 42 11 CD CC CC CC CC CC 50 40
+      ASCII  = .....v.zB.......P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788441529000
+        RAW            = 00 80 AA C0 76 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 67.2
+        RAW            = CD CC CC CC CC CC 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1730
+      LENGTH = 18
+      HEX    = 09 00 00 35 DE 76 06 7A 42 11 33 33 33 33 33 B3 4D 40
+      ASCII  = ...5.v.zB.33333.M@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788441650000
+        RAW            = 00 00 35 DE 76 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 59.4
+        RAW            = 33 33 33 33 33 B3 4D 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1750
+      LENGTH = 18
+      HEX    = 09 00 80 3C FC 76 06 7A 42 11 00 00 00 00 00 A0 50 40
+      ASCII  = ...<.v.zB.......P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788441773000
+        RAW            = 00 80 3C FC 76 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 66.5
+        RAW            = 00 00 00 00 00 A0 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1770
+      LENGTH = 18
+      HEX    = 09 00 00 D6 55 77 06 7A 42 11 66 66 66 66 66 E6 4D 40
+      ASCII  = ....Uw.zB.fffff.M@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788442140000
+        RAW            = 00 00 D6 55 77 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 59.8
+        RAW            = 66 66 66 66 66 E6 4D 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1790
+      LENGTH = 18
+      HEX    = 09 00 00 22 73 77 06 7A 42 11 CD CC CC CC CC CC 50 40
+      ASCII  = ..."sw.zB.......P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788442260000
+        RAW            = 00 00 22 73 77 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 67.2
+        RAW            = CD CC CC CC CC CC 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1810
+      LENGTH = 18
+      HEX    = 09 00 80 AC 90 77 06 7A 42 11 00 00 00 00 00 E0 51 40
+      ASCII  = .....w.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788442381000
+        RAW            = 00 80 AC 90 77 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 71.5
+        RAW            = 00 00 00 00 00 E0 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1830
+      LENGTH = 18
+      HEX    = 09 00 00 37 AE 77 06 7A 42 11 00 00 00 00 00 80 4F 40
+      ASCII  = ...7.w.zB.......O@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788442502000
+        RAW            = 00 00 37 AE 77 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 63
+        RAW            = 00 00 00 00 00 80 4F 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1850
+      LENGTH = 18
+      HEX    = 09 00 80 07 EA 77 06 7A 42 11 9A 99 99 99 99 19 51 40
+      ASCII  = .....w.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788442747000
+        RAW            = 00 80 07 EA 77 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 68.4
+        RAW            = 9A 99 99 99 99 19 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1870
+      LENGTH = 18
+      HEX    = 09 00 80 53 07 78 06 7A 42 11 33 33 33 33 33 B3 51 40
+      ASCII  = ...S.x.zB.33333.Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788442867000
+        RAW            = 00 80 53 07 78 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 70.8
+        RAW            = 33 33 33 33 33 B3 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1890
+      LENGTH = 18
+      HEX    = 09 00 00 5B 25 78 06 7A 42 11 CD CC CC CC CC 4C 4E 40
+      ASCII  = ...[%x.zB......LN@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788442990000
+        RAW            = 00 00 5B 25 78 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 60.6
+        RAW            = CD CC CC CC CC 4C 4E 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1910
+      LENGTH = 18
+      HEX    = 09 00 00 95 45 78 06 7A 42 11 9A 99 99 99 99 D9 4F 40
+      ASCII  = ....Ex.zB.......O@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788443122000
+        RAW            = 00 00 95 45 78 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 63.7
+        RAW            = 9A 99 99 99 99 D9 4F 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1930
+      LENGTH = 18
+      HEX    = 09 00 00 5E 63 78 06 7A 42 11 00 00 00 00 00 E0 51 40
+      ASCII  = ...^cx.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788443244000
+        RAW            = 00 00 5E 63 78 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 71.5
+        RAW            = 00 00 00 00 00 E0 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1950
+      LENGTH = 18
+      HEX    = 09 00 00 39 FB 78 06 7A 42 11 00 00 00 00 00 20 50 40
+      ASCII  = ...9.x.zB...... P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788443866000
+        RAW            = 00 00 39 FB 78 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 64.5
+        RAW            = 00 00 00 00 00 20 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1970
+      LENGTH = 18
+      HEX    = 09 00 00 85 18 79 06 7A 42 11 00 00 00 00 00 80 4E 40
+      ASCII  = .....y.zB.......N@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788443986000
+        RAW            = 00 00 85 18 79 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 61
+        RAW            = 00 00 00 00 00 80 4E 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=1990
+      LENGTH = 18
+      HEX    = 09 00 00 17 54 79 06 7A 42 11 00 00 00 00 00 E0 51 40
+      ASCII  = ....Ty.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788444230000
+        RAW            = 00 00 17 54 79 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 71.5
+        RAW            = 00 00 00 00 00 E0 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2010
+      LENGTH = 18
+      HEX    = 09 00 00 63 71 79 06 7A 42 11 9A 99 99 99 99 19 4F 40
+      ASCII  = ...cqy.zB.......O@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788444350000
+        RAW            = 00 00 63 71 79 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 62.2
+        RAW            = 9A 99 99 99 99 19 4F 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2030
+      LENGTH = 18
+      HEX    = 09 00 00 D8 9C 79 06 7A 42 11 33 33 33 33 33 53 50 40
+      ASCII  = .....y.zB.33333SP@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788444528000
+        RAW            = 00 00 D8 9C 79 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 65.3
+        RAW            = 33 33 33 33 33 53 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2050
+      LENGTH = 18
+      HEX    = 09 00 00 24 BA 79 06 7A 42 11 CD CC CC CC CC CC 51 40
+      ASCII  = ...$.y.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788444648000
+        RAW            = 00 00 24 BA 79 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 71.2
+        RAW            = CD CC CC CC CC CC 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2070
+      LENGTH = 18
+      HEX    = 09 00 00 7F 13 7A 06 7A 42 11 9A 99 99 99 99 B9 50 40
+      ASCII  = .....z.zB.......P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788445014000
+        RAW            = 00 00 7F 13 7A 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 66.9
+        RAW            = 9A 99 99 99 99 B9 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2090
+      LENGTH = 18
+      HEX    = 09 00 00 CB 30 7A 06 7A 42 11 9A 99 99 99 99 F9 51 40
+      ASCII  = ....0z.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788445134000
+        RAW            = 00 00 CB 30 7A 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 71.9
+        RAW            = 9A 99 99 99 99 F9 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2110
+      LENGTH = 18
+      HEX    = 09 00 80 2D A8 7A 06 7A 42 11 CD CC CC CC CC CC 51 40
+      ASCII  = ...-.z.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788445623000
+        RAW            = 00 80 2D A8 7A 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 71.2
+        RAW            = CD CC CC CC CC CC 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2130
+      LENGTH = 18
+      HEX    = 09 00 80 79 C5 7A 06 7A 42 11 33 33 33 33 33 B3 4E 40
+      ASCII  = ...y.z.zB.33333.N@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788445743000
+        RAW            = 00 80 79 C5 7A 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 61.4
+        RAW            = 33 33 33 33 33 B3 4E 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2150
+      LENGTH = 18
+      HEX    = 09 00 80 1E E9 7A 06 7A 42 11 00 00 00 00 00 20 50 40
+      ASCII  = .....z.zB...... P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788445889000
+        RAW            = 00 80 1E E9 7A 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 64.5
+        RAW            = 00 00 00 00 00 20 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2170
+      LENGTH = 18
+      HEX    = 09 00 00 A9 06 7B 06 7A 42 11 33 33 33 33 33 B3 51 40
+      ASCII  = .....{.zB.33333.Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788446010000
+        RAW            = 00 00 A9 06 7B 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 70.8
+        RAW            = 33 33 33 33 33 B3 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2190
+      LENGTH = 18
+      HEX    = 09 00 00 E9 25 7B 06 7A 42 11 CD CC CC CC CC CC 50 40
+      ASCII  = ....%{.zB.......P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788446138000
+        RAW            = 00 00 E9 25 7B 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 67.2
+        RAW            = CD CC CC CC CC CC 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2210
+      LENGTH = 18
+      HEX    = 09 00 80 FC 41 7B 06 7A 42 11 66 66 66 66 66 E6 4D 40
+      ASCII  = ....A{.zB.fffff.M@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788446253000
+        RAW            = 00 80 FC 41 7B 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 59.8
+        RAW            = 66 66 66 66 66 E6 4D 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2230
+      LENGTH = 18
+      HEX    = 09 00 80 3C 61 7B 06 7A 42 11 00 00 00 00 00 A0 50 40
+      ASCII  = ...<a{.zB.......P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788446381000
+        RAW            = 00 80 3C 61 7B 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 66.5
+        RAW            = 00 00 00 00 00 A0 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2250
+      LENGTH = 18
+      HEX    = 09 00 80 05 7F 7B 06 7A 42 11 9A 99 99 99 99 F9 51 40
+      ASCII  = .....{.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788446503000
+        RAW            = 00 80 05 7F 7B 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 71.9
+        RAW            = 9A 99 99 99 99 F9 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2270
+      LENGTH = 18
+      HEX    = 09 00 80 51 9C 7B 06 7A 42 11 33 33 33 33 33 53 50 40
+      ASCII  = ...Q.{.zB.33333SP@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788446623000
+        RAW            = 00 80 51 9C 7B 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 65.3
+        RAW            = 33 33 33 33 33 53 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2290
+      LENGTH = 18
+      HEX    = 09 00 00 59 BA 7B 06 7A 42 11 CD CC CC CC CC 4C 4E 40
+      ASCII  = ...Y.{.zB......LN@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788446746000
+        RAW            = 00 00 59 BA 7B 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 60.6
+        RAW            = CD CC CC CC CC 4C 4E 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2310
+      LENGTH = 18
+      HEX    = 09 00 00 A5 D7 7B 06 7A 42 11 66 66 66 66 66 E6 50 40
+      ASCII  = .....{.zB.fffff.P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788446866000
+        RAW            = 00 00 A5 D7 7B 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 67.6
+        RAW            = 66 66 66 66 66 E6 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2330
+      LENGTH = 18
+      HEX    = 09 00 00 A6 3F 7C 06 7A 42 11 66 66 66 66 66 86 50 40
+      ASCII  = ....?|.zB.fffff.P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788447292000
+        RAW            = 00 00 A6 3F 7C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 66.1
+        RAW            = 66 66 66 66 66 86 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2350
+      LENGTH = 18
+      HEX    = 09 00 00 F2 5C 7C 06 7A 42 11 9A 99 99 99 99 F9 51 40
+      ASCII  = ....\|.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788447412000
+        RAW            = 00 00 F2 5C 7C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 71.9
+        RAW            = 9A 99 99 99 99 F9 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2370
+      LENGTH = 18
+      HEX    = 09 00 80 F9 7A 7C 06 7A 42 11 00 00 00 00 00 A0 50 40
+      ASCII  = ....z|.zB.......P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788447535000
+        RAW            = 00 80 F9 7A 7C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 66.5
+        RAW            = 00 00 00 00 00 A0 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2390
+      LENGTH = 18
+      HEX    = 09 00 80 45 98 7C 06 7A 42 11 CD CC CC CC CC 4C 4E 40
+      ASCII  = ...E.|.zB......LN@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788447655000
+        RAW            = 00 80 45 98 7C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 60.6
+        RAW            = CD CC CC CC CC 4C 4E 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2410
+      LENGTH = 18
+      HEX    = 09 00 00 4D B6 7C 06 7A 42 11 CD CC CC CC CC CC 50 40
+      ASCII  = ...M.|.zB.......P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788447778000
+        RAW            = 00 00 4D B6 7C 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 67.2
+        RAW            = CD CC CC CC CC CC 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2430
+      LENGTH = 18
+      HEX    = 09 00 80 FB 4A 7D 06 7A 42 11 9A 99 99 99 99 79 52 40
+      ASCII  = ....J}.zB......yR@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788448387000
+        RAW            = 00 80 FB 4A 7D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 73.9
+        RAW            = 9A 99 99 99 99 79 52 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2450
+      LENGTH = 18
+      HEX    = 09 00 80 47 68 7D 06 7A 42 11 00 00 00 00 00 00 51 40
+      ASCII  = ...Gh}.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788448507000
+        RAW            = 00 80 47 68 7D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 68
+        RAW            = 00 00 00 00 00 00 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2470
+      LENGTH = 18
+      HEX    = 09 00 80 10 86 7D 06 7A 42 11 33 33 33 33 33 B3 4E 40
+      ASCII  = .....}.zB.33333.N@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788448629000
+        RAW            = 00 80 10 86 7D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 61.4
+        RAW            = 33 33 33 33 33 B3 4E 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2490
+      LENGTH = 18
+      HEX    = 09 00 80 5C A3 7D 06 7A 42 11 66 66 66 66 66 E6 50 40
+      ASCII  = ...\.}.zB.fffff.P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788448749000
+        RAW            = 00 80 5C A3 7D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 67.6
+        RAW            = 66 66 66 66 66 E6 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2510
+      LENGTH = 18
+      HEX    = 09 00 80 25 C1 7D 06 7A 42 11 CD CC CC CC CC 2C 52 40
+      ASCII  = ...%.}.zB......,R@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788448871000
+        RAW            = 00 80 25 C1 7D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 72.7
+        RAW            = CD CC CC CC CC 2C 52 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2530
+      LENGTH = 18
+      HEX    = 09 00 80 EE DE 7D 06 7A 42 11 9A 99 99 99 99 39 50 40
+      ASCII  = .....}.zB......9P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788448993000
+        RAW            = 00 80 EE DE 7D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 64.9
+        RAW            = 9A 99 99 99 99 39 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2550
+      LENGTH = 18
+      HEX    = 09 00 00 79 FC 7D 06 7A 42 11 66 66 66 66 66 E6 4E 40
+      ASCII  = ...y.}.zB.fffff.N@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788449114000
+        RAW            = 00 00 79 FC 7D 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 61.8
+        RAW            = 66 66 66 66 66 E6 4E 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2570
+      LENGTH = 18
+      HEX    = 09 00 00 42 1A 7E 06 7A 42 11 33 33 33 33 33 33 51 40
+      ASCII  = ...B.~.zB.333333Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788449236000
+        RAW            = 00 00 42 1A 7E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 68.8
+        RAW            = 33 33 33 33 33 33 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2590
+      LENGTH = 18
+      HEX    = 09 00 00 8E 37 7E 06 7A 42 11 9A 99 99 99 99 F9 51 40
+      ASCII  = ....7~.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788449356000
+        RAW            = 00 00 8E 37 7E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 71.9
+        RAW            = 9A 99 99 99 99 F9 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2610
+      LENGTH = 18
+      HEX    = 09 00 80 95 55 7E 06 7A 42 11 9A 99 99 99 99 19 4F 40
+      ASCII  = ....U~.zB.......O@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788449479000
+        RAW            = 00 80 95 55 7E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 62.2
+        RAW            = 9A 99 99 99 99 19 4F 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2630
+      LENGTH = 18
+      HEX    = 09 00 80 3A 79 7E 06 7A 42 11 33 33 33 33 33 53 50 40
+      ASCII  = ...:y~.zB.33333SP@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788449625000
+        RAW            = 00 80 3A 79 7E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 65.3
+        RAW            = 33 33 33 33 33 53 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2650
+      LENGTH = 18
+      HEX    = 09 00 00 C5 96 7E 06 7A 42 11 CD CC CC CC CC CC 51 40
+      ASCII  = .....~.zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788449746000
+        RAW            = 00 00 C5 96 7E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 71.2
+        RAW            = CD CC CC CC CC CC 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2670
+      LENGTH = 18
+      HEX    = 09 00 00 45 D5 7E 06 7A 42 11 CD CC CC CC CC 4C 4E 40
+      ASCII  = ...E.~.zB......LN@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788450002000
+        RAW            = 00 00 45 D5 7E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 60.6
+        RAW            = CD CC CC CC CC 4C 4E 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2690
+      LENGTH = 18
+      HEX    = 09 00 00 91 F2 7E 06 7A 42 11 CD CC CC CC CC CC 50 40
+      ASCII  = .....~.zB.......P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788450122000
+        RAW            = 00 00 91 F2 7E 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 67.2
+        RAW            = CD CC CC CC CC CC 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2710
+      LENGTH = 18
+      HEX    = 09 00 80 E4 2D 7F 06 7A 42 11 9A 99 99 99 99 39 50 40
+      ASCII  = ....-..zB......9P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788450365000
+        RAW            = 00 80 E4 2D 7F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 64.9
+        RAW            = 9A 99 99 99 99 39 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2730
+      LENGTH = 18
+      HEX    = 09 00 80 30 4B 7F 06 7A 42 11 00 00 00 00 00 80 4F 40
+      ASCII  = ...0K..zB.......O@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788450485000
+        RAW            = 00 80 30 4B 7F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 63
+        RAW            = 00 00 00 00 00 80 4F 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2750
+      LENGTH = 18
+      HEX    = 09 00 80 F9 68 7F 06 7A 42 11 00 00 00 00 00 80 51 40
+      ASCII  = ....h..zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788450607000
+        RAW            = 00 80 F9 68 7F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 70
+        RAW            = 00 00 00 00 00 80 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2770
+      LENGTH = 18
+      HEX    = 09 00 80 54 C2 7F 06 7A 42 11 9A 99 99 99 99 39 50 40
+      ASCII  = ...T...zB......9P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788450973000
+        RAW            = 00 80 54 C2 7F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 64.9
+        RAW            = 9A 99 99 99 99 39 50 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2790
+      LENGTH = 18
+      HEX    = 09 00 80 A0 DF 7F 06 7A 42 11 00 00 00 00 00 E0 51 40
+      ASCII  = .......zB.......Q@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788451093000
+        RAW            = 00 80 A0 DF 7F 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 71.5
+        RAW            = 00 00 00 00 00 E0 51 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2810
+      LENGTH = 18
+      HEX    = 09 00 00 84 03 80 06 7A 42 11 CD CC CC CC CC AC 52 40
+      ASCII  = .......zB.......R@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788451240000
+        RAW            = 00 00 84 03 80 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 74.7
+        RAW            = CD CC CC CC CC AC 52 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2830
+      LENGTH = 18
+      HEX    = 09 00 00 D0 20 80 06 7A 42 11 00 00 00 00 00 80 4F 40
+      ASCII  = .... ..zB.......O@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788451360000
+        RAW            = 00 00 D0 20 80 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 63
+        RAW            = 00 00 00 00 00 80 4F 40
+      --- END NESTED ---
+    FIELD 2  wire=2  tagOffset=2850
+      LENGTH = 18
+      HEX    = 09 00 00 99 3E 80 06 7A 42 11 9A 99 99 99 99 B9 50 40
+      ASCII  = ....>..zB.......P@
+      --- NESTED MESSAGE ---
+    MESSAGE ChartData.field1.field2  offset=0 length=18
+      FIELD 1  wire=1  tagOffset=0
+        FIXED64 DOUBLE = 1788451482000
+        RAW            = 00 00 99 3E 80 06 7A 42
+      FIELD 2  wire=1  tagOffset=9
+        FIXED64 DOUBLE = 66.9
+        RAW            = 9A 99 99 99 99 B9 50 40
+      --- END NESTED ---
+    FIELD 3  wire=2  tagOffset=2870
+      LENGTH = 7
+      HEX    = 23 30 30 39 43 44 45
+      ASCII  = #009CDE
+    FIELD 4  wire=2  tagOffset=2879
+      LENGTH = 27
+      HEX    = 30 33 2E 30 39 2E 32 30 32 36 26 6E 62 73 70 3B 26 6E 62 73 70 3B 31 36 3A 30 34
+      ASCII  = 03.09.2026&nbsp;&nbsp;16:04
+    FIELD 5  wire=2  tagOffset=2908
+      LENGTH = 4
+      HEX    = 36 37 20 25
+      ASCII  = 67 %
+    FIELD 6  wire=0  tagOffset=2914
+      VARINT = 0
+      RAW    = 00
+    FIELD 7  wire=0  tagOffset=2916
+      VARINT = 0
+      RAW    = 00
+    FIELD 8  wire=0  tagOffset=2918
+      VARINT = 0
+      RAW    = 00
+    FIELD 9  wire=2  tagOffset=2920
+      LENGTH = 7
+      HEX    = 4E 6F 41 6C 65 72 74
+      ASCII  = NoAlert
+    FIELD 10  wire=0  tagOffset=2929
+      VARINT = 0
+      RAW    = 00
+    FIELD 11  wire=0  tagOffset=2931
+      VARINT = 1
+      RAW    = 01
+    --- END NESTED ---
