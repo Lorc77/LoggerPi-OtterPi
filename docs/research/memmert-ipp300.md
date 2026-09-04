@@ -12,33 +12,47 @@
 
 ### Aktueller Erkenntnisstand
 
-Der MEMMERT-Service hat auf eine technische Anfrage bestätigt, dass der Controller des Gerätes intern über **RS-232** kommuniziert und das Interface **B04118 diese RS-232-Kommunikation auf USB umsetzt**.
+Der grundsätzliche Kommunikationsweg sowie die praktische Kommunikation mit dem real vorhandenen IPP300 sind inzwischen verifiziert.
 
-Damit ist der grundsätzliche Kommunikationsweg geklärt:
+Das MEMMERT USB Interface B04118 setzt die interne RS-232-Kommunikation des Controllers auf USB um. Unter Linux wird das Interface als serielles Device bereitgestellt.
 
-```text
-MEMMERT IPP300 Controller
-        │
-        │ RS-232
-        ▼
-MEMMERT USB Interface B04118
-        │
-        │ USB
-        ▼
-LoggerPi / Raspberry Pi
-```
-
-Zusätzlich wurde vom MEMMERT-Service eine offizielle Schnittstellenbeschreibung zur Verfügung gestellt:
+Am real vorhandenen IPP300 wurde erfolgreich folgende Kommunikation durchgeführt:
 
 ```text
-docs/research/sources/MEMMERT_IPP300_Beschreibung_RS232-2010.pdf
+Port      : /dev/ttyUSB1
+Baudrate  : 2400
+Format    : 8N1
+Flow Ctrl : none
+Adresse   : 1
 ```
 
-Die Dokumentation beschreibt die serielle Kommunikation einschließlich Übertragungsparametern, Befehlssyntax, Geräteadressierung, Status- und Fehlerantworten sowie Lese- und Schreibbefehlen.
+Die folgenden Read-only-Befehle wurden erfolgreich getestet:
 
-Damit ist **kein Reverse Engineering des eigentlichen MEMMERT-Kommunikationsprotokolls erforderlich**.
+```text
+IN_MODE_10
+IN_PAR_11
+IN_PV_11
+IN_SP_11
+```
 
-Die verbleibende technische Untersuchung betrifft primär die konkrete USB-Enumeration des B04118 sowie die Verifikation der dokumentierten Kommunikation am real vorhandenen IPP300.
+Damit ist die grundlegende Request/Response-Kommunikation des IPP300 über B04118 praktisch nachgewiesen.
+
+Zusätzlich wurde eine vollständige Read-only-Inventur der in der Herstellerdokumentation beschriebenen relevanten `IN_*` Befehle durchgeführt. Dabei wurde festgestellt, dass für den konkret untersuchten IPP300 lediglich folgende Abfragen für die geplante LoggerPi-Integration relevant sind:
+
+```text
+IN_MODE_10   Betriebsart
+IN_PAR_11    Reglerauflösung
+IN_PV_11     Ist-Temperatur
+IN_SP_11     Temperatur-Sollwert
+```
+
+Die übrigen dokumentierten optionalen Mess- und Konfigurationsabfragen sind für dieses Gerät nicht relevant bzw. laut Gerätekonfiguration nicht vorhanden.
+
+Ein separater Timing-Test mit 20 aufeinanderfolgenden `IN_PV_11` Requests ergab eine sehr konstante Antwortzeit von durchschnittlich 122,39 ms bei 20/20 erfolgreichen Antworten.
+
+Damit ist die technische Grundlage für einen read-only `MemmertAdapter` in LoggerPi-OtterPi gegeben.
+
+Die vollständige Herstellerbefehlsliste bleibt als Research-Dokumentation erhalten. Der Softwareadapter muss jedoch nicht die vollständige MEMMERT-Schnittstelle implementieren, sondern zunächst nur den für den konkreten IPP300 tatsächlich benötigten Read-only-Subset.
 
 ---
 
@@ -153,7 +167,31 @@ memmert:
   address: 0
 ```
 
-Die tatsächliche Adresse der beiden vorhandenen IPP300 muss am Gerät verifiziert werden.
+Das im Rahmen dieser Untersuchung getestete IPP300 antwortet auf die Geräteadresse:
+
+```text
+1
+```
+
+Die verwendeten Befehle enthalten daher beispielsweise:
+
+```text
+IN_MODE_10
+IN_PAR_11
+IN_PV_11
+IN_SP_11
+```
+
+Die Adresse des zweiten vorhandenen IPP300 ist separat zu verifizieren.
+
+Für LoggerPi sollte die MEMMERT-Adresse als explizite Gerätekonfiguration behandelt werden.
+
+Beispiel:
+
+```yaml
+memmert:
+  address: 1
+```
 
 Die MEMMERT-Geräteadresse kann damit zusätzlich zur USB-Identität als stabile logische Geräteidentifikation verwendet werden.
 
@@ -304,53 +342,114 @@ Insbesondere Sensorfehler (`ERR_03`) und Übertemperatur (`ERR_09`) sind relevan
 
 ## 7. Relevante Lese-Befehle
 
-Für LoggerPi sind zunächst ausschließlich Read-Operationen relevant.
+Die Herstellerdokumentation definiert zahlreiche `IN_*` Befehle. Eine vollständige Read-only-Inventur des real vorhandenen IPP300 wurde inzwischen durchgeführt.
 
-Die Herstellerdokumentation definiert mehrere Gruppen von Lese-Befehlen.
+Für die geplante LoggerPi-Integration sind beim konkret untersuchten IPP300 jedoch nur vier Abfragen relevant:
 
-### 7.1 Istwerte
+| Befehl | Bedeutung | Ergebnis beim Test |
+|---|---|---|
+| `IN_MODE_10` | Betriebsart | `0` = LOCAL |
+| `IN_PAR_11` | Reglerauflösung | `0` = 0,1 °C |
+| `IN_PV_11` | Ist-Temperatur | `14.7 °C` |
+| `IN_SP_11` | Temperatur-Sollwert | `14.7 °C` |
 
-```text
-IN_PV_{ADR}1
-```
-
-liest die Ist-Temperatur in °C.
-
-Beispiel für Adresse `0`:
-
-```text
-IN_PV_01<CR><LF>
-```
-
-Antwort:
+### 7.1 Betriebsart
 
 ```text
-OK<CR><LF>
--###.#<CR><LF>
+IN_MODE_10
 ```
 
-Weitere dokumentierte Process Values:
+liest die aktuelle Betriebsart des Reglers.
+
+Beim getesteten IPP300:
+
+```text
+OK\r\n
+0\r\n
+```
+
+Ergebnis:
+
+```text
+LOCAL / manueller Betrieb
+```
+
+### 7.2 Reglerauflösung
+
+```text
+IN_PAR_11
+```
+
+liest die Auflösung des Temperaturreglers.
+
+Beim getesteten IPP300:
+
+```text
+OK\r\n
+0\r\n
+```
+
+Ergebnis:
+
+```text
+0,1 °C
+```
+
+### 7.3 Ist-Temperatur
+
+```text
+IN_PV_11
+```
+
+liest die aktuelle Ist-Temperatur.
+
+Beim getesteten IPP300:
+
+```text
+OK\r\n
+14.7\r\n
+```
+
+Ergebnis:
+
+```text
+14.7 °C
+```
+
+### 7.4 Temperatur-Sollwert
+
+```text
+IN_SP_11
+```
+
+liest den aktuell eingestellten Temperatur-Sollwert.
+
+Beim getesteten IPP300:
+
+```text
+OK\r\n
+14.7\r\n
+```
+
+Ergebnis:
+
+```text
+14.7 °C
+```
+
+### 7.5 Weitere dokumentierte Read-Befehle
+
+Die vollständige Herstellerdokumentation definiert zusätzlich:
 
 | Befehl | Wert |
 |---|---|
-| `IN_PV_{ADR}1` | Ist-Temperatur |
-| `IN_PV_{ADR}2` | CO₂-Istwert in % |
-| `IN_PV_{ADR}3` | rh-Istwert in % |
+| `IN_PV_{ADR}2` | CO₂-Istwert |
+| `IN_PV_{ADR}3` | rh-Istwert |
 | `IN_PV_{ADR}5` | zweite Ist-Temperatur |
-| `IN_PV_{ADR}A` | Vakuum-/Druck-Istwert in mbar |
+| `IN_PV_{ADR}A` | Vakuum-/Druck-Istwert |
 | `IN_PV_{ADR}B` | dritte Ist-Temperatur |
 | `IN_PV_{ADR}C` | vierte Ist-Temperatur |
-| `IN_PV_{ADR}D` | O₂-Istwert in % |
-
-Nicht jeder Befehl ist bei jedem Gerät bzw. jeder Ausstattung implementiert.
-
-### 7.2 Sollwerte
-
-Die Herstellerdokumentation definiert außerdem:
-
-| Befehl | Wert |
-|---|---|
-| `IN_SP_{ADR}1` | Temperatur-Sollwert |
+| `IN_PV_{ADR}D` | O₂-Istwert |
 | `IN_SP_{ADR}2` | CO₂-Sollwert |
 | `IN_SP_{ADR}3` | rh-Sollwert |
 | `IN_SP_{ADR}4` | Luftklappen-Sollwert |
@@ -358,82 +457,143 @@ Die Herstellerdokumentation definiert außerdem:
 | `IN_SP_{ADR}A` | Druck-Sollwert |
 | `IN_SP_{ADR}D` | O₂-Sollwert |
 
-Für die erste LoggerPi-Implementierung sind insbesondere die Istwerte relevant.
+Diese Befehle bleiben als Teil der Hersteller-Referenz dokumentiert, werden aber nicht Bestandteil des ersten `MemmertAdapter`.
 
-Sollwerte können später als zusätzliche Mess-/Metadaten aufgenommen werden.
+Der Adapter implementiert zunächst ausschließlich den tatsächlich benötigten Read-only-Subset:
+
+```text
+IN_MODE_10
+IN_PAR_11
+IN_PV_11
+IN_SP_11
+```
 
 ---
 
-## 8. Gerätekonfiguration und verfügbare Messgrößen
+## 8. Gerätekonfiguration und nicht vorhandene Funktionen
 
-Über `IN_PAR` können Eigenschaften und Ausstattung des Reglers abgefragt werden.
+Die Herstellerdokumentation definiert über `IN_PAR` verschiedene optionale Ausstattungsmerkmale.
 
-Dokumentiert sind unter anderem:
+Für den konkret untersuchten IPP300 wurde eine vollständige Read-only-Inventur durchgeführt.
 
-| Befehl | Bedeutung |
-|---|---|
-| `IN_PAR_{ADR}1` | Reglerauflösung |
-| `IN_PAR_{ADR}4` | Luftklappensteuerung vorhanden |
-| `IN_PAR_{ADR}5` | Luftturbine vorhanden |
-| `IN_PAR_{ADR}6` | Schaltkontakt 1 vorhanden |
-| `IN_PAR_{ADR}7` | Schaltkontakt 2 vorhanden |
-| `IN_PAR_{ADR}8` | Schaltkontakt 3 vorhanden |
-| `IN_PAR_{ADR}9` | zweite Temperatur vorhanden |
-| `IN_PAR_{ADR}A` | Druckwert vorhanden |
+Ergebnis:
 
-Damit kann ein Adapter vor oder während der Datenerfassung feststellen, welche Messgrößen bzw. Funktionen das konkrete Gerät unterstützt.
+| Befehl | Funktion | Ergebnis |
+|---|---|---|
+| `IN_PAR_11` | Reglerauflösung | `0` = 0,1 °C |
+| `IN_PAR_14` | Luftklappensteuerung | `0` = nicht vorhanden |
+| `IN_PAR_15` | Luftturbine | `0` = nicht vorhanden |
+| `IN_PAR_16` | Schaltkontakt 1 | `0` = nicht vorhanden |
+| `IN_PAR_17` | Schaltkontakt 2 | `0` = nicht vorhanden |
+| `IN_PAR_18` | Schaltkontakt 3 | `0` = nicht vorhanden |
+| `IN_PAR_19` | zweite Temperatur | `0` = nicht vorhanden |
+| `IN_PAR_1A` | Druck/Vakuum | `0` = nicht vorhanden |
 
-Für LoggerPi ist insbesondere `IN_PAR_{ADR}9` bzw. `IN_PAR_{ADR}A` interessant, da damit optionale zusätzliche Messgrößen erkannt werden können.
+Damit sind für den konkret untersuchten IPP300 insbesondere folgende optionalen Funktionen nicht vorhanden:
+
+- Luftklappensteuerung
+- Luftturbine
+- Schaltkontakte 1–3
+- zweite Temperatur
+- Druck/Vakuum
+
+Diese Funktionen werden daher nicht Bestandteil des ersten LoggerPi-Adapters.
+
+Die entsprechenden Herstellerbefehle bleiben ausschließlich als Referenz in dieser Research-Dokumentation erhalten.
+
+### Auffällige Werte optionaler Temperaturkanäle
+
+Bei der vollständigen Inventur lieferten einige nicht vorhandene bzw. nicht relevante Temperaturkanäle dennoch numerische Antworten:
+
+```text
+IN_PV_15 -> 0.0
+IN_PV_1B -> 819.1
+IN_PV_1C -> 819.1
+```
+
+Da die Gerätekonfiguration keine entsprechenden zusätzlichen Temperaturkanäle meldet, werden diese Werte nicht als reale Messwerte interpretiert.
+
+Insbesondere darf `819.1` nicht als gültige Temperatur in LoggerPi übernommen werden.
+
+Für den Adapter ist ausschließlich der konfigurierte und tatsächlich benötigte Temperaturkanal `IN_PV_11` relevant.
 
 ---
 
 ## 9. Schreibbefehle und REMOTE-Modus
 
-Die MEMMERT-Schnittstelle unterstützt neben Leseoperationen auch die Steuerung des Gerätes.
+Die MEMMERT-Schnittstelle unterstützt neben Leseoperationen auch Schreib- und Steuerbefehle.
 
-Der Betriebsmodus kann mit `OUT_MODE` zwischen Local und Remote umgeschaltet werden:
+Diese Befehle werden in dieser Research-Dokumentation vollständig erfasst, sind aber **nicht Bestandteil des ersten LoggerPi-Adapters**.
+
+### 9.1 Theoretisch verfügbare OUT-Befehle
+
+Die Herstellerdokumentation definiert unter anderem folgende Schreibbefehle:
+
+| Befehl | Funktion |
+|---|---|
+| `OUT_MODE_{ADR}0_0` | Local-Betrieb |
+| `OUT_MODE_{ADR}0_1` | Remote-Betrieb |
+| `OUT_SP_{ADR}1_...` | Temperatur-Sollwert |
+| `OUT_SP_{ADR}2_...` | CO₂-Sollwert |
+| `OUT_SP_{ADR}3_...` | rh-Sollwert |
+| `OUT_SP_{ADR}4_...` | Luftklappenstellung |
+| `OUT_SP_{ADR}5_...` | Luftturbinendrehzahl |
+| `OUT_SP_{ADR}6_...` | Schaltkontakt A |
+| `OUT_SP_{ADR}7_...` | Schaltkontakt B |
+| `OUT_SP_{ADR}8_...` | Schaltkontakt C |
+| `OUT_SP_{ADR}A_...` | Druck-Sollwert |
+| `OUT_SP_{ADR}D_...` | O₂-Sollwert |
+
+Für das getestete Gerät mit Adresse `1` wäre der dokumentierte Befehl zum Umschalten auf Remote theoretisch:
 
 ```text
-OUT_MODE_{ADR}0_0
+OUT_MODE_10_1
 ```
 
-Local-Betrieb.
+Dieser Befehl wurde **nicht ausgeführt**.
+
+Ebenso wurden keine `OUT_SP_*` Befehle ausgeführt.
+
+### 9.2 Sicherheitsgrenze der Untersuchung
+
+Die vorhandenen IPP300 sind produktive Geräte.
+
+Daher gilt für die weitere Protokolluntersuchung:
 
 ```text
-OUT_MODE_{ADR}0_1
+ERLAUBT:
+IN_*
+
+NICHT AUSFÜHREN:
+OUT_MODE_*
+OUT_SP_*
 ```
 
-Remote-Betrieb.
+Die praktischen Tests wurden ausschließlich mit `IN_*` Befehlen durchgeführt.
 
-Im Remote-Betrieb können unter anderem Sollwerte über `OUT_SP_*` gesetzt werden.
+Insbesondere wurde der Wechsel von Local nach Remote nicht über die serielle Schnittstelle getestet.
 
-Beispielsweise:
+Ob und unter welchen Bedingungen ein Wechsel zwischen Local und Remote über `OUT_MODE_*` im praktischen Betrieb zulässig ist, bleibt für eine spätere, separat geplante Untersuchung offen.
+
+Für die aktuelle LoggerPi-Integration ist dieser Funktionsumfang ausdrücklich nicht erforderlich.
+
+### 9.3 REMOTE-Modus
+
+Die Herstellerdokumentation beschreibt einen REMOTE-Modus, in dem Steuerbefehle über die Kommunikationsschnittstelle möglich sind.
+
+Für den aktuellen Monitoring-Anwendungsfall wird ausschließlich der bestehende Betriebszustand gelesen:
 
 ```text
-OUT_SP_{ADR}1_55
+IN_MODE_10
 ```
 
-setzt den Temperatur-Sollwert auf 55 °C.
+Der Logger verändert den Betriebsmodus des Gerätes nicht.
 
-Für die erste LoggerPi-Implementierung werden **keine Schreibbefehle verwendet**.
-
-Der Logger soll zunächst ausschließlich lesend arbeiten.
-
-Dies vermeidet jede unnötige Veränderung des Betriebszustands des Gerätes.
+Die dokumentierten Auswirkungen des REMOTE-Modus sowie insbesondere mögliche Zustandsänderungen beim Verlassen von REMOTE sind deshalb lediglich sicherheitsrelevanter Dokumentationskontext und kein Bestandteil des laufenden Integrationstests.
 
 ### Achtung beim Verlassen des REMOTE-Modus
 
 Die Herstellerdokumentation weist darauf hin, dass beim Rücksetzen des `REMOTE`-Status das Gerät automatisch in seinen Grundzustand versetzt wird.
-
-Dokumentiert sind unter anderem:
-
-```text
-Soll-Temperatur = 20 °C
-Luftklappe = geschlossen
-Luftturbine = maximale Drehzahl
-```
-
-Daher dürfen `OUT_MODE_*` und `OUT_SP_*` nicht versehentlich im Rahmen eines reinen Monitoring-Tests verwendet werden.
 
 ---
 
@@ -472,6 +632,39 @@ Das MEMMERT-Protokoll ist ausdrücklich als Befehl/Antwort-Protokoll dokumentier
 Für LoggerPi ist ein periodisches Polling daher der natürliche Integrationsansatz.
 
 Das tatsächliche optimale Polling-Intervall für LoggerPi muss jedoch nicht zwangsläufig 30 Sekunden betragen. `PollIntervall=30` stammt aus der CELSIUS-Konfiguration und ist zunächst als Referenzwert zu betrachten.
+
+## 10.1 Praktische Kommunikationslatenz
+
+Mit dem Testskript:
+
+```text
+docs/research/sources/memmert_ipp300_timing_test.py
+```
+
+wurde die Antwortzeit des IPP300 für 20 aufeinanderfolgende `IN_PV_11` Requests gemessen.
+
+Ergebnis:
+
+| Kennzahl | Wert |
+|---|---:|
+| Requests | 20 |
+| Erfolgreiche Antworten | 20/20 |
+| Minimum | 121,88 ms |
+| Maximum | 122,56 ms |
+| Mittelwert | 122,39 ms |
+| Median | 122,41 ms |
+
+Die Antwortzeit lag damit im Test sehr konstant bei ungefähr:
+
+```text
+122 ms pro Request
+```
+
+Der Test zeigt, dass die Kommunikation zuverlässig und mit reproduzierbarer Latenz funktioniert.
+
+Die gemessenen 122 ms sind ein empirischer Wert des konkreten Tests und keine vom Hersteller spezifizierte maximale Antwortzeit.
+
+Ein aggressives Polling ist für LoggerPi daher nicht erforderlich. Ein deutlich größeres Polling-Intervall, beispielsweise im Bereich von mehreren Sekunden bis hin zu 30 Sekunden, belastet die serielle Schnittstelle nur sehr gering.
 
 ---
 
@@ -807,138 +1000,92 @@ Die Dokumentation beschreibt:
 
 Die Herstellerdokumentation ist für die Protokollimplementierung die primäre technische Quelle.
 
+### Praktische Testartefakte
+
+Die praktische Verifikation ist durch zwei reproduzierbare Python-Skripte dokumentiert:
+
+```text
+docs/research/sources/memmert_ipp300_inventory.py
+docs/research/sources/memmert_ipp300_timing_test.py
+```
+
+`memmert_ipp300_inventory.py` führt eine vollständige Read-only-Inventur der relevanten dokumentierten `IN_*` Befehle durch.
+
+`memmert_ipp300_timing_test.py` misst die Request/Response-Latenz anhand von 20 aufeinanderfolgenden `IN_PV_11` Requests.
+
+Beide Skripte verwenden ausschließlich `IN_*` Befehle.
+
+Es werden keine `OUT_MODE_*` oder `OUT_SP_*` Befehle ausgeführt.
+
 ---
 
-## 20. Nächste Untersuchungsschritte
+## 20. Verifikation und nächste Schritte
 
-Die grundsätzliche Protokollspezifikation ist durch die Herstellerdokumentation geklärt.
+### 20.1 Bereits erfolgreich verifiziert
 
-Als nächstes soll die Kommunikation am real vorhandenen IPP300 verifiziert werden.
+Folgende Punkte sind inzwischen praktisch nachgewiesen:
 
-### Schritt 1 – USB-Enumeration
+- B04118 wird unter Linux als serielles Device bereitgestellt.
+- Das getestete Device ist `/dev/ttyUSB1`.
+- Die Kommunikation mit `2400 8N1` funktioniert.
+- Hardware- und Software-Flow-Control sind nicht erforderlich.
+- Das getestete IPP300 antwortet auf Adresse `1`.
+- `IN_MODE_10` funktioniert.
+- `IN_PAR_11` funktioniert.
+- `IN_PV_11` funktioniert.
+- `IN_SP_11` funktioniert.
+- Das Antwortformat `OK\r\nWert\r\n` wurde praktisch verifiziert.
+- Die vollständige Read-only-Inventur wurde durchgeführt.
+- Die optionalen Funktionen des konkreten Gerätes wurden über `IN_PAR_*` überprüft.
+- Der Timing-Test mit 20 Requests war mit 20/20 Antworten erfolgreich.
 
-IPP300 über B04118 mit dem Raspberry Pi verbinden und prüfen:
+### 20.2 Noch offen
 
-```bash
-lsusb
-```
+Für die eigentliche LoggerPi-Integration sind noch folgende Punkte relevant:
 
-danach:
+- zweites IPP300 separat identifizieren
+- Geräteadresse des zweiten IPP300 verifizieren
+- stabile USB-/udev-Zuordnung für beide Geräte festlegen
+- Kommunikationsfehler und `ERR_##` sauber im Adapter behandeln
+- Verhalten bei Verbindungsunterbrechungen definieren
+- geeignetes Polling-Intervall für LoggerPi festlegen
+- `MemmertAdapter` implementieren
+- Logging und Normalisierung der vier relevanten Werte definieren
 
-```bash
-lsusb -v
-```
+### 20.3 Nicht Bestandteil der aktuellen Untersuchung
 
-und:
-
-```bash
-dmesg | tail -n 50
-```
-
-Zusätzlich:
-
-```bash
-ls -l /dev/ttyUSB*
-ls -l /dev/ttyACM*
-```
-
-Falls ein serielles Device erzeugt wird:
-
-```bash
-udevadm info -a -n /dev/ttyUSB0
-```
-
-bzw. entsprechend für das tatsächlich erzeugte Device.
-
-### Schritt 2 – USB-Identität dokumentieren
-
-Folgende Informationen sollen für das B04118 festgehalten werden:
-
-- VID
-- PID
-- Hersteller
-- Produktname
-- Seriennummer, falls vorhanden
-- Kernel-Treiber
-- `/dev/tty*`
-- stabile udev-Eigenschaften
-
-### Schritt 3 – Serielle Kommunikation testen
-
-Falls das Interface als serielles Device verfügbar ist, zunächst mit den vom Hersteller dokumentierten Parametern:
+Die folgenden Funktionen werden bewusst nicht praktisch getestet:
 
 ```text
-2400 Baud
-8 Datenbits
-keine Parität
-1 Stopbit
-kein Hardware-Handshake
-kein Software-Handshake
+OUT_MODE_*
+OUT_SP_*
 ```
 
-### Schritt 4 – Read-only-Protokoll testen
+Insbesondere wird kein produktiver IPP300 über die serielle Schnittstelle auf REMOTE geschaltet und es werden keine Sollwerte verändert.
 
-Als erster Protokolltest soll ausschließlich ein ungefährlicher Lesezugriff erfolgen.
+Die vollständige OUT-Befehlsliste bleibt ausschließlich als Referenz in dieser Research-Dokumentation erhalten.
 
-Für ein Gerät mit Adresse `0`:
+### 20.4 Ziel des Adapters
+
+Der erste `MemmertAdapter` soll ausschließlich den tatsächlich benötigten Read-only-Umfang implementieren:
 
 ```text
-IN_PV_01<CR><LF>
+IN_MODE_10
+IN_PAR_11
+IN_PV_11
+IN_SP_11
 ```
 
-Erwartete Antwortstruktur:
+Damit kann der Adapter mindestens folgende Informationen bereitstellen:
 
 ```text
-OK<CR><LF>
-<Temperatur><CR><LF>
+Betriebsart
+Reglerauflösung
+Ist-Temperatur
+Temperatur-Sollwert
 ```
 
-Beispiel aus der MEMMERT-Dokumentation:
-
-```text
-IN_PV_01<CR><LF>
-
-OK<CR><LF>
-220<CR><LF>
-```
-
-### Schritt 5 – Weitere Istwerte prüfen
-
-Nach erfolgreicher Temperaturabfrage können optional die weiteren dokumentierten Process Values getestet werden:
-
-```text
-IN_PV_{ADR}2
-IN_PV_{ADR}3
-IN_PV_{ADR}5
-IN_PV_{ADR}A
-IN_PV_{ADR}B
-IN_PV_{ADR}C
-IN_PV_{ADR}D
-```
-
-Nicht vorhandene bzw. nicht unterstützte Funktionen müssen dabei sauber behandelt werden.
-
-### Schritt 6 – Gerätekonfiguration prüfen
-
-Nach erfolgreicher Kommunikation können zusätzlich die verfügbaren Funktionen über `IN_PAR` abgefragt werden.
-
-Beispielsweise:
-
-```text
-IN_PAR_{ADR}1
-IN_PAR_{ADR}9
-IN_PAR_{ADR}A
-```
-
-Damit lässt sich feststellen, welche optionalen Messwerte beim konkreten IPP300 tatsächlich vorhanden sind.
-
-### Schritt 7 – Keine Schreibbefehle im ersten Test
-
-Die dokumentierten `OUT_MODE_*` und `OUT_SP_*` Befehle werden für die erste LoggerPi-Untersuchung **nicht verwendet**.
-
-Der erste Proof-of-Concept soll ausschließlich lesend arbeiten.
-
-Damit besteht kein unnötiges Risiko, Sollwerte oder Betriebszustände des Gerätes zu verändern.
+Die zahlreichen weiteren Funktionen der vollständigen MEMMERT-Schnittstelle sind für den konkreten IPP300 nicht erforderlich und müssen daher nicht Teil der ersten Implementierung sein.
 
 ---
 
@@ -946,107 +1093,147 @@ Damit besteht kein unnötiges Risiko, Sollwerte oder Betriebszustände des Gerä
 
 Die MEMMERT-Kommunikation ist ein Request/Response-Protokoll über eine serielle Verbindung.
 
-Der geplante Adapter sollte deshalb Transport und Protokoll trennen:
+Für den konkret untersuchten IPP300 ist für den ersten Adapter lediglich ein kleiner Read-only-Subset erforderlich:
 
 ```text
 MemmertAdapter
       │
-      ├── SerialTransport
-      │      └── /dev/ttyUSB*
-      │
-      └── MemmertProtocol
-             ├── command generation
-             ├── response parsing
-             ├── status handling
-             └── value conversion
+      └── SerialTransport
+            │
+            ├── 2400 8N1
+            ├── no flow control
+            └── /dev/ttyUSB*
+                  │
+                  ▼
+            MemmertProtocol
+                  │
+                  ├── IN_MODE_10
+                  ├── IN_PAR_11
+                  ├── IN_PV_11
+                  └── IN_SP_11
 ```
 
-Der Transport kennt dabei ausschließlich die serielle Verbindung.
+Der Transport kennt ausschließlich die serielle Verbindung.
 
-Das Protokoll kennt:
+Das Protokoll übernimmt:
 
+- Request-Erzeugung
+- CR/LF-Framing
+- Response-Parsing
+- `OK`-Antworten
+- `ERR_##`-Antworten
+- Konvertierung der Temperaturwerte
 - Geräteadresse
-- `IN_PV`
-- `IN_SP`
-- `IN_PAR`
-- `IN_MODE`
-- `OK`
-- `ERR_##`
-- CR/LF framing
 
-Dadurch bleibt die Architektur unabhängig davon, welcher konkrete USB-Serial-Chip im B04118 verwendet wird.
+Eine generische Implementierung sämtlicher dokumentierter MEMMERT-Befehle ist für den ersten Adapter nicht erforderlich.
 
-Die Geräteidentität sollte ebenfalls nicht ausschließlich an `/dev/ttyUSB0` oder `/dev/ttyUSB1` gebunden werden.
+Die vollständige Herstellerbefehlsliste bleibt in der Research-Dokumentation erhalten, wird aber bewusst nicht vollständig in Software abgebildet.
 
-Stattdessen sollte eine stabile Konfiguration verwendet werden, beispielsweise:
+### Vorgesehene Gerätekonfiguration
+
+Beispiel:
 
 ```yaml
 memmert:
-  port: /dev/ttyUSB0
-  address: 0
+  port: /dev/ttyUSB1
+  address: 1
 ```
 
-Langfristig kann die Zuordnung über stabile USB-/udev-Eigenschaften und die MEMMERT-Geräteadresse abgesichert werden.
+Langfristig sollte die Portzuordnung nicht ausschließlich auf `/dev/ttyUSB1` basieren, sondern über stabile USB-/udev-Eigenschaften abgesichert werden.
+
+Die MEMMERT-Geräteadresse kann zusätzlich als logische Geräteidentifikation verwendet werden.
 
 ---
 
 ## 22. Aktueller Erkenntnisstand
 
-Der MEMMERT-IP­P300-Kommunikationsweg ist durch die Herstellerinformationen wesentlich besser geklärt als zum Beginn der Untersuchung.
+Die Kommunikation des MEMMERT IPP300 über das USB Interface B04118 ist sowohl durch die Herstellerdokumentation als auch praktisch am real vorhandenen Gerät verifiziert.
 
-### Durch MEMMERT bestätigt
+### Durch Herstellerdokumentation bestätigt
 
 - Der Controller kommuniziert intern über RS-232.
 - Das Interface B04118 setzt RS-232 auf USB um.
 - Das MEMMERT-Protokoll ist dokumentiert.
 - Die Kommunikation erfolgt nach NAMUR.
 - Die seriellen Parameter sind 2400 Baud, 8N1.
-- Es wird kein Handshake verwendet.
+- Es wird kein Hardware- oder Software-Handshake verwendet.
 - Die Übertragung ist halbduplex.
 - Befehle werden mit CR/LF abgeschlossen.
 - Geräte besitzen eine Adresse von 0 bis F.
 - Das Protokoll verwendet Statusantworten `OK` bzw. `ERR_##`.
 - Istwerte können über `IN_PV_*` abgefragt werden.
-- Sollwerte können über `IN_SP_*` abgefragt bzw. gesetzt werden.
+- Sollwerte können über `IN_SP_*` abgefragt werden.
 - Konfigurationsmerkmale können über `IN_PAR_*` abgefragt werden.
+- Schreib- und Steuerbefehle existieren über `OUT_MODE_*` und `OUT_SP_*`.
+
+### Praktisch am IPP300 verifiziert
+
+- B04118 wird unter Linux als `/dev/ttyUSB1` bereitgestellt.
+- 2400 Baud, 8N1 funktionieren.
+- Kein Flow-Control ist erforderlich.
+- Das getestete Gerät verwendet Adresse `1`.
+- `IN_MODE_10` funktioniert.
+- `IN_PAR_11` funktioniert.
+- `IN_PV_11` funktioniert.
+- `IN_SP_11` funktioniert.
+- Das erwartete Response-Format wurde bestätigt.
+- Die vollständige Read-only-Inventur wurde durchgeführt.
+- Die optionalen Funktionen des konkreten Gerätes sind nicht vorhanden.
+- 20/20 Timing-Test-Requests waren erfolgreich.
+- Die mittlere Antwortzeit betrug 122,39 ms.
+
+### Für den konkreten IPP300 relevante Befehle
+
+```text
+IN_MODE_10   Betriebsart
+IN_PAR_11    Reglerauflösung
+IN_PV_11     Ist-Temperatur
+IN_SP_11     Temperatur-Sollwert
+```
+
+### Für den konkreten IPP300 nicht relevante Funktionen
+
+Laut `IN_PAR_*` Inventur nicht vorhanden:
+
+```text
+Luftklappensteuerung
+Luftturbine
+Schaltkontakte 1–3
+zweite Temperatur
+Druck/Vakuum
+```
+
+Die entsprechenden Herstellerbefehle bleiben als Referenz dokumentiert, werden aber nicht Bestandteil des ersten Adapters.
+
+### Sicherheitsstatus
+
+Es wurden ausschließlich `IN_*` Befehle ausgeführt.
+
+Keine der folgenden Operationen wurde auf dem produktiven Gerät durchgeführt:
+
+```text
+OUT_MODE_*
+OUT_SP_*
+```
+
+Insbesondere wurde kein REMOTE-Modus über die serielle Schnittstelle aktiviert und kein Sollwert verändert.
 
 ### Nicht mehr notwendig
 
-Ein Reverse Engineering des eigentlichen MEMMERT-Kommunikationsprotokolls ist nicht erforderlich.
+Ein Reverse Engineering des MEMMERT-Kommunikationsprotokolls ist nicht erforderlich.
 
 Ebenso besteht derzeit kein Grund, ein proprietäres USB-Protokoll zu reverse engineeren.
 
-### Noch zu verifizieren
+Die technische Untersuchung hat damit den Punkt erreicht, an dem die Implementierung des read-only `MemmertAdapter` beginnen kann.
 
-- konkrete USB-VID/PID des B04118
-- verwendeter USB-Serial-Chip bzw. Kernel-Treiber
-- erzeugtes Linux-Device
-- stabile USB-Identifikationsmerkmale
-- tatsächliche Geräteadresse der beiden IPP300
-- erfolgreiche Kommunikation mit dem realen Gerät
-- tatsächlich verfügbare `IN_PV_*` Werte des konkreten IPP300
-- Verhalten bei nicht unterstützten Befehlen
-- praktische Antwortzeiten
-- sinnvolles Polling-Intervall für LoggerPi
-- Verhalten bei Kommunikationsunterbrechungen
-- Verhalten bei den dokumentierten `ERR_##` Zuständen
+### Noch offen
 
-### Ziel des nächsten Tests
-
-Der nächste Test soll einen **read-only Zugriff** auf die Ist-Temperatur demonstrieren:
-
-```text
-IN_PV_{ADR}1<CR><LF>
-```
-
-mit erwarteter Antwort:
-
-```text
-OK<CR><LF>
-<Temperatur><CR><LF>
-```
-
-Wenn dieser Test erfolgreich ist, ist die technische Grundlage für einen `MemmertAdapter` in LoggerPi-OtterPi gegeben.
+- zweites IPP300 identifizieren
+- Adresse des zweiten Gerätes verifizieren
+- stabile USB-/udev-Zuordnung definieren
+- Fehler- und Disconnect-Handling implementieren
+- Polling-Intervall festlegen
+- Adapter in LoggerPi integrieren
 
 ### Primärquelle
 
@@ -1055,3 +1242,10 @@ docs/research/sources/MEMMERT_IPP300_Beschreibung_RS232-2010.pdf
 ```
 
 **Schnittstellenbeschreibung für MEMMERT-Wärmeschränke mit Temperaturregler der E- oder P-Klasse, Stand April 2011.**
+
+### Praktische Testartefakte
+
+```text
+docs/research/sources/memmert_ipp300_inventory.py
+docs/research/sources/memmert_ipp300_timing_test.py
+```
