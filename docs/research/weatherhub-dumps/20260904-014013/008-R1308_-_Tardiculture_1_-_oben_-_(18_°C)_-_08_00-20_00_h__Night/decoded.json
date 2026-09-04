@@ -1,0 +1,440 @@
+{
+    "Series":  [
+                   {
+                       "SeriesID":  "Temperature1",
+                       "Datasets":  [
+                                        {
+                                            "Timestamp":  1788464495000,
+                                            "Value":  21.7
+                                        },
+                                        {
+                                            "Timestamp":  1788464918000,
+                                            "Value":  21.7
+                                        },
+                                        {
+                                            "Timestamp":  1788465340000,
+                                            "Value":  21.6
+                                        },
+                                        {
+                                            "Timestamp":  1788465762000,
+                                            "Value":  21.6
+                                        },
+                                        {
+                                            "Timestamp":  1788466186000,
+                                            "Value":  21.6
+                                        },
+                                        {
+                                            "Timestamp":  1788466609000,
+                                            "Value":  21.6
+                                        },
+                                        {
+                                            "Timestamp":  1788467032000,
+                                            "Value":  21.6
+                                        },
+                                        {
+                                            "Timestamp":  1788467457000,
+                                            "Value":  21.6
+                                        },
+                                        {
+                                            "Timestamp":  1788467880000,
+                                            "Value":  21.8
+                                        },
+                                        {
+                                            "Timestamp":  1788468302000,
+                                            "Value":  21.8
+                                        },
+                                        {
+                                            "Timestamp":  1788468724000,
+                                            "Value":  21.7
+                                        },
+                                        {
+                                            "Timestamp":  1788469147000,
+                                            "Value":  21.7
+                                        },
+                                        {
+                                            "Timestamp":  1788469569000,
+                                            "Value":  21.6
+                                        },
+                                        {
+                                            "Timestamp":  1788469992000,
+                                            "Value":  21.6
+                                        },
+                                        {
+                                            "Timestamp":  1788470415000,
+                                            "Value":  21.6
+                                        },
+                                        {
+                                            "Timestamp":  1788470837000,
+                                            "Value":  21.5
+                                        },
+                                        {
+                                            "Timestamp":  1788471260000,
+                                            "Value":  21.5
+                                        },
+                                        {
+                                            "Timestamp":  1788471683000,
+                                            "Value":  21.6
+                                        },
+                                        {
+                                            "Timestamp":  1788472107000,
+                                            "Value":  21.6
+                                        },
+                                        {
+                                            "Timestamp":  1788472530000,
+                                            "Value":  21.7
+                                        },
+                                        {
+                                            "Timestamp":  1788472954000,
+                                            "Value":  21.7
+                                        },
+                                        {
+                                            "Timestamp":  1788473376000,
+                                            "Value":  21.7
+                                        },
+                                        {
+                                            "Timestamp":  1788473799000,
+                                            "Value":  21.6
+                                        },
+                                        {
+                                            "Timestamp":  1788474222000,
+                                            "Value":  21.6
+                                        },
+                                        {
+                                            "Timestamp":  1788474645000,
+                                            "Value":  21.5
+                                        },
+                                        {
+                                            "Timestamp":  1788475068000,
+                                            "Value":  21.5
+                                        },
+                                        {
+                                            "Timestamp":  1788475490000,
+                                            "Value":  21.5
+                                        },
+                                        {
+                                            "Timestamp":  1788475912000,
+                                            "Value":  21.5
+                                        },
+                                        {
+                                            "Timestamp":  1788476334000,
+                                            "Value":  21.5
+                                        },
+                                        {
+                                            "Timestamp":  1788476756000,
+                                            "Value":  21.5
+                                        },
+                                        {
+                                            "Timestamp":  1788477180000,
+                                            "Value":  21.6
+                                        },
+                                        {
+                                            "Timestamp":  1788477602000,
+                                            "Value":  21.7
+                                        },
+                                        {
+                                            "Timestamp":  1788478023000,
+                                            "Value":  21.7
+                                        },
+                                        {
+                                            "Timestamp":  1788478446000,
+                                            "Value":  21.6
+                                        },
+                                        {
+                                            "Timestamp":  1788478870000,
+                                            "Value":  21.6
+                                        },
+                                        {
+                                            "Timestamp":  1788479292000,
+                                            "Value":  21.5
+                                        },
+                                        {
+                                            "Timestamp":  1788479715000,
+                                            "Value":  21.5
+                                        },
+                                        {
+                                            "Timestamp":  1788480139000,
+                                            "Value":  21.5
+                                        },
+                                        {
+                                            "Timestamp":  1788480561000,
+                                            "Value":  21.5
+                                        },
+                                        {
+                                            "Timestamp":  1788480983000,
+                                            "Value":  21.5
+                                        },
+                                        {
+                                            "Timestamp":  1788481407000,
+                                            "Value":  21.5
+                                        },
+                                        {
+                                            "Timestamp":  1788481830000,
+                                            "Value":  21.5
+                                        },
+                                        {
+                                            "Timestamp":  1788482253000,
+                                            "Value":  21.7
+                                        },
+                                        {
+                                            "Timestamp":  1788482676000,
+                                            "Value":  21.6
+                                        },
+                                        {
+                                            "Timestamp":  1788483098000,
+                                            "Value":  21.6
+                                        },
+                                        {
+                                            "Timestamp":  1788483521000,
+                                            "Value":  21.5
+                                        },
+                                        {
+                                            "Timestamp":  1788483944000,
+                                            "Value":  21.5
+                                        },
+                                        {
+                                            "Timestamp":  1788484368000,
+                                            "Value":  21.5
+                                        },
+                                        {
+                                            "Timestamp":  1788484790000,
+                                            "Value":  21.5
+                                        },
+                                        {
+                                            "Timestamp":  1788485211000,
+                                            "Value":  21.5
+                                        },
+                                        {
+                                            "Timestamp":  1788485633000,
+                                            "Value":  21.4
+                                        }
+                                    ],
+                       "LineColor":  "#FF8715",
+                       "FormattedTimestamp":  "04.09.2026\u0026nbsp;\u0026nbsp;01:33",
+                       "FormattedMeasurement":  "21,4°C",
+                       "ConnectionLost":  false,
+                       "LowBattery":  false,
+                       "AlertWasActive":  false,
+                       "CardStatus":  "NoAlert",
+                       "AlertActive":  false,
+                       "AlertSettingActive":  true
+                   },
+                   {
+                       "SeriesID":  "Temperature2",
+                       "Datasets":  [
+                                        {
+                                            "Timestamp":  1788464495000,
+                                            "Value":  13.2
+                                        },
+                                        {
+                                            "Timestamp":  1788464918000,
+                                            "Value":  13.4
+                                        },
+                                        {
+                                            "Timestamp":  1788465340000,
+                                            "Value":  13.6
+                                        },
+                                        {
+                                            "Timestamp":  1788465762000,
+                                            "Value":  14.7
+                                        },
+                                        {
+                                            "Timestamp":  1788466186000,
+                                            "Value":  15.6
+                                        },
+                                        {
+                                            "Timestamp":  1788466609000,
+                                            "Value":  16.4
+                                        },
+                                        {
+                                            "Timestamp":  1788467032000,
+                                            "Value":  17
+                                        },
+                                        {
+                                            "Timestamp":  1788467457000,
+                                            "Value":  16.3
+                                        },
+                                        {
+                                            "Timestamp":  1788467880000,
+                                            "Value":  14.4
+                                        },
+                                        {
+                                            "Timestamp":  1788468302000,
+                                            "Value":  13.6
+                                        },
+                                        {
+                                            "Timestamp":  1788468724000,
+                                            "Value":  13.3
+                                        },
+                                        {
+                                            "Timestamp":  1788469147000,
+                                            "Value":  13.2
+                                        },
+                                        {
+                                            "Timestamp":  1788469569000,
+                                            "Value":  13.3
+                                        },
+                                        {
+                                            "Timestamp":  1788469992000,
+                                            "Value":  13.6
+                                        },
+                                        {
+                                            "Timestamp":  1788470415000,
+                                            "Value":  14.4
+                                        },
+                                        {
+                                            "Timestamp":  1788470837000,
+                                            "Value":  15.4
+                                        },
+                                        {
+                                            "Timestamp":  1788471260000,
+                                            "Value":  16.2
+                                        },
+                                        {
+                                            "Timestamp":  1788471683000,
+                                            "Value":  16.8
+                                        },
+                                        {
+                                            "Timestamp":  1788472107000,
+                                            "Value":  16.7
+                                        },
+                                        {
+                                            "Timestamp":  1788472530000,
+                                            "Value":  14.8
+                                        },
+                                        {
+                                            "Timestamp":  1788472954000,
+                                            "Value":  13.8
+                                        },
+                                        {
+                                            "Timestamp":  1788473376000,
+                                            "Value":  13.4
+                                        },
+                                        {
+                                            "Timestamp":  1788473799000,
+                                            "Value":  13.2
+                                        },
+                                        {
+                                            "Timestamp":  1788474222000,
+                                            "Value":  13.3
+                                        },
+                                        {
+                                            "Timestamp":  1788474645000,
+                                            "Value":  13.5
+                                        },
+                                        {
+                                            "Timestamp":  1788475068000,
+                                            "Value":  14
+                                        },
+                                        {
+                                            "Timestamp":  1788475490000,
+                                            "Value":  15
+                                        },
+                                        {
+                                            "Timestamp":  1788475912000,
+                                            "Value":  15.9
+                                        },
+                                        {
+                                            "Timestamp":  1788476334000,
+                                            "Value":  16.6
+                                        },
+                                        {
+                                            "Timestamp":  1788476756000,
+                                            "Value":  17.1
+                                        },
+                                        {
+                                            "Timestamp":  1788477180000,
+                                            "Value":  15.7
+                                        },
+                                        {
+                                            "Timestamp":  1788477602000,
+                                            "Value":  14.2
+                                        },
+                                        {
+                                            "Timestamp":  1788478023000,
+                                            "Value":  13.5
+                                        },
+                                        {
+                                            "Timestamp":  1788478446000,
+                                            "Value":  13.2
+                                        },
+                                        {
+                                            "Timestamp":  1788478870000,
+                                            "Value":  13.2
+                                        },
+                                        {
+                                            "Timestamp":  1788479292000,
+                                            "Value":  13.4
+                                        },
+                                        {
+                                            "Timestamp":  1788479715000,
+                                            "Value":  13.6
+                                        },
+                                        {
+                                            "Timestamp":  1788480139000,
+                                            "Value":  14.7
+                                        },
+                                        {
+                                            "Timestamp":  1788480561000,
+                                            "Value":  15.6
+                                        },
+                                        {
+                                            "Timestamp":  1788480983000,
+                                            "Value":  16.3
+                                        },
+                                        {
+                                            "Timestamp":  1788481407000,
+                                            "Value":  16.9
+                                        },
+                                        {
+                                            "Timestamp":  1788481830000,
+                                            "Value":  16.4
+                                        },
+                                        {
+                                            "Timestamp":  1788482253000,
+                                            "Value":  14.5
+                                        },
+                                        {
+                                            "Timestamp":  1788482676000,
+                                            "Value":  13.6
+                                        },
+                                        {
+                                            "Timestamp":  1788483098000,
+                                            "Value":  13.2
+                                        },
+                                        {
+                                            "Timestamp":  1788483521000,
+                                            "Value":  13.2
+                                        },
+                                        {
+                                            "Timestamp":  1788483944000,
+                                            "Value":  13.3
+                                        },
+                                        {
+                                            "Timestamp":  1788484368000,
+                                            "Value":  13.5
+                                        },
+                                        {
+                                            "Timestamp":  1788484790000,
+                                            "Value":  14.3
+                                        },
+                                        {
+                                            "Timestamp":  1788485211000,
+                                            "Value":  15.3
+                                        },
+                                        {
+                                            "Timestamp":  1788485633000,
+                                            "Value":  16.1
+                                        }
+                                    ],
+                       "LineColor":  "#8C1437",
+                       "FormattedTimestamp":  "04.09.2026\u0026nbsp;\u0026nbsp;01:33",
+                       "FormattedMeasurement":  "16,1°C",
+                       "ConnectionLost":  false,
+                       "LowBattery":  false,
+                       "AlertWasActive":  false,
+                       "CardStatus":  "NoAlert",
+                       "AlertActive":  false,
+                       "AlertSettingActive":  true
+                   }
+               ]
+}

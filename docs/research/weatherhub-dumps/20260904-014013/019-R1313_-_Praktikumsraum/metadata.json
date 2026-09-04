@@ -1,0 +1,22 @@
+﻿{
+    "CaptureRun":  "20260904-014013",
+    "DeviceNumber":  19,
+    "DeviceId":  "0169706EBE2C",
+    "Name":  "R1313 - Praktikumsraum",
+    "CaptureStarted":  "2026-09-04T01:40:54.6568204+02:00",
+    "Endpoint":  "https://www.wh-observer.de/Devices/SparkLineChartData",
+    "Method":  "POST",
+    "RequestBody":  {
+                        "deviceID":  "0169706EBE2C"
+                    },
+    "Decoder":  "decode-weatherhub-v2.ps1",
+    "Research":  "ALL ChartDataset fields, CLR types and values",
+    "Status":  "OK",
+    "CaptureFinished":  "2026-09-04T01:40:55.1033310+02:00",
+    "DurationMilliseconds":  446.5106,
+    "HttpStatus":  200,
+    "Base64Length":  2784,
+    "DecoderStatus":  "OK",
+    "SeriesCount":  2,
+    "DatasetFieldRecordCount":  192
+}

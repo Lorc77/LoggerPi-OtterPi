@@ -1,0 +1,22 @@
+﻿{
+    "CaptureRun":  "20260904-014013",
+    "DeviceNumber":  17,
+    "DeviceId":  "017A5CD3FC1C",
+    "Name":  "R1311 - Immunolab - Antibody - Freezer",
+    "CaptureStarted":  "2026-09-04T01:40:53.5426328+02:00",
+    "Endpoint":  "https://www.wh-observer.de/Devices/SparkLineChartData",
+    "Method":  "POST",
+    "RequestBody":  {
+                        "deviceID":  "017A5CD3FC1C"
+                    },
+    "Decoder":  "decode-weatherhub-v2.ps1",
+    "Research":  "ALL ChartDataset fields, CLR types and values",
+    "Status":  "OK",
+    "CaptureFinished":  "2026-09-04T01:40:54.2050396+02:00",
+    "DurationMilliseconds":  662.4068,
+    "HttpStatus":  200,
+    "Base64Length":  2944,
+    "DecoderStatus":  "OK",
+    "SeriesCount":  2,
+    "DatasetFieldRecordCount":  204
+}

@@ -3,10 +3,9 @@
 ## Status
 
 **Subprojekt:** WeatherHub Observer  
-**Stand:** 2026-09-02  
-**Status:** Authentifizierter Datenabruf reproduzierbar, SparkLineChartData dekodiert, Datenstruktur für mehrere Sensortypen untersucht  
-**Nächster Schritt:** Login, automatische Device Discovery und
-Sensorabruf als robuste Komponente zusammenführen.
+**Stand:** 2026-09-04  
+**Status:** Authentifizierter Datenabruf, automatische Device Discovery und vollständiger Cross-Dump-Abruf aller aktuell 19 Geräte reproduziert; SparkLineChartData dekodiert; ID-Typen `0E` und `01` sowie deren aktuell beobachtete Kanalstrukturen verifiziert  
+**Nächster Schritt:** Überführung der verifizierten Referenzimplementierung in `WeatherHubClient`, `WeatherHubDecoder` und `WeatherHubAdapter` sowie Normalisierung in das gemeinsame LoggerPi Data Model.
 
 Dieses Dokument beschreibt die technische Untersuchung des proprietären
 WeatherHub-/Observer-Datenkanals sowie den inzwischen reproduzierbaren
@@ -15,6 +14,27 @@ automatisierten Datenabruf.
 Die Untersuchung ist vom eigentlichen LoggerPi-/OtterPi-Core getrennt.
 WeatherHub-spezifische Strukturen sollen ausschließlich im WeatherHub-Adapter
 behandelt werden.
+
+## Dokumentationshinweis
+
+Die Abschnitte mit konkreten Testläufen und historischen Beobachtungen
+dokumentieren den Entstehungs- und Verifikationsweg der Untersuchung.
+
+Für die aktuelle Implementierung sind insbesondere folgende Abschnitte
+maßgeblich:
+
+- Abschnitt 37 – Golden Path
+- Abschnitt 43 – Komponentenaufteilung
+- Abschnitt 45 – gemeinsames Data Model
+- Abschnitt 46 – Health-/Monitoring-Abgrenzung
+- Abschnitt 47 – Fehlerbehandlung
+- Abschnitt 50 – Teststrategie
+- Abschnitt 58 – nächste Implementierungsschritte
+- Abschnitt 59 – aktueller Wiedereinstiegspunkt
+- Abschnitt 61 – Cross-Dump-Meilenstein
+
+Historische Testdetails dürfen erhalten bleiben, sollen aber nicht als
+aktuelle offene Aufgaben interpretiert werden.
 
 ---
 
@@ -572,19 +592,15 @@ Der aktuelle Decoder verwendet folgende logische Struktur:
       field 11 = AlertSettingActive
 
     ChartDataset
-      field 1  = Timestamp
-      field 2  = Value
-      field 3  = AlertIsActive
-      field 4  = Measurement
-      field 5  = Tooltip
-      field 6  = HiAlert
-      field 7  = HiStartEvent
-      field 8  = HiEndEvent
-      field 9  = HiSetting
-      field 10 = LoAlert
-      field 11 = LoStartEvent
-      field 12 = LoEndEvent
-      field 13 = LoSetting
+      field 1 = Timestamp
+      field 2 = Value
+
+Für `ChartDataset` sind derzeit nur `field 1` und `field 2` belastbar
+verifiziert.
+
+Weitere historische Feldzuordnungen wurden aus der aktuellen
+Strukturbeschreibung entfernt, da sie nicht ausreichend reproduzierbar
+belegt sind.
 
 Die Struktur ist damit für den aktuell untersuchten Datenstrom weitgehend
 rekonstruiert.
@@ -699,30 +715,45 @@ Die Felder `ConnectionLost` und `LowBattery` sind für die spätere Überwachung
 
 ---
 
-## 21. ChartDataset – bekannte Felder
+## 21. ChartDataset – aktuell verifizierte Struktur
 
-Ein `ChartDataset` enthält derzeit:
+Für `ChartDataset` sind im aktuellen Stand des Decoders nur folgende Felder
+belastbar verifiziert:
 
-| Feld | Typ | Bedeutung |
-|---:|---|---|
-| 1 | double | Timestamp |
-| 2 | double | Value |
-| 3 | bool | AlertIsActive |
-| 4 | message | Measurement |
-| 5 | string | Tooltip |
-| 6 | bool | HiAlert |
-| 7 | bool | HiStartEvent |
-| 8 | bool | HiEndEvent |
-| 9 | double | HiSetting |
-| 10 | bool | LoAlert |
-| 11 | bool | LoStartEvent |
-| 12 | bool | LoEndEvent |
-| 13 | double | LoSetting |
+| Feld | Wire Type | Bedeutung |
+|---:|---:|---|
+| 1 | fixed64 | Timestamp |
+| 2 | fixed64 | Value |
 
-Die Felder sind für den aktuellen Decoder bereits technisch abbildbar.
+Dabei gilt:
 
-Das Feld `Measurement` wird derzeit noch übersprungen und ist damit ein
-Kandidat für eine spätere Untersuchung.
+    field 1 = Timestamp
+    field 2 = Value
+
+`Timestamp` wird aktuell als Unix-Zeit in Millisekunden interpretiert.
+
+`Value` wird als IEEE-754 Double dekodiert.
+
+Die früher in der Untersuchung dokumentierten Felder:
+
+    field 3
+    field 4
+    ...
+    field 13
+
+sind **nicht als Bestandteil der aktuell verifizierten `ChartDataset`-
+Struktur anzusehen**.
+
+Die entsprechende frühere Feldzuordnung war ein historischer
+Reverse-Engineering-Versuch und wird für die aktuelle Implementierung
+nicht mehr verwendet.
+
+Insbesondere darf `field 4` nicht als bekanntes `Measurement`-Nested-Message
+behandelt werden.
+
+Weitere Felder dürfen erst dann dokumentiert werden, wenn sie anhand
+konkreter Payloads reproduzierbar nachgewiesen und dem jeweiligen
+Wire-Type eindeutig zugeordnet wurden.
 
 ---
 
@@ -838,6 +869,48 @@ und:
     Decoder
         └── idType → payload structure
 
+### Konsequenz für die Implementierung
+
+Der Binary-Decoder darf die fachliche Interpretation der Series nicht
+fest verdrahten.
+
+Beispielsweise dekodiert der Decoder lediglich:
+
+    SeriesID = "Temperature1"
+    Value = 22.3
+
+Er entscheidet nicht selbst, dass `Temperature1` eine
+Umgebungstemperatur darstellt.
+
+Diese Interpretation erfolgt in einer WeatherHub-spezifischen
+Mapping-Schicht.
+
+Konzeptionell:
+
+    ID-Typ
+        ↓
+    WeatherHub Channel Mapping
+        ↓
+    SeriesID
+        ↓
+    neutrales Measurement
+
+Aktuell verifiziert:
+
+    ID-Typ 0E
+        Temperature → temperature
+        Humidity    → humidity
+
+    ID-Typ 01
+        Temperature1 → ambient_temperature
+        Temperature2 → monitored_temperature
+
+Die fachliche Interpretation von `Temperature1` und `Temperature2` basiert
+auf Sensorhardware, Einsatzort und Cross-Dump-Ergebnissen.
+
+Die ursprünglichen `SeriesID`-Werte bleiben trotzdem Bestandteil der
+WeatherHub-spezifischen Roh-/Zwischenstruktur.
+
 ---
 
 ## 26. Für Monitoring relevante Daten
@@ -888,32 +961,15 @@ Die genaue Alarmstrategie wird später im Monitoring-Core definiert.
 
 ## 28. Sensor-/Messfehler
 
-Ein wichtiger Status ist:
+Auf `ChartDataset`-Ebene sind aktuell nur `Timestamp` und `Value`
+belastbar verifiziert.
 
-    ConnectionLost
+Statusinformationen wie Verbindungs- oder Batteriezustand sind davon
+getrennt zu betrachten und werden derzeit insbesondere über die
+verifizierten `ChartSeries`-Felder untersucht.
 
-Zusätzlich existieren auf Dataset-Ebene verschiedene Alert-/Statusfelder.
-
-Die spätere Monitoring-Logik soll zwischen unterschiedlichen Fehlerarten
-unterscheiden können.
-
-Beispiel:
-
-    Messwert vorhanden
-    + kein Fehlerstatus
-        ↓
-    Sensor OK
-
-gegen:
-
-    Messwert fehlt
-    oder
-    ConnectionLost = true
-        ↓
-    Sensor-/Kommunikationsproblem
-
-Die konkrete Health-State-Matrix ist noch als separates Engineering-Thema
-zu definieren.
+Eine Ableitung von Sensorfehlern aus nicht verifizierten
+`ChartDataset.field`-Nummern erfolgt nicht.
 
 ---
 
@@ -1244,6 +1300,45 @@ Diese Punkte sind keine grundlegende Blockade mehr für einen ersten automatisie
 
 ---
 
+## 39.1 Abgrenzung: Research abgeschlossen vs. Engineering offen
+
+Der grundlegende Reverse-Engineering- und Reproduktionsnachweis für den
+SparkLine-Datenpfad ist abgeschlossen.
+
+Als technisch verifiziert gelten:
+
+- Login über `/Account/LogOn`
+- authentifizierte `WebRequestSession`
+- Authentifizierungsprüfung über `/Devices`
+- automatische Device Discovery
+- dynamische Ermittlung der aktuell vorhandenen Geräte
+- Abruf aller aktuell vorhandenen Geräte über `SparkLineChartData`
+- Base64-Dekodierung
+- Dekodierung von `ChartData`, `ChartSeries` und `ChartDataset`
+- Extraktion von Timestamp und Value
+- Extraktion der bekannten Status-/Alert-Felder
+- Erkennung der aktuell beobachteten ID-Typen `0E` und `01`
+- Zuordnung der aktuell beobachteten Kanalstrukturen
+- vollständiger Cross-Dump-Test mit 19/19 erfolgreichen Geräten
+
+Damit liegt der Schwerpunkt der weiteren Entwicklung nicht mehr auf der
+Ermittlung des proprietären Datenformats.
+
+Offen sind primär Engineering-Themen:
+
+- robuste Implementierung des HTTP-/Session-Clients
+- robuste HTML-basierte Device Discovery
+- Fehler- und Retry-Strategie
+- Trennung von Decoder und Adapter
+- ID-Typ-/Kanal-Konfiguration
+- Normalisierung in das gemeinsame Data Model
+- Persistenz
+- Scheduler
+- Monitoring und Alerting
+- Regressionstests mit bereinigten Fixtures
+
+---
+
 ## 40. Automatische Device Discovery
 
 Die Device-Liste kann inzwischen direkt aus der authentifizierten
@@ -1559,35 +1654,46 @@ Historische Messdaten benötigen keine Änderung.
 
 ---
 
-## 40.8 Device Discovery ist jetzt kein offener Reverse-Engineering-Punkt mehr
+## 40.8 Status der Device Discovery
 
-Die ursprüngliche Frage war:
+Die Device Discovery ist technisch verifiziert und kein offener
+Reverse-Engineering-Punkt mehr.
 
-    Woher bekommt das Dashboard seine Device-IDs?
+Der produktive Ablauf verwendet:
 
-Diese Frage ist für den aktuellen Integrationspfad ausreichend beantwortet.
-
-Der Server liefert mit:
-
+    POST /Account/LogOn
+        ↓
+    authentifizierte WebRequestSession
+        ↓
     GET /Devices
+        ↓
+    HTML-Geräteübersicht
+        ↓
+    Device Discovery
+        ↓
+    deviceID + name
+        ↓
+    SparkLineChartData
 
-eine HTML-Geräteübersicht, aus der die relevanten Device-Informationen
-extrahiert werden können.
+Im Cross-Dump-Test vom 03.09.2026 wurden 19 von 19 erwarteten Geräten
+erfolgreich ermittelt und anschließend abgefragt.
 
-Damit ist für den ersten Adapter keine manuelle Device-Konfiguration
-erforderlich.
+Für die produktive Implementierung bleibt ausschließlich die technische
+Robustheit der HTML-Extraktion als Engineering-Aufgabe relevant.
 
-Offen bleibt lediglich die Frage, wie robust die konkrete HTML-Extraktion
-gegen zukünftige Änderungen des Portals ist.
+Die Discovery muss deshalb mindestens:
 
-Für die produktive Implementierung sollte die Discovery deshalb mit:
+- gültige Device-IDs validieren
+- Duplikate erkennen
+- die gefundene Geräteanzahl protokollieren
+- unerwartete HTML-Strukturen erkennen
+- den Anzeigenamen als veränderliches Metadatum behandeln
+- die `deviceID` als technische Identität verwenden
 
-- Validierung der gefundenen IDs
-- Erkennung von Duplikaten
-- Logging der Device-Anzahl
-- kontrolliertem Fehler bei unerwarteter HTML-Struktur
+Die Anzahl der Geräte darf nicht fest auf 19 codiert werden.
 
-abgesichert werden.
+Die aktuelle Zahl 19 ist lediglich der zum Zeitpunkt des Tests beobachtete
+Bestand.
 
 ---
 
@@ -1669,21 +1775,69 @@ begrenzt gespeichert werden.
 
 ## 43. Decoder als eigenständige Komponente
 
-Der vorhandene Decoder soll nicht direkt mit HTTP oder Login vermischt
-werden.
+Der Decoder darf weder HTTP-Kommunikation noch Credentials,
+Session-Verwaltung oder LoggerPi-spezifische Normalisierung enthalten.
 
-Sinnvolle Trennung:
+Die Verantwortlichkeiten werden strikt getrennt.
 
-    WeatherHub Client
-        └── Login / Session / HTTP
+### WeatherHubClient
 
-    WeatherHub Decoder
-        └── Base64 / Binary / Proto-Struktur
+Verantwortlich für:
 
-    WeatherHub Adapter
-        └── Mapping auf gemeinsames Data Model
+- Login
+- Session-Verwaltung
+- Authentifizierungsprüfung
+- Device Discovery
+- Abruf von `SparkLineChartData`
+- HTTP-Fehlerbehandlung auf Transportebene
 
-Damit bleiben Netzwerkzugriff und Binärdekodierung unabhängig testbar.
+Der Client kennt die WeatherHub-Endpunkte, aber nicht die interne
+Bedeutung der Messreihen im LoggerPi Data Model.
+
+### WeatherHubDecoder
+
+Verantwortlich für:
+
+- Base64-Dekodierung
+- Binary Parsing
+- Wire-Type-Verarbeitung
+- `ChartData`
+- `ChartSeries`
+- `ChartDataset`
+- Timestamp-/Value-Dekodierung
+- bekannte Status-/Alert-Felder
+- Erkennung unbekannter bzw. nicht unterstützter Felder
+
+Der Decoder arbeitet idealerweise ausschließlich auf übergebenen
+Payload-Daten und ist damit ohne Live-Server testbar.
+
+### WeatherHubAdapter
+
+Verantwortlich für:
+
+- Kombination aus Device-Metadaten und Decoder-Ergebnis
+- Zuordnung von ID-Typ und erwarteten Kanälen
+- Normalisierung der Series
+- Mapping von Statusinformationen
+- Erzeugung des gemeinsamen LoggerPi Data Models
+
+Der Adapter darf WeatherHub-spezifische Begriffe kennen.
+
+Der Core darf diese Begriffe dagegen nicht benötigen.
+
+Der Datenfluss lautet damit:
+
+    WeatherHubClient
+        ↓
+    raw SparkLine payload
+        ↓
+    WeatherHubDecoder
+        ↓
+    decoded WeatherHub structure
+        ↓
+    WeatherHubAdapter
+        ↓
+    common LoggerPi Data Model
 
 ---
 
@@ -1714,71 +1868,121 @@ ohne jedes Mal den WeatherHub-Server aufzurufen.
 
 ## 45. Gemeinsames Data Model
 
-WeatherHub-spezifische Namen sollen nicht in den Core durchsickern.
+WeatherHub-spezifische Begriffe dürfen nicht in das allgemeine LoggerPi
+Data Model übernommen werden.
 
-Beispielsweise soll aus:
+Der Adapter transformiert die WeatherHub-Struktur in ein neutrales Modell.
 
-    ChartSeries
-    ChartDataset
-    LowBattery
-    ConnectionLost
-
-im Adapter ein neutrales Modell entstehen.
-
-Konzeptionell:
+Ein normalisiertes Sensorergebnis sollte mindestens folgende Informationen
+enthalten:
 
     Sensor
       ├── sensor_id
-      ├── timestamp
+      ├── name
+      ├── source
       ├── measurements[]
       └── health
-            ├── battery
-            ├── connection
-            ├── sensor_error
-            └── status
 
-Die genaue Struktur richtet sich nach dem bestehenden LoggerPi Data Model.
+    Measurement
+      ├── timestamp
+      ├── type
+      └── value
+
+    Health
+      ├── connection
+      ├── battery
+      ├── sensor_error
+      └── status
+
+Für WeatherHub gilt:
+
+    sensor_id
+        = deviceID
+
+    name
+        = aktueller Anzeigename aus `/Devices`
+
+    source
+        = WeatherHub
+
+Die historische Messreihe wird über:
+
+    sensor_id
+    +
+    measurement type
+    +
+    timestamp
+
+identifiziert.
+
+Die WeatherHub-spezifischen Begriffe:
+
+    ChartData
+    ChartSeries
+    ChartDataset
+    SeriesID
+    LowBattery
+    ConnectionLost
+    AlertIsActive
+
+dürfen nicht Bestandteil des allgemeinen Core-Modells werden.
+
+Sie dürfen ausschließlich innerhalb des WeatherHub-Adapters bzw. seiner
+internen Zwischenmodelle verwendet werden.
 
 ---
 
-## 46. Monitoring-Logik
+## 46. Monitoring- und Health-Logik
 
-Der WeatherHub-Adapter soll möglichst Rohinformationen und normalisierte
-Zustände liefern.
+Der WeatherHub-Adapter übernimmt die Normalisierung der vom WeatherHub
+gelieferten Statusinformationen.
 
-Die eigentliche Alarmentscheidung gehört in den Monitoring-Core.
+Er entscheidet jedoch nicht über die endgültige Alarmierung.
 
-Beispiel:
+Es wird zwischen direkt beobachteten Zuständen und lokal abgeleiteten
+Zuständen unterschieden.
 
-    WeatherHub:
-        LowBattery = true
+### Direkt aus WeatherHub
 
+Beispielsweise:
+
+    LowBattery = true
         ↓
-
-    Adapter:
-        battery.status = "warning"
-
-        ↓
-
-    Core:
-        Alert: sensor battery low
-
-Ebenso:
+    battery.status = "warning"
 
     ConnectionLost = true
-
         ↓
+    connection.status = "lost"
 
-    Adapter:
-        connection.status = "lost"
+Diese Informationen stammen direkt aus der WeatherHub-Payload.
 
+### Lokal im LoggerPi abgeleitet
+
+Zusätzlich kann der Core anhand eigener Informationen Zustände ableiten.
+
+Beispielsweise:
+
+    letzter gültiger Messpunkt zu alt
         ↓
+    status = "stale"
 
-    Core:
-        Alert: sensor connection lost
+oder:
 
-Dadurch bleibt WeatherHub nur eine Datenquelle unter mehreren möglichen
-Datenquellen.
+    kompletter Abrufzyklus fehlgeschlagen
+        ↓
+    source / collection status = "error"
+
+Damit bleibt die Verantwortlichkeit klar:
+
+    WeatherHub Adapter
+        ↓
+    beobachtete und normalisierte Zustände
+
+    Monitoring Core
+        ↓
+    Health-State
+        ↓
+    Alerting
 
 ---
 
@@ -1830,6 +2034,35 @@ Dieser Fehler muss pro Sensor protokolliert werden.
 
 Der Adapter soll den Sensor nicht stillschweigend verwerfen, sondern einen
 klaren Decode-/Compatibility-Status erzeugen.
+
+### Ergebnis pro Device
+
+Der Abrufzyklus soll für jedes entdeckte Gerät ein eigenes Ergebnis
+erzeugen.
+
+Beispiel:
+
+    Device A → success
+    Device B → success
+    Device C → decode_error
+    Device D → success
+
+Ein Fehler bei Device C darf Device D und die folgenden Geräte nicht
+verhindern.
+
+Ein Device-Ergebnis sollte deshalb mindestens einen Status enthalten:
+
+    success
+    http_error
+    authentication_error
+    invalid_base64
+    decode_error
+    unsupported_id_type
+    unexpected_payload
+    stale_or_missing_data
+
+Die konkrete Zuordnung zum Monitoring-State erfolgt anschließend im
+Monitoring-Core.
 
 ---
 
@@ -2338,6 +2571,49 @@ nicht-sensitive Testproben verwendet werden.
 Die Decoderlogik kann mit solchen Fixtures unabhängig vom Live-Server
 getestet werden.
 
+## 55.1 Decoder-Test-Fixtures
+
+Der Decoder muss unabhängig vom Live-WeatherHub-Server testbar sein.
+
+Die Research-Dumps unter:
+
+    docs/research/weatherhub-dumps/
+
+dienen als technische Referenz und Regressionstestmaterial.
+
+Für automatisierte Tests sollen daraus jedoch gezielte, bereinigte Fixtures
+abgeleitet werden.
+
+Geeignete Fixtures sollten mindestens abdecken:
+
+- ID-Typ `0E`
+- ID-Typ `01`
+- Temperatur-Series
+- Humidity-Series
+- mehrere Datasets
+- Timestamp + Value
+- optionale Bool-Felder
+- fehlende optionale Felder
+- unbekannte Felder
+- ungültige Base64-Payload
+- beschädigte Binärpayload
+- unbekannter ID-Typ
+
+Der Decoder-Test darf keinen Netzwerkzugriff benötigen.
+
+Damit kann beispielsweise getestet werden:
+
+    Fixture
+        ↓
+    Base64
+        ↓
+    WeatherHubDecoder
+        ↓
+    erwartete ChartData-Struktur
+
+Der Live-Server wird ausschließlich für Integrationstests des
+`WeatherHubClient` bzw. des vollständigen Adapters benötigt.
+
 ---
 
 ## 56. Status der ursprünglichen Untersuchung
@@ -2432,69 +2708,95 @@ Es geht jetzt um:
 
 ## 58. Nächste konkrete Schritte
 
-Die nächsten Schritte sollten in dieser Reihenfolge erfolgen:
+Die Reverse-Engineering-Phase für den grundlegenden Sparkline-Datenpfad ist
+abgeschlossen.
 
-1. Login in eine eigene Funktion kapseln.
-2. Authentifizierungsstatus zuverlässig prüfen.
-3. Device Discovery über `/Devices` implementieren. **erledigt / Baseline verifiziert**
-4. Device-IDs und Anzeigenamen automatisch extrahieren. **erledigt / 19 Geräte verifiziert**
-5. einen einzelnen Sensor über die ermittelte ID abrufen.
-6. alle 19 Sensoren mit derselben Session abrufen.
-7. jede Response separat dekodieren.
-8. ID-Typen automatisch erkennen bzw. zuordnen.
-9. Measurement Series und Kanäle normalisieren.
-10. Statusinformationen in ein neutrales Health-Modell überführen.
-11. Ergebnisse in das gemeinsame LoggerPi Data Model mappen.
-12. persistente Speicherung integrieren.
-13. 15-Minuten-Scheduler aufsetzen.
-14. Fehler-/Retry-Logik implementieren.
-15. anschließend Monitoring und Alerting auf dem OtterPi integrieren.
+Die nächsten Schritte sind daher:
+
+1. `WeatherHubClient` aus dem Referenzskript extrahieren.
+2. Login und Session-Verwaltung kapseln.
+3. Authentifizierungsstatus zuverlässig prüfen.
+4. `GetDevices()` mit robuster HTML-Extraktion implementieren.
+5. `GetSparkLineChartData(deviceID)` implementieren.
+6. `WeatherHubDecoder` aus `decode-weatherhub-v2.ps1` herauslösen.
+7. Decoder mit gespeicherten Test-Fixtures unabhängig vom Server testen.
+8. WeatherHub-ID-Typ-/Kanal-Mapping als separate Konfiguration implementieren.
+9. `WeatherHubAdapter` für die Normalisierung implementieren.
+10. Health-/Statusinformationen in das neutrale Modell überführen.
+11. Fehler pro Device isolieren und protokollieren.
+12. Ergebnisse in das gemeinsame LoggerPi Data Model mappen.
+13. Persistenz integrieren.
+14. vollständigen End-to-End-Test mit allen aktuell vorhandenen Geräten durchführen.
+15. 15-Minuten-Scheduler integrieren.
+16. Retry-/Session-Recovery implementieren.
+17. anschließend Monitoring und Alerting auf dem OtterPi integrieren.
+
+Die bereits verifizierten Punkte:
+
+- Login
+- authentifizierte Session
+- Device Discovery
+- dynamische Device-Liste
+- 19/19 Geräteabruf
+- Base64-Dekodierung
+- ChartData-Dekodierung
+- ID-Typen `0E` und `01`
+
+werden dabei nicht erneut als offene Forschungsaufgaben behandelt.
 
 ---
 
 ## 59. Wiedereinstiegspunkt
 
-Der aktuelle Wiedereinstiegspunkt ist ausdrücklich **nicht** mehr:
+Der aktuelle Wiedereinstiegspunkt ist die verifizierte Referenzimplementierung
+und nicht mehr die ursprüngliche Reverse-Engineering-Untersuchung.
+
+Nicht mehr erforderlich für den grundlegenden Datenzugriff sind:
 
     Browser DevTools
-    Curl
-    Cookie manuell kopieren
-    Timestamp suchen
+    Curl-Experimente
+    manuelles Kopieren von Cookies
+    Suche nach dem Timestamp-Format
+    manuelle Eingabe der Device-IDs
 
-Diese Schritte sind für den grundlegenden Datenzugriff bereits geklärt.
+Der aktuelle technische Ausgangspunkt lautet:
 
-Der aktuelle Ausgangspunkt lautet:
+    Get-Credential
+          ↓
+    POST /Account/LogOn
+          ↓
+    authentifizierte WebRequestSession
+          ↓
+    GET /Devices
+          ↓
+    automatische Device Discovery
+          ↓
+    N dynamisch ermittelte Geräte
+          ↓
+    POST /Devices/SparkLineChartData
+          ↓
+    Base64
+          ↓
+    WeatherHubDecoder
+          ↓
+    ChartData / ChartSeries / ChartDataset
+          ↓
+    WeatherHubAdapter
+          ↓
+    gemeinsames LoggerPi Data Model
 
-> PowerShell-Login funktioniert.  
-> `$session` enthält die authentifizierte Session.  
-> `/Devices` liefert HTTP 200.  
-> `POST /Devices/SparkLineChartData` mit derselben Session liefert HTTP 200
-> und eine kompakte Base64-Payload.  
-> Die Payload kann dekodiert werden.  
-> Die `ChartData`-/`ChartSeries`-/`ChartDataset`-Struktur ist rekonstruiert.  
-> Timestamp, Value und relevante Statusfelder können bereits ausgelesen
-> werden.  
-> ID-Typ `0E` und ID-Typ `01` wurden praktisch untersucht.
+Die nächste Implementierungsaufgabe ist damit die Überführung des bereits
+funktionierenden PowerShell-Golden-Paths in produktiv nutzbare Komponenten.
 
-Damit ist WeatherHub Observer bereit für die nächste Phase:
+Priorität:
 
-    Login + Session
-          ↓
-    automatische Device-Liste
-          ↓
-    19 Sensoren
-          ↓
-    SparkLineChartData
-          ↓
-    Decoder
-          ↓
-    Data Model
-          ↓
-    Storage
-          ↓
-    Monitoring
-          ↓
-    OtterPi
+    1. Client
+    2. Decoder
+    3. Adapter
+    4. Tests
+    5. Storage
+    6. Scheduler
+    7. Monitoring
 
 ---
 
@@ -2668,3 +2970,111 @@ Bewiesen ist nun:
 Der nächste Arbeitsschritt ist damit nicht mehr die Suche nach weiteren
 grundlegenden Datenstrukturen, sondern die saubere technische Normalisierung
 der bereits bekannten Daten in den WeatherHub-Adapter.
+
+### 61.5 Engineering-Meilenstein
+
+Der Cross-Dump-Test vom 03.09.2026 markiert den Übergang von der
+Reverse-Engineering-Phase in die Implementierungsphase.
+
+Der WeatherHub-Sparkline-Datenpfad gilt für die aktuell untersuchten
+Sensorfamilien als ausreichend verstanden, um mit der produktiven
+Adapterimplementierung zu beginnen.
+
+Die Implementierung muss dabei nicht die komplette historische
+Untersuchung reproduzieren.
+
+Sie benötigt lediglich die stabil verifizierten Schritte:
+
+    Authentication
+        ↓
+    Device Discovery
+        ↓
+    SparkLine Request
+        ↓
+    Base64 Decode
+        ↓
+    Chart Decode
+        ↓
+    WeatherHub Mapping
+        ↓
+    LoggerPi Data Model
+
+Nicht vollständig geklärte proprietäre Felder, insbesondere das
+`Measurement`-Nested-Message und einzelne Alert-/Statusfelder, werden
+zunächst nicht als Blockade behandelt.
+
+Sie bleiben innerhalb des WeatherHub-Decoders optional und können später
+ohne Änderung des grundlegenden Client-/Adapterdesigns ergänzt werden.
+
+---
+
+### 62. Trennung von SparkLineChartData und DeviceDetails/ChartData
+
+Die erneute Analyse der bisherigen Reverse-Engineering-Ergebnisse
+hat gezeigt, dass zwischen zwei WeatherHub-Endpunkten unterschieden
+werden muss:
+
+    POST /Devices/SparkLineChartData
+
+und:
+
+    POST /DeviceDetails/ChartData
+
+Der aktuelle produktive Datenpfad basiert auf
+`SparkLineChartData`.
+
+Die aktuellen Dashboard-Captures zeigen für `ChartDataset` konsistent:
+
+    field 1 = Timestamp
+    field 2 = Value
+
+Die früher dokumentierte Struktur mit `ChartDataset.field 1` bis
+`ChartDataset.field 13` stammt möglicherweise aus der historischen
+Untersuchung des `DeviceDetails/ChartData`-Pfads.
+
+Alternativ ist möglich, dass die damaligen Fields 3–13 einem anderen
+verschachtelten Message-Typ zugeordnet wurden.
+
+Diese Zuordnung ist noch nicht abschließend bewiesen.
+
+Daher gilt für die aktuelle Implementierung:
+
+    SparkLineChartData
+        → Field 1 = Timestamp
+        → Field 2 = Value
+
+Die historischen Fields 3–13 werden nicht in den Sparkline-Decoder
+übernommen, solange ihre tatsächliche Herkunft nicht anhand der
+historischen Dumps bestätigt wurde.
+
+Als nächster Research-Schritt werden die beiden Payloads direkt
+miteinander verglichen.
+
+### 62.1 Realer Status-Cross-Check
+
+Der Live-Capture unter:
+
+    docs\research\weatherhub-dumps\20260904-014013\
+
+enthält einen direkten Vergleich realer Dashboard-Zustände.
+
+Beispiel OK:
+
+    Device 0167554C25BE
+        Dashboard: OK
+        ConnectionLost: False
+        CardStatus: NoAlert
+
+Beispiel Warning:
+
+    Device 0169706EBE2C
+        Dashboard: Warning
+        ConnectionLost: True
+        CardStatus: Warning
+
+Damit wurde die Zuordnung von `ConnectionLost` und `CardStatus` anhand
+zweier realer Dashboard-Zustände gegengeprüft.
+
+Die Beobachtung bestätigt die bisherige Interpretation für diese Fälle,
+stellt aber noch keine vollständige Spezifikation aller möglichen
+WeatherHub-Statuszustände dar.
