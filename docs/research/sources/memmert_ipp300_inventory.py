@@ -42,7 +42,6 @@ REQUEST_DELAY = 0.2
 COMMANDS = [
     # Operating mode
     ("IN_MODE_10", "Betriebsart"),
-
     # Configuration parameters
     ("IN_PAR_11", "Reglerauflösung"),
     ("IN_PAR_14", "Luftklappensteuerung"),
@@ -52,7 +51,6 @@ COMMANDS = [
     ("IN_PAR_18", "Schaltkontakt 3"),
     ("IN_PAR_19", "2. Temperatur vorhanden"),
     ("IN_PAR_1A", "Druck/Vakuum vorhanden"),
-
     # Actual values
     ("IN_PV_11", "Ist-Temperatur"),
     ("IN_PV_12", "CO2-Istwert"),
@@ -62,7 +60,6 @@ COMMANDS = [
     ("IN_PV_1B", "3. Ist-Temperatur"),
     ("IN_PV_1C", "4. Ist-Temperatur"),
     ("IN_PV_1D", "O2-Istwert"),
-
     # Setpoints
     ("IN_SP_11", "Temperatur-Sollwert"),
     ("IN_SP_12", "CO2-Sollwert"),
@@ -207,12 +204,10 @@ def main():
             rtscts=False,
             dsrdtr=False,
         ) as ser:
-
             print("Serielle Schnittstelle geöffnet.")
             print()
 
             for base_command, description in COMMANDS:
-
                 # The address is already encoded into the command.
                 command = base_command
 
@@ -261,11 +256,7 @@ def main():
     print()
 
     for result in results:
-        print(
-            f"{result['command']:12} "
-            f"{result['description']:<28} "
-            f"=> {result['interpretation']}"
-        )
+        print(f"{result['command']:12} {result['description']:<28} => {result['interpretation']}")
 
     print()
     print("=" * 72)

@@ -61,12 +61,10 @@ def main():
             rtscts=False,
             dsrdtr=False,
         ) as ser:
-
             print("Serielle Schnittstelle geöffnet.")
             print()
 
             for i in range(1, REQUESTS + 1):
-
                 ser.reset_input_buffer()
 
                 start = time.monotonic()
@@ -96,20 +94,14 @@ def main():
                 text = data.decode("ascii", errors="replace")
                 lines = [
                     line.strip()
-                    for line in text.replace("\r\n", "\n")
-                    .replace("\r", "\n")
-                    .split("\n")
+                    for line in text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
                     if line.strip()
                 ]
 
                 if lines and lines[0] == "OK":
                     successful += 1
 
-                print(
-                    f"{i:02d}: "
-                    f"{elapsed_ms:8.2f} ms   "
-                    f"{data!r}"
-                )
+                print(f"{i:02d}: {elapsed_ms:8.2f} ms   {data!r}")
 
                 if i < REQUESTS:
                     time.sleep(PAUSE_BETWEEN_REQUESTS)
