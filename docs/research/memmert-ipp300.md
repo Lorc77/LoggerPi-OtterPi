@@ -2,29 +2,71 @@
 
 ## Status
 
-**Stand:** 2026-08-30  
+**Stand:** 2026-09-04  
 **Gerät:** MEMMERT IPP300  
-**Kommunikation:** je nach Ausstattung RS-232, RS-485, USB oder Ethernet  
+**Kommunikation:** interne RS-232-Kommunikation, über MEMMERT USB Interface B04118 auf USB umgesetzt  
+**Protokoll:** MEMMERT-Schnittstellenprotokoll nach NAMUR  
 **Software:** CELSIUS 10.0 / ältere Geräte ggf. CELSIUS 2005  
 **USB-Modul:** MEMMERT USB Interface Module B04118  
 **Ziel:** Prüfen, ob die beiden vorhandenen IPP300 direkt in LoggerPi-OtterPi integriert werden können.
+
+### Aktueller Erkenntnisstand
+
+Der MEMMERT-Service hat auf eine technische Anfrage bestätigt, dass der Controller des Gerätes intern über **RS-232** kommuniziert und das Interface **B04118 diese RS-232-Kommunikation auf USB umsetzt**.
+
+Damit ist der grundsätzliche Kommunikationsweg geklärt:
+
+```text
+MEMMERT IPP300 Controller
+        │
+        │ RS-232
+        ▼
+MEMMERT USB Interface B04118
+        │
+        │ USB
+        ▼
+LoggerPi / Raspberry Pi
+```
+
+Zusätzlich wurde vom MEMMERT-Service eine offizielle Schnittstellenbeschreibung zur Verfügung gestellt:
+
+```text
+docs/research/sources/MEMMERT_IPP300_Beschreibung_RS232-2010.pdf
+```
+
+Die Dokumentation beschreibt die serielle Kommunikation einschließlich Übertragungsparametern, Befehlssyntax, Geräteadressierung, Status- und Fehlerantworten sowie Lese- und Schreibbefehlen.
+
+Damit ist **kein Reverse Engineering des eigentlichen MEMMERT-Kommunikationsprotokolls erforderlich**.
+
+Die verbleibende technische Untersuchung betrifft primär die konkrete USB-Enumeration des B04118 sowie die Verifikation der dokumentierten Kommunikation am real vorhandenen IPP300.
 
 ---
 
 ## 1. Vorhandene Ausstattung
 
-Bei den vorhandenen IPP300 ist offenbar ein älteres **USB-Interface-Modul B04118** verbaut.
+Bei den vorhandenen IPP300 ist ein **MEMMERT USB Interface Module B04118** verbaut.
 
 Physisch handelt es sich um eine ältere USB-A-Buchse am Gerät. Zusätzlich scheint bei den Geräten ein paralleler Druckeranschluss vorhanden zu sein.
 
-Aus dem CELSIUS-Handbuch ergibt sich, dass MEMMERT-Geräte je nach Ausstattung unterschiedliche Kommunikationsschnittstellen besitzen können:
+Nach Auskunft des MEMMERT-Service kommuniziert der Controller des Gerätes intern über **RS-232**. Das B04118 übernimmt die Umsetzung dieser RS-232-Kommunikation auf USB.
 
-- RS-232
-- RS-485
-- USB
-- Ethernet/LAN
+Die Kommunikationskette ist damit bestätigt als:
 
-Die konkrete USB-Hardware der beiden vorhandenen IPP300 muss noch direkt am Gerät bzw. unter Linux untersucht werden.
+```text
+MEMMERT IPP300 Controller
+        │
+        │ RS-232
+        ▼
+B04118
+        │
+        │ USB
+        ▼
+Host / Raspberry Pi
+```
+
+Die konkrete USB-Implementierung des B04118 ist noch nicht untersucht. Insbesondere ist noch offen, welcher USB-Controller bzw. USB-Serial-Chip verwendet wird und wie sich das Interface unter Linux enumeriert.
+
+Diese Frage betrifft jedoch nur die Transportebene. Das eigentliche MEMMERT-Kommunikationsprotokoll ist durch die vom Hersteller bereitgestellte Schnittstellendokumentation beschrieben.
 
 ---
 
@@ -43,17 +85,19 @@ Unterstützt werden Geräte mit:
 - RS-232
 - RS-485
 - USB
-- Ethernet
+- Ethernet/LAN
 
 CELSIUS kann aktuelle Messwerte protokollieren und den internen Ringprotokollspeicher des Gerätes auslesen.
 
 Damit ist grundsätzlich klar, dass über die jeweilige Kommunikationsschnittstelle nicht nur Konfiguration, sondern auch Messdaten zugänglich sind.
 
+Für die IPP300 ist durch die vom Hersteller bereitgestellte RS-232-Schnittstellendokumentation inzwischen zusätzlich geklärt, wie die grundlegende Kommunikation auf Protokollebene funktioniert.
+
 ---
 
 ## 3. USB-Anbindung
 
-Das CELSIUS-Handbuch beschreibt USB ausdrücklich als direkte Kommunikationsschnittstelle zum Schrank.
+Das CELSIUS-Handbuch beschreibt USB ausdrücklich als Kommunikationsschnittstelle zum Schrank.
 
 Bei einer USB-Verbindung werden Geräte in CELSIUS als:
 
@@ -66,119 +110,372 @@ angezeigt.
 
 CELSIUS ermittelt laut Handbuch die Konfiguration online angeschlossener Schränke selbstständig.
 
-Das ist für LoggerPi interessant, weil der physische USB-Port damit nicht zwangsläufig die Geräteidentität darstellen muss.
+Das ist für LoggerPi interessant, weil der physische USB-Port damit nicht zwangsläufig die logische Geräteidentität darstellen muss.
+
+Durch die Herstellerantwort ist außerdem geklärt, dass das MEMMERT USB Interface B04118 die interne RS-232-Kommunikation des Controllers auf USB umsetzt.
+
+Die offene Frage ist daher nicht mehr, **welches Protokoll über USB verwendet werden muss**, sondern zunächst nur, **wie das B04118 unter Linux als USB-Gerät bzw. serielles Device erscheint**.
 
 ---
 
 ## 4. Geräteadresse
 
-Laut IPP300-Handbuch befindet sich die Kommunikationsadresse im SETUP-Menü unter:
+Das MEMMERT-Protokoll verwendet eine Geräteadresse innerhalb der Befehle.
 
-`ADDRESS`
+Für P-Klasse-Regler muss jedem Gerät eine eindeutige Adresse zugeordnet werden.
 
-Wertebereich:
+Der dokumentierte Wertebereich ist:
 
-`0 ... 15`
+```text
+0 ... F
+```
 
-Werkseitiger Standardwert:
+Damit sind 16 Adressen möglich:
 
-`0`
+```text
+0, 1, 2, ... 9, A, B, C, D, E, F
+```
 
-Die Adresse wird vom PC verwendet, um einen bestimmten Schrank anzusprechen.
+Bei P-Klasse-Geräten wird die Adresse im SETUP-Menü konfiguriert.
 
-Bei mehreren Geräten müssen unterschiedliche Geräteadressen vergeben werden.
+Bei E-Klasse-Reglern ist die Adresse laut Hersteller nicht fest zugeordnet; der Regler antwortet auf gültige Adressen von `0 ... 9` und `A ... F`.
 
-Damit könnte die MEMMERT-Geräteadresse eine stabile logische Identität liefern, unabhängig davon, an welchem USB-Port das Gerät angeschlossen ist.
+Wichtig:
+
+> Wenn die Geräteadresse nicht stimmt, antwortet der Regler überhaupt nicht.
+
+Für LoggerPi sollte die MEMMERT-Adresse deshalb als explizite Gerätekonfiguration behandelt werden.
+
+Beispiel:
+
+```yaml
+memmert:
+  address: 0
+```
+
+Die tatsächliche Adresse der beiden vorhandenen IPP300 muss am Gerät verifiziert werden.
+
+Die MEMMERT-Geräteadresse kann damit zusätzlich zur USB-Identität als stabile logische Geräteidentifikation verwendet werden.
 
 ---
 
-## 5. RS-232 als Referenz
+## 5. Offizielle MEMMERT-RS-232-Schnittstelle
 
-Das IPP300-Handbuch beschreibt eine standardmäßige RS-232C-Schnittstelle.
+Die vom MEMMERT-Service bereitgestellte Schnittstellendokumentation beschreibt die RS-232-Kommunikation der MEMMERT-Wärmeschränke mit E- oder P-Temperaturreglern.
 
-Pinbelegung:
+### 5.1 Serielle Übertragungsparameter
 
-| Pin | Funktion |
+Die Kommunikation verwendet:
+
+| Parameter | Wert |
+|---|---|
+| Baudrate | 2400 Baud |
+| Startbits | 1 |
+| Datenbits | 8 |
+| Parität | keine |
+| Stopbits | 1 |
+| Handshake | keiner |
+| Übertragungsverfahren | Halbduplex |
+
+Damit ergibt sich für die Implementierung:
+
+```text
+2400 8N1
+kein Hardware-Handshake
+kein Software-Handshake
+Halbduplex
+```
+
+Diese Werte stammen direkt aus der vom MEMMERT-Service bereitgestellten Schnittstellenbeschreibung.
+
+### 5.2 Elektrische Schnittstelle
+
+Die originale RS-232-Schnittstelle des Gerätes verwendet eine 9-polige Buchse.
+
+MEMMERT beschreibt den Anschluss eines PCs über ein Nullmodemkabel nach DIN 12900-1.
+
+Die in der Herstellerdokumentation angegebene Belegung lautet:
+
+| Pin | Signal | Beschreibung |
+|---:|---|---|
+| 1 | DCD | im Gerät mit DSR gebrückt |
+| 2 | TxD | Sendeleitung |
+| 3 | RxD | Empfangsleitung |
+| 4 | DTR | nicht verwendet |
+| 5 | GND | Masse |
+| 6 | DSR | im Gerät mit DCD gebrückt |
+| 7 | RTS | im Gerät mit CTS gebrückt |
+| 8 | CTS | im Gerät mit RTS gebrückt |
+| 9 | RI | nicht verwendet |
+
+Für die LoggerPi-Implementierung ist insbesondere relevant, dass laut Hersteller **kein Handshake** verwendet wird.
+
+### 5.3 Quelle
+
+Quelle:
+
+```text
+docs/research/sources/MEMMERT_IPP300_Beschreibung_RS232-2010.pdf
+```
+
+Dokumenttitel:
+
+**Schnittstellenbeschreibung für MEMMERT-Wärmeschränke mit Temperaturregler der E- oder P-Klasse**
+
+Stand der Herstellerdokumentation: **April 2011**.
+
+---
+
+## 6. MEMMERT-Kommunikationsprotokoll
+
+Die Datenübertragung erfolgt laut Herstellerdokumentation nach dem **NAMUR-Protokoll**.
+
+Die Befehle bestehen aus ASCII-Text und werden mit `<CR><LF>` abgeschlossen.
+
+### 6.1 Steuerzeichen
+
+| Zeichen | ASCII hex | ASCII dez |
+|---|---:|---:|
+| `<CR>` | `0D` | 13 |
+| `<LF>` | `0A` | 10 |
+| Blank | `20` | 32 |
+
+Ein Befehl wird beispielsweise als:
+
+```text
+IN_PV_01<CR><LF>
+```
+
+übertragen.
+
+Groß- und Kleinschreibung ist laut Hersteller erlaubt.
+
+Führende Leerzeichen sowie mehrere aufeinanderfolgende Leerzeichen sind ebenfalls erlaubt.
+
+### 6.2 Antwortstruktur
+
+Auf einen empfangenen Befehl sendet der Regler zunächst eine Statusmeldung.
+
+Bei erfolgreicher Verarbeitung:
+
+```text
+OK<CR><LF>
+```
+
+Bei einem Fehler:
+
+```text
+ERR_##<CR><LF>
+```
+
+Bei Leseoperationen folgt nach der Statusmeldung eine weitere Zeile mit dem angeforderten Wert.
+
+Beispiel:
+
+```text
+PC:
+IN_PV_01<CR><LF>
+
+Regler:
+OK<CR><LF>
+220<CR><LF>
+```
+
+### 6.3 Fehlercodes
+
+| Code | Bedeutung |
 |---:|---|
-| 1 | nicht belegt |
-| 2 | RxD |
-| 3 | TxD |
-| 4 | nicht belegt |
-| 5 | GND |
-| 6 | nicht belegt |
-| 7 | nicht belegt |
-| 8 | nicht belegt |
-| 9 | nicht belegt |
+| `01` | Schaltelement defekt |
+| `02` | Leistungsteil defekt |
+| `03` | Temperatursensor defekt |
+| `04` | Interner Konfigurationsfehler |
+| `07` | Keine MEMory Card oder MEMory Card falsch gesteckt |
+| `08` | MEMory Card passt nicht zum Gerät |
+| `09` | ALARM! Übertemperatur durch Überwachungsregler erkannt |
+| `10` | Parameter falsch |
+| `11` | Gerät nicht REMOTE |
+| `13` | REMOTE nicht möglich |
 
-Das vorgesehene Kabel ist ein gedrehtes RS-232-Kabel nach DIN 12900 Teil 1.
+Die Fehlerantwort sollte im LoggerPi nicht lediglich als generischer Kommunikationsfehler behandelt werden.
 
-MEMMERT bezeichnet ein entsprechendes Kabel als:
-
-`V6`
-
-Besonders interessant:
-
-> Die Protokollbeschreibung der Schnittstelle (nach NAMUR) kann beim MEMMERT-Kundendienst angefordert werden.
-
-Das deutet auf ein dokumentiertes MEMMERT/NAMUR-Kommunikationsprotokoll hin.
+Insbesondere Sensorfehler (`ERR_03`) und Übertemperatur (`ERR_09`) sind relevante Gerätezustände und sollten später als solche im Adapter bzw. Logger-Modell berücksichtigt werden.
 
 ---
 
-## 6. RS-485
+## 7. Relevante Lese-Befehle
 
-Bei entsprechender Ausstattung kann statt RS-232 eine RS-485-Schnittstelle vorhanden sein.
+Für LoggerPi sind zunächst ausschließlich Read-Operationen relevant.
 
-Damit können mehrere Geräte über einen gemeinsamen Bus verbunden werden.
+Die Herstellerdokumentation definiert mehrere Gruppen von Lese-Befehlen.
 
-Das IPP300-Handbuch nennt:
+### 7.1 Istwerte
 
-- 2-Draht-Bus
-- Geräteadresse 0 ... 15
-- maximal 16 adressierbare Geräte
-- 150 m maximale Gesamtkabellänge
-- 220-Ohm-Abschlusswiderstand am letzten Gerät
+```text
+IN_PV_{ADR}1
+```
 
-Die genaue maximale Geräteanzahl unterscheidet sich teilweise zwischen älteren MEMMERT/CELSIUS-Dokumentationen. Für LoggerPi ist daher zunächst die konkrete Hardware entscheidend.
+liest die Ist-Temperatur in °C.
+
+Beispiel für Adresse `0`:
+
+```text
+IN_PV_01<CR><LF>
+```
+
+Antwort:
+
+```text
+OK<CR><LF>
+-###.#<CR><LF>
+```
+
+Weitere dokumentierte Process Values:
+
+| Befehl | Wert |
+|---|---|
+| `IN_PV_{ADR}1` | Ist-Temperatur |
+| `IN_PV_{ADR}2` | CO₂-Istwert in % |
+| `IN_PV_{ADR}3` | rh-Istwert in % |
+| `IN_PV_{ADR}5` | zweite Ist-Temperatur |
+| `IN_PV_{ADR}A` | Vakuum-/Druck-Istwert in mbar |
+| `IN_PV_{ADR}B` | dritte Ist-Temperatur |
+| `IN_PV_{ADR}C` | vierte Ist-Temperatur |
+| `IN_PV_{ADR}D` | O₂-Istwert in % |
+
+Nicht jeder Befehl ist bei jedem Gerät bzw. jeder Ausstattung implementiert.
+
+### 7.2 Sollwerte
+
+Die Herstellerdokumentation definiert außerdem:
+
+| Befehl | Wert |
+|---|---|
+| `IN_SP_{ADR}1` | Temperatur-Sollwert |
+| `IN_SP_{ADR}2` | CO₂-Sollwert |
+| `IN_SP_{ADR}3` | rh-Sollwert |
+| `IN_SP_{ADR}4` | Luftklappen-Sollwert |
+| `IN_SP_{ADR}5` | Luftturbinen-Sollwert |
+| `IN_SP_{ADR}A` | Druck-Sollwert |
+| `IN_SP_{ADR}D` | O₂-Sollwert |
+
+Für die erste LoggerPi-Implementierung sind insbesondere die Istwerte relevant.
+
+Sollwerte können später als zusätzliche Mess-/Metadaten aufgenommen werden.
 
 ---
 
-## 7. Ethernet/LAN
+## 8. Gerätekonfiguration und verfügbare Messgrößen
 
-CELSIUS unterstützt ebenfalls Geräte mit Ethernet-Schnittstelle.
+Über `IN_PAR` können Eigenschaften und Ausstattung des Reglers abgefragt werden.
 
-Laut CELSIUS-Handbuch:
+Dokumentiert sind unter anderem:
 
-- jeder Schrank benötigt eine eindeutige IP- bzw. DNS-Adresse
-- ältere Geräte können standardmäßig `192.168.100.100` verwenden
-- die IP-Adresse kann mit `XTADMIN` geändert werden
-- anschließend wird die IP-Adresse in CELSIUS eingetragen
+| Befehl | Bedeutung |
+|---|---|
+| `IN_PAR_{ADR}1` | Reglerauflösung |
+| `IN_PAR_{ADR}4` | Luftklappensteuerung vorhanden |
+| `IN_PAR_{ADR}5` | Luftturbine vorhanden |
+| `IN_PAR_{ADR}6` | Schaltkontakt 1 vorhanden |
+| `IN_PAR_{ADR}7` | Schaltkontakt 2 vorhanden |
+| `IN_PAR_{ADR}8` | Schaltkontakt 3 vorhanden |
+| `IN_PAR_{ADR}9` | zweite Temperatur vorhanden |
+| `IN_PAR_{ADR}A` | Druckwert vorhanden |
 
-In CELSIUS können bis zu 16 Geräte über LAN verwaltet werden.
+Damit kann ein Adapter vor oder während der Datenerfassung feststellen, welche Messgrößen bzw. Funktionen das konkrete Gerät unterstützt.
 
-Für die beiden vorhandenen IPP300 ist momentan nicht bekannt, ob Ethernet-Hardware vorhanden ist.
+Für LoggerPi ist insbesondere `IN_PAR_{ADR}9` bzw. `IN_PAR_{ADR}A` interessant, da damit optionale zusätzliche Messgrößen erkannt werden können.
 
 ---
 
-## 8. CELSIUS-Konfiguration
+## 9. Schreibbefehle und REMOTE-Modus
 
-Aus der gefundenen CELSIUS-Konfigurationsdatei:
+Die MEMMERT-Schnittstelle unterstützt neben Leseoperationen auch die Steuerung des Gerätes.
+
+Der Betriebsmodus kann mit `OUT_MODE` zwischen Local und Remote umgeschaltet werden:
+
+```text
+OUT_MODE_{ADR}0_0
+```
+
+Local-Betrieb.
+
+```text
+OUT_MODE_{ADR}0_1
+```
+
+Remote-Betrieb.
+
+Im Remote-Betrieb können unter anderem Sollwerte über `OUT_SP_*` gesetzt werden.
+
+Beispielsweise:
+
+```text
+OUT_SP_{ADR}1_55
+```
+
+setzt den Temperatur-Sollwert auf 55 °C.
+
+Für die erste LoggerPi-Implementierung werden **keine Schreibbefehle verwendet**.
+
+Der Logger soll zunächst ausschließlich lesend arbeiten.
+
+Dies vermeidet jede unnötige Veränderung des Betriebszustands des Gerätes.
+
+### Achtung beim Verlassen des REMOTE-Modus
+
+Die Herstellerdokumentation weist darauf hin, dass beim Rücksetzen des `REMOTE`-Status das Gerät automatisch in seinen Grundzustand versetzt wird.
+
+Dokumentiert sind unter anderem:
+
+```text
+Soll-Temperatur = 20 °C
+Luftklappe = geschlossen
+Luftturbine = maximale Drehzahl
+```
+
+Daher dürfen `OUT_MODE_*` und `OUT_SP_*` nicht versehentlich im Rahmen eines reinen Monitoring-Tests verwendet werden.
+
+---
+
+## 10. CELSIUS-Polling und Request/Response-Modell
+
+Aus der gefundenen CELSIUS-Konfiguration:
 
 ```ini
 DelayInMilliseconds = 10
 PollIntervall=30
 ```
 
-CELSIUS wartet demnach 10 ms zwischen dem Senden eines Kommandos und dem Lesen der Antwort.
+ergibt sich ein Polling-Intervall von 30 Sekunden.
 
-Der Polling-Intervall beträgt standardmäßig 30 Sekunden.
+CELSIUS wartet laut Konfiguration 10 ms zwischen dem Senden eines Kommandos und dem Lesen der Antwort.
 
-Die Beschreibung zu `PollIntervall` sagt sinngemäß, dass nach Ablauf dieses Intervalls alle aktiven Geräte erneut nach ihren Werten abgefragt werden.
+Zusammen mit der nun vorliegenden MEMMERT-Protokolldokumentation ist der grundsätzliche Kommunikationsmechanismus geklärt:
 
-Das ist ein deutlicher Hinweis auf einen Request/Response-Mechanismus.
+```text
+CELSIUS / LoggerPi
+       │
+       │ Request
+       ▼
+MEMMERT Controller
+       │
+       │ OK / ERR
+       │ + ggf. Wert
+       ▼
+CELSIUS / LoggerPi
+```
+
+Die bisherige Annahme, dass CELSIUS möglicherweise ein Request/Response-Modell verwendet, ist damit nicht mehr lediglich eine Hypothese.
+
+Das MEMMERT-Protokoll ist ausdrücklich als Befehl/Antwort-Protokoll dokumentiert.
+
+Für LoggerPi ist ein periodisches Polling daher der natürliche Integrationsansatz.
+
+Das tatsächliche optimale Polling-Intervall für LoggerPi muss jedoch nicht zwangsläufig 30 Sekunden betragen. `PollIntervall=30` stammt aus der CELSIUS-Konfiguration und ist zunächst als Referenzwert zu betrachten.
 
 ---
 
-## 9. Gerätestatus
+## 11. Gerätestatus in CELSIUS
 
 Die CELSIUS-Gerätestatuszeile zeigt beispielsweise:
 
@@ -194,15 +491,50 @@ Dabei werden unter anderem angezeigt:
 4. weitere physikalische Eigenschaft bzw. Profilwert
 5. Laufzeit
 
-Die Kommunikation wird damit von CELSIUS einer konkreten Schnittstelle zugeordnet.
+Die genaue Bedeutung aller dargestellten Felder ist für die LoggerPi-Implementierung noch nicht vollständig untersucht.
+
+Die Statusanzeige bestätigt jedoch die Zuordnung eines MEMMERT-Reglers zu einer konkreten Kommunikationsschnittstelle.
 
 ---
 
-## 10. Möglicher USB-Aufbau
+## 12. USB-Transport über B04118
 
-Es wurde ein Prolific-USB-Seriell-Treiber gefunden.
+MEMMERT hat bestätigt, dass das Interface B04118 die interne RS-232-Kommunikation des Controllers auf USB umsetzt.
 
-Der Treiber unterstützt beispielsweise:
+Damit ist folgende Architektur bestätigt:
+
+```text
+IPP300 Controller
+    │
+    │ RS-232
+    ▼
+B04118
+    │
+    │ USB
+    ▼
+Host / Raspberry Pi
+```
+
+### 12.1 Noch offene USB-Frage
+
+Noch nicht geklärt ist, wie sich das B04118 konkret am Linux-Host präsentiert.
+
+Insbesondere müssen noch ermittelt werden:
+
+- USB Vendor ID (VID)
+- USB Product ID (PID)
+- Manufacturer
+- Product
+- Serial Number, falls vorhanden
+- USB Interface Class
+- Interface/Subclass/Protocol
+- Kernel-Treiber
+- erzeugtes `/dev/tty*`-Device
+- stabile udev-Eigenschaften
+
+### 12.2 PL2303-Hypothese
+
+In der ursprünglichen Untersuchung wurde ein Prolific-USB-Seriell-Treiber gefunden, unter anderem mit Unterstützung für:
 
 ```text
 VID_067B&PID_2303
@@ -216,30 +548,23 @@ VID_067B&PID_2304
 "Prolific USB-to-Serial Comm Port"
 ```
 
-Das macht einen **PL2303 USB-to-Serial-Chip** im USB-Interface zumindest plausibel.
+Daraus entstand die Hypothese, dass das B04118 möglicherweise einen PL2303 oder einen ähnlichen USB-Serial-Chip verwendet.
 
-Ein möglicher Aufbau wäre:
+Diese Hypothese ist **nicht durch MEMMERT bestätigt**.
+
+Die Herstellerinformation bestätigt lediglich die Funktion:
 
 ```text
-MEMMERT IPP300
-    │
-    │ USB
-    ▼
-USB-Interface-Modul B04118
-    │
-    │ USB-Serial / PL2303 ?
-    ▼
-virtueller COM-Port
-    │
-    ▼
-CELSIUS / unser Serial Reader
+RS-232 → USB
 ```
 
-Das ist derzeit eine Arbeitshypothese und muss am tatsächlichen Gerät verifiziert werden.
+Der konkrete USB-Controller bleibt zu verifizieren.
+
+Daher darf die PL2303-Annahme nicht als Grundlage der Implementierung verwendet werden.
 
 ---
 
-## 11. PL2303-Erkennung
+## 13. PL2303-Erkennung
 
 Der gefundene Prolific-Treiber enthält ein eigenes CheckChipVersion-Tool.
 
@@ -258,24 +583,15 @@ Das Tool kann unter Windows anhand des COM-Ports die verwendete PL2303-Chipversi
 
 Für unsere Untersuchung ist zunächst aber wichtiger, wie das **komplette MEMMERT-USB-Gerät** enumeriert wird.
 
-Interessant sind:
-
-- USB Vendor ID (VID)
-- USB Product ID (PID)
-- Manufacturer
-- Product
-- Serial Number
-- USB Interface Class
-- Interface/Subclass/Protocol
-- erzeugtes `/dev/tty*`-Device
+Die PL2303-Hypothese ist deshalb derzeit lediglich historischer Recherchekontext und keine bestätigte Hardwareeigenschaft des B04118.
 
 ---
 
-## 12. USB-Portabhängigkeit
+## 14. USB-Portabhängigkeit und Geräteidentität
 
-Wenn das MEMMERT-USB-Modul tatsächlich als USB-zu-Seriell-Gerät arbeitet, sollte der physische USB-Port **nicht als Geräteidentität verwendet werden**.
+Die Linux-Gerätenamen `/dev/ttyUSB0`, `/dev/ttyUSB1` usw. dürfen nicht als alleinige Geräteidentität verwendet werden.
 
-Unter Linux können sich beispielsweise `/dev/ttyUSB0` und `/dev/ttyUSB1` abhängig von Enumeration und Anschlussreihenfolge ändern.
+Unter Linux können sich diese Namen abhängig von Enumeration und Anschlussreihenfolge ändern.
 
 Nicht ideal:
 
@@ -284,17 +600,17 @@ Nicht ideal:
 /dev/ttyUSB1 = IPP300-2
 ```
 
-Besser wäre eine Identifikation über stabile Eigenschaften, beispielsweise:
+Besser ist eine Identifikation über stabile Eigenschaften.
+
+Mögliche Ebenen:
 
 ```text
-USB VID/PID
-+
-USB-Seriennummer (falls vorhanden)
+USB-Geräteidentität
 +
 MEMMERT-Geräteadresse
++
+LoggerPi device_id
 ```
-
-Idealerweise wird die Geräteadresse zusätzlich über das MEMMERT-Protokoll verifiziert.
 
 Beispiel:
 
@@ -314,61 +630,62 @@ USB-Gerät B
     -> IPP300
 ```
 
-Damit wäre die Identität unabhängig vom physischen USB-Port.
+Damit kann die logische Geräteidentität unabhängig vom physischen USB-Port aufgebaut werden.
+
+Falls das B04118 keine USB-Seriennummer bereitstellt, muss die stabile Host-seitige Zuordnung über udev bzw. andere USB-Gerätemerkmale erfolgen.
 
 ---
 
-## 13. Proprietäres USB wäre kein Ausschlusskriterium
+## 15. Proprietäres USB-Protokoll
 
-Falls sich herausstellt, dass das USB-Modul **nicht** als klassischer USB-Seriell-Adapter erscheint, sondern als `vendor-specific USB device`, wäre die Situation aufwendiger.
+Die ursprüngliche Untersuchung betrachtete die Möglichkeit, dass das B04118 ein proprietäres USB-Protokoll verwenden könnte.
 
-Dann müsste zunächst untersucht werden:
+Durch die Herstellerinformation ist inzwischen geklärt, dass das B04118 funktional als **RS-232-zu-USB-Interface** eingesetzt wird.
 
-- USB Descriptors
-- VID/PID
-- Interfaces
-- Endpoints
-- Transferarten
-- Kommunikation zwischen CELSIUS und Gerät
+Ein Reverse Engineering eines proprietären MEMMERT-USB-Protokolls ist daher derzeit **nicht angezeigt**.
 
-Anschließend könnte der Datenverkehr zwischen CELSIUS und IPP300 analysiert werden.
+Der nächste Schritt ist zunächst festzustellen, ob das B04118 am Raspberry Pi als USB-Serial-Gerät erscheint.
 
-Da CELSIUS das Gerät aktiv abfragt und Messwerte protokollieren kann, wäre grundsätzlich eine Protokollanalyse bzw. Reverse Engineering denkbar.
+Nur falls die USB-Enumeration entgegen der erwarteten seriellen Architektur keine direkt nutzbare serielle Schnittstelle bereitstellt, wäre eine weitergehende USB-Untersuchung erforderlich.
 
-Das wäre aber erst notwendig, wenn die USB-Hardware tatsächlich kein serielles Interface bereitstellt.
-
----
-
-## 14. Polling-Modell
-
-Die CELSIUS-Konfiguration enthält:
-
-```ini
-DelayInMilliseconds = 10
-PollIntervall=30
-```
-
-Die Beschreibung von `PollIntervall` macht deutlich, dass CELSIUS aktive Geräte regelmäßig nach ihren Werten fragt.
-
-Vermutetes Modell:
+Der Fokus der Untersuchung verschiebt sich damit von:
 
 ```text
-CELSIUS
+USB-Protokoll reverse engineeren
+```
+
+zu:
+
+```text
+USB-Serial-Device identifizieren
+        ↓
+serielle Verbindung öffnen
+        ↓
+MEMMERT-Protokoll verwenden
+```
+
+---
+
+## 16. Polling-Modell im Vergleich zum vorhandenen Freezer
+
+Das MEMMERT-Protokoll ist ein klassisches Request/Response-Protokoll.
+
+Der grundsätzliche Ablauf ist:
+
+```text
+LoggerPi
    │
-   │ Anfrage
+   │ IN_PV_01<CR><LF>
    ▼
 MEMMERT
    │
-   │ Antwort
+   │ OK<CR><LF>
+   │ 24.1<CR><LF>
    ▼
-CELSIUS
+LoggerPi
 ```
 
 Das unterscheidet sich konzeptionell vom derzeit vorhandenen Freezer.
-
----
-
-## 15. Vergleich mit dem vorhandenen Freezer
 
 Der vorhandene Thermo Scientific HFC -80 °C Freezer funktioniert aktuell über:
 
@@ -384,9 +701,7 @@ minicom
 
 Der Freezer sendet derzeit selbstständig ungefähr alle 60 Minuten eine Meldung, die bereits sauber empfangen werden kann.
 
-Das ist konzeptionell etwas anderes als die MEMMERT-Kommunikation, falls CELSIUS tatsächlich aktiv pollt.
-
-Daraus ergibt sich für LoggerPi voraussichtlich die Möglichkeit, unterschiedliche Adaptertypen zu unterstützen:
+Daraus ergibt sich für LoggerPi die Möglichkeit, unterschiedliche Adaptertypen zu unterstützen:
 
 ```text
 Serial Reader
@@ -399,7 +714,44 @@ Serial Reader
 
 ---
 
-## 16. Bezug zu den bereits vorhandenen MEMMERT-Geräten
+## 17. RS-485 und Ethernet als allgemeiner MEMMERT-Kontext
+
+MEMMERT-Geräte können je nach Ausstattung auch über RS-485 oder Ethernet/LAN kommunizieren.
+
+### RS-485
+
+Das IPP300-Handbuch nennt für entsprechende Ausstattung:
+
+- 2-Draht-Bus
+- Geräteadresse 0 ... 15
+- maximal 16 adressierbare Geräte
+- 150 m maximale Gesamtkabellänge
+- 220-Ohm-Abschlusswiderstand am letzten Gerät
+
+Die genaue maximale Geräteanzahl unterscheidet sich teilweise zwischen älteren MEMMERT/CELSIUS-Dokumentationen.
+
+Für die aktuelle LoggerPi-Integration ist RS-485 jedoch nicht der primäre Transportweg, da die vorhandenen IPP300 über B04118 an USB angebunden sind.
+
+### Ethernet/LAN
+
+CELSIUS unterstützt ebenfalls Geräte mit Ethernet-Schnittstelle.
+
+Laut CELSIUS-Handbuch:
+
+- jeder Schrank benötigt eine eindeutige IP- bzw. DNS-Adresse
+- ältere Geräte können standardmäßig `192.168.100.100` verwenden
+- die IP-Adresse kann mit `XTADMIN` geändert werden
+- anschließend wird die IP-Adresse in CELSIUS eingetragen
+
+In CELSIUS können bis zu 16 Geräte über LAN verwaltet werden.
+
+Für die beiden vorhandenen IPP300 ist derzeit nicht bekannt, ob Ethernet-Hardware vorhanden ist.
+
+Diese Informationen sind für den aktuellen B04118/USB-Pfad Hintergrundwissen und keine Voraussetzung für die erste Implementierung.
+
+---
+
+## 18. Bezug zu den bereits vorhandenen MEMMERT-Geräten
 
 Im bestehenden LoggerPi-/Observer-System werden bereits zwei andere MEMMERT-Geräte über Ethernet angesprochen.
 
@@ -407,69 +759,71 @@ Dort wird die MEMMERT-/AtmoControl-API verwendet.
 
 Das ist zunächst von den beiden IPP300 getrennt zu betrachten.
 
-Interessant bleibt jedoch die Frage, ob die IPP300 möglicherweise ebenfalls über eine kompatible MEMMERT-Kommunikationsschicht bzw. AtmoControl/API erreichbar sind.
+Für die IPP300 liegt derzeit kein belastbarer Nachweis vor, dass deren ältere RS-232-/B04118-Kommunikation über dieselbe AtmoControl/API-Schicht erreichbar ist.
 
-Dafür gibt es momentan **keinen belastbaren Nachweis**.
+Die vorhandene Herstellerdokumentation zeigt dagegen eindeutig einen eigenständigen, textbasierten RS-232-Kommunikationsweg.
 
-Die CELSIUS-Dokumentation zeigt dagegen eindeutig, dass die IPP300 über ihre Kommunikationsschnittstelle abgefragt werden können.
-
----
-
-## 17. Arbeitshypothesen
-
-### Hypothese A – USB ist USB-Serial
-
-```text
-IPP300
-  ↓
-USB interface module
-  ↓
-PL2303 oder ähnlicher USB-Serial-Chip
-  ↓
-/dev/ttyUSBx
-  ↓
-MEMMERT-Protokoll
-```
-
-Das wäre der günstigste Fall.
-
-Dann könnten wir wahrscheinlich direkt einen MEMMERT-Serial-Reader implementieren.
-
-### Hypothese B – proprietäres USB
-
-```text
-IPP300
-  ↓
-USB interface module
-  ↓
-vendor-specific USB device
-  ↓
-MEMMERT USB-Protokoll
-```
-
-Dann wäre zunächst USB-Protokollanalyse notwendig.
-
-### Hypothese C – USB-Modul stellt intern weiterhin eine serielle Schnittstelle bereit
-
-Auch wenn das Modul auf USB-Seite speziell aussieht, könnte es intern das MEMMERT-Protokoll über eine abstrahierte serielle Verbindung bereitstellen.
-
-Diese Variante muss durch die tatsächliche Enumeration und ggf. CELSIUS-Kommunikation geprüft werden.
+Für die IPP300 sollte daher zunächst der dokumentierte RS-232-Weg über B04118 implementiert bzw. getestet werden.
 
 ---
 
-## 18. Nächster Untersuchungsschritt
+## 19. Herstellerkontakt und Primärquelle
 
-Noch **keine Implementierung notwendig**.
+Am 2026-09-04 wurde eine technische Anfrage an den MEMMERT-Service gestellt.
 
-Zunächst einen der beiden IPP300 an einen Linux-Rechner anschließen.
+MEMMERT bestätigte daraufhin:
 
-Dann:
+> Intern wird über die RS232-Schnittstelle vom Controller kommuniziert. Das Interface B04118 wandelt auf USB, welche in Ihren Geräten als Kommunikations-Schnittstelle herausgeführt ist.
+
+Zusätzlich stellte MEMMERT eine offizielle Schnittstellenbeschreibung zur Verfügung.
+
+### Herstellerdokumentation
+
+**Titel:**
+
+**Schnittstellenbeschreibung für MEMMERT-Wärmeschränke mit Temperaturregler der E- oder P-Klasse**
+
+**Stand:** April 2011
+
+**Lokale Kopie im Repository:**
+
+```text
+docs/research/sources/MEMMERT_IPP300_Beschreibung_RS232-2010.pdf
+```
+
+Die Dokumentation beschreibt:
+
+- serielle Übertragungsparameter
+- RS-232-Anschluss
+- NAMUR-basierte Befehlssyntax
+- Geräteadressierung
+- Statusantworten
+- Fehlercodes
+- Istwert-Abfragen
+- Sollwert-Abfragen
+- Konfigurationsabfragen
+- Schreib-/Steuerbefehle
+- REMOTE-Modus
+
+Die Herstellerdokumentation ist für die Protokollimplementierung die primäre technische Quelle.
+
+---
+
+## 20. Nächste Untersuchungsschritte
+
+Die grundsätzliche Protokollspezifikation ist durch die Herstellerdokumentation geklärt.
+
+Als nächstes soll die Kommunikation am real vorhandenen IPP300 verifiziert werden.
+
+### Schritt 1 – USB-Enumeration
+
+IPP300 über B04118 mit dem Raspberry Pi verbinden und prüfen:
 
 ```bash
 lsusb
 ```
 
-anschließend:
+danach:
 
 ```bash
 lsusb -v
@@ -488,107 +842,216 @@ ls -l /dev/ttyUSB*
 ls -l /dev/ttyACM*
 ```
 
-Falls ein serielles Gerät auftaucht:
+Falls ein serielles Device erzeugt wird:
 
 ```bash
 udevadm info -a -n /dev/ttyUSB0
 ```
 
-bzw. das tatsächlich erzeugte Device.
+bzw. entsprechend für das tatsächlich erzeugte Device.
 
-Damit lässt sich feststellen, ob das USB-Modul als klassischer USB-Seriell-Adapter erkannt wird.
+### Schritt 2 – USB-Identität dokumentieren
+
+Folgende Informationen sollen für das B04118 festgehalten werden:
+
+- VID
+- PID
+- Hersteller
+- Produktname
+- Seriennummer, falls vorhanden
+- Kernel-Treiber
+- `/dev/tty*`
+- stabile udev-Eigenschaften
+
+### Schritt 3 – Serielle Kommunikation testen
+
+Falls das Interface als serielles Device verfügbar ist, zunächst mit den vom Hersteller dokumentierten Parametern:
+
+```text
+2400 Baud
+8 Datenbits
+keine Parität
+1 Stopbit
+kein Hardware-Handshake
+kein Software-Handshake
+```
+
+### Schritt 4 – Read-only-Protokoll testen
+
+Als erster Protokolltest soll ausschließlich ein ungefährlicher Lesezugriff erfolgen.
+
+Für ein Gerät mit Adresse `0`:
+
+```text
+IN_PV_01<CR><LF>
+```
+
+Erwartete Antwortstruktur:
+
+```text
+OK<CR><LF>
+<Temperatur><CR><LF>
+```
+
+Beispiel aus der MEMMERT-Dokumentation:
+
+```text
+IN_PV_01<CR><LF>
+
+OK<CR><LF>
+220<CR><LF>
+```
+
+### Schritt 5 – Weitere Istwerte prüfen
+
+Nach erfolgreicher Temperaturabfrage können optional die weiteren dokumentierten Process Values getestet werden:
+
+```text
+IN_PV_{ADR}2
+IN_PV_{ADR}3
+IN_PV_{ADR}5
+IN_PV_{ADR}A
+IN_PV_{ADR}B
+IN_PV_{ADR}C
+IN_PV_{ADR}D
+```
+
+Nicht vorhandene bzw. nicht unterstützte Funktionen müssen dabei sauber behandelt werden.
+
+### Schritt 6 – Gerätekonfiguration prüfen
+
+Nach erfolgreicher Kommunikation können zusätzlich die verfügbaren Funktionen über `IN_PAR` abgefragt werden.
+
+Beispielsweise:
+
+```text
+IN_PAR_{ADR}1
+IN_PAR_{ADR}9
+IN_PAR_{ADR}A
+```
+
+Damit lässt sich feststellen, welche optionalen Messwerte beim konkreten IPP300 tatsächlich vorhanden sind.
+
+### Schritt 7 – Keine Schreibbefehle im ersten Test
+
+Die dokumentierten `OUT_MODE_*` und `OUT_SP_*` Befehle werden für die erste LoggerPi-Untersuchung **nicht verwendet**.
+
+Der erste Proof-of-Concept soll ausschließlich lesend arbeiten.
+
+Damit besteht kein unnötiges Risiko, Sollwerte oder Betriebszustände des Gerätes zu verändern.
 
 ---
 
-## 19. Wenn ein serieller Port gefunden wird
+## 21. Relevanz für die LoggerPi-Architektur
 
-Dann wäre der nächste Schritt zunächst **passives Beobachten**, nicht Reverse Engineering.
+Die MEMMERT-Kommunikation ist ein Request/Response-Protokoll über eine serielle Verbindung.
 
-Beispielsweise mit:
+Der geplante Adapter sollte deshalb Transport und Protokoll trennen:
 
-```bash
-minicom
+```text
+MemmertAdapter
+      │
+      ├── SerialTransport
+      │      └── /dev/ttyUSB*
+      │
+      └── MemmertProtocol
+             ├── command generation
+             ├── response parsing
+             ├── status handling
+             └── value conversion
 ```
 
-oder einem kleinen Python-Programm, das den seriellen Datenverkehr aufzeichnet.
+Der Transport kennt dabei ausschließlich die serielle Verbindung.
 
-Zu bestimmen sind:
+Das Protokoll kennt:
 
-- Baudrate
-- Datenbits
-- Parität
-- Stopbits
-- Flow Control
-- ob spontan Daten kommen
-- ob das Gerät nur auf Requests antwortet
+- Geräteadresse
+- `IN_PV`
+- `IN_SP`
+- `IN_PAR`
+- `IN_MODE`
+- `OK`
+- `ERR_##`
+- CR/LF framing
 
-Die CELSIUS-Konfiguration liefert bereits einen Hinweis auf eine Response-Verzögerung von 10 ms und einen Polling-Intervall von 30 Sekunden.
+Dadurch bleibt die Architektur unabhängig davon, welcher konkrete USB-Serial-Chip im B04118 verwendet wird.
+
+Die Geräteidentität sollte ebenfalls nicht ausschließlich an `/dev/ttyUSB0` oder `/dev/ttyUSB1` gebunden werden.
+
+Stattdessen sollte eine stabile Konfiguration verwendet werden, beispielsweise:
+
+```yaml
+memmert:
+  port: /dev/ttyUSB0
+  address: 0
+```
+
+Langfristig kann die Zuordnung über stabile USB-/udev-Eigenschaften und die MEMMERT-Geräteadresse abgesichert werden.
 
 ---
 
-## 20. Relevanz für die LoggerPi-Architektur
+## 22. Aktueller Erkenntnisstand
 
-Die Geräteidentität sollte nicht an einem zufälligen Linux-Port hängen.
+Der MEMMERT-IP­P300-Kommunikationsweg ist durch die Herstellerinformationen wesentlich besser geklärt als zum Beginn der Untersuchung.
 
-Nicht:
+### Durch MEMMERT bestätigt
+
+- Der Controller kommuniziert intern über RS-232.
+- Das Interface B04118 setzt RS-232 auf USB um.
+- Das MEMMERT-Protokoll ist dokumentiert.
+- Die Kommunikation erfolgt nach NAMUR.
+- Die seriellen Parameter sind 2400 Baud, 8N1.
+- Es wird kein Handshake verwendet.
+- Die Übertragung ist halbduplex.
+- Befehle werden mit CR/LF abgeschlossen.
+- Geräte besitzen eine Adresse von 0 bis F.
+- Das Protokoll verwendet Statusantworten `OK` bzw. `ERR_##`.
+- Istwerte können über `IN_PV_*` abgefragt werden.
+- Sollwerte können über `IN_SP_*` abgefragt bzw. gesetzt werden.
+- Konfigurationsmerkmale können über `IN_PAR_*` abgefragt werden.
+
+### Nicht mehr notwendig
+
+Ein Reverse Engineering des eigentlichen MEMMERT-Kommunikationsprotokolls ist nicht erforderlich.
+
+Ebenso besteht derzeit kein Grund, ein proprietäres USB-Protokoll zu reverse engineeren.
+
+### Noch zu verifizieren
+
+- konkrete USB-VID/PID des B04118
+- verwendeter USB-Serial-Chip bzw. Kernel-Treiber
+- erzeugtes Linux-Device
+- stabile USB-Identifikationsmerkmale
+- tatsächliche Geräteadresse der beiden IPP300
+- erfolgreiche Kommunikation mit dem realen Gerät
+- tatsächlich verfügbare `IN_PV_*` Werte des konkreten IPP300
+- Verhalten bei nicht unterstützten Befehlen
+- praktische Antwortzeiten
+- sinnvolles Polling-Intervall für LoggerPi
+- Verhalten bei Kommunikationsunterbrechungen
+- Verhalten bei den dokumentierten `ERR_##` Zuständen
+
+### Ziel des nächsten Tests
+
+Der nächste Test soll einen **read-only Zugriff** auf die Ist-Temperatur demonstrieren:
 
 ```text
-/dev/ttyUSB0 = IPP300-1
-/dev/ttyUSB1 = IPP300-2
+IN_PV_{ADR}1<CR><LF>
 ```
 
-sondern eher:
+mit erwarteter Antwort:
 
 ```text
-MEMMERT device identity
-    ↓
-Geräteadresse / USB-Identität
-    ↓
-stabile LoggerPi device_id
+OK<CR><LF>
+<Temperatur><CR><LF>
 ```
 
-Der konkrete Transport kann dann austauschbar sein:
+Wenn dieser Test erfolgreich ist, ist die technische Grundlage für einen `MemmertAdapter` in LoggerPi-OtterPi gegeben.
+
+### Primärquelle
 
 ```text
-MEMMERT IPP300
-├── serial transport
-├── USB transport
-└── LAN transport
+docs/research/sources/MEMMERT_IPP300_Beschreibung_RS232-2010.pdf
 ```
 
-Das passt grundsätzlich gut zu einer Adapterarchitektur.
-
----
-
-## 21. Vorläufiges Fazit
-
-Die bisherigen Informationen sind sehr vielversprechend.
-
-Besonders wichtig:
-
-1. Die IPP300 besitzen eine dokumentierte PC-Kommunikationsschnittstelle.
-2. CELSIUS kann die IPP300 online anbinden und aktuelle Werte protokollieren.
-3. USB wird von CELSIUS ausdrücklich als Kommunikationsschnittstelle unterstützt.
-4. Die Geräte besitzen eine eigene Kommunikationsadresse von 0–15.
-5. Das MEMMERT-Protokoll ist laut Handbuch nach NAMUR beschrieben.
-6. Die Kommunikation scheint bei CELSIUS aktiv per Polling zu erfolgen.
-7. Ein gefundener Prolific-Treiber macht einen USB-zu-Seriell-Aufbau plausibel.
-8. Falls tatsächlich ein PL2303 verwendet wird, wäre kein proprietäres USB-Reverse-Engineering erforderlich.
-9. Selbst bei einem proprietären USB-Interface wäre eine Protokollanalyse grundsätzlich denkbar.
-10. Für LoggerPi sollte die Geräteidentität nicht vom physischen USB-Port abhängen.
-
-### Noch offen
-
-- Welchen USB-Chip verwendet das konkrete B04118-Modul?
-- Welche VID/PID meldet das Modul?
-- Wird ein `/dev/ttyUSB*` oder `/dev/ttyACM*` erzeugt?
-- Welche seriellen Parameter verwendet die IPP300-Kommunikation?
-- Welche konkreten Requests/Responses verwendet das MEMMERT-Protokoll?
-- Welche Messwerte können abgefragt werden?
-- Wie wird die Geräteadresse im Protokoll übertragen?
-- Welche Geräteadressen haben die beiden vorhandenen IPP300?
-- Gibt es eine USB-Seriennummer?
-- Ist das B04118 tatsächlich nur ein USB-Seriell-Adapter oder enthält es zusätzliche Logik?
-- Ist die AtmoControl/API der bereits vorhandenen MEMMERT-Geräte auch für die IPP300 relevant?
-
-Diese Punkte sollten zunächst empirisch am vorhandenen Gerät geklärt werden.
+**Schnittstellenbeschreibung für MEMMERT-Wärmeschränke mit Temperaturregler der E- oder P-Klasse, Stand April 2011.**
