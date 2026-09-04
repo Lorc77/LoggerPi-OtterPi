@@ -24,10 +24,10 @@ Current device:
     MEMMERT address: 1
 """
 
-import serial
 import time
 from datetime import datetime
 
+import serial
 
 PORT = "/dev/ttyUSB1"
 ADDRESS = "1"
@@ -251,7 +251,7 @@ def main():
         return 1
 
     except serial.SerialException as exc:
-        print(f"FEHLER beim Öffnen/Benutzen der seriellen Schnittstelle:")
+        print("FEHLER beim Öffnen/Benutzen der seriellen Schnittstelle:")
         print(exc)
         return 1
 

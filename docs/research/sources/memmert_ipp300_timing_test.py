@@ -16,10 +16,10 @@ SICHERHEIT:
     Keine Änderung von Sollwerten oder Gerätezuständen.
 """
 
-import serial
 import time
 from datetime import datetime
 
+import serial
 
 PORT = "/dev/ttyUSB1"
 BAUDRATE = 2400
