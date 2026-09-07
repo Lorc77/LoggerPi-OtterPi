@@ -1,0 +1,13 @@
+[Unit]
+Description=Freezer serial logger
+After=default.target
+Wants=default.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/script -q -c "/usr/bin/minicom -C /home/ZOOLOGY-observ/Programs/freezer.log -D /dev/ttyUSB0" /dev/null
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

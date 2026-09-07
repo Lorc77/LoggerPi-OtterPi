@@ -337,6 +337,73 @@ Die konkreten Entwicklungs- und Prüfregeln sind in `docs/development/DEVELOPMEN
 
 ---
 
+## DEC-014 — Stabilisierung des Legacy-Freezer-Loggers über systemd User Service
+
+Status: Angenommen  
+Datum: 2026-09-07
+
+### Kontext
+
+Die Legacy-Freezer-Protokollierung wurde ursprünglich über einen grafischen XDG/LXDE-Autostart mit `lxterminal` und `minicom` betrieben.
+
+Der bisherige Startmechanismus hatte eine unnötige Abhängigkeit von der grafischen Terminalumgebung. Gleichzeitig muss der bestehende Legacy-Freezer-Datenpfad weiterhin zuverlässig betrieben werden, da die Legacy-`observer.py` den aktuellen Freezer-Wert aus `freezer.log` liest.
+
+### Entscheidung
+
+Die kontinuierliche Freezer-Protokollierung wird künftig über einen dedizierten `systemd --user`-Service betrieben.
+
+Der Service lautet:
+
+    `freezer-log.service`
+
+Er wird unter dem Benutzer `ZOOLOGY-observ` betrieben und über `default.target` automatisch gestartet.
+
+`minicom` wird innerhalb einer virtuellen PTY-Umgebung über `/usr/bin/script` ausgeführt.
+
+Der technische Datenpfad lautet:
+
+    `/dev/ttyUSB0`
+          ↓
+       minicom
+          ↓
+     freezer.log
+
+Der bisherige grafische Terminal-Autostart wird nicht mehr als Startmechanismus verwendet.
+
+### Begründung
+
+Der Freezer-Logger benötigt keine grafische Benutzeroberfläche für die eigentliche Datenerfassung.
+
+Die serielle Schnittstelle und `minicom` können als dauerhafter User-Service betrieben werden. Die Verwendung von `script` stellt die von `minicom` benötigte virtuelle Terminalumgebung bereit.
+
+Damit wird die Legacy-Datenerfassung:
+
+  * unabhängig von einem geöffneten Terminalfenster,
+  * unabhängig von einer aktiven LXDE-Terminalsitzung,
+  * automatisch nach einem Reboot gestartet,
+  * über systemd überwacht,
+  * über den normalen User-Service-Mechanismus administrierbar.
+
+Die grafische Umgebung bleibt trotzdem erhalten, da sie weiterhin als lokaler Recovery- und Konfigurationsweg des LoggerPi vorgesehen ist.
+
+### Konsequenzen
+
+Der Freezer-Logger wird nicht mehr über XDG/LXDE-Terminal-Autostart gestartet.
+
+Die bestehende Datei
+
+    `/home/ZOOLOGY-observ/.config/autostart/TerminalAutostart.desktop`
+
+ist kein aktiver Bestandteil des Runtime-Starts mehr.
+
+Der Legacy-Datenpfad über `freezer.log` bleibt unverändert, damit die bestehende `observer.py` weiterhin funktioniert.
+
+Die Entscheidung stellt keine Migration des Freezers in das neue Data Model dar. Sie stabilisiert ausschließlich den bestehenden Legacy-Datenpfad.
+
+Eine spätere vollständige Migration des Freezers soll weiterhin über einen dedizierten Adapter/Reader in das neue Measurement-Modell erfolgen.
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:

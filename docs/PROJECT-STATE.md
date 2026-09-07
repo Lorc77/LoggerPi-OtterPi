@@ -6,7 +6,7 @@
 **Data Model:** v1  
 **Projektphase:** Implementierung / Core Batch v1  
 **Status:** In aktiver Entwicklung  
-**Stand:** 2026-08-30
+**Stand:** 2026-09-07
 
 ---
 
@@ -93,6 +93,8 @@ Der OtterPi bewertet deren fachliche Bedeutung, Health und Zustand.
 - Legacy-`observer.py` wurde im Repository unter `docs/legacy/` dokumentiert
 - aktueller Legacy-`observer.py` wurde zusätzlich als Referenz im Repository hinterlegt
 - reale LoggerPi-Runtime-/Service-Inventur wurde durchgeführt
+- Legacy-Freezer-Logging aus XDG/LXDE-Terminal-Autostart auf einen stabilen `systemd --user`-Service umgestellt
+- Freezer-Logger nach Reboot erfolgreich automatisch gestartet und praktisch verifiziert
 
 ### Aktueller Arbeitspunkt
 
@@ -409,35 +411,83 @@ Die Legacy-Anwendung ist Referenz für den bisherigen Datenpfad, aber nicht das 
 
 Die Legacy-`observer.py` verwendet unter anderem:
 
-- AtmoWEB-Endpunkte
-- CPU-Temperatur
-- CPU-Auslastung
-- Freezer-Log
-- ThingSpeak Bulk Update
+  * AtmoWEB-Endpunkte
+  * CPU-Temperatur
+  * CPU-Auslastung
+  * Freezer-Log
+  * ThingSpeak Bulk Update
 
-Der Freezer wird derzeit über eine serielle Verbindung erfasst.
+Der Freezer wird weiterhin über eine serielle Verbindung erfasst.
 
-`/dev/ttyUSB0` wird aktuell von `minicom` verwendet:
+Das serielle Gerät wird als
 
-```text
-minicom -C /home/ZOOLOGY-observ/Programs/freezer.log
-```
+    `/dev/ttyUSB0`
 
-Das Freezer-Log befindet sich unter:
+bereitgestellt.
 
-```text
-/home/ZOOLOGY-observ/Programs/freezer.log
-```
+Die kontinuierliche Protokollierung erfolgt inzwischen über einen dedizierten `systemd --user`-Service des Benutzerkontos `ZOOLOGY-observ`.
 
-Die bisherige monatliche Archivierung erfolgt über:
+Der aktuelle Runtime-Pfad lautet:
 
-```text
-/home/ZOOLOGY-observ/Programs/backup_log.sh
-```
+    `/dev/ttyUSB0`
+            ↓
+       minicom
+            ↓
+      freezer.log
 
-und einen User-Cronjob.
+Der Service wird über
 
-Diese Legacy-Mechanismen werden nicht automatisch Bestandteil des neuen Core Batch. Sie dienen zunächst als Ist-Zustand und als Quelle für die Ableitung des neuen Datenmodells.
+    `~/.config/systemd/user/freezer-log.service`
+
+definiert und ist als User-Service aktiviert.
+
+Der aktuelle Service verwendet für `minicom` eine virtuelle PTY-Umgebung:
+
+    `/usr/bin/script`
+            ↓
+         minicom
+            ↓
+      `/dev/ttyUSB0`
+
+Die relevante Startzeile lautet sinngemäß:
+
+    `/usr/bin/script -q -c "/usr/bin/minicom -C /home/ZOOLOGY-observ/Programs/freezer.log -D /dev/ttyUSB0" /dev/null`
+
+Die Verwendung von `script` stellt die für `minicom` erforderliche Terminal-/PTY-Umgebung bereit. Dadurch kann der Freezer-Logger als dauerhafter User-Service betrieben werden, ohne dass ein grafisches Terminalfenster oder eine aktive LXDE-Terminalsitzung erforderlich ist.
+
+Der bisherige XDG/LXDE-Terminal-Autostart wurde deaktiviert. Die frühere Datei
+
+    `/home/ZOOLOGY-observ/.config/autostart/TerminalAutostart.desktop`
+
+wird nicht mehr als aktiver Startmechanismus verwendet.
+
+Die grafische Umgebung selbst bleibt weiterhin Bestandteil der LoggerPi-Installation. Sie dient als lokaler Recovery- und Konfigurationsweg und ist nicht Voraussetzung für den Betrieb des Freezer-Loggers.
+
+Das Freezer-Log befindet sich weiterhin unter:
+
+    `/home/ZOOLOGY-observ/Programs/freezer.log`
+
+Die Legacy-`observer.py` liest weiterhin den jeweils neuesten Freezer-Wert aus dieser Datei.
+
+Damit besteht weiterhin folgende fachliche Abhängigkeit:
+
+    serielles Gerät /dev/ttyUSB0
+             |
+             v
+          minicom
+             |
+             v
+        freezer.log
+             |
+             v
+      Legacy observer.py
+             |
+             v
+         ThingSpeak
+
+Der technische Startmechanismus des Freezer-Loggers ist damit nicht mehr an eine grafische Terminalanwendung gebunden.
+
+Die Freezer-Datenquelle selbst bleibt weiterhin eine Legacy-Datenquelle und wird erst durch einen ausdrücklichen neuen Freezer-Adapter in das neue Datenmodell abgelöst.
 
 ---
 

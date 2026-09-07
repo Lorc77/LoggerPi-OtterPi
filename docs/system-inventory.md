@@ -178,35 +178,29 @@ SMSC9514 USB Hub
 
 Das FTDI-Gerät wird als
 
-```text
-/dev/ttyUSB0
-```
+    `/dev/ttyUSB0`
 
 bereitgestellt.
 
-Es wird aktuell aktiv von der Legacy-Freezer-Protokollierung verwendet.
+Die Schnittstelle ist die serielle Datenquelle des Freezers.
 
-Aktueller Prozess:
+Der aktuelle Logger-Prozess ist nicht mehr an ein grafisches Terminal gebunden. Die serielle Freezer-Protokollierung wird über einen dedizierten User-Service betrieben:
 
-```text
-minicom -C /home/ZOOLOGY-observ/Programs/freezer.log
-```
+    `freezer-log.service`
 
-PID zum Zeitpunkt der Inventarisierung:
+Der Runtime-Pfad lautet:
 
-```text
-1349
-```
+    `/dev/ttyUSB0`
+            ↓
+         minicom
+            ↓
+      freezer.log
 
-Das Gerät ist damit aktuell wie folgt belegt:
+Der Service läuft unter dem Benutzer `ZOOLOGY-observ` und wird über systemd User Units verwaltet.
 
-```text
-/dev/ttyUSB0 -> minicom -> freezer.log
-```
+Die frühere XDG/LXDE-Autostart-Lösung über `lxterminal` wurde deaktiviert.
 
-Dies ist eine wichtige Legacy-Abhängigkeit und darf nicht entfernt oder für
-andere Zwecke verwendet werden, ohne zuvor die serielle Datenquelle des
-Freezers ausdrücklich zu migrieren.
+Die serielle Schnittstelle darf weiterhin nicht für andere Anwendungen verwendet werden, solange die Freezer-Datenquelle noch über diesen Legacy-Datenpfad betrieben wird.
 
 ---
 
@@ -214,48 +208,78 @@ Freezers ausdrücklich zu migrieren.
 
 Der Legacy-Freezer-Logger schreibt nach:
 
-```text
-/home/ZOOLOGY-observ/Programs/freezer.log
-```
+    `/home/ZOOLOGY-observ/Programs/freezer.log`
 
-Aktuelle Datei:
+Die serielle Quelle ist:
 
-```text
--rw-r--r-- 1 ZOOLOGY-observ ZOOLOGY-observ ...
-```
+    `/dev/ttyUSB0`
 
-Zuletzt beobachtete Werte:
+Der Logger wird inzwischen über einen dedizierten `systemd --user`-Service gestartet:
 
-```text
-- 80 C
-- 80 C
-- 82 C
-- 82 C
-```
+    `freezer-log.service`
 
-Die Legacy-`observer.py` liest den jeweils neuesten Freezer-Wert aus dieser
-Datei.
+Service-Datei:
 
-Damit besteht folgende direkte Abhängigkeit:
+    `/home/ZOOLOGY-observ/.config/systemd/user/freezer-log.service`
 
-```text
-serielles Gerät /dev/ttyUSB0
-         |
-         v
+In /docs/baseline/freezer-log.service findet sich zur Dokumentation eine Kopie der aktuell produktiv laufenden Service-Datei.
+
+Der Service ist für den Benutzer `ZOOLOGY-observ` aktiviert und startet automatisch über:
+
+    `default.target`
+
+Der technische Runtime-Pfad lautet:
+
+    systemd --user
+          |
+          v
+    freezer-log.service
+          |
+          v
+       script
+          |
+          v
       minicom
-         |
-         v
-    freezer.log
-         |
-         v
-  Legacy observer.py
-         |
-         v
-     ThingSpeak
-```
+          |
+          v
+     /dev/ttyUSB0
+          |
+          v
+     freezer.log
 
-Diese Abhängigkeit soll erhalten bleiben, bis die Freezer-Datenquelle
-ausdrücklich in das neue Datenmodell migriert wurde.
+Für `minicom` wird `/usr/bin/script` verwendet, um eine virtuelle PTY-/Terminalumgebung bereitzustellen. Dadurch kann `minicom` als dauerhafter systemd User-Service betrieben werden, obwohl kein grafisches Terminalfenster geöffnet sein muss.
+
+Die bisherige XDG-Autostart-Datei
+
+    `/home/ZOOLOGY-observ/.config/autostart/TerminalAutostart.desktop`
+
+wurde deaktiviert und ist nicht mehr der aktive Startmechanismus.
+
+Die grafische Umgebung bleibt davon unabhängig erhalten. Sie wird weiterhin als lokaler Recovery- und Konfigurationsweg benötigt, ist aber für die kontinuierliche Freezer-Protokollierung nicht erforderlich.
+
+Die Legacy-`observer.py` liest weiterhin den jeweils neuesten Freezer-Wert aus:
+
+    `/home/ZOOLOGY-observ/Programs/freezer.log`
+
+Damit bleibt folgende fachliche Abhängigkeit bestehen:
+
+    serielles Gerät
+          |
+          v
+      minicom
+          |
+          v
+    freezer.log
+          |
+          v
+    observer.py
+          |
+          v
+    ThingSpeak
+
+Der neue systemd-basierte Startmechanismus ändert nicht die fachliche Legacy-Datenquelle. Er macht deren Betrieb lediglich unabhängig von einer aktiven grafischen Terminal-Sitzung und stellt einen reproduzierbaren automatischen Start nach einem Reboot sicher.
+
+Der Freezer-Logger bleibt bis zur ausdrücklichen Migration auf einen neuen Freezer-Adapter Bestandteil des Legacy-Datenpfades.
 
 ---
 
