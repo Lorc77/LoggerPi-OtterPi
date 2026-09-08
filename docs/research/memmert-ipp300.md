@@ -56,6 +56,70 @@ Die vollständige Herstellerbefehlsliste bleibt als Research-Dokumentation erhal
 
 ---
 
+### Neue Erkenntnisse zur Linux-USB-Identität (2026-09-08)
+
+Die Linux-seitige USB-Erkennung der beiden tatsächlich vorhandenen
+MEMMERT-IPPs wurde inzwischen praktisch vollständig untersucht.
+
+Beide MEMMERT-Verbindungen erscheinen als Prolific USB-Serial-Geräte:
+
+```text
+Vendor:      Prolific Technology Inc.
+VID:         067b
+Product:     USB-Serial Controller
+PID:         2303
+Driver:      pl2303
+```
+
+Beide Adapter besitzen in der untersuchten Linux-Enumeration keine
+individuelle `ID_SERIAL_SHORT`.
+
+Die beiden Adapter sind daher nicht anhand einer individuellen
+USB-Seriennummer unterscheidbar.
+
+Sie lassen sich jedoch eindeutig anhand ihrer physischen USB-Topologie
+am LoggerPi unterscheiden:
+
+```text
+1-1.4 -> /dev/ttyUSB1 -> MEMMERT-Adresse 1 -> 14,1 °C
+1-1.5 -> /dev/ttyUSB2 -> MEMMERT-Adresse 2 -> 24,0 °C
+```
+
+Für den späteren LoggerPi-Dauerbetrieb wurden deshalb stabile udev-
+Symlinks eingerichtet:
+
+```text
+/dev/memmert_ipp300_links
+/dev/memmert_ipp300_rechts
+```
+
+Die aktuelle Zuordnung lautet:
+
+```text
+/dev/memmert_ipp300_links
+    -> USB topology 1-1.4
+    -> aktuell /dev/ttyUSB1
+    -> MEMMERT-Adresse 1
+    -> IPP300 links
+    -> 14,1 °C
+
+/dev/memmert_ipp300_rechts
+    -> USB topology 1-1.5
+    -> aktuell /dev/ttyUSB2
+    -> MEMMERT-Adresse 2
+    -> IPP300 rechts
+    -> 24,0 °C
+```
+
+Die vollständige Linux-seitige Untersuchung ist separat dokumentiert
+unter:
+
+```text
+docs/research/memmert-ipp300-linux-usb-identity.md
+```
+
+---
+
 ## 1. Vorhandene Ausstattung
 
 Bei den vorhandenen IPP300 ist ein **MEMMERT USB Interface Module B04118** verbaut.
@@ -708,52 +772,86 @@ B04118
 Host / Raspberry Pi
 ```
 
-### 12.1 Noch offene USB-Frage
+### 12.1 Linux-Enumeration des B04118 – praktisch verifiziert
 
-Noch nicht geklärt ist, wie sich das B04118 konkret am Linux-Host präsentiert.
+Die Linux-Enumeration der beiden tatsächlich vorhandenen MEMMERT-
+Verbindungen wurde am 2026-09-08 untersucht.
 
-Insbesondere müssen noch ermittelt werden:
+Beide Interfaces erscheinen als Prolific USB-Serial-Controller:
 
-- USB Vendor ID (VID)
-- USB Product ID (PID)
-- Manufacturer
-- Product
-- Serial Number, falls vorhanden
-- USB Interface Class
-- Interface/Subclass/Protocol
-- Kernel-Treiber
-- erzeugtes `/dev/tty*`-Device
-- stabile udev-Eigenschaften
+| Eigenschaft | Wert |
+|---|---|
+| Manufacturer | Prolific Technology Inc. |
+| Product | USB-Serial Controller |
+| VID | `067b` |
+| PID | `2303` |
+| Kernel-Treiber | `pl2303` |
+| USB Speed | 12 Mbit/s |
+| USB Version | 1.10 |
 
-### 12.2 PL2303-Hypothese
+Eine individuelle `ID_SERIAL_SHORT` wird bei den beiden Geräten nicht
+bereitgestellt.
 
-In der ursprünglichen Untersuchung wurde ein Prolific-USB-Seriell-Treiber gefunden, unter anderem mit Unterstützung für:
+Damit ist die Kombination aus Hersteller und VID/PID nicht ausreichend,
+um die beiden Adapter voneinander zu unterscheiden.
 
-```text
-VID_067B&PID_2303
-"Prolific USB-to-Serial Comm Port"
-```
-
-sowie:
+Die eindeutige Unterscheidung erfolgt derzeit über die physische
+USB-Topologie des LoggerPi:
 
 ```text
-VID_067B&PID_2304
-"Prolific USB-to-Serial Comm Port"
+1-1.4 -> /dev/ttyUSB1 -> MEMMERT 1
+1-1.5 -> /dev/ttyUSB2 -> MEMMERT 2
 ```
 
-Daraus entstand die Hypothese, dass das B04118 möglicherweise einen PL2303 oder einen ähnlichen USB-Serial-Chip verwendet.
-
-Diese Hypothese ist **nicht durch MEMMERT bestätigt**.
-
-Die Herstellerinformation bestätigt lediglich die Funktion:
+Die entsprechenden stabilen udev-Namen sind:
 
 ```text
-RS-232 → USB
+/dev/memmert_ipp300_links
+/dev/memmert_ipp300_rechts
 ```
 
-Der konkrete USB-Controller bleibt zu verifizieren.
+Die vollständigen Linux-Details sind in
+`docs/research/memmert-ipp300-linux-usb-identity.md` dokumentiert.
 
-Daher darf die PL2303-Annahme nicht als Grundlage der Implementierung verwendet werden.
+### 12.2 Schlussfolgerung zur B04118-Identifikation
+
+Die ursprüngliche offene Frage, ob das B04118 am Linux-Host als
+USB-Serial-Gerät erscheint, ist beantwortet.
+
+Das reale Gerät wird als USB-Serial-Gerät erkannt und kann direkt über
+das Linux-Seriell-Subsystem angesprochen werden.
+
+Die praktische Kette lautet:
+
+```text
+IPP300 Controller
+    │
+    │ RS-232
+    ▼
+B04118
+    │
+    │ USB
+    ▼
+Prolific USB-Serial Controller
+    │
+    │ pl2303
+    ▼
+Linux /dev/ttyUSB*
+    │
+    ▼
+udev-stabiler Gerätename
+```
+
+Ein Reverse Engineering eines proprietären USB-Protokolls ist für die
+vorhandene Hardware daher nicht erforderlich.
+
+Die PL2303-Eigenschaft ist jetzt keine reine historische Hypothese
+mehr, sondern wurde am realen LoggerPi über `udevadm` praktisch
+verifiziert.
+
+Sie sollte jedoch weiterhin nicht mit einer individuellen Geräte-ID
+verwechselt werden: Beide vorhandenen Adapter besitzen dieselben
+USB-Identifikationswerte und keine individuelle USB-Seriennummer.
 
 ---
 
@@ -782,50 +880,105 @@ Die PL2303-Hypothese ist deshalb derzeit lediglich historischer Recherchekontext
 
 ## 14. USB-Portabhängigkeit und Geräteidentität
 
-Die Linux-Gerätenamen `/dev/ttyUSB0`, `/dev/ttyUSB1` usw. dürfen nicht als alleinige Geräteidentität verwendet werden.
+Die Linux-Gerätenamen `/dev/ttyUSB0`, `/dev/ttyUSB1` usw. dürfen nicht
+als alleinige Geräteidentität verwendet werden.
 
-Unter Linux können sich diese Namen abhängig von Enumeration und Anschlussreihenfolge ändern.
+Unter Linux können sich diese Namen abhängig von Enumeration und
+Anschlussreihenfolge ändern.
 
-Nicht ideal:
+Für die beiden tatsächlich vorhandenen MEMMERT-USB-Adapter wurde
+untersucht, ob eine individuelle USB-Seriennummer oder andere
+geräteindividuelle USB-Kennung vorhanden ist.
+
+Ergebnis:
 
 ```text
-/dev/ttyUSB0 = IPP300-1
-/dev/ttyUSB1 = IPP300-2
+MEMMERT links:
+    VID  = 067b
+    PID  = 2303
+    Serial Short = nicht vorhanden
+
+MEMMERT rechts:
+    VID  = 067b
+    PID  = 2303
+    Serial Short = nicht vorhanden
 ```
 
-Besser ist eine Identifikation über stabile Eigenschaften.
+Beide Adapter sind damit auf USB-Geräteebene anhand dieser Merkmale
+identisch.
 
-Mögliche Ebenen:
+Die praktische Unterscheidung erfolgt deshalb über die physische
+USB-Topologie des Raspberry Pi.
 
-```text
-USB-Geräteidentität
-+
-MEMMERT-Geräteadresse
-+
-LoggerPi device_id
-```
-
-Beispiel:
+### Aktuelle Zuordnung
 
 ```text
-USB-Gerät A
-    -> MEMMERT
-    -> Adresse 3
-    -> IPP300
+USB topology 1-1.4
+    ↓
+/dev/ttyUSB1
+    ↓
+MEMMERT-Adresse 1
+    ↓
+IPP300 links
+    ↓
+/dev/memmert_ipp300_links
 ```
 
 und:
 
 ```text
-USB-Gerät B
-    -> MEMMERT
-    -> Adresse 7
-    -> IPP300
+USB topology 1-1.5
+    ↓
+/dev/ttyUSB2
+    ↓
+MEMMERT-Adresse 2
+    ↓
+IPP300 rechts
+    ↓
+/dev/memmert_ipp300_rechts
 ```
 
-Damit kann die logische Geräteidentität unabhängig vom physischen USB-Port aufgebaut werden.
+Die verwendeten udev-Regeln sind:
 
-Falls das B04118 keine USB-Seriennummer bereitstellt, muss die stabile Host-seitige Zuordnung über udev bzw. andere USB-Gerätemerkmale erfolgen.
+```text
+SUBSYSTEM=="tty", KERNEL=="ttyUSB*", KERNELS=="1-1.4", SYMLINK+="memmert_ipp300_links"
+SUBSYSTEM=="tty", KERNEL=="ttyUSB*", KERNELS=="1-1.5", SYMLINK+="memmert_ipp300_rechts"
+```
+
+Damit wird die aktuelle physische Verdrahtung stabil und unabhängig
+von der jeweiligen `ttyUSB`-Nummer abgebildet.
+
+### Einschränkung
+
+Diese Identifikation ist portstabil, nicht adapterstabil.
+
+Wenn ein Adapter von `1-1.4` auf `1-1.5` umgesteckt wird, würde die
+bisherige logische Zuordnung ebenfalls wechseln.
+
+Daher gilt für die LoggerPi-Hardware:
+
+> Die beiden MEMMERT-Adapter sollen nach Einrichtung der udev-Zuordnung
+> nicht zwischen den definierten USB-Buchsen vertauscht werden.
+
+Die MEMMERT-Geräteadresse stellt eine zusätzliche logische Identität
+dar:
+
+```text
+USB-Port / udev
+        +
+MEMMERT-Adresse
+        +
+LoggerPi device_id
+```
+
+Damit kann der LoggerPi sowohl den Transportweg als auch das logisch
+angesprochene MEMMERT-Gerät eindeutig konfigurieren.
+
+Die vollständige Hardware-/udev-Untersuchung ist dokumentiert unter:
+
+```text
+docs/research/memmert-ipp300-linux-usb-identity.md
+```
 
 ---
 
@@ -1041,16 +1194,20 @@ Folgende Punkte sind inzwischen praktisch nachgewiesen:
 
 ### 20.2 Noch offen
 
-Für die eigentliche LoggerPi-Integration sind noch folgende Punkte relevant:
+Für die eigentliche LoggerPi-Integration sind noch folgende Punkte
+relevant:
 
-- zweites IPP300 separat identifizieren
-- Geräteadresse des zweiten IPP300 verifizieren
-- stabile USB-/udev-Zuordnung für beide Geräte festlegen
 - Kommunikationsfehler und `ERR_##` sauber im Adapter behandeln
 - Verhalten bei Verbindungsunterbrechungen definieren
 - geeignetes Polling-Intervall für LoggerPi festlegen
 - `MemmertAdapter` implementieren
 - Logging und Normalisierung der vier relevanten Werte definieren
+- Integration in den bestehenden Core-Batch-/Queue-/Delivery-Pfad
+  praktisch verifizieren
+
+Die Identifikation des zweiten IPP300, seine MEMMERT-Adresse sowie die
+stabile Linux-seitige udev-Zuordnung sind inzwischen praktisch
+verifiziert und daher nicht mehr offen.
 
 ### 20.3 Nicht Bestandteil der aktuellen Untersuchung
 
@@ -1131,17 +1288,46 @@ Die vollständige Herstellerbefehlsliste bleibt in der Research-Dokumentation er
 
 ### Vorgesehene Gerätekonfiguration
 
-Beispiel:
+Die beiden vorhandenen IPP300 sollen über die stabilen udev-Namen
+angesprochen werden.
 
 ```yaml
 memmert:
-  port: /dev/ttyUSB1
-  address: 1
+  devices:
+    - id: memmert_ipp300_links
+      port: /dev/memmert_ipp300_links
+      address: 1
+
+    - id: memmert_ipp300_rechts
+      port: /dev/memmert_ipp300_rechts
+      address: 2
 ```
 
-Langfristig sollte die Portzuordnung nicht ausschließlich auf `/dev/ttyUSB1` basieren, sondern über stabile USB-/udev-Eigenschaften abgesichert werden.
+Dabei haben die beiden Ebenen unterschiedliche Aufgaben:
 
-Die MEMMERT-Geräteadresse kann zusätzlich als logische Geräteidentifikation verwendet werden.
+- `id` ist die LoggerPi-seitige logische Geräteidentität.
+- `port` identifiziert den stabilen Linux-Gerätepfad.
+- `address` ist die logische MEMMERT-Geräteadresse innerhalb des
+  MEMMERT-Protokolls.
+
+Aktuelle Zuordnung:
+
+```text
+memmert_ipp300_links
+    port: /dev/memmert_ipp300_links
+    address: 1
+    USB topology: 1-1.4
+    aktueller Testwert: 14,1 °C
+
+memmert_ipp300_rechts
+    port: /dev/memmert_ipp300_rechts
+    address: 2
+    USB topology: 1-1.5
+    aktueller Testwert: 24,0 °C
+```
+
+Die Anwendung soll nicht von `/dev/ttyUSB1` oder `/dev/ttyUSB2`
+abhängen.
 
 ---
 
@@ -1228,12 +1414,33 @@ Die technische Untersuchung hat damit den Punkt erreicht, an dem die Implementie
 
 ### Noch offen
 
-- zweites IPP300 identifizieren
-- Adresse des zweiten Gerätes verifizieren
-- stabile USB-/udev-Zuordnung definieren
 - Fehler- und Disconnect-Handling implementieren
 - Polling-Intervall festlegen
 - Adapter in LoggerPi integrieren
+- Normalisierung der MEMMERT-Werte in das gemeinsame Measurement-Modell
+- praktischen End-to-End-Betrieb testen
+
+### Inzwischen zusätzlich verifiziert
+
+- zweites IPP300 wurde eindeutig identifiziert
+- zweites IPP300 verwendet MEMMERT-Adresse `2`
+- erstes IPP300 verwendet MEMMERT-Adresse `1`
+- `/dev/ttyUSB1` entspricht aktuell dem physischen USB-Pfad `1-1.4`
+- `/dev/ttyUSB2` entspricht aktuell dem physischen USB-Pfad `1-1.5`
+- beide USB-Adapter sind Prolific `067b:2303`
+- beide Adapter besitzen keine individuelle `ID_SERIAL_SHORT`
+- stabile udev-Symlinks wurden eingerichtet
+- `/dev/memmert_ipp300_links` verweist aktuell auf `/dev/ttyUSB1`
+- `/dev/memmert_ipp300_rechts` verweist aktuell auf `/dev/ttyUSB2`
+- die Zuordnung wurde mit `readlink -f` verifiziert
+- der physische USB-Port ist damit als Host-seitige Identifikation
+  der beiden aktuell fest verdrahteten Adapter dokumentiert
+
+Die detaillierte Linux-/udev-Untersuchung befindet sich unter:
+
+```text
+docs/research/memmert-ipp300-linux-usb-identity.md
+```
 
 ### Primärquelle
 

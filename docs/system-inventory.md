@@ -204,6 +204,93 @@ Die serielle Schnittstelle darf weiterhin nicht für andere Anwendungen verwende
 
 ---
 
+### 5.1 MEMMERT IPP300 – serielle USB-Verbindungen
+
+Auf dem LoggerPi sind zwei MEMMERT IPP300 über USB-Seriell-Adapter
+angeschlossen.
+
+Beide Adapter werden als Prolific USB-Serial Controller erkannt:
+
+```text
+Vendor:  Prolific Technology Inc.
+VID:     067b
+PID:     2303
+Driver:  pl2303
+```
+
+Die beiden Adapter besitzen keine individuelle USB-Seriennummer.
+
+Die physische Zuordnung erfolgt deshalb über die USB-Porttopologie.
+
+| Funktion | USB-Pfad | aktuelles Device | stabiler udev-Pfad | MEMMERT-Adresse |
+|---|---|---|---|---:|
+| IPP300 links | `1-1.4` | `/dev/ttyUSB1` | `/dev/memmert_ipp300_links` | `1` |
+| IPP300 rechts | `1-1.5` | `/dev/ttyUSB2` | `/dev/memmert_ipp300_rechts` | `2` |
+
+Die aktuelle praktische Verifikation ergab:
+
+```text
+IPP300 links:
+    /dev/memmert_ipp300_links
+    MEMMERT address 1
+    Testwert: 14,1 °C
+
+IPP300 rechts:
+    /dev/memmert_ipp300_rechts
+    MEMMERT address 2
+    Testwert: 24,0 °C
+```
+
+Die verwendeten udev-Symlinks sind:
+
+```text
+/dev/memmert_ipp300_links
+/dev/memmert_ipp300_rechts
+```
+
+Die beiden Adapter sollen für die bestehende Verdrahtung nicht
+zwischen den definierten USB-Buchsen vertauscht werden.
+
+Eine Änderung der physischen USB-Buchse würde die Zuordnung der
+portbasierten udev-Namen verändern und muss anschließend erneut
+dokumentiert bzw. angepasst werden.
+
+Die vollständige Untersuchung ist unter
+`docs/research/memmert-ipp300-linux-usb-identity.md` dokumentiert.
+
+---
+
+### 5.2 Freezer – stabile USB-Identität
+
+Der vorhandene Freezer verwendet einen FTDI FT232R USB-UART-Adapter.
+
+Der Adapter besitzt eine individuelle Seriennummer:
+
+```text
+A9NX8YRE
+```
+
+Der stabile Linux-Pfad lautet:
+
+```text
+/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A9NX8YRE-if00-port0
+```
+
+Dieser Pfad basiert auf der USB-Geräteidentität einschließlich der
+Seriennummer und ist daher nicht an eine bestimmte `ttyUSB`-Nummer
+gebunden.
+
+Das aktuelle dynamische Device `/dev/ttyUSB0` kann sich bei einer
+anderen Enumeration ändern. Der `by-id`-Pfad bleibt dagegen für
+diesen konkreten Adapter grundsätzlich identisch, solange der
+Adapter selbst derselbe bleibt.
+
+Für eine spätere Migration des Freezer-Readers sollte daher der
+seriennummernbasierte `by-id`-Pfad bzw. ein darauf basierender udev-
+Alias verwendet werden.
+
+---
+
 ## 6. Legacy-Freezer-Logger
 
 Der Legacy-Freezer-Logger schreibt nach:
