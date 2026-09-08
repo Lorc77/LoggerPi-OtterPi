@@ -71,17 +71,13 @@ REQUEST_DELAY = 0.2
 # ---------------------------------------------------------------------------
 
 COMMANDS = [
-
     # -----------------------------------------------------------------------
     # Operating mode
     # -----------------------------------------------------------------------
-
     ("IN_MODE_{addr}0", "Betriebsart"),
-
     # -----------------------------------------------------------------------
     # Configuration parameters
     # -----------------------------------------------------------------------
-
     ("IN_PAR_{addr}1", "Reglerauflösung"),
     ("IN_PAR_{addr}4", "Luftklappensteuerung"),
     ("IN_PAR_{addr}5", "Luftturbine"),
@@ -90,11 +86,9 @@ COMMANDS = [
     ("IN_PAR_{addr}8", "Schaltkontakt 3"),
     ("IN_PAR_{addr}9", "2. Temperatur vorhanden"),
     ("IN_PAR_{addr}A", "Druck/Vakuum vorhanden"),
-
     # -----------------------------------------------------------------------
     # Actual values
     # -----------------------------------------------------------------------
-
     ("IN_PV_{addr}1", "Ist-Temperatur"),
     ("IN_PV_{addr}2", "CO2-Istwert"),
     ("IN_PV_{addr}3", "rh-Istwert"),
@@ -103,11 +97,9 @@ COMMANDS = [
     ("IN_PV_{addr}B", "3. Ist-Temperatur"),
     ("IN_PV_{addr}C", "4. Ist-Temperatur"),
     ("IN_PV_{addr}D", "O2-Istwert"),
-
     # -----------------------------------------------------------------------
     # Setpoints
     # -----------------------------------------------------------------------
-
     ("IN_SP_{addr}1", "Temperatur-Sollwert"),
     ("IN_SP_{addr}2", "CO2-Sollwert"),
     ("IN_SP_{addr}3", "rh-Sollwert"),
@@ -121,6 +113,7 @@ COMMANDS = [
 # ---------------------------------------------------------------------------
 # Serial communication
 # ---------------------------------------------------------------------------
+
 
 def open_serial(port):
     """Open a MEMMERT serial connection."""
@@ -187,9 +180,7 @@ def clean_response(raw):
 
     return [
         line.strip()
-        for line in text.replace("\r\n", "\n")
-        .replace("\r", "\n")
-        .split("\n")
+        for line in text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
         if line.strip()
     ]
 
@@ -197,6 +188,7 @@ def clean_response(raw):
 # ---------------------------------------------------------------------------
 # Human-readable interpretation
 # ---------------------------------------------------------------------------
+
 
 def interpret(command, lines):
     """
@@ -218,7 +210,6 @@ def interpret(command, lines):
             return "REMOTE / Schnittstellenbetrieb"
 
     if command.startswith("IN_PAR_") and len(lines) >= 2:
-
         parameter_binary = {
             "4": "Luftklappensteuerung",
             "5": "Luftturbine",
@@ -265,6 +256,7 @@ def interpret(command, lines):
 # Address scan
 # ---------------------------------------------------------------------------
 
+
 def scan_addresses(port):
     """
     Test all possible MEMMERT addresses using IN_PV_{ADDR}1.
@@ -282,17 +274,14 @@ def scan_addresses(port):
 
     try:
         with open_serial(port) as ser:
-
             print("Serielle Schnittstelle geöffnet.")
             print()
 
             for address in ADDRESSES:
-
                 command = f"IN_PV_{address}1"
 
                 print(
-                    f"  Teste Adresse {address}: "
-                    f"{command} ... ",
+                    f"  Teste Adresse {address}: {command} ... ",
                     end="",
                     flush=True,
                 )
@@ -331,15 +320,11 @@ def scan_addresses(port):
         print(f"Gefundene MEMMERT-Adresse(n) auf {port}:")
 
         for device in found:
-
             lines = device["lines"]
 
             value = lines[1] if len(lines) >= 2 else "?"
 
-            print(
-                f"  Adresse {device['address']} "
-                f"-> IN_PV = {value} °C"
-            )
+            print(f"  Adresse {device['address']} -> IN_PV = {value} °C")
 
     else:
         print(f"Keine antwortenden MEMMERT-Geräte auf {port}.")
@@ -351,6 +336,7 @@ def scan_addresses(port):
 # Complete inventory for one device
 # ---------------------------------------------------------------------------
 
+
 def inventory_device(port, address):
     """
     Query every documented read-only IN_* command for one device.
@@ -359,24 +345,18 @@ def inventory_device(port, address):
     print()
     print()
     print("=" * 72)
-    print(
-        f"VOLLSTÄNDIGE DETAILINVENTUR: "
-        f"{port} / Adresse {address}"
-    )
+    print(f"VOLLSTÄNDIGE DETAILINVENTUR: {port} / Adresse {address}")
     print("=" * 72)
     print()
 
     results = []
 
     try:
-
         with open_serial(port) as ser:
-
             print("Serielle Schnittstelle geöffnet.")
             print()
 
             for template, description in COMMANDS:
-
                 command = template.format(addr=address)
 
                 print(f"  -> Sende: {command}")
@@ -388,10 +368,7 @@ def inventory_device(port, address):
 
                 if raw:
                     print(f"     Rohdaten    : {raw!r}")
-                    print(
-                        "     Rohdaten HEX: "
-                        + " ".join(f"{b:02x}" for b in raw)
-                    )
+                    print("     Rohdaten HEX: " + " ".join(f"{b:02x}" for b in raw))
                 else:
                     print("     Rohdaten    : <keine Antwort>")
 
@@ -431,6 +408,7 @@ def inventory_device(port, address):
 # Summary
 # ---------------------------------------------------------------------------
 
+
 def print_device_summary(port, address, results):
     """Print a compact summary of all responses."""
 
@@ -441,7 +419,6 @@ def print_device_summary(port, address, results):
     print()
 
     for result in results:
-
         status = "OK" if result["lines"] else "NO RESPONSE"
 
         print(
@@ -456,6 +433,7 @@ def print_device_summary(port, address, results):
 # Main
 # ---------------------------------------------------------------------------
 
+
 def main():
 
     print()
@@ -464,10 +442,7 @@ def main():
     print("=" * 72)
     print()
 
-    print(
-        f"Zeitpunkt : "
-        f"{datetime.now().isoformat(timespec='seconds')}"
-    )
+    print(f"Zeitpunkt : {datetime.now().isoformat(timespec='seconds')}")
 
     print(f"Ports     : {', '.join(PORTS)}")
     print(f"Baudrate  : {BAUDRATE}")
@@ -495,11 +470,9 @@ def main():
     devices = []
 
     for port in PORTS:
-
         found = scan_addresses(port)
 
         for device in found:
-
             devices.append(
                 {
                     "port": port,
@@ -519,15 +492,12 @@ def main():
     all_results = []
 
     if not devices:
-
         print()
         print("Keine MEMMERT-Geräte gefunden.")
         print()
 
     else:
-
         for device in devices:
-
             port = device["port"]
             address = device["address"]
 
@@ -562,24 +532,17 @@ def main():
     print()
 
     if not all_results:
-
         print("Keine Geräte gefunden.")
 
     else:
-
         for device in all_results:
-
-            print(
-                f"{device['port']} / "
-                f"MEMMERT-Adresse {device['address']}"
-            )
+            print(f"{device['port']} / MEMMERT-Adresse {device['address']}")
 
             successful = 0
             errors = 0
             no_response = 0
 
             for result in device["results"]:
-
                 lines = result["lines"]
 
                 if not lines:
@@ -591,17 +554,11 @@ def main():
                 else:
                     successful += 1
 
-            print(
-                f"  Erfolgreiche Antworten : {successful}"
-            )
+            print(f"  Erfolgreiche Antworten : {successful}")
 
-            print(
-                f"  ERR-Antworten           : {errors}"
-            )
+            print(f"  ERR-Antworten           : {errors}")
 
-            print(
-                f"  Keine Antwort           : {no_response}"
-            )
+            print(f"  Keine Antwort           : {no_response}")
 
             print()
 
