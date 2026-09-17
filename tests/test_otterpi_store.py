@@ -66,3 +66,15 @@ def test_batch_store_rejects_same_sequence_with_different_batch_id(tmp_path):
     )
 
     assert store.store(conflicting_batch) == "conflict"
+
+
+def test_batch_store_uses_wal(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+
+    with store._connect() as connection:
+        journal_mode = connection.execute("PRAGMA journal_mode").fetchone()[0]
+
+        synchronous = connection.execute("PRAGMA synchronous").fetchone()[0]
+
+    assert journal_mode.lower() == "wal"
+    assert synchronous == 1
