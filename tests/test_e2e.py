@@ -9,28 +9,15 @@ from loggerpi_otterpi.batch_factory import SequenceStore
 from loggerpi_otterpi.composer import compose_batch
 from loggerpi_otterpi.delivery import BatchDelivery
 from loggerpi_otterpi.model.measurement import Measurement
+from loggerpi_otterpi.otterpi import create_server
+from loggerpi_otterpi.otterpi_store import BatchStore
 from loggerpi_otterpi.queue import BatchQueue
 from loggerpi_otterpi.queue_delivery import deliver_pending
 
 
 def test_measurement_batch_queue_http_e2e(tmp_path: Path) -> None:
-    received = {}
-
-    class Handler(BaseHTTPRequestHandler):
-        def do_POST(self):
-            length = int(self.headers["Content-Length"])
-            body = self.rfile.read(length)
-
-            received["path"] = self.path
-            received["body"] = json.loads(body.decode("utf-8"))
-
-            self.send_response(202)
-            self.end_headers()
-
-        def log_message(self, format, *args):
-            pass
-
-    server = HTTPServer(("127.0.0.1", 0), Handler)
+    store = BatchStore(tmp_path / "otter.db")
+    server = create_server("127.0.0.1", 0, store)
     thread = Thread(target=server.serve_forever)
     thread.start()
 
@@ -43,7 +30,7 @@ def test_measurement_batch_queue_http_e2e(tmp_path: Path) -> None:
             source="test-reader",
         )
 
-        store = SequenceStore(tmp_path / "sequence")
+        sequence_store = SequenceStore(tmp_path / "sequence")
         queue = BatchQueue(tmp_path / "queue.jsonl")
 
         with patch(
@@ -76,7 +63,7 @@ def test_measurement_batch_queue_http_e2e(tmp_path: Path) -> None:
         ):
             batch = compose_batch(
                 "logger-001",
-                store,
+                sequence_store,
                 measurements={"temperature": measurement},
             )
 
@@ -87,10 +74,12 @@ def test_measurement_batch_queue_http_e2e(tmp_path: Path) -> None:
         assert deliver_pending(queue, delivery) == 1
         assert queue.pending() == []
 
-        assert received["path"] == "/api/v1/batches"
-        assert received["body"] == batch.to_dict()
-        assert received["body"]["measurements"]["temperature"]["value"] == 21.5
-        assert received["body"]["measurements"]["temperature"]["unit"] == "°C"
+        stored = store.get(batch.batch_id)
+
+        assert stored is not None
+        assert stored.to_dict() == batch.to_dict()
+        assert stored.measurements["temperature"].value == 21.5
+        assert stored.measurements["temperature"].unit == "°C"
     finally:
         server.shutdown()
         thread.join()
@@ -174,7 +163,7 @@ def test_atmoweb_measurement_batch_queue_http_e2e(tmp_path: Path) -> None:
         assert measurements["temperature_4"].value is None
         assert measurements["temperature_4"].validity == "unknown"
 
-        store = SequenceStore(tmp_path / "sequence")
+        sequence_store = SequenceStore(tmp_path / "sequence")
         queue = BatchQueue(tmp_path / "queue.jsonl")
 
         with patch(
@@ -207,7 +196,7 @@ def test_atmoweb_measurement_batch_queue_http_e2e(tmp_path: Path) -> None:
         ):
             batch = compose_batch(
                 "logger-001",
-                store,
+                sequence_store,
                 measurements=measurements,
             )
 
