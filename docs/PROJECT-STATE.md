@@ -792,8 +792,8 @@ Modell entfernt werden kann.
 
 ### Aktueller nächster Schritt
 
-Der erste vertikale Core-Batch-Datenpfad ist inzwischen technisch
-implementiert und durch Tests abgesichert.
+Der erste vertikale Core-Batch-Datenpfad ist technisch implementiert und
+durch Tests abgesichert.
 
 Der aktuelle Pfad lautet:
 
@@ -817,38 +817,66 @@ BatchStore
 SQLite
 ```
 
-Damit ist erstmals nicht nur der LoggerPi-seitige Batch-/Queue-/Delivery-Pfad,
-sondern auch die serverseitige Annahme und persistente Speicherung eines
-Batches implementiert.
+Auf dem LoggerPi ist inzwischen zusätzlich die erste Runtime-Orchestrierung
+implementiert.
 
-Der nächste Entwicklungsschritt ist nun die Bereitstellung einer sehr kleinen
-serverseitigen Dashboard-/Statusansicht auf dem OtterPi.
-
-Diese erste Ansicht soll zunächst ausschließlich bereits gespeicherte Core
-Batches aus dem `BatchStore` sichtbar machen. Sie dient als technischer
-vertikaler Nachweis:
+Die Runtime kann mehrere konfigurierte AtmoWEB-Reader innerhalb einer
+Messrunde ausführen und deren Measurements in genau einem Core Batch
+zusammenführen:
 
 ```text
-LoggerPi
-    ↓
-HTTP Push
-    ↓
-OtterPi
-    ↓
-SQLite
-    ↓
-Dashboard
+AtmoWEB 101 ─┐
+             ├→ LoggerRuntime → ein Core Batch
+AtmoWEB 102 ─┘
 ```
 
-Noch nicht Bestandteil dieses Schrittes sind komplexe Visualisierung,
-historische Aggregationen, Benutzerverwaltung, Alarmierungslogik oder eine
-vollständige Webanwendung.
+Der Batch wird anschließend über den bestehenden Delivery-/Queue-Pfad
+zugestellt.
 
-Parallel dazu kann der bestehende Legacy-Betrieb des LoggerPi unverändert
-weiterlaufen. Die neue LoggerPi → OtterPi-Datenübertragung wird zunächst
-zusätzlich zum bestehenden Datenpfad betrieben.
+Vor der Erzeugung eines neuen Batches werden bereits wartende Batches aus
+der persistenten Queue erneut zugestellt. Erfolgreich zugestellte Queue-
+Einträge werden entfernt. Kann ein wartender Batch nicht zugestellt werden,
+wird die weitere Queue-Wiedergabe für diesen Lauf abgebrochen, damit die
+Reihenfolge der ausstehenden Batches erhalten bleibt.
 
-Danach werden weitere konkrete Datenquellen schrittweise ergänzt.
+Damit ist die technische Orchestrierung des ersten LoggerPi-Messzyklus
+implementiert und durch automatisierte Tests abgesichert.
+
+Der nächste Entwicklungsschritt ist nun **nicht** ein weiterer Adapter,
+sondern ein sehr kleiner dauerhafter Runner für den LoggerPi, der
+`LoggerRuntime.run_once()` regelmäßig ausführt.
+
+Dabei soll der neue Pfad zunächst parallel zur bestehenden Legacy-
+`observer.py` betrieben werden. Die Legacy-Runtime bleibt unverändert
+produktiv.
+
+Ziel des nächsten Schrittes:
+
+```text
+bestehender Legacy-Observer
+        │
+        ├── bestehender Legacy-Datenpfad
+        │
+        └── unverändert weiter
+
+neuer LoggerPi-Runner
+        ↓
+LoggerRuntime.run_once()
+        ↓
+AtmoWEB 101 + AtmoWEB 102
+        ↓
+ein Core Batch
+        ↓
+Queue / HTTP Delivery
+        ↓
+OtterPi
+```
+
+Der Runner soll bewusst klein und ressourcenschonend bleiben. Es ist keine
+zusätzliche Framework-, Async- oder Container-Schicht vorgesehen.
+
+Erst nach erfolgreicher praktischer Verifikation dieses parallelen
+LoggerPi-Betriebs werden weitere konkrete LoggerPi-Datenquellen ergänzt.
 
 ## Aktueller technischer Stand
 
@@ -1335,59 +1363,57 @@ abgesichert.
 
 Derzeit bestehen:
 
-49 Tests
-
+```text
+53 Tests
 Alle Tests bestehen.
+```
 
 Zusätzlich sind die lokalen Ruff-Quality-Gates erfolgreich:
 
 ```text
 ruff format --check .
-43 files already formatted
+45 files already formatted
 
 ruff check .
 All checks passed!
 ```
 
 Abgedeckt sind insbesondere:
-  * Batch-Modell
-  * Measurement-Modell
-  * Batch-Validierung
-  * Batch-Erzeugung
-  * Batch Composer
-  * persistente Sequence
-  * Queue-Persistenz
-  * Queue-Wiederherstellung
-  * Entfernen eines spezifischen Queue-Eintrags
-  * HTTP-JSON-Delivery
-  * HTTP-202-Erfolg
-  * Behandlung nicht erfolgreicher HTTP-Responses
-  * erfolgreiches Entfernen eines zugestellten Batches
-  * Beibehalten eines Batches bei fehlgeschlagener Zustellung
-  * Systemdaten
-  * Memory-Daten
-  * CPU-Daten
-  * CPU Load Average
-  * CPU-Temperatur
-  * Integration von `system` und `memory` in den Batch
-  * E2E-Pfad von Batch-Erzeugung über Queue bis HTTP-Delivery
-  * AtmoWEB-Geräteidentifikation
-  * AtmoWEB-Messwert-Mapping
-  * AtmoWEB-Validity-Mapping
-  * AtmoWEB-State-Mapping
-  * AtmoWEB-Fehlerbehandlung
-  * AtmoWEB-Gerätekonfiguration
-  * AtmoWEB → Measurement → Core Batch → Queue → HTTP Delivery
-  * AtmoWEB-Messwerte im tatsächlich erzeugten und übertragenen Batch
-  * erfolgreiche Batch-Annahme
-  * persistente Speicherung
-  * identische Duplikate
-  * Batch-Konflikte
-  * Sequence-Konflikte
-  * SQLite-WAL-Konfiguration
-  * ungültigen Content-Type
-  * ungültige Batch-Payloads
-  * unbekannte HTTP-Pfade
+
+- Batch-Modell
+- Measurement-Modell
+- Batch-Validierung
+- Batch-Erzeugung
+- Batch Composer
+- persistente Sequence
+- Queue-Persistenz
+- Queue-Wiederherstellung
+- Entfernen eines spezifischen Queue-Eintrags
+- HTTP-JSON-Delivery
+- HTTP-202-Erfolg
+- Behandlung nicht erfolgreicher HTTP-Responses
+- Systemdaten
+- Memory-Daten
+- CPU-Daten
+- E2E-Datenpfad
+- AtmoWEB-Geräteidentifikation
+- AtmoWEB-Messwert-Mapping
+- AtmoWEB-Validity-Mapping
+- AtmoWEB-State-Mapping
+- AtmoWEB-Fehlerbehandlung
+- AtmoWEB-Gerätekonfiguration
+- mehrere AtmoWEB-Quellen innerhalb eines Batches
+- Runtime-Orchestrierung
+- Replay ausstehender Queue-Batches vor einem neuen Batch
+- Entfernen erfolgreich zugestellter Queue-Batches
+- Beibehalten der Queue bei fehlgeschlagener Zustellung
+- OtterPi-Batch-Annahme
+- persistente Speicherung
+- Duplicate Handling
+- Sequence-Konflikte
+- SQLite-WAL-Konfiguration
+- ungültige Batch-Payloads
+- unbekannte HTTP-Pfade
 
 Zusätzlich gilt:
 
@@ -1512,30 +1538,75 @@ Der Pfad ist durch einen automatisierten E2E-Test abgesichert.
 Damit ist die technische Grundlage für die weitere Runtime-Integration
 vorhanden.
 
-### Nächster Arbeitsschritt
+### Runtime-Orchestrierung
 
-Als nächstes wird die konkrete Runtime-Orchestrierung des bereits
-implementierten Pfades konzipiert.
+Die konkrete Runtime-Orchestrierung des ersten LoggerPi-Datenpfades ist
+implementiert und getestet.
 
-Dabei ist zunächst zu klären:
+Die `LoggerRuntime` übernimmt dabei ausschließlich die Orchestrierung der
+bereits vorhandenen Bausteine:
 
-- wie und wann eine Messrunde ausgelöst wird
-- wie die konfigurierten AtmoWEB-Datenquellen in einer Messrunde behandelt werden
-- wann ein Core Batch erzeugt wird
-- wann der Batch in die persistente Queue gelangt
-- wann ausstehende Batches zugestellt werden
-- wie Wiederanlauf und Fehlerfälle im Runtime-Ablauf behandelt werden
-- wie der neue Pfad später kontrolliert neben der bestehenden Legacy-Runtime
-  auf dem LoggerPi betrieben werden kann
-- welcher konkrete Prozess-/Service-Mechanismus dafür verwendet wird
+```text
+konfigurierte Reader
+        ↓
+Measurements zusammenführen
+        ↓
+ein Core Batch
+        ↓
+ausstehende Queue-Batches zustellen
+        ↓
+neuen Batch zustellen oder in Queue ablegen
+```
 
-Diese Runtime-Orchestrierung ist noch nicht implementiert.
+Die Runtime verwendet mehrere konfigurierte AtmoWEB-Reader, erzeugt daraus
+jedoch pro Messrunde bewusst nur **einen** Core Batch.
 
-Sie wird zunächst gegen den bestehenden Vertrag und die bereits getroffenen
-Architekturentscheidungen geprüft, bevor ein konkreter Runner bzw.
-dauerhafter Prozess implementiert wird.
+Die aktuell konfigurierte AtmoWEB-Gruppe umfasst:
 
-Der bestehende Legacy-Observer bleibt bis dahin unverändert produktiv.
+```text
+atmoweb_101
+141.51.190.101
+
+atmoweb_102
+141.51.190.102
+```
+
+Die Reader-Konfiguration bleibt von der Runtime getrennt. Die
+`AtmoWebReader`-Implementierung bleibt für die herstellerspezifische
+Kommunikation zuständig.
+
+Die Runtime führt keine fachliche Bewertung der Messwerte durch und enthält
+keine herstellerspezifische AtmoWEB-Logik.
+
+Bereits wartende Batches werden vor der Erzeugung eines neuen Batches
+wieder zugestellt. Ein erfolgreich zugestellter Queue-Eintrag wird entfernt.
+Bei einem fehlgeschlagenen Replay wird die Queue-Wiedergabe für diesen Lauf
+abgebrochen.
+
+Die Runtime ist damit bewusst als dünne Orchestrierungsschicht gehalten.
+
+### Nächster Schritt: dauerhafter LoggerPi-Runner
+
+Die Runtime selbst ist nicht als dauerhaft laufender Prozess ausgelegt.
+
+Als nächstes wird ein kleiner Runner benötigt, der `LoggerRuntime.run_once()`
+regelmäßig ausführt.
+
+Der Runner soll:
+
+- mit möglichst wenig Ressourcen auskommen,
+- keine zusätzlichen Frameworks benötigen,
+- den bestehenden Legacy-Observer nicht ersetzen,
+- den neuen Datenpfad parallel zum Legacy-Betrieb starten können,
+- Fehler eines einzelnen Zyklus kontrolliert behandeln,
+- den bestehenden LoggerPi möglichst wenig verändern.
+
+Der konkrete Start-/Service-Mechanismus wird vor der Implementierung gegen
+die bestehende LoggerPi-Runtime und die dokumentierten Betriebsbedingungen
+geprüft.
+
+Der bestehende Legacy-Observer bleibt bis zur praktischen Verifikation des
+neuen Pfades unverändert produktiv.
 
 ### Danach
 
