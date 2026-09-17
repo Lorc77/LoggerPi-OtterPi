@@ -85,11 +85,13 @@ class OtterPiHandler(BaseHTTPRequestHandler):
 def _batch_from_dict(data: dict) -> Batch:
     measurements = {
         name: _measurement_from_dict(measurement)
-        for name, measurement in data.pop("measurements", {}).items()
+        for name, measurement in data.get("measurements", {}).items()
     }
 
+    batch_data = {key: value for key, value in data.items() if key != "measurements"}
+
     return Batch(
-        **data,
+        **batch_data,
         measurements=measurements,
     )
 
