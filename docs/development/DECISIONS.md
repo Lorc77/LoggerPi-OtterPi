@@ -339,7 +339,7 @@ Die konkreten Entwicklungs- und Prüfregeln sind in `docs/development/DEVELOPMEN
 
 ## DEC-014 — Stabilisierung des Legacy-Freezer-Loggers über systemd User Service
 
-Status: Angenommen  
+Status: Angenommen
 Datum: 2026-09-07
 
 ### Kontext
@@ -401,6 +401,127 @@ Der Legacy-Datenpfad über `freezer.log` bleibt unverändert, damit die bestehen
 Die Entscheidung stellt keine Migration des Freezers in das neue Data Model dar. Sie stabilisiert ausschließlich den bestehenden Legacy-Datenpfad.
 
 Eine spätere vollständige Migration des Freezers soll weiterhin über einen dedizierten Adapter/Reader in das neue Measurement-Modell erfolgen.
+
+---
+
+## DEC-015 — OtterPi als persistenter Core-Batch-Empfänger
+
+**Status:** Accepted
+**Datum:** 2026-09-17
+
+### Kontext
+
+Der bisher spezifizierte LoggerPi → OtterPi Push-Weg war zunächst nur auf
+Vertragsebene definiert.
+
+Für die weitere Entwicklung wird nun ein tatsächlich persistenter
+serverseitiger Empfänger benötigt, damit eingehende Core Batches nicht nur
+technisch angenommen, sondern auch lokal gespeichert und später für
+Dashboard, Diagnose und weitere Verarbeitung verwendet werden können.
+
+### Entscheidung
+
+Der OtterPi implementiert einen eigenen HTTP-Ingestion-Endpunkt:
+
+```text
+POST /api/v1/batches
+```
+
+Eingehende Core Batches werden nach erfolgreicher Validierung an einen
+serverseitigen `BatchStore` übergeben und persistent gespeichert.
+
+Die Persistenz erfolgt zunächst über SQLite.
+
+Der HTTP-Empfänger bleibt bewusst unabhängig von nginx, MeshCentral und
+anderen bestehenden OtterPi-Diensten.
+
+### Begründung
+
+Damit entsteht ein kleiner, eigenständiger und lokal testbarer vertikaler
+Datenpfad:
+
+```text
+LoggerPi
+    ↓
+HTTP
+    ↓
+OtterPi
+    ↓
+BatchStore
+    ↓
+SQLite
+```
+
+Diese Struktur ermöglicht es, die neue Architektur parallel zum bestehenden
+Legacy-Betrieb einzuführen, ohne den vorhandenen LoggerPi-Datenpfad sofort
+ablösen zu müssen.
+
+### Konsequenz
+
+Der OtterPi besitzt nun eine erste tatsächlich persistente Ingestion-Schicht.
+
+Die spätere Dashboard-, Health-, Event- und Auswertungslogik kann auf dieser
+Persistenz aufbauen.
+
+Die fachliche Bewertung der Daten bleibt weiterhin Aufgabe des OtterPi.
+
+---
+
+## DEC-016 — SQLite WAL und `synchronous=NORMAL`
+
+**Status:** Accepted
+**Datum:** 2026-09-17
+
+### Kontext
+
+Der OtterPi benötigt für den ersten persistenten BatchStore eine lokale,
+robuste und wartungsarme Datenbank.
+
+Der erwartete Zugriff besteht zunächst aus häufigen kleinen Batch-Schreibvorgängen
+sowie späteren Lesezugriffen durch Dashboard und Diagnose.
+
+### Entscheidung
+
+Der `BatchStore` verwendet SQLite mit:
+
+```sql
+PRAGMA journal_mode=WAL;
+PRAGMA synchronous=NORMAL;
+```
+
+Die PRAGMAs werden beim Aufbau jeder SQLite-Verbindung gesetzt.
+
+### Begründung
+
+WAL (`Write-Ahead Logging`) erlaubt parallele Lesezugriffe während
+Schreibvorgängen und passt damit zum vorgesehenen Muster aus kontinuierlicher
+Batch-Ingestion und lesendem Dashboard-Zugriff.
+
+`synchronous=NORMAL` reduziert gegenüber dem strengeren synchronen Modus
+den Schreibaufwand, während SQLite weiterhin die WAL-basierte
+Transaktionssicherheit verwendet.
+
+Die Einstellung ist für den aktuellen lokalen OtterPi-Einsatz bewusst als
+pragmatische Balance zwischen Persistenzsicherheit und Schreibaufwand gewählt.
+
+### Konsequenz
+
+Der aktuelle BatchStore bleibt bewusst einfach:
+
+```text
+HTTP request
+    ↓
+BatchStore
+    ↓
+SQLite WAL
+```
+
+Eine komplexere Datenbank oder zusätzliche Persistenzschicht ist für den
+aktuellen Entwicklungsstand nicht erforderlich.
+
+Die Performance- und Speichercharakteristik soll später anhand realer
+LoggerPi-Batchraten beobachtet werden, bevor weitere Optimierungen eingeführt
+werden.
 
 ---
 

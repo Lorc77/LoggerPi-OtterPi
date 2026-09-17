@@ -6,7 +6,7 @@
 **Data Model:** v1  
 **Projektphase:** Implementierung / Core Batch v1  
 **Status:** In aktiver Entwicklung  
-**Stand:** 2026-09-07
+**Stand:** 2026-09-17
 
 ---
 
@@ -233,6 +233,58 @@ Batch-Identität erfolgen, insbesondere über `batch_id` und die persistente
 
 Die konkrete technische Ausgestaltung von Queue, Retry und Duplicate
 Handling wird im API-/Delivery-Design spezifiziert.
+
+---
+
+## Aktuelles Duplicate Handling auf dem OtterPi
+
+Der `BatchStore` verwendet die Batch-Identität für die serverseitige
+Idempotenz.
+
+Bei einem bereits vorhandenen `batch_id` gilt:
+
+```text
+gleiche batch_id
+        +
+identischer Payload
+        ↓
+duplicate
+        ↓
+HTTP 202
+```
+
+Ein gleicher `batch_id` mit verändertem Inhalt wird dagegen als Konflikt
+behandelt:
+
+```text
+gleiche batch_id
+        +
+unterschiedlicher Payload
+        ↓
+conflict
+        ↓
+HTTP 409
+```
+
+Zusätzlich wird verhindert, dass derselbe LoggerPi dieselbe `sequence`
+mit einer anderen Batch-Identität verwendet.
+
+```text
+logger_id + sequence
+        ↓
+bereits vorhanden
+        +
+andere batch_id
+        ↓
+conflict
+```
+
+Damit ist die serverseitige Annahme eines wiederholt zugestellten Batches
+bereits idempotent implementiert.
+
+Die weitergehende fachliche Behandlung von verlorenen Responses,
+Retry-Backoff und dauerhaft nicht erreichbarem OtterPi bleibt Bestandteil
+des LoggerPi-seitigen Delivery-Designs.
 
 ---
 
@@ -740,10 +792,61 @@ Modell entfernt werden kann.
 
 ### Aktueller nächster Schritt
 
-AtmoWEB als bereits implementierte konkrete Datenquelle vollständig
-in den bestehenden Core-Batch-/Queue-/HTTP-Delivery-Pfad integrieren
-und den daraus entstehenden vertikalen E2E-Datenpfad auf dem LoggerPi
-praktisch verifizieren.
+Der erste vertikale Core-Batch-Datenpfad ist inzwischen technisch
+implementiert und durch Tests abgesichert.
+
+Der aktuelle Pfad lautet:
+
+```text
+LoggerPi-Datenquelle
+        ↓
+Adapter / Reader
+        ↓
+Measurement / Systemdaten
+        ↓
+Core Batch
+        ↓
+persistente LoggerPi-Queue
+        ↓
+HTTP Delivery
+        ↓
+OtterPi POST /api/v1/batches
+        ↓
+BatchStore
+        ↓
+SQLite
+```
+
+Damit ist erstmals nicht nur der LoggerPi-seitige Batch-/Queue-/Delivery-Pfad,
+sondern auch die serverseitige Annahme und persistente Speicherung eines
+Batches implementiert.
+
+Der nächste Entwicklungsschritt ist nun die Bereitstellung einer sehr kleinen
+serverseitigen Dashboard-/Statusansicht auf dem OtterPi.
+
+Diese erste Ansicht soll zunächst ausschließlich bereits gespeicherte Core
+Batches aus dem `BatchStore` sichtbar machen. Sie dient als technischer
+vertikaler Nachweis:
+
+```text
+LoggerPi
+    ↓
+HTTP Push
+    ↓
+OtterPi
+    ↓
+SQLite
+    ↓
+Dashboard
+```
+
+Noch nicht Bestandteil dieses Schrittes sind komplexe Visualisierung,
+historische Aggregationen, Benutzerverwaltung, Alarmierungslogik oder eine
+vollständige Webanwendung.
+
+Parallel dazu kann der bestehende Legacy-Betrieb des LoggerPi unverändert
+weiterlaufen. Die neue LoggerPi → OtterPi-Datenübertragung wird zunächst
+zusätzlich zum bestehenden Datenpfad betrieben.
 
 Danach werden weitere konkrete Datenquellen schrittweise ergänzt.
 
@@ -1013,6 +1116,76 @@ Der nächste fachlich sinnvolle Schritt ist daher nicht eine weitere
 generische Batch- oder Measurement-Abstraktion, sondern die Anbindung
 einer konkreten realen LoggerPi-Datenquelle.
 
+## OtterPi-Ingestion und Persistenz
+
+Die erste serverseitige OtterPi-Ingestion ist implementiert.
+
+Der HTTP-Endpunkt:
+
+```text
+POST /api/v1/batches
+```
+
+nimmt Core Batches als JSON entgegen.
+
+Die Implementierung befindet sich unter:
+
+```text
+src/loggerpi_otterpi/otterpi.py
+```
+
+Der HTTP-Handler übernimmt aktuell:
+
+- Prüfung des Request-Pfads
+- Prüfung des `Content-Type`
+- Lesen und Parsen des JSON-Request-Bodys
+- Rekonstruktion des Core Batch v1
+- Rückgabe definierter HTTP-Fehler
+- Übergabe des Batches an den persistenten `BatchStore`
+- Behandlung identischer Duplikate
+- Erkennung von Batch-Konflikten
+
+Aktuell verwendete HTTP-Ergebnisse:
+
+```text
+202  accepted
+400  invalid_payload
+404  unknown path
+409  batch_conflict
+415  unsupported_media_type
+```
+
+Bei erfolgreicher Annahme werden `batch_id` und `sequence` in der
+HTTP-Response zurückgegeben.
+
+Die serverseitige Persistenz befindet sich unter:
+
+```text
+src/loggerpi_otterpi/otterpi_store.py
+```
+
+Der `BatchStore` verwendet derzeit SQLite mit einer Tabelle `batches`.
+
+Die Persistenz berücksichtigt:
+
+- `batch_id` als primären Schlüssel
+- `logger_id` + `sequence` als eindeutige Batch-Position
+- idempotente Annahme identischer Batches
+- Erkennung widersprüchlicher Batches
+- Speicherung der vollständigen Batch-Repräsentation als JSON
+
+Für den SQLite-Betrieb werden derzeit:
+
+```text
+journal_mode = WAL
+synchronous  = NORMAL
+```
+
+verwendet.
+
+Damit ist die grundlegende serverseitige Ingestion einschließlich
+persistenter Speicherung implementiert und durch Tests abgesichert.
+
 ## Implementierungsstand: reale Systemdaten
 
 Die zuvor geplante Anbindung der grundlegenden LoggerPi-Systemdaten ist
@@ -1162,9 +1335,19 @@ abgesichert.
 
 Derzeit bestehen:
 
-39 Tests
+49 Tests
 
 Alle Tests bestehen.
+
+Zusätzlich sind die lokalen Ruff-Quality-Gates erfolgreich:
+
+```text
+ruff format --check .
+43 files already formatted
+
+ruff check .
+All checks passed!
+```
 
 Abgedeckt sind insbesondere:
   * Batch-Modell
@@ -1196,6 +1379,15 @@ Abgedeckt sind insbesondere:
   * AtmoWEB-Gerätekonfiguration
   * AtmoWEB → Measurement → Core Batch → Queue → HTTP Delivery
   * AtmoWEB-Messwerte im tatsächlich erzeugten und übertragenen Batch
+  * erfolgreiche Batch-Annahme
+  * persistente Speicherung
+  * identische Duplikate
+  * Batch-Konflikte
+  * Sequence-Konflikte
+  * SQLite-WAL-Konfiguration
+  * ungültigen Content-Type
+  * ungültige Batch-Payloads
+  * unbekannte HTTP-Pfade
 
 Zusätzlich gilt:
 

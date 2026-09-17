@@ -362,6 +362,31 @@ ermöglichen.
 
 Die vollständige Duplicate-Handling-Semantik wird separat spezifiziert.
 
+### Implementierungsstand
+
+Die grundlegende Duplicate-Handling-Semantik ist inzwischen auf dem OtterPi
+implementiert.
+
+Der serverseitige BatchStore unterscheidet:
+
+```text
+identische Batch-Identität + identischer Payload
+    → idempotente Annahme
+
+identische batch_id + unterschiedlicher Payload
+    → 409 Conflict
+
+identische logger_id + sequence + andere batch_id
+    → 409 Conflict
+```
+
+Damit ist die API auf Empfängerseite für identische Wiederholungen bereits
+idempotent.
+
+Die weitergehende Retry-Policy des LoggerPi, insbesondere Backoff und
+Verhalten bei dauerhaft nicht erreichbarem OtterPi, bleibt Bestandteil des
+Delivery-Designs.
+
 ---
 
 # 14. HTTP Response und Netzwerktopologie
