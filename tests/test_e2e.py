@@ -12,7 +12,6 @@ from loggerpi_otterpi.model.measurement import Measurement
 from loggerpi_otterpi.otterpi import create_server
 from loggerpi_otterpi.otterpi_store import BatchStore
 from loggerpi_otterpi.queue import BatchQueue
-from loggerpi_otterpi.queue_delivery import deliver_pending
 
 
 def test_measurement_batch_queue_http_e2e(tmp_path: Path) -> None:
@@ -71,7 +70,9 @@ def test_measurement_batch_queue_http_e2e(tmp_path: Path) -> None:
 
         delivery = BatchDelivery(f"http://127.0.0.1:{server.server_port}/api/v1/batches")
 
-        assert deliver_pending(queue, delivery) == 1
+        assert delivery.send(batch) is True
+        queue.remove(batch)
+
         assert queue.pending() == []
 
         stored = store.get(batch.batch_id)
@@ -80,6 +81,7 @@ def test_measurement_batch_queue_http_e2e(tmp_path: Path) -> None:
         assert stored.to_dict() == batch.to_dict()
         assert stored.measurements["temperature"].value == 21.5
         assert stored.measurements["temperature"].unit == "°C"
+
     finally:
         server.shutdown()
         thread.join()
@@ -204,7 +206,9 @@ def test_atmoweb_measurement_batch_queue_http_e2e(tmp_path: Path) -> None:
 
         delivery = BatchDelivery(f"http://127.0.0.1:{otter_server.server_port}/api/v1/batches")
 
-        assert deliver_pending(queue, delivery) == 1
+        assert delivery.send(batch) is True
+        queue.remove(batch)
+
         assert queue.pending() == []
 
         assert received["path"] == "/api/v1/batches"
@@ -216,6 +220,7 @@ def test_atmoweb_measurement_batch_queue_http_e2e(tmp_path: Path) -> None:
         assert received["body"]["measurements"]["vacuum"]["value"] == 1013.25
         assert received["body"]["measurements"]["vacuum"]["unit"] == "mbar"
         assert received["body"]["measurements"]["vacuum"]["source"] == "atmoweb"
+
     finally:
         atmoweb_server.shutdown()
         otter_server.shutdown()
