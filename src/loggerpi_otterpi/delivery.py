@@ -1,7 +1,7 @@
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-from .model.batch import Batch
+from model.batch import Batch
 
 
 class BatchDelivery:

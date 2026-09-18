@@ -1,8 +1,7 @@
 import json
 
 import pytest
-
-from loggerpi_otterpi.atmoweb import AtmoWebError, AtmoWebReader
+from atmoweb import AtmoWebError, AtmoWebReader
 
 
 class FakeResponse:
@@ -33,7 +32,7 @@ def test_identify_reads_serial_number_and_device_type(monkeypatch) -> None:
             }
         )
 
-    monkeypatch.setattr("loggerpi_otterpi.atmoweb.urlopen", fake_urlopen)
+    monkeypatch.setattr("atmoweb.urlopen", fake_urlopen)
 
     reader = AtmoWebReader("192.168.100.101")
 
@@ -66,7 +65,7 @@ def test_read_measurements_maps_atmoweb_values(monkeypatch) -> None:
             }
         )
 
-    monkeypatch.setattr("loggerpi_otterpi.atmoweb.urlopen", fake_urlopen)
+    monkeypatch.setattr("atmoweb.urlopen", fake_urlopen)
 
     measurements = AtmoWebReader("192.168.100.101").read_measurements()
 
@@ -110,7 +109,7 @@ def test_read_measurements_maps_nd_to_unknown(monkeypatch) -> None:
             }
         )
 
-    monkeypatch.setattr("loggerpi_otterpi.atmoweb.urlopen", fake_urlopen)
+    monkeypatch.setattr("atmoweb.urlopen", fake_urlopen)
 
     measurement = AtmoWebReader("192.168.100.101").read_measurements()["temperature_1"]
 
@@ -137,7 +136,7 @@ def test_read_state_maps_atmoweb_states(monkeypatch) -> None:
             }
         )
 
-    monkeypatch.setattr("loggerpi_otterpi.atmoweb.urlopen", fake_urlopen)
+    monkeypatch.setattr("atmoweb.urlopen", fake_urlopen)
 
     states, operation = AtmoWebReader("192.168.100.101").read_state()
 
@@ -168,7 +167,7 @@ def test_invalid_json_raises_atmoweb_error(monkeypatch) -> None:
             self.body = b"not json"
 
     monkeypatch.setattr(
-        "loggerpi_otterpi.atmoweb.urlopen",
+        "atmoweb.urlopen",
         lambda request, timeout: InvalidResponse(),
     )
 

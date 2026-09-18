@@ -9,8 +9,7 @@ User=ZOOLOGY-observ
 Group=ZOOLOGY-observ
 WorkingDirectory=/opt/loggerpi-otterpi
 EnvironmentFile=/etc/loggerpi-otterpi/loggerpi.env
-Environment="PYTHONPATH=/opt/loggerpi-otterpi/src"
-ExecStart=/usr/bin/python3 -m loggerpi_otterpi.loggerpi_observer
+ExecStart=/usr/bin/python3 -m loggerpi_observer
 Restart=on-failure
 RestartSec=5
 

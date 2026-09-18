@@ -3,8 +3,8 @@ from pathlib import Path
 from typing import Optional, Union
 from uuid import uuid4
 
-from .model.batch import Batch
-from .model.measurement import Measurement
+from model.batch import Batch
+from model.measurement import Measurement
 
 
 class SequenceStore:

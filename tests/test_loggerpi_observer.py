@@ -1,8 +1,7 @@
 from unittest.mock import Mock, patch
 
+import loggerpi_observer
 import pytest
-
-from loggerpi_otterpi import loggerpi_observer
 
 
 def test_main_builds_runtime_and_starts_runner(monkeypatch) -> None:
@@ -16,10 +15,10 @@ def test_main_builds_runtime_and_starts_runner(monkeypatch) -> None:
 
     with (
         patch(
-            "loggerpi_otterpi.loggerpi_observer.create_atmoweb_readers",
+            "loggerpi_observer.create_atmoweb_readers",
             return_value=readers,
         ),
-        patch("loggerpi_otterpi.loggerpi_observer.run") as run,
+        patch("loggerpi_observer.run") as run,
     ):
         loggerpi_observer.main()
 

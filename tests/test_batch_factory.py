@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from loggerpi_otterpi.batch_factory import SequenceStore, create_batch
+from batch_factory import SequenceStore, create_batch
 
 
 def test_sequence_is_persistent(tmp_path):

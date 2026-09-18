@@ -1,7 +1,6 @@
 import pytest
-
-from loggerpi_otterpi.model.batch import Batch, BatchValidationError
-from loggerpi_otterpi.model.measurement import Measurement
+from model.batch import Batch, BatchValidationError
+from model.measurement import Measurement
 
 
 def test_batch_requires_non_empty_identity_fields():

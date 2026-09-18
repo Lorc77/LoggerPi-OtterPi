@@ -2,8 +2,8 @@ import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Optional
 
-from .model.batch import Batch
-from .otterpi_store import BatchStore
+from model.batch import Batch
+from otterpi_store import BatchStore
 
 
 class OtterPiHandler(BaseHTTPRequestHandler):
@@ -97,7 +97,7 @@ def _batch_from_dict(data: dict) -> Batch:
 
 
 def _measurement_from_dict(data: dict):
-    from .model.measurement import Measurement
+    from model.measurement import Measurement
 
     return Measurement(**data)
 

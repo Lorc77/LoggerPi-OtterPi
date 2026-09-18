@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from .atmoweb import AtmoWebReader
+from atmoweb import AtmoWebReader
 
 
 @dataclass(frozen=True)

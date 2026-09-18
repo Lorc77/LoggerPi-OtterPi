@@ -5,7 +5,7 @@ from typing import Any, Optional
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-from .model.measurement import Measurement
+from model.measurement import Measurement
 
 
 @dataclass(frozen=True)

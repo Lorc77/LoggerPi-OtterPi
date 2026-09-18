@@ -1,7 +1,8 @@
-from loggerpi_otterpi.batch_factory import SequenceStore, create_batch
-from loggerpi_otterpi.model.measurement import Measurement
-from loggerpi_otterpi.queue import BatchQueue
-from loggerpi_otterpi.runtime import LoggerRuntime
+from queue import BatchQueue
+
+from batch_factory import SequenceStore, create_batch
+from model.measurement import Measurement
+from runtime import LoggerRuntime
 
 
 class FakeReader:
@@ -26,7 +27,7 @@ class FakeDelivery:
 
 def _patch_system_info(monkeypatch):
     monkeypatch.setattr(
-        "loggerpi_otterpi.composer.get_system_info",
+        "composer.get_system_info",
         lambda: {
             "time": {
                 "current": "2026-09-17T12:00:00+00:00",
@@ -206,7 +207,7 @@ def test_runtime_replays_queued_batch_before_new_batch(tmp_path, monkeypatch):
     delivery = FakeDelivery(True)
 
     monkeypatch.setattr(
-        "loggerpi_otterpi.composer.get_system_info",
+        "composer.get_system_info",
         lambda: {
             "time": {
                 "current": "2026-09-17T12:00:00+00:00",

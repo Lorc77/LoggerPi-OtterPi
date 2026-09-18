@@ -1,7 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 
-from loggerpi_otterpi.system_info import (
+from system_info import (
     get_boot_info,
     get_cpu_info,
     get_cpu_temperature,

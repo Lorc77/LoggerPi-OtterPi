@@ -1,17 +1,17 @@
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
+from queue import BatchQueue
 from threading import Thread
 from unittest.mock import patch
 
-from loggerpi_otterpi.atmoweb import AtmoWebReader
-from loggerpi_otterpi.batch_factory import SequenceStore
-from loggerpi_otterpi.composer import compose_batch
-from loggerpi_otterpi.delivery import BatchDelivery
-from loggerpi_otterpi.model.measurement import Measurement
-from loggerpi_otterpi.otterpi import create_server
-from loggerpi_otterpi.otterpi_store import BatchStore
-from loggerpi_otterpi.queue import BatchQueue
+from atmoweb import AtmoWebReader
+from batch_factory import SequenceStore
+from composer import compose_batch
+from delivery import BatchDelivery
+from model.measurement import Measurement
+from otterpi import create_server
+from otterpi_store import BatchStore
 
 
 def test_measurement_batch_queue_http_e2e(tmp_path: Path) -> None:
@@ -33,7 +33,7 @@ def test_measurement_batch_queue_http_e2e(tmp_path: Path) -> None:
         queue = BatchQueue(tmp_path / "queue.jsonl")
 
         with patch(
-            "loggerpi_otterpi.composer.get_system_info",
+            "composer.get_system_info",
             return_value={
                 "time": {
                     "current": "2026-08-30T18:00:00+00:00",
@@ -169,7 +169,7 @@ def test_atmoweb_measurement_batch_queue_http_e2e(tmp_path: Path) -> None:
         queue = BatchQueue(tmp_path / "queue.jsonl")
 
         with patch(
-            "loggerpi_otterpi.composer.get_system_info",
+            "composer.get_system_info",
             return_value={
                 "time": {
                     "current": "2026-08-30T18:00:00+00:00",

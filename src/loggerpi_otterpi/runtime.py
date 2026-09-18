@@ -1,8 +1,9 @@
-from .atmoweb import AtmoWebReader
-from .batch_factory import SequenceStore
-from .composer import compose_batch
-from .delivery import BatchDelivery
-from .queue import BatchQueue
+from queue import BatchQueue
+
+from atmoweb import AtmoWebReader
+from batch_factory import SequenceStore
+from composer import compose_batch
+from delivery import BatchDelivery
 
 
 class LoggerRuntime:

@@ -1,9 +1,9 @@
 import json
 from threading import Thread
 
-from loggerpi_otterpi.batch_factory import SequenceStore, create_batch
-from loggerpi_otterpi.otterpi import create_server
-from loggerpi_otterpi.otterpi_store import BatchStore
+from batch_factory import SequenceStore, create_batch
+from otterpi import create_server
+from otterpi_store import BatchStore
 
 
 def test_otterpi_accepts_new_batch(tmp_path):

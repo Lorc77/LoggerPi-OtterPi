@@ -1,5 +1,5 @@
-from loggerpi_otterpi.batch_factory import SequenceStore, create_batch
-from loggerpi_otterpi.otterpi_store import BatchStore
+from batch_factory import SequenceStore, create_batch
+from otterpi_store import BatchStore
 
 
 def test_batch_store_persists_batch(tmp_path):

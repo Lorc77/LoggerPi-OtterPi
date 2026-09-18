@@ -1,8 +1,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
-
-from loggerpi_otterpi.loggerpi_runner import LoggerPiRunner
+from loggerpi_runner import LoggerPiRunner
 
 
 def test_runner_rejects_non_positive_interval() -> None:
@@ -20,7 +19,7 @@ def test_runner_does_not_run_when_stop_was_requested() -> None:
         runner.request_stop()
 
     with patch(
-        "loggerpi_otterpi.loggerpi_runner.time.sleep",
+        "loggerpi_runner.time.sleep",
         side_effect=sleep_and_stop,
     ) as sleep:
         runner.run()
@@ -45,7 +44,7 @@ def test_runner_continues_after_runtime_error() -> None:
             runner.request_stop()
 
     with patch(
-        "loggerpi_otterpi.loggerpi_runner.time.sleep",
+        "loggerpi_runner.time.sleep",
         side_effect=sleep_and_stop,
     ):
         runner.run()
@@ -69,10 +68,10 @@ def test_runner_does_not_sleep_when_cycle_takes_longer_than_interval() -> None:
 
     with (
         patch(
-            "loggerpi_otterpi.loggerpi_runner.time.monotonic",
+            "loggerpi_runner.time.monotonic",
             side_effect=monotonic,
         ),
-        patch("loggerpi_otterpi.loggerpi_runner.time.sleep") as sleep,
+        patch("loggerpi_runner.time.sleep") as sleep,
     ):
         runner.run()
 

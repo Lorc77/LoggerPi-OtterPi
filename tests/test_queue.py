@@ -1,5 +1,6 @@
-from loggerpi_otterpi.batch_factory import SequenceStore, create_batch
-from loggerpi_otterpi.queue import BatchQueue
+from queue import BatchQueue
+
+from batch_factory import SequenceStore, create_batch
 
 
 def test_queue_persists_batch(tmp_path):

@@ -1,7 +1,7 @@
 import json
 
-from loggerpi_otterpi.batch_factory import SequenceStore, create_batch
-from loggerpi_otterpi.delivery import BatchDelivery
+from batch_factory import SequenceStore, create_batch
+from delivery import BatchDelivery
 
 
 class FakeResponse:
@@ -25,7 +25,7 @@ def test_delivery_sends_batch_as_json(monkeypatch, tmp_path):
         captured["timeout"] = timeout
         return FakeResponse(202)
 
-    monkeypatch.setattr("loggerpi_otterpi.delivery.urlopen", fake_urlopen)
+    monkeypatch.setattr("delivery.urlopen", fake_urlopen)
 
     delivery = BatchDelivery("http://otterpi/api/v1/batches")
 
@@ -45,7 +45,7 @@ def test_delivery_accepts_only_http_202(monkeypatch, tmp_path):
     batch = create_batch("logger-001", store)
 
     monkeypatch.setattr(
-        "loggerpi_otterpi.delivery.urlopen",
+        "delivery.urlopen",
         lambda request, timeout: FakeResponse(200),
     )
 

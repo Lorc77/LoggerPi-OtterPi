@@ -3,8 +3,8 @@
 import logging
 import os
 
-from .otterpi import create_server
-from .otterpi_store import BatchStore
+from otterpi import create_server
+from otterpi_store import BatchStore
 
 LOGGER = logging.getLogger(__name__)
 

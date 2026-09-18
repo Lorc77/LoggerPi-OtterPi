@@ -1,8 +1,7 @@
 from unittest.mock import Mock, patch
 
+import otterpi_observer
 import pytest
-
-from loggerpi_otterpi import otterpi_observer
 
 
 def test_main_builds_store_and_starts_server(
@@ -17,11 +16,11 @@ def test_main_builds_store_and_starts_server(
 
     with (
         patch(
-            "loggerpi_otterpi.otterpi_observer.BatchStore",
+            "otterpi_observer.BatchStore",
             return_value=store,
         ) as batch_store,
         patch(
-            "loggerpi_otterpi.otterpi_observer.create_server",
+            "otterpi_observer.create_server",
             return_value=server,
         ) as create_server,
     ):

@@ -1,4 +1,4 @@
-from loggerpi_otterpi.atmoweb_config import (
+from atmoweb_config import (
     ATMOWEB_DEVICES,
     AtmoWebEndpoint,
     create_atmoweb_readers,

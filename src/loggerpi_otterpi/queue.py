@@ -2,8 +2,8 @@ import json
 from pathlib import Path
 from typing import Union
 
-from .model.batch import Batch
-from .model.measurement import Measurement
+from model.batch import Batch
+from model.measurement import Measurement
 
 
 class BatchQueue:

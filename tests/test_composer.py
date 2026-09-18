@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from loggerpi_otterpi.batch_factory import SequenceStore
-from loggerpi_otterpi.composer import compose_batch
+from batch_factory import SequenceStore
+from composer import compose_batch
 
 
 def test_compose_batch_maps_system_info_to_batch(tmp_path: Path, monkeypatch) -> None:
@@ -32,7 +32,7 @@ def test_compose_batch_maps_system_info_to_batch(tmp_path: Path, monkeypatch) ->
     }
 
     monkeypatch.setattr(
-        "loggerpi_otterpi.composer.get_system_info",
+        "composer.get_system_info",
         lambda: system_info,
     )
 

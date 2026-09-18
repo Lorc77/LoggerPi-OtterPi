@@ -6,7 +6,7 @@ import time
 from types import FrameType
 from typing import Optional
 
-from .runtime import LoggerRuntime
+from runtime import LoggerRuntime
 
 LOGGER = logging.getLogger(__name__)
 

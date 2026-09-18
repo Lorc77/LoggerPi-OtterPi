@@ -17,7 +17,11 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src"]
+pythonpath = [
+    "src",
+    "src/loggerpi_otterpi",
+    "src/loggerpi_otterpi/model",
+]
 addopts = "-ra"
 
 [tool.ruff]
