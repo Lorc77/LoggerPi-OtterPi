@@ -57,6 +57,10 @@ install -d -o makki -g makki -m 0750 \
 systemctl daemon-reload
 systemctl enable "$SERVICE_NAME"
 
+install -o root -g root -m 0755 \
+    "$REPO_DIR/deploy/update.sh" \
+    /usr/local/sbin/loggerpi-otterpi-update
+
 echo
 echo "OtterPi installation complete."
 echo
