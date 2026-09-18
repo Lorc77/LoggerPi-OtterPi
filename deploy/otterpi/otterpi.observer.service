@@ -1,0 +1,18 @@
+[Unit]
+Description=OtterPi Observer
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=makki
+Group=makki
+WorkingDirectory=/opt/loggerpi-otterpi
+EnvironmentFile=/etc/loggerpi-otterpi/otterpi.env
+Environment="PYTHONPATH=/opt/loggerpi-otterpi/src"
+ExecStart=/usr/bin/python3 -m loggerpi_otterpi.otterpi_observer
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
