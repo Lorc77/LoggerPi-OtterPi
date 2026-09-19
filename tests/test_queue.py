@@ -1,4 +1,4 @@
-from queue import BatchQueue
+from batch_queue import BatchQueue
 
 from batch_factory import SequenceStore, create_batch
 

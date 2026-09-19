@@ -1,10 +1,10 @@
 """Production process entry point for LoggerPi."""
 
 import os
-from queue import BatchQueue
 
 from atmoweb_config import create_atmoweb_readers
 from batch_factory import SequenceStore
+from batch_queue import BatchQueue
 from delivery import BatchDelivery
 from loggerpi_runner import run
 from runtime import LoggerRuntime

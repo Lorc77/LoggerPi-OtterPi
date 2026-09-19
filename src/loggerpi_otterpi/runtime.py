@@ -1,7 +1,6 @@
-from queue import BatchQueue
-
 from atmoweb import AtmoWebReader
 from batch_factory import SequenceStore
+from batch_queue import BatchQueue
 from composer import compose_batch
 from delivery import BatchDelivery
 

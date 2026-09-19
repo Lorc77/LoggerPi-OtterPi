@@ -1,7 +1,7 @@
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
-from queue import BatchQueue
+from batch_queue import BatchQueue
 from threading import Thread
 from unittest.mock import patch
 

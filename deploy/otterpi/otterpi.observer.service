@@ -9,6 +9,7 @@ User=makki
 Group=makki
 WorkingDirectory=/opt/loggerpi-otterpi
 EnvironmentFile=/etc/loggerpi-otterpi/otterpi.env
+Environment="PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model"
 ExecStart=/usr/bin/python3 -m otterpi_observer
 Restart=on-failure
 RestartSec=5

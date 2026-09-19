@@ -35,6 +35,12 @@ install -o root -g root -m 0644 \
     "$REPO_DIR/src/loggerpi_otterpi/model/measurement.py" \
     "$INSTALL_DIR/model/measurement.py"
 
+# Schreibe VERSION-Datei (für Menschenlesbarkeit)
+VERSION=$(grep '^version = ' "$REPO_DIR/pyproject.toml" | sed 's/version = "//;s/"//')
+printf '%s\n' "$VERSION" > "$INSTALL_DIR/VERSION"
+chown root:root "$INSTALL_DIR/VERSION"
+chmod 0644 "$INSTALL_DIR/VERSION"
+
 install -d -o root -g root -m 0755 /etc/loggerpi-otterpi
 
 if [ ! -f /etc/loggerpi-otterpi/otterpi.env ]; then
@@ -72,3 +78,6 @@ echo "  sudo systemctl restart $SERVICE_NAME"
 echo
 echo "Status:"
 echo "  systemctl status $SERVICE_NAME --no-pager"
+echo
+echo "Current version:"
+echo "  cat /opt/loggerpi-otterpi/VERSION"

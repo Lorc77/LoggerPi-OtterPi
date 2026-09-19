@@ -1,6 +1,5 @@
-from queue import BatchQueue
-
 from batch_factory import SequenceStore, create_batch
+from batch_queue import BatchQueue
 from model.measurement import Measurement
 from runtime import LoggerRuntime
 
