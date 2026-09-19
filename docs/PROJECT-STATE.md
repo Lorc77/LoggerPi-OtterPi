@@ -10,6 +10,117 @@
 
 ---
 
+## Deployment-Stand
+
+**Stand:** 2026-09-19
+
+Der erste reproduzierbare Deployment-Mechanismus für LoggerPi und
+OtterPi ist inzwischen im Repository implementiert.
+
+Der zentrale Deployment-Wrapper befindet sich unter:
+
+```text
+deploy/update.sh
+```
+
+Der Wrapper unterstützt zwei Rollen:
+
+```text
+loggerpi
+otterpi
+```
+
+Auf beiden Zielsystemen wird der Wrapper durch das jeweilige
+Installationsskript nach:
+
+```text
+/usr/local/sbin/loggerpi-otterpi-update
+```
+
+installiert.
+
+### LoggerPi
+
+Der LoggerPi verwendet:
+
+```text
+loggerpi.observer.service
+```
+
+und das Deployment erfolgt mit:
+
+```bash
+sudo /usr/local/sbin/loggerpi-otterpi-update loggerpi
+```
+
+### OtterPi
+
+Der OtterPi verwendet:
+
+```text
+otterpi.observer.service
+```
+
+und das Deployment erfolgt mit:
+
+```bash
+sudo /usr/local/sbin/loggerpi-otterpi-update otterpi
+```
+
+### Deployment-Ablauf
+
+Der Wrapper führt grundsätzlich folgenden Ablauf aus:
+
+```text
+GitHub main
+    ↓
+git clone --depth 1
+    ↓
+Commit bestimmen
+    ↓
+rollenabhängiges install.sh
+    ↓
+systemd daemon-reload / enable
+    ↓
+Service restart
+    ↓
+Service-Status prüfen
+    ↓
+DEPLOYED_COMMIT schreiben
+```
+
+Der tatsächlich deployte Commit wird nach:
+
+```text
+/opt/loggerpi-otterpi/DEPLOYED_COMMIT
+```
+
+geschrieben.
+
+Damit kann auf dem Zielsystem jederzeit nachvollzogen werden,
+welcher Repository-Commit zuletzt über den Deployment-Mechanismus
+ausgerollt wurde.
+
+### Wichtige Einschränkung
+
+Der aktuelle Deployment-Mechanismus aktualisiert ausschließlich die
+Anwendung und die zugehörigen systemd-Service-Dateien.
+
+Er konfiguriert derzeit **nicht** automatisch:
+
+- nginx
+- TLS-Zertifikate
+- nginx-Reverse-Proxy-Regeln
+- DNS
+- Firewall
+- FRITZ!Box-/IPv6-Freigaben
+- externe Routing-/CDN-/Tunnel-Konfiguration
+
+Diese Infrastruktur bleibt bis zu einer ausdrücklich implementierten
+Deployment-Erweiterung ein separater administrativer Schritt.
+
+---
+
 ## Projektziel
 
 Der LoggerPi erfasst System-, Sensor- und Gerätedaten und überträgt diese an den OtterPi.
@@ -1607,6 +1718,108 @@ geprüft.
 
 Der bestehende Legacy-Observer bleibt bis zur praktischen Verifikation des
 neuen Pfades unverändert produktiv.
+
+## Aktuelle offene Arbeitspakete
+
+### P0 – Produktionsdeployment noch nicht verifiziert
+
+Der Application-Deploymentmechanismus ist im Repository implementiert,
+wurde aber noch nicht auf LoggerPi und OtterPi praktisch ausgerollt.
+
+Zu verifizieren:
+
+```text
+LoggerPi
+    ↓
+loggerpi-otterpi-update loggerpi
+    ↓
+loggerpi.observer.service
+```
+
+und:
+
+```text
+OtterPi
+    ↓
+loggerpi-otterpi-update otterpi
+    ↓
+otterpi.observer.service
+```
+
+Dabei müssen insbesondere Installation, Service-Start,
+Konfiguration und `DEPLOYED_COMMIT` geprüft werden.
+
+### P0 – OtterPi nginx-Integration
+
+Der OtterPi-Anwendungsserver läuft lokal auf:
+
+```text
+127.0.0.1:8090
+```
+
+Die bestehende nginx-/TLS-Infrastruktur ist vorhanden.
+
+Die konkrete Reverse-Proxy-Konfiguration für den LoggerPi-OtterPi-
+API-Endpunkt ist noch nicht fertiggestellt bzw. nicht als Projekt-
+Deployment dokumentiert.
+
+Vor der Konfiguration muss die reale nginx-Konfiguration read-only
+vollständig erfasst werden.
+
+### P0 – Authentication / Authorization
+
+Für den produktiven LoggerPi → OtterPi HTTP-Betrieb ist noch eine
+Authentication-/Authorization-Lösung festzulegen.
+
+### P1 – LoggerPi Runner
+
+Der dauerhafte LoggerPi-Runner für:
+
+```text
+LoggerRuntime.run_once()
+```
+
+bleibt ein eigener Implementierungsschritt.
+
+Er soll zunächst parallel zur Legacy-`observer.py` betrieben werden.
+
+### P1 – praktischer E2E-Test
+
+Nach Deployment und nginx-Konfiguration muss der reale Pfad geprüft
+werden:
+
+```text
+LoggerPi
+ ↓
+Core Batch
+ ↓
+Queue
+ ↓
+HTTPS
+ ↓
+nginx
+ ↓
+127.0.0.1:8090
+ ↓
+BatchStore
+ ↓
+SQLite
+ ↓
+HTTP 202
+ ↓
+Queue removal
+```
+
+### P1 – Dokumentations-Synchronisation
+
+Nach erfolgreichem Deployment müssen insbesondere aktualisiert werden:
+
+```text
+docs/PROJECT-STATE.md
+docs/deployment/DEPLOYMENT.md
+docs/baselines/OtterPi_Technical_Baseline_v2.md
+docs/development/DECISIONS.md
+```
 
 ### Danach
 

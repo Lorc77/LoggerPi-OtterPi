@@ -488,3 +488,22 @@ Eine Änderung gilt als bereit, wenn:
 Diese Regeln sollen keinen unnötigen bürokratischen Aufwand erzeugen.
 
 Sie sollen das Repository gegen genau die Art von unbemerkten Kompatibilitätsfehlern absichern, die zuvor aufgetreten ist.
+
+### Deployment-Gate
+
+Wenn eine Änderung Deployment- oder Runtime-Verhalten betrifft, muss
+zusätzlich geprüft werden:
+
+```text
+Deployment-Skript
+systemd-Service
+Environment-Datei
+Installationspfade
+Zielsystem-Python
+```
+
+Für einen tatsächlichen Raspberry-Pi-Deploy muss anschließend die
+entsprechende Service-Instanz praktisch verifiziert werden.
+
+Ein erfolgreicher lokaler Testlauf unter Windows gilt nicht als
+Nachweis eines erfolgreichen Raspberry-Pi-Deployments.

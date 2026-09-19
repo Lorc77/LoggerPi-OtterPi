@@ -525,6 +525,73 @@ werden.
 
 ---
 
+## DEC-017 — OtterPi Application Listener hinter bestehendem nginx
+
+**Status:** Accepted
+**Datum:** 2026-09-19
+
+### Kontext
+
+Der OtterPi-Core-Batch-Empfänger stellt einen lokalen HTTP-Listener
+für `POST /api/v1/batches` bereit.
+
+Die Anwendung lauscht derzeit ausschließlich auf:
+
+```text
+127.0.0.1:8090
+```
+
+Der OtterPi besitzt bereits einen bestehenden nginx-/TLS-Stack für
+öffentliche HTTP-/HTTPS-Dienste.
+
+### Entscheidung
+
+Der LoggerPi → OtterPi HTTP-Datenpfad soll für den produktiven Betrieb
+über den bestehenden nginx-/TLS-Stack geführt werden.
+
+Die Anwendung selbst bleibt dabei unabhängig von nginx.
+
+```text
+LoggerPi
+    ↓
+HTTPS
+    ↓
+nginx
+    ↓
+127.0.0.1:8090
+    ↓
+OtterPi Observer
+```
+
+Port `8090` bleibt ein lokaler Backend-Port und wird nicht als
+öffentlicher API-Port verwendet.
+
+### Begründung
+
+Damit bleiben Anwendung und HTTP-Ingestion klein und unabhängig,
+während TLS und öffentliche HTTP-Erreichbarkeit durch die bereits
+vorhandene Host-Infrastruktur bereitgestellt werden.
+
+Der Core-Batch-API-Vertrag bleibt unabhängig von:
+
+- nginx
+- TLS
+- DNS
+- CDN/Tunnel
+- Host-Firewall
+
+### Konsequenz
+
+Das Application Deployment konfiguriert nginx derzeit nicht automatisch.
+
+Die konkrete nginx-Proxy-Konfiguration und die zugehörige Produktions-
+Domain müssen separat dokumentiert und verifiziert werden.
+
+Vor produktiver Nutzung muss außerdem eine geeignete
+Authentication-/Authorization-Lösung festgelegt werden.
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:
