@@ -1,12 +1,12 @@
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
-from batch_queue import BatchQueue
 from threading import Thread
 from unittest.mock import patch
 
 from atmoweb import AtmoWebReader
 from batch_factory import SequenceStore
+from batch_queue import BatchQueue
 from composer import compose_batch
 from delivery import BatchDelivery
 from model.measurement import Measurement

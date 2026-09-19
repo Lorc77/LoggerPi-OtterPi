@@ -1,6 +1,5 @@
-from batch_queue import BatchQueue
-
 from batch_factory import SequenceStore, create_batch
+from batch_queue import BatchQueue
 
 
 def test_queue_persists_batch(tmp_path):
