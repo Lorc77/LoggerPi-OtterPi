@@ -33,6 +33,7 @@ def _get_interval() -> float:
 def main() -> None:
     logger_id = _require_env("LOGGERPI_ID")
     otterpi_url = _require_env("OTTERPI_URL")
+    token = _require_env("LOGGERPI_TOKEN")
     queue_file = _require_env("LOGGERPI_QUEUE_FILE")
     sequence_file = _require_env("LOGGERPI_SEQUENCE_FILE")
     interval_seconds = _get_interval()
@@ -41,7 +42,7 @@ def main() -> None:
         logger_id=logger_id,
         readers=create_atmoweb_readers(),
         sequence_store=SequenceStore(sequence_file),
-        delivery=BatchDelivery(otterpi_url),
+        delivery=BatchDelivery(otterpi_url, token=token),
         queue=BatchQueue(queue_file),
     )
 

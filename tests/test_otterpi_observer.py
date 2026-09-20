@@ -3,6 +3,8 @@ from unittest.mock import Mock, patch
 import otterpi_observer
 import pytest
 
+TEST_TOKEN = "lp-test-token-1234567890abcdef"
+
 
 def test_main_builds_store_and_starts_server(
     monkeypatch: pytest.MonkeyPatch,
@@ -10,6 +12,7 @@ def test_main_builds_store_and_starts_server(
     monkeypatch.setenv("OTTERPI_HOST", "127.0.0.1")
     monkeypatch.setenv("OTTERPI_PORT", "8080")
     monkeypatch.setenv("OTTERPI_DATABASE", "/tmp/otterpi.sqlite3")
+    monkeypatch.setenv("OTTERPI_TOKEN", TEST_TOKEN)
 
     store = Mock()
     server = Mock()
@@ -27,7 +30,7 @@ def test_main_builds_store_and_starts_server(
         otterpi_observer.main()
 
     batch_store.assert_called_once_with("/tmp/otterpi.sqlite3")
-    create_server.assert_called_once_with("127.0.0.1", 8080, store)
+    create_server.assert_called_once_with("127.0.0.1", 8080, store, token=TEST_TOKEN)
     server.serve_forever.assert_called_once_with()
 
 
@@ -37,6 +40,7 @@ def test_main_builds_store_and_starts_server(
         "OTTERPI_HOST",
         "OTTERPI_PORT",
         "OTTERPI_DATABASE",
+        "OTTERPI_TOKEN",
     ],
 )
 def test_main_requires_environment_variable(
@@ -46,6 +50,7 @@ def test_main_requires_environment_variable(
     monkeypatch.setenv("OTTERPI_HOST", "127.0.0.1")
     monkeypatch.setenv("OTTERPI_PORT", "8080")
     monkeypatch.setenv("OTTERPI_DATABASE", "/tmp/otterpi.sqlite3")
+    monkeypatch.setenv("OTTERPI_TOKEN", TEST_TOKEN)
     monkeypatch.delenv(missing)
 
     with pytest.raises(

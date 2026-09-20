@@ -3,6 +3,8 @@ import json
 from batch_factory import SequenceStore, create_batch
 from delivery import BatchDelivery
 
+TEST_TOKEN = "lp-test-token-1234567890abcdef"
+
 
 class FakeResponse:
     def __init__(self, status: int) -> None:
@@ -27,7 +29,7 @@ def test_delivery_sends_batch_as_json(monkeypatch, tmp_path):
 
     monkeypatch.setattr("delivery.urlopen", fake_urlopen)
 
-    delivery = BatchDelivery("http://otterpi/api/v1/batches")
+    delivery = BatchDelivery("http://otterpi/api/v1/batches", token=TEST_TOKEN)
 
     assert delivery.send(batch) is True
 
@@ -36,6 +38,7 @@ def test_delivery_sends_batch_as_json(monkeypatch, tmp_path):
     assert request.method == "POST"
     assert request.full_url == "http://otterpi/api/v1/batches"
     assert request.headers["Content-type"] == "application/json"
+    assert request.headers["Authorization"] == f"Bearer {TEST_TOKEN}"
     assert json.loads(request.data.decode("utf-8")) == batch.to_dict()
     assert captured["timeout"] == 10.0
 
@@ -49,6 +52,6 @@ def test_delivery_accepts_only_http_202(monkeypatch, tmp_path):
         lambda request, timeout: FakeResponse(200),
     )
 
-    delivery = BatchDelivery("http://otterpi/api/v1/batches")
+    delivery = BatchDelivery("http://otterpi/api/v1/batches", token=TEST_TOKEN)
 
     assert delivery.send(batch) is False

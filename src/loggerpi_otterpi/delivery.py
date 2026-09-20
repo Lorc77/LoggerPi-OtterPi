@@ -6,15 +6,19 @@ from model.batch import Batch
 
 
 class BatchDelivery:
-    def __init__(self, endpoint: str, timeout: float = 10.0) -> None:
+    def __init__(self, endpoint: str, token: str, timeout: float = 10.0) -> None:
         self.endpoint = endpoint
+        self.token = token
         self.timeout = timeout
 
     def send(self, batch: Batch) -> bool:
         request = Request(
             self.endpoint,
             data=_encode_batch(batch),
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.token}",
+            },
             method="POST",
         )
 

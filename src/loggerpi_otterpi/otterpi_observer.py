@@ -37,9 +37,10 @@ def main() -> None:
     host = _required_environment("OTTERPI_HOST")
     port = _int_environment("OTTERPI_PORT")
     database = _required_environment("OTTERPI_DATABASE")
+    token = _required_environment("OTTERPI_TOKEN")
 
     store = BatchStore(database)
-    server = create_server(host, port, store)
+    server = create_server(host, port, store, token=token)
 
     LOGGER.info("OtterPi server starting on %s:%s", host, port)
 

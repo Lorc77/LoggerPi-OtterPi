@@ -3,10 +3,13 @@ from unittest.mock import Mock, patch
 import loggerpi_observer
 import pytest
 
+TEST_TOKEN = "lp-test-token-1234567890abcdef"
+
 
 def test_main_builds_runtime_and_starts_runner(monkeypatch) -> None:
     monkeypatch.setenv("LOGGERPI_ID", "loggerpi-test")
     monkeypatch.setenv("OTTERPI_URL", "http://otterpi:8080/api/v1/batches")
+    monkeypatch.setenv("LOGGERPI_TOKEN", TEST_TOKEN)
     monkeypatch.setenv("LOGGERPI_INTERVAL_SECONDS", "30")
     monkeypatch.setenv("LOGGERPI_QUEUE_FILE", "/tmp/loggerpi/queue.jsonl")
     monkeypatch.setenv("LOGGERPI_SEQUENCE_FILE", "/tmp/loggerpi/sequence")
@@ -29,6 +32,7 @@ def test_main_builds_runtime_and_starts_runner(monkeypatch) -> None:
     assert runtime.logger_id == "loggerpi-test"
     assert runtime.readers is readers
     assert runtime.delivery.endpoint == ("http://otterpi:8080/api/v1/batches")
+    assert runtime.delivery.token == TEST_TOKEN
     assert runtime.queue.path.as_posix() == "/tmp/loggerpi/queue.jsonl"
     assert runtime.sequence_store.path.as_posix() == "/tmp/loggerpi/sequence"
     assert run.call_args.kwargs["interval_seconds"] == 30.0
@@ -39,6 +43,7 @@ def test_main_builds_runtime_and_starts_runner(monkeypatch) -> None:
     [
         "LOGGERPI_ID",
         "OTTERPI_URL",
+        "LOGGERPI_TOKEN",
         "LOGGERPI_INTERVAL_SECONDS",
         "LOGGERPI_QUEUE_FILE",
         "LOGGERPI_SEQUENCE_FILE",
@@ -48,6 +53,7 @@ def test_main_requires_environment_variable(monkeypatch, variable: str) -> None:
     values = {
         "LOGGERPI_ID": "loggerpi-test",
         "OTTERPI_URL": "http://otterpi:8080/api/v1/batches",
+        "LOGGERPI_TOKEN": TEST_TOKEN,
         "LOGGERPI_INTERVAL_SECONDS": "30",
         "LOGGERPI_QUEUE_FILE": "/tmp/loggerpi/queue.jsonl",
         "LOGGERPI_SEQUENCE_FILE": "/tmp/loggerpi/sequence",
@@ -69,6 +75,7 @@ def test_main_requires_environment_variable(monkeypatch, variable: str) -> None:
 def test_main_rejects_invalid_interval(monkeypatch, value: str) -> None:
     monkeypatch.setenv("LOGGERPI_ID", "loggerpi-test")
     monkeypatch.setenv("OTTERPI_URL", "http://otterpi:8080/api/v1/batches")
+    monkeypatch.setenv("LOGGERPI_TOKEN", TEST_TOKEN)
     monkeypatch.setenv("LOGGERPI_INTERVAL_SECONDS", value)
     monkeypatch.setenv("LOGGERPI_QUEUE_FILE", "/tmp/loggerpi/queue.jsonl")
     monkeypatch.setenv("LOGGERPI_SEQUENCE_FILE", "/tmp/loggerpi/sequence")

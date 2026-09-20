@@ -13,10 +13,12 @@ from model.measurement import Measurement
 from otterpi import create_server
 from otterpi_store import BatchStore
 
+TEST_TOKEN = "lp-test-token-1234567890abcdef"
+
 
 def test_measurement_batch_queue_http_e2e(tmp_path: Path) -> None:
     store = BatchStore(tmp_path / "otter.db")
-    server = create_server("127.0.0.1", 0, store)
+    server = create_server("127.0.0.1", 0, store, token=TEST_TOKEN)
     thread = Thread(target=server.serve_forever)
     thread.start()
 
@@ -68,7 +70,10 @@ def test_measurement_batch_queue_http_e2e(tmp_path: Path) -> None:
 
         queue.enqueue(batch)
 
-        delivery = BatchDelivery(f"http://127.0.0.1:{server.server_port}/api/v1/batches")
+        delivery = BatchDelivery(
+            f"http://127.0.0.1:{server.server_port}/api/v1/batches",
+            token=TEST_TOKEN,
+        )
 
         assert delivery.send(batch) is True
         queue.remove(batch)
@@ -204,7 +209,10 @@ def test_atmoweb_measurement_batch_queue_http_e2e(tmp_path: Path) -> None:
 
         queue.enqueue(batch)
 
-        delivery = BatchDelivery(f"http://127.0.0.1:{otter_server.server_port}/api/v1/batches")
+        delivery = BatchDelivery(
+            f"http://127.0.0.1:{otter_server.server_port}/api/v1/batches",
+            token=TEST_TOKEN,
+        )
 
         assert delivery.send(batch) is True
         queue.remove(batch)

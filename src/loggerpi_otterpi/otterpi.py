@@ -8,10 +8,28 @@ from otterpi_store import BatchStore
 
 class OtterPiHandler(BaseHTTPRequestHandler):
     store: Optional[BatchStore] = None
+    token: Optional[str] = None
 
     def do_POST(self) -> None:
         if self.path != "/api/v1/batches":
             self.send_error(404)
+            return
+
+        # Token validieren
+        auth = self.headers.get("Authorization", "")
+        expected = f"Bearer {self.token}"
+
+        if auth != expected:
+            self._send_json(
+                401,
+                {
+                    "status": "error",
+                    "error": {
+                        "code": "unauthorized",
+                        "message": "Invalid or missing token.",
+                    },
+                },
+            )
             return
 
         if self.headers.get("Content-Type") != "application/json":
@@ -106,11 +124,12 @@ def create_server(
     host: str,
     port: int,
     store: BatchStore,
+    token: Optional[str] = None,
 ) -> HTTPServer:
     handler = type(
         "OtterPiRequestHandler",
         (OtterPiHandler,),
-        {"store": store},
+        {"store": store, "token": token},
     )
 
     return HTTPServer((host, port), handler)
