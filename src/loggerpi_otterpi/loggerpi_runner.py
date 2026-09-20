@@ -2,6 +2,7 @@
 
 import logging
 import signal
+import threading
 import time
 from types import FrameType
 from typing import Optional
@@ -24,11 +25,11 @@ class LoggerPiRunner:
 
         self._runtime = runtime
         self._interval_seconds = interval_seconds
-        self._stop_requested = False
+        self._stop_event = threading.Event()
 
     def request_stop(self) -> None:
         """Request a graceful shutdown after the current cycle."""
-        self._stop_requested = True
+        self._stop_event.set()
 
     def run(self) -> None:
         """Run runtime cycles until a stop is requested."""
@@ -37,7 +38,7 @@ class LoggerPiRunner:
             self._interval_seconds,
         )
 
-        while not self._stop_requested:
+        while not self._stop_event.is_set():
             started = time.monotonic()
 
             try:
@@ -48,8 +49,9 @@ class LoggerPiRunner:
             elapsed = time.monotonic() - started
             delay = max(0.0, self._interval_seconds - elapsed)
 
-            if delay > 0 and not self._stop_requested:
-                time.sleep(delay)
+            if delay > 0:
+                # Blockiert ressourcenschonend bis zum Timeout ODER bis Stopp angefordert wird
+                self._stop_event.wait(delay)
 
         LOGGER.info("LoggerPi runner stopped")
 

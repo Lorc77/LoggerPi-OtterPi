@@ -15,17 +15,17 @@ def test_runner_does_not_run_when_stop_was_requested() -> None:
     runtime = Mock()
     runner = LoggerPiRunner(runtime, interval_seconds=60)
 
-    def sleep_and_stop(_: float) -> None:
+    def wait_and_stop(_: float) -> None:
         runner.request_stop()
 
     with patch(
-        "loggerpi_runner.time.sleep",
-        side_effect=sleep_and_stop,
-    ) as sleep:
+        "loggerpi_runner.threading.Event.wait",
+        side_effect=wait_and_stop,
+    ) as wait:
         runner.run()
 
     runtime.run_once.assert_called_once_with()
-    sleep.assert_called_once()
+    wait.assert_called_once()
 
 
 def test_runner_continues_after_runtime_error() -> None:
@@ -34,18 +34,18 @@ def test_runner_continues_after_runtime_error() -> None:
 
     runner = LoggerPiRunner(runtime, interval_seconds=60)
 
-    sleep_calls = 0
+    wait_calls = 0
 
-    def sleep_and_stop(_: float) -> None:
-        nonlocal sleep_calls
-        sleep_calls += 1
+    def wait_and_stop(_: float) -> None:
+        nonlocal wait_calls
+        wait_calls += 1
 
-        if sleep_calls >= 2:
+        if wait_calls >= 2:
             runner.request_stop()
 
     with patch(
-        "loggerpi_runner.time.sleep",
-        side_effect=sleep_and_stop,
+        "loggerpi_runner.threading.Event.wait",
+        side_effect=wait_and_stop,
     ):
         runner.run()
 
@@ -71,9 +71,9 @@ def test_runner_does_not_sleep_when_cycle_takes_longer_than_interval() -> None:
             "loggerpi_runner.time.monotonic",
             side_effect=monotonic,
         ),
-        patch("loggerpi_runner.time.sleep") as sleep,
+        patch("loggerpi_runner.threading.Event.wait") as wait,
     ):
         runner.run()
 
     runtime.run_once.assert_called_once_with()
-    sleep.assert_not_called()
+    wait.assert_not_called()
