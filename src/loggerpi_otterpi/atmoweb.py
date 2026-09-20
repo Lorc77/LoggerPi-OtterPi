@@ -51,7 +51,7 @@ class AtmoWebReader:
         try:
             # Standard: JSON-Fragment (reales AtmoWEB)
             # "key": value, "key2": value2, ...
-            json_text = "{" + body.rstrip(",") + "}"
+            json_text = "{" + body.strip().rstrip(",") + "}"
             data = json.loads(json_text)
         except json.JSONDecodeError:
             # Fallback: gültiges JSON (Tests / andere Geräte)
