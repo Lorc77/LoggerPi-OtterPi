@@ -22,7 +22,7 @@ folgende Prüfungen erfolgreich sein:
 ```powershell
 ruff check .
 ruff format --check .
-pytest -q
+pytest
 git diff --check
 git status
 ```
@@ -52,6 +52,17 @@ Commit und schreibt diesen nach erfolgreichem Deployment nach:
 /opt/loggerpi-otterpi/DEPLOYED_COMMIT
 ```
 
+Zusätzlich werden folgende Dateien geschrieben:
+
+```text
+/opt/loggerpi-otterpi/DEPLOYED_VERSION   menschenlesbare Version (z. B. v1.0.0)
+/opt/loggerpi-otterpi/VERSION            Version aus pyproject.toml (z. B. 1.0.0)
+```
+
+Die `DEPLOYED_*`-Dateien werden **nur bei erfolgreichem Update** geschrieben
+(Fail-safe-Design). Schlägt der Service-Neustart fehl, bleibt die bisherige
+Deployment-Version bestehen.
+
 ---
 
 ## 3. LoggerPi Deployment
@@ -66,15 +77,16 @@ Der Wrapper:
 
 1. klont den aktuellen `main`-Stand temporär,
 2. bestimmt den Commit,
-3. führt `deploy/loggerpi/install.sh` aus,
-4. installiert bzw. aktualisiert die Anwendung unter
+3. setzt `chmod +x` für `install.sh`-Dateien,
+4. führt `deploy/loggerpi/install.sh` aus,
+5. installiert bzw. aktualisiert die Anwendung unter
    `/opt/loggerpi-otterpi`,
-5. installiert die systemd-Service-Datei,
-6. aktiviert `loggerpi.observer.service`,
-7. startet den Service neu,
-8. prüft dessen Zustand,
-9. schreibt den deployten Commit nach
-   `/opt/loggerpi-otterpi/DEPLOYED_COMMIT`.
+6. installiert die systemd-Service-Datei,
+7. aktiviert `loggerpi.observer.service`,
+8. startet den Service neu,
+9. prüft dessen Zustand,
+10. schreibt den deployten Commit und die Version nach
+    `/opt/loggerpi-otterpi/DEPLOYED_COMMIT` und `/opt/loggerpi-otterpi/DEPLOYED_VERSION`.
 
 Service:
 
@@ -100,6 +112,41 @@ Persistenter Zustand:
 /var/lib/loggerpi-otterpi
 ```
 
+### Flache Deploy-Struktur
+
+Die Installation kopiert die Anwendungsdateien **flach** nach
+`/opt/loggerpi-otterpi/`:
+
+```text
+/opt/loggerpi-otterpi/
+├── atmoweb.py
+├── atmoweb_config.py
+├── batch_factory.py
+├── batch_queue.py
+├── composer.py
+├── delivery.py
+├── loggerpi_observer.py
+├── loggerpi_runner.py
+├── otterpi.py (nur OtterPi)
+├── otterpi_observer.py (nur OtterPi)
+├── otterpi_store.py (nur OtterPi)
+├── runtime.py
+├── system_info.py
+└── model/
+    ├── batch.py
+    └── measurement.py
+```
+
+Da `model/` ein Unterverzeichnis ist und kein Python-Package-Setup
+(`pip install -e .`) verwendet wird, muss `PYTHONPATH` explizit gesetzt
+werden:
+
+```bash
+PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
+```
+
+Dies wird in den Service-Dateien und den `.env`-Dateien konfiguriert.
+
 ---
 
 ## 4. OtterPi Deployment
@@ -114,14 +161,15 @@ Der Wrapper:
 
 1. klont den aktuellen `main`-Stand temporär,
 2. bestimmt den Commit,
-3. führt `deploy/otterpi/install.sh` aus,
-4. installiert die OtterPi-Anwendung,
-5. installiert bzw. aktualisiert `otterpi.observer.service`,
-6. aktiviert den Service,
-7. startet ihn neu,
-8. prüft dessen Zustand,
-9. schreibt den deployten Commit nach
-   `/opt/loggerpi-otterpi/DEPLOYED_COMMIT`.
+3. setzt `chmod +x` für `install.sh`-Dateien,
+4. führt `deploy/otterpi/install.sh` aus,
+5. installiert die OtterPi-Anwendung,
+6. installiert bzw. aktualisiert `otterpi.observer.service`,
+7. aktiviert den Service,
+8. startet ihn neu,
+9. prüft dessen Zustand,
+10. schreibt den deployten Commit und die Version nach
+    `/opt/loggerpi-otterpi/DEPLOYED_COMMIT` und `/opt/loggerpi-otterpi/DEPLOYED_VERSION`.
 
 Service:
 
@@ -184,7 +232,7 @@ Der LoggerPi soll nicht direkt auf Port 8090 zugreifen.
 
 ## 6. Geplanter Produktionspfad
 
-Der produktive HTTP-Weg soll über den bestehenden nginx/TLS-Stack
+Der productive HTTP-Weg soll über den bestehenden nginx/TLS-Stack
 des OtterPi erfolgen:
 
 ```text
@@ -322,6 +370,13 @@ Commit prüfen:
 cat /opt/loggerpi-otterpi/DEPLOYED_COMMIT
 ```
 
+Version prüfen:
+
+```bash
+cat /opt/loggerpi-otterpi/DEPLOYED_VERSION
+cat /opt/loggerpi-otterpi/VERSION
+```
+
 Zusätzlich:
 
 ```bash
@@ -414,8 +469,11 @@ Stand 2026-09-19:
 Repository:
     main
 
+Version:
+    v1.0.0
+
 Letzter bekannter Release-Commit:
-    1641d48
+    fa92271
 
 Application Deployment:
     implementiert
@@ -424,7 +482,7 @@ LoggerPi Deployment:
     noch nicht auf dem Raspberry Pi verifiziert
 
 OtterPi Deployment:
-    noch nicht auf dem Raspberry Pi verifiziert
+    auf dem Raspberry Pi verifiziert (2026-09-19)
 
 OtterPi Anwendung:
     systemd-Service im Repository definiert

@@ -39,6 +39,10 @@ Installationsskript nach:
 
 installiert.
 
+Die Skripte `deploy/loggerpi/install.sh` und `deploy/otterpi/install.sh` sind
+im Repository als ausführbar markiert (`git update-index --chmod=+x`), damit
+`update.sh` sie nach dem `git clone` direkt ausführen kann.
+
 ### LoggerPi
 
 Der LoggerPi verwendet:
@@ -78,6 +82,8 @@ git clone --depth 1
     ↓
 Commit bestimmen
     ↓
+chmod +x für install.sh-Dateien
+    ↓
 rollenabhängiges install.sh
     ↓
 systemd daemon-reload / enable
@@ -87,19 +93,45 @@ Service restart
 Service-Status prüfen
     ↓
 DEPLOYED_COMMIT schreiben
+    ↓
+DEPLOYED_VERSION schreiben
 ```
 
-Der tatsächlich deployte Commit wird nach:
+Auf dem Zielsystem werden nach erfolgreichem Deployment folgende Dateien geschrieben:
 
 ```text
-/opt/loggerpi-otterpi/DEPLOYED_COMMIT
+/opt/loggerpi-otterpi/DEPLOYED_COMMIT    technischer Git-Commit
+/opt/loggerpi-otterpi/DEPLOYED_VERSION   menschenlesbare Version (z. B. v1.0.0)
 ```
 
-geschrieben.
+Zusätzlich schreibt `install.sh` bereits während der Installation:
+
+```text
+/opt/loggerpi-otterpi/VERSION            Version aus pyproject.toml (z. B. 1.0.0)
+```
 
 Damit kann auf dem Zielsystem jederzeit nachvollzogen werden,
 welcher Repository-Commit zuletzt über den Deployment-Mechanismus
 ausgerollt wurde.
+
+### Versionierung und Deployment-Metadaten
+
+Seit `v1.0.0` wird die Version über mehrere Dateien geführt:
+
+| Datei | Inhalt | Herkunft | Geschrieben von |
+|-------|--------|----------|-----------------|
+| `/opt/loggerpi-otterpi/VERSION` | `1.0.0` | `pyproject.toml` | `install.sh` |
+| `/opt/loggerpi-otterpi/DEPLOYED_VERSION` | `v1.0.0` | Git-Tag | `update.sh` |
+| `/opt/loggerpi-otterpi/DEPLOYED_COMMIT` | `fa92271...` | Git-Commit | `update.sh` |
+
+Die `DEPLOYED_*`-Dateien werden **nur bei erfolgreichem Update** geschrieben
+(Fail-safe-Design). Schlägt der Service-Neustart fehl, bleibt die bisherige
+Deployment-Version bestehen, damit auf dem Zielsystem sofort erkennbar ist,
+welche Version tatsächlich läuft.
+
+Die Versionskennung `v1.0.0` entstammt dem Git-Tag und wird über
+`git describe --tags --exact-match` ermittelt. Fehlt ein Tag, wird `dev`
+als Fallback verwendet.
 
 ### Wichtige Einschränkung
 
@@ -118,6 +150,50 @@ Er konfiguriert derzeit **nicht** automatisch:
 
 Diese Infrastruktur bleibt bis zu einer ausdrücklich implementierten
 Deployment-Erweiterung ein separater administrativer Schritt.
+
+### Flache Deploy-Struktur und PYTHONPATH
+
+Die Installation kopiert die Anwendungsdateien **flach** nach
+`/opt/loggerpi-otterpi/`:
+
+```text
+/opt/loggerpi-otterpi/
+├── atmoweb.py
+├── atmoweb_config.py
+├── batch_factory.py
+├── batch_queue.py
+├── composer.py
+├── delivery.py
+├── loggerpi_observer.py
+├── loggerpi_runner.py
+├── otterpi.py
+├── otterpi_observer.py
+├── otterpi_store.py
+├── runtime.py
+├── system_info.py
+└── model/
+    ├── batch.py
+    └── measurement.py
+```
+
+Da `model/` ein Unterverzeichnis ist und kein Python-Package-Setup
+(`pip install -e .`) verwendet wird, muss `PYTHONPATH` explizit gesetzt
+werden:
+
+```bash
+PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
+```
+
+Dies wird in den Service-Dateien und den `.env`-Dateien konfiguriert:
+
+- `deploy/loggerpi/loggerpi.observer.service`
+- `deploy/otterpi/otterpi.observer.service`
+- `deploy/loggerpi/loggerpi.env.example`
+- `deploy/otterpi/otterpi.env.example`
+
+Hinweis: Die Anwendung läuft ohne `pip install`, ohne Virtualenv und ohne
+Package-Import. Die flache Struktur bleibt bewusst als Deployment-Ansatz
+erhalten.
 
 ---
 
@@ -1144,7 +1220,11 @@ das vorhandene Measurement-Modell überführt.
 
 Die persistente lokale Queue ist implementiert:
 
-src/loggerpi_otterpi/queue.py
+src/loggerpi_otterpi/batch_queue.py
+
+Hinweis: Die Datei wurde bewusst von `queue.py` in `batch_queue.py` umbenannt,
+damit kein Namenskonflikt mit dem Python-Standardmodul `queue` entsteht.
+Andernfalls würde `from queue import BatchQueue` das falsche Modul laden.
 
 Die Queue speichert vollständige Batches lokal als JSON Lines.
 
@@ -1189,9 +1269,7 @@ Dies ist kein separates ACK-Synchronisationsprotokoll.
 
 ### Queue Delivery
 
-Der Queue-Delivery-Schritt ist implementiert:
-
-src/loggerpi_otterpi/queue_delivery.py
+Die Queue-Zustellung ist Bestandteil des LoggerRuntime-Laufs (runtime.py).
 
 Der Delivery-Ablauf ist:
 
@@ -1475,7 +1553,7 @@ abgesichert.
 Derzeit bestehen:
 
 ```text
-53 Tests
+68 Tests
 Alle Tests bestehen.
 ```
 

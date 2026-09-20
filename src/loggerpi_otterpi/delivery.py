@@ -1,3 +1,4 @@
+import json
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -25,6 +26,5 @@ class BatchDelivery:
 
 
 def _encode_batch(batch: Batch) -> bytes:
-    import json
 
     return json.dumps(batch.to_dict(), ensure_ascii=False).encode("utf-8")

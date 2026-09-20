@@ -592,6 +592,143 @@ Authentication-/Authorization-Lösung festgelegt werden.
 
 ---
 
+## DEC-018 — Umbenennung `queue.py` → `batch_queue.py`
+
+**Status:** Angenommen
+**Datum:** 2026-09-19
+
+### Kontext
+
+Die persistente lokale Queue war zunächst in `queue.py` implementiert.
+
+Beim Import `from queue import BatchQueue` bestand jedoch ein Konflikt mit
+dem Python-Standardmodul `queue`.
+
+### Entscheidung
+
+Die Datei wird in `batch_queue.py` umbenannt.
+
+Alle Imports werden entsprechend angepasst:
+
+```python
+from batch_queue import BatchQueue
+```
+
+### Begründung
+
+Der Name `batch_queue` ist eindeutig und kollidiert nicht mit dem
+Python-Standardmodul `queue`.
+
+### Konsequenz
+
+- `queue.py` existiert nicht mehr.
+- `batch_queue.py` ist die neue Bezeichnung.
+- Alle Imports in `runtime.py`, `loggerpi_observer.py` und Tests wurden
+  angepasst.
+- Die `install.sh`-Dateien wurden entsprechend aktualisiert.
+
+---
+
+## DEC-019 — Flache Deploy-Struktur und `PYTHONPATH`
+
+**Status:** Angenommen
+**Datum:** 2026-09-19
+
+### Kontext
+
+Die Installation kopiert die Anwendungsdateien **flach** nach
+`/opt/loggerpi-otterpi/`.
+
+Es wird kein `pip install -e .` verwendet.
+
+### Entscheidung
+
+Die flache Deploy-Struktur wird beibehalten.
+
+Da `model/` ein Unterverzeichnis ist, wird `PYTHONPATH` explizit gesetzt:
+
+```bash
+PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
+```
+
+Dies wird in den Service-Dateien und `.env`-Dateien konfiguriert.
+
+### Begründung
+
+Die flache Struktur ist bewusst gewählt, um ohne `pip`, Virtualenv und
+Package-Import auszukommen.
+
+### Konsequenz
+
+- `PYTHONPATH` muss in den Service-Dateien gesetzt werden.
+- Lokal unter Windows funktionieren Imports über `pythonpath` in
+  `pyproject.toml`.
+
+---
+
+## DEC-020 — Deployment-Versionierung mit `DEPLOYED_VERSION`
+
+**Status:** Angenommen
+**Datum:** 2026-09-19
+
+### Kontext
+
+Bisher wurde nach erfolgreichem Deployment nur `DEPLOYED_COMMIT` geschrieben.
+
+Für eine menschenlesbare Version fehlte eine entsprechende Datei.
+
+### Entscheidung
+
+Zusätzlich zu `DEPLOYED_COMMIT` wird `DEPLOYED_VERSION` geschrieben:
+
+```text
+/opt/loggerpi-otterpi/DEPLOYED_COMMIT    technischer Git-Commit
+/opt/loggerpi-otterpi/DEPLOYED_VERSION   menschenlesbare Version (z. B. v1.0.0)
+/opt/loggerpi-otterpi/VERSION            Version aus pyproject.toml (z. B. 1.0.0)
+```
+
+Die `DEPLOYED_*`-Dateien werden **nur bei erfolgreichem Update** geschrieben
+(Fail-safe-Design).
+
+### Begründung
+
+Damit ist auf dem Zielsystem sofort erkennbar, welche Version tatsächlich
+läuft.
+
+### Konsequenz
+
+- `update.sh` schreibt `DEPLOYED_COMMIT` und `DEPLOYED_VERSION`.
+- `install.sh` schreibt `VERSION`.
+- Bei fehlgeschlagenem Update bleibt die bisherige Version bestehen.
+
+---
+
+## DEC-021 — Erste Release-Version `v1.0.0`
+
+**Status:** Angenommen
+**Datum:** 2026-09-19
+
+### Kontext
+
+Der erste reproduzierbare Deployment-Mechanismus ist implementiert und
+auf dem OtterPi praktisch verifiziert.
+
+### Entscheidung
+
+Die erste Release-Version wird als `v1.0.0` getaggt.
+
+### Begründung
+
+Der aktuelle Stand ist stabil und getestet (68 Tests).
+
+### Konsequenz
+
+- `pyproject.toml` enthält `version = "1.0.0"`.
+- `__init__.py` enthält `__version__ = "1.0.0"`.
+- Git-Tag `v1.0.0` ist gesetzt und gepusht.
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:

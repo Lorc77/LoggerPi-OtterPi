@@ -207,6 +207,37 @@ Für LoggerPi-OtterPi wurde jedoch bewusst die klassische, unmittelbar mit Pytho
 
 Dadurch ist ohne zusätzliche Annahmen erkennbar, welche Syntax die minimale Python-Version tatsächlich unterstützt.
 
+## 4.1 Import-Struktur und Deployment-Kompatibilität
+
+Die Import-Struktur ist auf die flache Deploy-Struktur der Zielsysteme
+ausgelegt.
+
+Die Datei `queue.py` wurde in `batch_queue.py` umbenannt, damit kein
+Namenskonflikt mit dem Python-Standardmodul `queue` entsteht.
+
+Lokal unter Windows funktionieren die Imports über die `pythonpath`-Angabe
+in `pyproject.toml`:
+
+```toml
+[tool.pytest.ini_options]
+pythonpath = [
+    "src",
+    "src/loggerpi_otterpi",
+    "src/loggerpi_otterpi/model",
+]
+```
+
+Auf den Zielsystemen (LoggerPi, OtterPi) wird die flache Deploy-Struktur
+unter `/opt/loggerpi-otterpi/` verwendet. Dort wird `PYTHONPATH` in den
+Service-Dateien und `.env`-Dateien gesetzt:
+
+```bash
+PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
+```
+
+Damit funktionieren Imports wie `from batch_queue import BatchQueue` sowohl
+lokal unter Windows als auch auf den Zielsystemen.
+
 ## 5. Lokales Quality-Gate
 
 Vor einem Commit werden alle drei Prüfungen ausgeführt:
@@ -244,6 +275,8 @@ muss bestätigen, dass die Dateien bereits korrekt formatiert sind.
 ```powershell
 pytest
 ```
+
+Aktueller Stand: **68 Tests**, alle bestehen.
 
 Alle Tests müssen erfolgreich sein.
 

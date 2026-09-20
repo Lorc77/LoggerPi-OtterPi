@@ -191,6 +191,52 @@ Wesentliche technische Vorgaben:
   sein können. `FA102` ersetzt nicht den tatsächlichen Python-3.9-CI-Lauf.
 - Die GitHub Actions testen den Code unter Python 3.9 und Python 3.13.
 
+## Tests und Qualität
+
+### Tests
+
+Die Tests werden mit `pytest` ausgeführt:
+
+```powershell
+pytest
+```
+
+Die `pyproject.toml` definiert:
+
+- `testpaths = ["tests"]`
+- `pythonpath = ["src", "src/loggerpi_otterpi", "src/loggerpi_otterpi/model"]`
+
+Dadurch funktionieren die Imports unter Windows (z. B. `from batch_queue import BatchQueue`)
+ohne zusätzliche `PYTHONPATH`-Setzung.
+
+Aktueller Stand: **68 Tests**, alle bestehen.
+
+### Linting und Formatierung
+
+Ruff wird für Linting und Formatierung verwendet:
+
+```powershell
+ruff check .
+ruff format .
+```
+
+Bei Import-Reihenfolge-Fehlern:
+
+```powershell
+ruff check . --fix
+```
+
+### Import-Struktur
+
+Die Datei `queue.py` wurde in `batch_queue.py` umbenannt, damit kein
+Namenskonflikt mit dem Python-Standardmodul `queue` entsteht.
+
+Auf den Zielsystemen (flache Deploy-Struktur) wird `PYTHONPATH` in den
+Service-Dateien und `.env`-Dateien gesetzt:
+
+```bash
+PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
+```
 
 ## Zielsysteme
 

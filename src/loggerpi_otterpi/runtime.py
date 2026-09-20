@@ -24,24 +24,28 @@ class LoggerRuntime:
         self.queue = queue
 
     def run_once(self):
+        # 1. Queue-Replay: bereits wartende Batches zustellen
         for queued_batch in self.queue.pending():
             if self.delivery.send(queued_batch):
                 self.queue.remove(queued_batch)
             else:
                 break
 
+        # 2. Measurements von allen Readern sammeln
         measurements = {}
 
         for source, reader in self.readers.items():
             for name, measurement in reader.read_measurements().items():
                 measurements[f"{source}.{name}"] = measurement
 
+        # 3. Batch erzeugen
         batch = compose_batch(
             logger_id=self.logger_id,
             sequence_store=self.sequence_store,
             measurements=measurements,
         )
 
+        # 4. Batch zustellen oder in Queue legen
         if not self.delivery.send(batch):
             self.queue.enqueue(batch)
 
