@@ -49,9 +49,16 @@ class AtmoWebReader:
             ) from exc
 
         try:
-            data = json.loads(body)
-        except json.JSONDecodeError as exc:
-            raise AtmoWebError("AtmoWEB hat keine gültige JSON-Antwort geliefert.") from exc
+            # Standard: JSON-Fragment (reales AtmoWEB)
+            # "key": value, "key2": value2, ...
+            json_text = "{" + body.rstrip(",") + "}"
+            data = json.loads(json_text)
+        except json.JSONDecodeError:
+            # Fallback: gültiges JSON (Tests / andere Geräte)
+            try:
+                data = json.loads(body)
+            except json.JSONDecodeError as exc:
+                raise AtmoWebError("AtmoWEB hat keine gültige JSON-Antwort geliefert.") from exc
 
         if not isinstance(data, dict):
             raise AtmoWebError("AtmoWEB-Antwort muss ein JSON-Objekt sein.")
@@ -214,39 +221,13 @@ def _measurement_from_atmoweb(
     unit: str,
     measured_at: Optional[str],
 ) -> Measurement:
-    if value == "N/A":
+    if value in {"N/A", "N/D", "PermissionDenied", None}:
+        validity = "unknown" if value == "N/D" else "unavailable"
         return Measurement(
             value=None,
             unit=unit,
             measured_at=None,
-            validity="unavailable",
-            source="atmoweb",
-        )
-
-    if value == "N/D":
-        return Measurement(
-            value=None,
-            unit=unit,
-            measured_at=None,
-            validity="unknown",
-            source="atmoweb",
-        )
-
-    if value == "PermissionDenied":
-        return Measurement(
-            value=None,
-            unit=unit,
-            measured_at=None,
-            validity="unavailable",
-            source="atmoweb",
-        )
-
-    if value is None:
-        return Measurement(
-            value=None,
-            unit=unit,
-            measured_at=None,
-            validity="unavailable",
+            validity=validity,
             source="atmoweb",
         )
 
@@ -266,10 +247,10 @@ def _optional_bool(value: object) -> Optional[bool]:
     if value in {"N/A", "N/D", None, "PermissionDenied"}:
         return None
 
-    if value == 0 or value == 0.0:
+    if value == 0:
         return False
 
-    if value == 1 or value == 1.0:
+    if value == 1:
         return True
 
     raise AtmoWebError(f"Ungültiger AtmoWEB-State-Wert: {value!r}")
