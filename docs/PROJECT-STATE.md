@@ -12,10 +12,14 @@
 
 ## Deployment-Stand
 
-**Stand:** 2026-09-19
+**Stand:** 2026-09-20
 
 Der erste reproduzierbare Deployment-Mechanismus für LoggerPi und
-OtterPi ist inzwischen im Repository implementiert.
+OtterPi ist implementiert und auf beiden Zielsystemen praktisch
+verifiziert.
+
+LoggerPi und OtterPi laufen produktiv auf Version `v1.0.4` und
+übertragen Core Batches kontinuierlich (alle 15 Minuten).
 
 Der zentrale Deployment-Wrapper befindet sich unter:
 
@@ -1325,13 +1329,30 @@ Batch bleibt in Queue
     ↓
 späterer erneuter Zustellversuch
 
-Der vollständige reale Datenpfad ist noch nicht abgeschlossen, weil neben
-den bereits angebundenen AtmoWEB-Daten weitere konkrete LoggerPi-Datenquellen
-und deren Integration in den vollständigen Laufzeitpfad noch ausstehen.
+Der vollständige reale Datenpfad ist für die AtmoWEB-Datenquellen
+abgeschlossen und praktisch verifiziert (Stand 2026-09-20):
 
-Der nächste fachlich sinnvolle Schritt ist daher nicht eine weitere
-generische Batch- oder Measurement-Abstraktion, sondern die Anbindung
-einer konkreten realen LoggerPi-Datenquelle.
+AtmoWEB 101 + AtmoWEB 102
+    ↓
+AtmoWebReader
+    ↓
+Measurement / Systemdaten
+    ↓
+Core Batch
+    ↓
+persistente Queue
+    ↓
+HTTPS
+    ↓
+nginx
+    ↓
+OtterPi POST /api/v1/batches
+    ↓
+BatchStore
+    ↓
+SQLite
+
+Weitere konkrete LoggerPi-Datenquellen (z. B. Freezer) stehen noch aus.
 
 ## OtterPi-Ingestion und Persistenz
 
@@ -1799,10 +1820,13 @@ neuen Pfades unverändert produktiv.
 
 ## Aktuelle offene Arbeitspakete
 
-### P0 – Produktionsdeployment noch nicht verifiziert
+### P0 – Produktionsdeployment verifiziert ✅
 
-Der Application-Deploymentmechanismus ist im Repository implementiert,
-wurde aber noch nicht auf LoggerPi und OtterPi praktisch ausgerollt.
+Der Application-Deploymentmechanismus ist implementiert und auf
+LoggerPi und OtterPi praktisch ausgerollt (Stand 2026-09-20).
+
+Beide Systeme laufen auf `v1.0.4` und übertragen Core Batches
+kontinuierlich.
 
 Zu verifizieren:
 

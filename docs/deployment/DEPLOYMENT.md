@@ -230,10 +230,10 @@ Der LoggerPi soll nicht direkt auf Port 8090 zugreifen.
 
 ---
 
-## 6. Geplanter Produktionspfad
+## 6. Produktionspfad (verifiziert 2026-09-20)
 
-Der productive HTTP-Weg soll über den bestehenden nginx/TLS-Stack
-des OtterPi erfolgen:
+Der produktive HTTP-Weg erfolgt über den bestehenden nginx/TLS-Stack
+des OtterPi:
 
 ```text
 LoggerPi
@@ -284,6 +284,21 @@ hinzugefügt werden.
 
 Die konkrete produktive Domain muss vor Aktivierung festgelegt und
 dokumentiert werden.
+
+### Verifikation (2026-09-20)
+
+Der nginx-Reverse-Proxy für `loggerpi.makki.route64.de` ist eingerichtet
+und verifiziert:
+
+```nginx
+location /api/v1/batches {
+    proxy_pass http://127.0.0.1:8090;
+    ...
+}
+```
+
+Die Konfiguration wurde mit `sudo nginx -t` geprüft und funktioniert
+im produktiven Betrieb.
 
 ---
 
@@ -417,10 +432,10 @@ Diese Trennung ist absichtlich.
 
 ---
 
-## 12. Produktionsfreigabe
+## 12. Produktionsfreigabe (erfüllt 2026-09-20)
 
-Der neue LoggerPi → OtterPi-Datenpfad gilt erst dann als praktisch
-verifiziert, wenn mindestens folgende Kette erfolgreich getestet wurde:
+Der neue LoggerPi → OtterPi-Datenpfad ist praktisch verifiziert.
+Die folgende Kette wurde erfolgreich getestet:
 
 ```text
 LoggerPi
@@ -463,26 +478,26 @@ Dabei müssen insbesondere geprüft werden:
 
 ## 13. Aktueller Stand
 
-Stand 2026-09-19:
+Stand 2026-09-20:
 
 ```text
 Repository:
     main
 
 Version:
-    v1.0.0
+    v1.0.4
 
 Letzter bekannter Release-Commit:
-    fa92271
+    98c8e00
 
 Application Deployment:
     implementiert
 
 LoggerPi Deployment:
-    noch nicht auf dem Raspberry Pi verifiziert
+    auf dem Raspberry Pi verifiziert (2026-09-20)
 
 OtterPi Deployment:
-    auf dem Raspberry Pi verifiziert (2026-09-19)
+    auf dem Raspberry Pi verifiziert (2026-09-20)
 
 OtterPi Anwendung:
     systemd-Service im Repository definiert
@@ -494,13 +509,14 @@ API:
     POST /api/v1/batches
 
 nginx:
-    bestehende Infrastruktur vorhanden
-    LoggerPi-OtterPi-Reverse-Proxy noch nicht fertig eingerichtet
+    Reverse-Proxy für loggerpi.makki.route64.de eingerichtet und verifiziert
 
 TLS:
     Zertifikate auf OtterPi vorhanden
-    konkrete LoggerPi-OtterPi-nginx-Einbindung noch offen
+    LoggerPi-OtterPi-nginx-Einbindung aktiv
 
 End-to-End-Produktion:
-    noch nicht verifiziert
+    verifiziert (2026-09-20)
+    LoggerPi sendet Batches alle 15 Minuten
+    OtterPi speichert in SQLite
 ```

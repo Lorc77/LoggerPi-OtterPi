@@ -238,6 +238,12 @@ Service-Dateien und `.env`-Dateien gesetzt:
 PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
 ```
 
+### Deployment-Verifikation
+
+Ein erfolgreicher lokaler Testlauf unter Windows gilt nicht als Nachweis
+eines erfolgreichen Raspberry-Pi-Deployments. Die Zielsysteme müssen
+separat praktisch verifiziert werden (siehe `docs/deployment/DEPLOYMENT.md`).
+
 ## Zielsysteme
 
 LoggerPi und OtterPi verwenden bewusst ihre vorhandenen nativen
@@ -264,6 +270,14 @@ Aktueller Stand:
 - Architektur: ARM64 (`aarch64`)
 - System-Python: Python 3.13.5
 
+### Aktueller Betriebsstand (2026-09-20)
+
+Beide Zielsysteme laufen produktiv:
+
+| System | Version | Status |
+|--------|---------|--------|
+| LoggerPi | `v1.0.4` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.0.4` | Empfängt Batches, speichert in SQLite |
 
 ## Grundsätze für die Zielsysteme
 
@@ -285,6 +299,13 @@ Entwicklungsrechner.
 
 Die grundlegende Windows-Entwicklungsumgebung wurde eingerichtet und
 erfolgreich verifiziert.
+
+### Aktueller Stand (2026-09-20)
+
+- LoggerPi und OtterPi laufen produktiv auf `v1.0.4`
+- E2E-Datenpfad (LoggerPi → OtterPi → SQLite) ist verifiziert
+- 68 Tests bestehen
+- Ruff-Quality-Gates sind grün
 
 Verifiziert sind:
 

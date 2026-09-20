@@ -1409,8 +1409,9 @@ Bei der nächsten Sitzung kann direkt mit der nächsten Entwicklungsphase begonn
 | Syntax | ✅ |
 | Versionskette | ✅ dokumentiert |
 | Exploration | **✅ abgeschlossen** |
-| neue Observer-Architektur | 🟡 nächster Entwicklungsschritt |
-| OtterPi-Anbindung | 🟡 geplant |
+| neuer Observer (LoggerPi-OtterPi) | ✅ produktiv (v1.0.4, 2026-09-20) |
+| OtterPi-Anbindung | ✅ verifiziert (2026-09-20) |
+| E2E-Datenpfad | ✅ verifiziert (2026-09-20) |
 | Migration | 🟡 geplant |
 
 ---
@@ -1437,6 +1438,21 @@ Dabei sollten wir vor dem ersten Code insbesondere festlegen:
 12. endgültige Entfernung der ThingSpeak-Kompatibilität
 
 **Bis dahin bleibt observer.py v4 unverändert produktiv.**
+
+### Migrationsstand (2026-09-20)
+
+Die neue LoggerPi → OtterPi-Lösung ist für die AtmoWEB-Datenquellen
+produktiv verifiziert (Version `v1.0.4`).
+
+Der neue Observer (`loggerpi_observer.py`) läuft auf dem LoggerPi und
+überträgt Core Batches an den OtterPi.
+
+Die Legacy-`observer.py` (v4) läuft weiterhin parallel und überträgt
+weiterhin Daten an ThingSpeak.
+
+Eine Ablösung der Legacy-Anwendung ist erst nach erfolgreicher Anbindung
+aller relevanten Datenquellen (Freezer, IPP300) und der Verifikation des
+neuen Datenpfads vorgesehen.
 
 ---
 

@@ -638,6 +638,24 @@ measurements
 
 Nicht jeder Sensor muss zu jedem Zeitpunkt einen gültigen Wert liefern.
 
+### Implementierungsstand (2026-09-20)
+
+In der aktuellen Implementierung werden die Measurements mit einem
+Quellen-Prefix versehen, wenn mehrere AtmoWEB-Geräte in einem Batch
+zusammengeführt werden:
+
+```text
+measurements
+├── atmoweb_101.temperature_1
+├── atmoweb_101.humidity
+├── atmoweb_102.temperature_1
+├── atmoweb_102.humidity
+└── ...
+```
+
+Das Präfix `atmoweb_101` / `atmoweb_102` identifiziert die Quelle und
+wird in `runtime.py` beim Zusammenführen der Measurements vergeben.
+
 ---
 
 # 16. Validity
@@ -1094,6 +1112,60 @@ Der technische HTTP-Contract ist in
 }
 ```
 
+### Reales Beispiel (2026-09-20)
+
+Der produktive LoggerPi erzeugt aktuell Batches mit folgender Struktur
+(Auszug):
+
+```json
+{
+  "schema_version": "1.0",
+  "batch_id": "bc3a0869-7966-4b5e-9d97-0ea7d7b26f68",
+  "logger_id": "loggerpi-001",
+  "sequence": 0,
+  "created_at": "2026-09-20T02:36:44.676898+00:00",
+  "system": {
+    "time": { ... },
+    "boot": { ... },
+    "cpu": { ... }
+  },
+  "memory": { ... },
+  "measurements": {
+    "atmoweb_101.temperature_1": {
+      "value": 22.993,
+      "unit": "celsius",
+      "measured_at": "2026-09-20T04:38:16+01:00",
+      "validity": "valid",
+      "source": "atmoweb"
+    },
+    "atmoweb_101.humidity": {
+      "value": 60.401,
+      "unit": "percent",
+      "measured_at": "2026-09-20T04:38:16+01:00",
+      "validity": "valid",
+      "source": "atmoweb"
+    },
+    "atmoweb_102.temperature_1": {
+      "value": 23.003,
+      "unit": "celsius",
+      "measured_at": "2026-09-20T04:38:03+01:00",
+      "validity": "valid",
+      "source": "atmoweb"
+    },
+    "atmoweb_102.humidity": {
+      "value": 62.752,
+      "unit": "percent",
+      "measured_at": "2026-09-20T04:38:03+01:00",
+      "validity": "valid",
+      "source": "atmoweb"
+    }
+  }
+}
+```
+
+Nicht verfügbare Werte (z. B. `Temp2Read`, `VacRead`, `CO2Read`) werden
+mit `value: null` und `validity: "unavailable"` übertragen.
+
 ---
 
 ## 23. Status
@@ -1118,7 +1190,21 @@ Damit sind insbesondere festgelegt:
 - persistente lokale Queue
 - keine nachgelagerte Rückverbindung zum LoggerPi
 
-Die konkrete Authentication ist noch nicht final festgelegt.
+Die konkrete Authentication ist noch nicht final festgelegt (geplant:
+API-Key-/Token-Ansatz, Stand 2026-09-20).
+
+### Implementierungsstand (2026-09-20)
+
+Der Core Batch v1 ist für die aktuell implementierten Bereiche praktisch
+verifiziert:
+
+- Batch Envelope ✅
+- `system` (time, boot, cpu) ✅
+- `memory` ✅
+- `measurements` (AtmoWEB mit Quellen-Prefix) ✅
+- Measurement-Modell mit `null`- und `validity`-Semantik ✅
+- `states`, `operation`, `serial`, `freezer`, `services` – noch nicht
+  implementiert (geplant für spätere Datenquellen)
 
 Die Bereiche `connectivity.upload` und `connectivity.queue` sind als
 technische Connectivity-Telemetrie vorgesehen.

@@ -39,3 +39,15 @@ Insbesondere soll nachvollziehbar bleiben:
 4. welche Teile später durch das neue Datenmodell ersetzt oder weiterentwickelt wurden.
 
 Neue Änderungen am aktuellen System sollen grundsätzlich **nicht** in diesen Legacy-Dateien dokumentiert werden.
+
+### Aktueller Migrationsstand (2026-09-20)
+
+Die neue LoggerPi → OtterPi-Lösung ist für die AtmoWEB-Datenquellen
+produktiv verifiziert (Version `v1.0.4`).
+
+Die Legacy-`observer.py` läuft weiterhin parallel und überträgt weiterhin
+Daten an ThingSpeak.
+
+Eine Ablösung der Legacy-Anwendung ist erst nach erfolgreicher Anbindung
+aller relevanten Datenquellen (Freezer, IPP300) und der Verifikation des
+neuen Datenpfads vorgesehen.

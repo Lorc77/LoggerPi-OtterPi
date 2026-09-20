@@ -729,6 +729,160 @@ Der aktuelle Stand ist stabil und getestet (68 Tests).
 
 ---
 
+## DEC-022 — AtmoWEB JSON-Fragment-Parsing
+
+**Status:** Angenommen
+**Datum:** 2026-09-20
+
+### Kontext
+
+Die realen AtmoWEB-Geräte (HPP260) liefern ihre Antworten als
+JSON-Fragment ohne umschließende geschweifte Klammern:
+
+```text
+"SN": "W616.0154", "DevType": "HPP260", ...
+```
+
+Zusätzlich endet die Antwort mit einem trailing Leerzeichen nach dem
+letzten Komma.
+
+### Entscheidung
+
+`atmoweb.py` behandelt das JSON-Fragment als Standard und ergänzt die
+Klammern:
+
+```python
+json_text = "{" + body.strip().rstrip(",") + "}"
+```
+
+Gültiges JSON (z. B. in Tests) wird als Fallback unterstützt.
+
+### Begründung
+
+Der produktive Standardfall (reales AtmoWEB) benötigt nur einen
+Parsing-Versuch.
+
+### Konsequenz
+
+- `_request()` unterstützt beide Formate.
+- Das trailing Leerzeichen wird mit `strip()` entfernt.
+
+---
+
+## DEC-023 — `OTTERPI_URL` mit vollständigem API-Pfad
+
+**Status:** Angenommen
+**Datum:** 2026-09-20
+
+### Kontext
+
+Der LoggerPi sendete Batches an `https://loggerpi.makki.route64.de`
+(ohne Pfad). nginx leitete `/` an `return 404` weiter, sodass die
+Delivery fehlschlug.
+
+### Entscheidung
+
+`OTTERPI_URL` muss den vollständigen API-Pfad enthalten:
+
+```bash
+OTTERPI_URL=https://loggerpi.makki.route64.de/api/v1/batches
+```
+
+### Begründung
+
+Der `BatchDelivery` sendet direkt an den konfigurierten Endpoint.
+Ohne den Pfad wird nginx-Root (`404`) erreicht.
+
+### Konsequenz
+
+- `loggerpi.env.example` enthält den vollständigen Pfad.
+- Bestehende Installationen müssen die URL manuell anpassen.
+
+---
+
+## DEC-024 — Graceful Shutdown mit `threading.Event`
+
+**Status:** Angenommen
+**Datum:** 2026-09-20
+
+### Kontext
+
+Der `LoggerPiRunner` nutzte `time.sleep(interval)` (bis zu 900s).
+Bei `SIGTERM` konnte der Prozess nicht schnell stoppen → systemd
+killte ihn nach 90s mit `SIGKILL`.
+
+### Entscheidung
+
+Statt `time.sleep()` wird `threading.Event.wait(timeout)` verwendet:
+
+```python
+self._stop_event.wait(delay)
+```
+
+`request_stop()` setzt das Event → `wait()` kehrt sofort zurück.
+
+### Begründung
+
+`Event.wait(timeout)` blockiert ressourcenschonend (kein ständiges
+Aufwachen) und reagiert sofort auf Stopp.
+
+### Konsequenz
+
+- Service stoppt sauber (kein `SIGKILL` mehr).
+- Ressourcenschonend (keine 1-Sekunden-Schleife).
+
+---
+
+## DEC-025 — E2E-Datenpfad praktisch verifiziert
+
+**Status:** Angenommen
+**Datum:** 2026-09-20
+
+### Kontext
+
+Der komplette Datenpfad LoggerPi → OtterPi war implementiert, aber noch
+nicht praktisch verifiziert.
+
+### Entscheidung
+
+Der E2E-Datenpfad gilt als praktisch verifiziert:
+
+```text
+AtmoWEB 101 + AtmoWEB 102
+    ↓
+AtmoWebReader
+    ↓
+Measurement / Systemdaten
+    ↓
+Core Batch
+    ↓
+persistente Queue
+    ↓
+HTTPS
+    ↓
+nginx
+    ↓
+OtterPi POST /api/v1/batches
+    ↓
+BatchStore
+    ↓
+SQLite
+```
+
+### Begründung
+
+LoggerPi und OtterPi laufen produktiv auf `v1.0.4` und übertragen
+Batches kontinuierlich (alle 15 Minuten). Die SQLite-Datenbank wächst
+nachweislich.
+
+### Konsequenz
+
+- Der E2E-Datenpfad ist als verifiziert zu dokumentieren.
+- Weitere Datenquellen (Freezer, IPP300) können schrittweise angebunden
+  werden.
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:
@@ -738,7 +892,9 @@ Folgende Punkte sind derzeit bewusst noch offen:
 - konkrete Retry-/Backoff-Parameter
 - Queue-Größe und Aufbewahrungsdauer
 - Umgang mit dauerhaft nicht zustellbaren Batches
-- Persistenzimplementierung des OtterPi
-- Authentifizierung und Autorisierung im produktiven Betrieb
+- Authentifizierung und Autorisierung im produktiven Betrieb (geplant:
+  API-Key-/Token-Ansatz)
 - endgültige WeatherHub-Adapterimplementierung
 - Zeitpunkt der Ablösung des Legacy-Observers
+- Integration von States/Events (Change Detection)
+- Dashboard auf dem OtterPi (geplant: `zoology.makki.route64.de`)

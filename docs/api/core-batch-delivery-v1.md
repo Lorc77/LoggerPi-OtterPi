@@ -769,6 +769,22 @@ retry-fähig, solange sich die Authentifizierungsbedingungen nicht ändern.
 
 Der Batch selbst enthält keine Authentication-Daten.
 
+### Implementierungsstand (2026-09-20)
+
+Authentication ist noch nicht implementiert.
+
+Geplant ist ein schlanker API-Key-/Token-Ansatz:
+
+```text
+Authorization: Bearer <token>
+```
+
+Der LoggerPi sendet den Token im HTTP-Header mit. Der OtterPi validiert
+ihn, bevor der Batch angenommen wird.
+
+Die konkrete Token-Verwaltung (Erzeugung, Rotation, Speicherung) wird
+separat spezifiziert.
+
 ---
 
 # 25. Zusammenfassung der Zustellentscheidungen
@@ -793,6 +809,15 @@ Der Batch selbst enthält keine Authentication-Daten.
 | Connection Timeout | keine sichere Annahme | retry |
 | Response verloren | Annahme unbekannt | retry |
 | HTTP 202 | dauerhaft angenommen | Queue-Eintrag kann entfernt werden |
+
+### Praktische Verifikation (2026-09-20)
+
+Die Zustellentscheidungen wurden im produktiven Betrieb verifiziert:
+
+- erfolgreiche Zustellung → `202` → Batch aus Queue entfernt
+- OtterPi nicht erreichbar → Batch bleibt in Queue → späterer Retry
+- Duplicate → `202` (idempotente Annahme)
+- Identitätskonflikt → `409 Conflict`
 
 ---
 
@@ -825,5 +850,17 @@ Noch separat zu definieren sind:
 - Queue-Größe
 - Queue-Aufbewahrungsdauer
 - Verhalten bei dauerhaft nicht zustellbaren Batches
-- Authentication
+- Authentication (geplant: API-Key-/Token-Ansatz, Stand 2026-09-20)
 - konkrete OtterPi-Persistenz
+
+### Implementierungsstand (2026-09-20)
+
+Die grundlegende Delivery-Semantik ist implementiert und praktisch
+verifiziert:
+
+- LoggerPi erzeugt Batches und legt sie bei Fehlern in die persistente Queue
+- Bei erfolgreicher HTTP-Annahme (`202`) wird der Batch aus der Queue entfernt
+- Duplicate Handling ist auf dem OtterPi implementiert
+- `409 Conflict` wird bei Identitätskonflikten zurückgegeben
+- Der E2E-Datenpfad (LoggerPi → nginx → OtterPi → SQLite) ist verifiziert
+- Authentication ist noch nicht implementiert (geplant)

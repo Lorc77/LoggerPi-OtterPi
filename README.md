@@ -121,6 +121,15 @@ Da `model/` ein Unterverzeichnis ist, wird `PYTHONPATH` gesetzt:
 PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
 ```
 
+### Aktueller Betriebsstand (2026-09-20)
+
+| System | Version | Status |
+|--------|---------|--------|
+| LoggerPi | `v1.0.4` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.0.4` | Empfängt Batches, speichert in SQLite |
+
+Der E2E-Datenpfad (LoggerPi → nginx → OtterPi → SQLite) ist verifiziert.
+
 ---
 
 ## Entwicklung
@@ -155,13 +164,13 @@ Aktueller Stand: **68 Tests**, alle bestehen.
 
 ## Versionierung
 
-Aktuelle Version: **v1.0.0**
+Aktuelle Version: **v1.0.4**
 
 Die Version wird geführt über:
 
-- `pyproject.toml` → `version = "1.0.0"`
-- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.0.0"`
-- Git-Tag `v1.0.0`
+- `pyproject.toml` → `version = "1.0.4"`
+- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.0.4"`
+- Git-Tag `v1.0.4`
 
 ---
 
@@ -171,12 +180,28 @@ Weitere Dokumentation:
 
 ```text
 docs/PROJECT-STATE.md
+docs/system-inventory.md
+
 docs/deployment/DEPLOYMENT.md
+
 docs/development/DEVELOPMENT-ENVIRONMENT.md
 docs/development/DEVELOPMENT-QUALITY.md
 docs/development/DECISIONS.md
-docs/data-model/
-docs/api/
+
+docs/data-model/data-model-v1-field-catalog.md
+docs/data-model/core-batch-v1.md
+docs/data-model/core-batch-v1-json.md
+
+docs/api/core-batch-api-v1.md
+docs/api/core-batch-delivery-v1.md
+
+docs/baselines/LoggerPi_Observer_Technical_Baseline_v4.md
+docs/baselines/OtterPi_Technical_Baseline_v1.md
+docs/baselines/freezer-log.service
+
+docs/legacy/README.md
+docs/legacy/observer.md
+docs/legacy/observer.py
 ```
 
 ---

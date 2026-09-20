@@ -879,6 +879,24 @@ measurements.fan_speed
 
 Die endgültige Benennung und Gruppierung wird beim konkreten Batch-Schema noch einmal geprüft.
 
+### Implementierungsstand (2026-09-20)
+
+In der aktuellen Implementierung werden die Measurements mit einem
+Quellen-Prefix versehen, wenn mehrere AtmoWEB-Geräte in einem Batch
+zusammengeführt werden:
+
+```text
+measurements
+├── atmoweb_101.temperature_1
+├── atmoweb_101.humidity
+├── atmoweb_102.temperature_1
+├── atmoweb_102.humidity
+└── ...
+```
+
+Das Präfix `atmoweb_101` / `atmoweb_102` identifiziert die Quelle und
+wird in `runtime.py` beim Zusammenführen der Measurements vergeben.
+
 ---
 
 ## 31. AtmoWEB N/A
@@ -1446,12 +1464,25 @@ Noch nicht abgeschlossen sind insbesondere:
 
 - vollständiges Metadata-Change-/Synchronisationsprotokoll
 - Event-Schema
-- Authentication
+- Authentication (geplant: API-Key-/Token-Ansatz, Stand 2026-09-20)
 - Schema-Versionierung
 - Routing-/DNS-Platzierung
 - Behandlung statischer Netzwerk-/Storage-Metadata
 - genaue technische Umsetzung der Legacy-Ablösung
 - finale Zuordnung weiterer Runtime-Komponenten zum neuen Service-Modell
+
+### Implementierungsstand (2026-09-20)
+
+Der Core Batch v1 ist für die aktuell implementierten Bereiche praktisch
+verifiziert:
+
+- Batch Envelope ✅
+- `system` (time, boot, cpu) ✅
+- `memory` ✅
+- `measurements` (AtmoWEB mit Quellen-Prefix) ✅
+- Measurement-Modell mit `null`- und `validity`-Semantik ✅
+- `states`, `operation`, `serial`, `freezer`, `services` – noch nicht
+  implementiert (geplant für spätere Datenquellen)
 
 Damit bleibt der Feldkatalog die verbindliche Data-Model-Referenz, ohne
 bereits offene nachgelagerte Designbereiche vorwegzunehmen.

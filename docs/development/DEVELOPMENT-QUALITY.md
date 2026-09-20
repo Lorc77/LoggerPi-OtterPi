@@ -500,6 +500,8 @@ Für die relevanten Bereiche gilt folgende Hierarchie:
 3. Dieses Dokument beschreibt Entwicklungs- und Quality-Gate-Regeln.
 4. `DECISIONS.md` dokumentiert wesentliche Projektentscheidungen und deren Begründungen.
 5. Die lokale `.venv` ist ein Detail der Entwicklungsumgebung und keine Kompatibilitätsdefinition.
+6. `docs/deployment/DEPLOYMENT.md` dokumentiert den Deployment-Ablauf und
+   den aktuellen Betriebsstand der Zielsysteme.
 
 Wenn Dokumentation und Konfiguration voneinander abweichen, gilt zunächst die Konfiguration als technische Quelle der Wahrheit. Die Dokumentation muss anschließend korrigiert werden.
 
@@ -540,3 +542,14 @@ entsprechende Service-Instanz praktisch verifiziert werden.
 
 Ein erfolgreicher lokaler Testlauf unter Windows gilt nicht als
 Nachweis eines erfolgreichen Raspberry-Pi-Deployments.
+
+### Praktische Verifikation (2026-09-20)
+
+Der E2E-Datenpfad (LoggerPi → OtterPi → SQLite) ist praktisch verifiziert:
+
+- LoggerPi sendet Batches alle 15 Minuten
+- OtterPi empfängt und speichert in SQLite
+- nginx-Reverse-Proxy funktioniert
+- Duplicate Handling funktioniert
+
+Weitere Datenquellen (Freezer, IPP300) sind noch nicht angebunden.

@@ -268,10 +268,24 @@ maßgeblich.
 Authentication ist Bestandteil des API-Designs, wird aber nicht durch die
 fachliche Core-Batch-Payload abgebildet.
 
-Die konkrete Authentication-Methode wird separat spezifiziert.
-
 Insbesondere werden keine Authentication-Daten in den Core Batch
 aufgenommen.
+
+### Implementierungsstand (2026-09-20)
+
+Die konkrete Authentication-Methode ist noch nicht implementiert.
+
+Geplant ist ein schlanker API-Key-/Token-Ansatz:
+
+```text
+Authorization: Bearer <token>
+```
+
+Der LoggerPi sendet den Token im HTTP-Header mit. Der OtterPi validiert
+ihn, bevor der Batch angenommen wird.
+
+Die konkrete Token-Verwaltung (Erzeugung, Rotation, Speicherung) wird
+separat spezifiziert.
 
 ---
 
@@ -386,6 +400,14 @@ idempotent.
 Die weitergehende Retry-Policy des LoggerPi, insbesondere Backoff und
 Verhalten bei dauerhaft nicht erreichbarem OtterPi, bleibt Bestandteil des
 Delivery-Designs.
+
+### Praktische Verifikation (2026-09-20)
+
+Das Duplicate Handling wurde im produktiven Betrieb verifiziert:
+
+- identische Batch-Identität + identischer Payload → idempotente Annahme
+- identische `batch_id` + unterschiedlicher Payload → `409 Conflict`
+- identische `logger_id` + `sequence` + andere `batch_id` → `409 Conflict`
 
 ---
 
@@ -503,4 +525,15 @@ Festgelegt sind:
 
 Noch separat zu definieren sind:
 
-  * Authentication
+  * Authentication (geplant: API-Key-/Token-Ansatz, Stand 2026-09-20)
+
+### Implementierungsstand (2026-09-20)
+
+Der API-Endpunkt `POST /api/v1/batches` ist implementiert und praktisch
+verifiziert:
+
+- LoggerPi sendet Core Batches kontinuierlich (alle 15 Minuten)
+- OtterPi nimmt Batches an und speichert sie in SQLite
+- Duplicate Handling ist implementiert
+- nginx-Reverse-Proxy funktioniert (`https://loggerpi.makki.route64.de`)
+- Authentication ist noch nicht implementiert (geplant)

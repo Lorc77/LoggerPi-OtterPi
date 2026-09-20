@@ -1271,6 +1271,18 @@ Für zukünftige Gespräche über otterpi können wir diesen Zustand als Ausgang
 
 **otterpi ist ein produktiver Debian-13-ARM64-Raspberry-Pi hinter einer FRITZ!Box 6690 Cable mit DS-Lite. IPv4-Publikation erfolgt für relevante Dienste über CDN/Tunnel. IPv6 ist direkt global am Host vorhanden. nginx stellt 80/443 bereit und proxied u. a. MeshCentral auf localhost:4430 und Pi-hole auf localhost:8080. MeshCentral 1.2.4 läuft als eigener systemd-Dienst. Pi-hole Core 6.4.3 / Web 6.6 / FTL 6.7 läuft lokal. SSH, DNS, rpcbind und weitere Dienste lauschen intern auf allen Interfaces. Es gibt derzeit keine aktive Host-Firewall via ufw/nftables. Externe IPv6-Tests haben 80/443 als OPEN und die getesteten internen TCP-Ports als CLOSED gezeigt. Änderungen müssen daher zunächst lesend geplant und besonders vorsichtig umgesetzt werden; Firewall-/Routingänderungen sind nicht Teil der Baseline-Erstellung.**
 
+### Aktueller Stand (2026-09-20)
+
+Der OtterPi betreibt zusätzlich den LoggerPi-OtterPi-Dienst:
+
+- `otterpi.observer.service` (Version `v1.0.4`)
+- HTTP-Listener auf `127.0.0.1:8090`
+- nginx-Reverse-Proxy für `loggerpi.makki.route64.de` → `127.0.0.1:8090`
+- SQLite-Persistenz unter `/var/lib/loggerpi-otterpi/batches.sqlite3`
+
+Der LoggerPi sendet kontinuierlich Core Batches (alle 15 Minuten),
+die der OtterPi empfängt und in SQLite speichert.
+
 ---
 
 ## 37. Änderungslog
@@ -1312,6 +1324,17 @@ Erfasst:
 - Secret-Hygiene
 
 **Keine Systemänderungen durchgeführt.**
+
+### v1.1 – 2026-09-20 (Ergänzung, keine Systemänderung)
+
+Ergänzt:
+
+- LoggerPi-OtterPi-Dienst auf dem OtterPi
+- `otterpi.observer.service` (v1.0.4)
+- nginx-Reverse-Proxy für `loggerpi.makki.route64.de`
+- SQLite-Persistenz für Core Batches
+
+**Keine Änderungen an der bestehenden Baseline-Erfassung.**
 
 ---
 

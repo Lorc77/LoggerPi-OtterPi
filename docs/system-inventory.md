@@ -258,6 +258,11 @@ dokumentiert bzw. angepasst werden.
 Die vollständige Untersuchung ist unter
 `docs/research/memmert-ipp300-linux-usb-identity.md` dokumentiert.
 
+> **Hinweis (Stand 2026-09-20):** Die beiden MEMMERT IPP300 sind derzeit
+> noch **nicht** in das neue LoggerPi-OtterPi-Datenmodell integriert.
+> Sie werden weiterhin über den Legacy-Pfad betrieben. Eine spätere
+> Integration erfolgt über einen dedizierten IPP300-Adapter/Reader.
+
 ---
 
 ### 5.2 Freezer – stabile USB-Identität
@@ -288,6 +293,12 @@ Adapter selbst derselbe bleibt.
 Für eine spätere Migration des Freezer-Readers sollte daher der
 seriennummernbasierte `by-id`-Pfad bzw. ein darauf basierender udev-
 Alias verwendet werden.
+
+> **Hinweis (Stand 2026-09-20):** Der Freezer ist weiterhin eine aktive
+> Legacy-Datenquelle (`/dev/ttyUSB0` → `minicom` → `freezer.log`).
+> Eine spätere Migration in das neue Datenmodell erfolgt über einen
+> dedizierten Freezer-Adapter/Reader, der den seriennummernbasierten
+> `by-id`-Pfad verwenden soll.
 
 ---
 
@@ -483,6 +494,10 @@ sind:
    Anwendungsebene-Nutzung dieser Geräte beobachtet.
 10. Kein Service darf allein aufgrund dieses Inventars deaktiviert oder
     entfernt werden.
+11. Seit 2026-09-20 läuft der neue LoggerPi-OtterPi-Datenpfad produktiv
+    auf dem LoggerPi (Version `v1.0.4`). Er erfasst AtmoWEB-Daten
+    (HPP260, 141.51.190.101/102) und überträgt Core Batches an den
+    OtterPi. Der Legacy-`observer.py` läuft weiterhin parallel.
 
 ---
 
@@ -503,3 +518,10 @@ werden.
 Die Repository-Dokumentation ist die maßgebliche Quelle für
 Architekturentscheidungen und erkannte Abhängigkeiten; der laufende
 Raspberry Pi ist die maßgebliche Quelle für den aktuellen Laufzeitstatus.
+
+> **Aktueller Migrationsstand (2026-09-20):** Der neue LoggerPi-OtterPi-
+> Datenpfad ist für AtmoWEB verifiziert und produktiv. Die Legacy-
+> `observer.py` läuft weiterhin parallel. Die nächsten Migrationsschritte
+> betreffen weitere Datenquellen (Freezer, IPP300) sowie die Ablösung
+> der Legacy-`observer.py` nach erfolgreicher Verifikation aller neuen
+> Datenquellen.
