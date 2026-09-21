@@ -194,12 +194,13 @@ h1 {{ text-align: center; margin-top: 0; }}
     width: 12px;
     height: 12px;
     border-radius: 50%;
+    box-shadow: 0 0 9px currentColor;
 }}
 
-.lamp.status-ok {{ background: #22c55e; }}
-.lamp.status-warn {{ background: #eab308; }}
-.lamp.status-critical {{ background: #ef4444; }}
-.lamp.status-off {{ background: #6b7280; }}
+.lamp.status-ok {{ color: #22c55e; background: #22c55e; }}
+.lamp.status-warn {{ color: #eab308; background: #eab308; }}
+.lamp.status-critical {{ color: #ef4444; background: #ef4444; }}
+.lamp.status-off {{ color: #6b7280; background: #6b7280; box-shadow: none; }}
 
 .footer {{
     text-align: center;
@@ -307,9 +308,11 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
         labels: {device["chart_id"].replace("-", "_")}Labels,
         datasets: [
             {{ label: 'Temperatur', data: {device["temp_values_json"]},
-                borderColor: '#f97316', yAxisID: 'temperature', tension: 0.3 }},
+                borderColor: '#f97316', borderWidth: 1.5,
+                yAxisID: 'temperature', tension: 0.3 }},
             {{ label: 'Rel. Feuchte', data: {device["hum_values_json"]},
-                borderColor: '#38bdf8', yAxisID: 'humidity', tension: 0.3 }}
+                borderColor: '#38bdf8', borderWidth: 1.5,
+                yAxisID: 'humidity', tension: 0.3 }}
         ]
     }},
     options: {{
@@ -413,11 +416,11 @@ h1 {{ text-align: center; margin-top: 0; }}
 
 .status-light {{
     flex: 0 0 auto;
-    width: 48px;
-    height: 48px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     border: 3px solid rgba(255,255,255,.25);
-    box-shadow: 0 0 18px currentColor;
+    box-shadow: 0 0 14px currentColor;
 }}
 
 .status-ok {{ color: #22c55e; background: #22c55e; }}
