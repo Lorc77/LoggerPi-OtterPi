@@ -71,6 +71,9 @@ h1 {{ text-align: center; margin-top: 0; }}
 
 .card h2 {{ margin-top: 0; font-size: 1.1rem; }}
 
+.title-blue {{ color: #38bdf8; }}
+.title-orange {{ color: #eab308; }}
+
 .value {{
     font-size: 2rem;
     font-weight: 700;
@@ -129,20 +132,20 @@ h1 {{ text-align: center; margin-top: 0; }}
 
 <div class="grid">
     <div class="card">
-        <h2>🌡 Temperatur links</h2>
-        <div class="value value-blue">{current["temp_101"]:.1f} <span class="unit">°C</span></div>
+        <h2 class="title-blue">🌡 Temperatur links</h2>
+        <div class="value">{current["temp_101"]:.1f} <span class="unit">°C</span></div>
     </div>
     <div class="card">
-        <h2>💧 Rel. Feuchte links</h2>
-        <div class="value value-blue">{current["hum_101"]:.1f} <span class="unit">%</span></div>
+        <h2 class="title-blue">💧 Rel. Feuchte links</h2>
+        <div class="value">{current["hum_101"]:.1f} <span class="unit">%</span></div>
     </div>
     <div class="card">
-        <h2>🌡 Temperatur rechts</h2>
-        <div class="value value-orange">{current["temp_102"]:.1f} <span class="unit">°C</span></div>
+        <h2 class="title-orange">🌡 Temperatur rechts</h2>
+        <div class="value">{current["temp_102"]:.1f} <span class="unit">°C</span></div>
     </div>
     <div class="card">
-        <h2>💧 Rel. Feuchte rechts</h2>
-        <div class="value value-orange">{current["hum_102"]:.1f} <span class="unit">%</span></div>
+        <h2 class="title-orange">💧 Rel. Feuchte rechts</h2>
+        <div class="value">{current["hum_102"]:.1f} <span class="unit">%</span></div>
     </div>
 
     <div class="chart-card">
@@ -267,7 +270,9 @@ def _current_values(batches: list[dict]) -> dict:
     latest = batches[-1]
 
     current["last_batch"] = (
-        datetime.fromisoformat(latest["created_at"]).astimezone(BERLIN).strftime("%d.%m.%Y %H:%M")
+        datetime.fromisoformat(latest["created_at"])
+        .astimezone(BERLIN)
+        .strftime("%d.%m.%Y %H:%M Uhr")
     )
 
     measurements = latest.get("measurements", {})
@@ -307,7 +312,8 @@ def _series(batches: list[dict], key: str) -> list[dict]:
         measured_at = measurement.get("measured_at")
 
         if value is not None and measured_at:
-            label = datetime.fromisoformat(measured_at).astimezone(BERLIN).strftime("%H:%M")
+            # measured_at ist bereits in lokaler AtmoWEB-Zeit
+            label = measured_at[11:16]
             series.append({"label": label, "value": value})
 
     return series
