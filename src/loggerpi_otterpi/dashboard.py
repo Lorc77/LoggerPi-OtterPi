@@ -348,7 +348,7 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>🦦 {room["name"]}</title>
+<title>{room["icon"]} {room["name"]}</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 * {{ box-sizing: border-box; }}
