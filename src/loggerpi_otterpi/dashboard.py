@@ -318,7 +318,15 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
     options: {{
         responsive: true,
         interaction: {{ mode: 'index', intersect: false }},
-        plugins: {{ legend: {{ labels: {{ color: '#d1d5db' }} }} }},
+        plugins: {{
+            legend: {{
+                labels: {{
+                    color: '#d1d5db',
+                    usePointStyle: true,
+                    pointStyle: 'line',
+                }}
+            }}
+        }},
         scales: {{
             x: {{ ticks: {{ color: '#9ca3af' }} }},
             temperature: {{
