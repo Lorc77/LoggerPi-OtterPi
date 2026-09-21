@@ -88,10 +88,14 @@ class OtterPiHandler(BaseHTTPRequestHandler):
         )
 
     def do_GET(self) -> None:
-        if self.path == "/":
+        if self.path == "/" or self.path.startswith("/raum/"):
             from dashboard import render_dashboard
 
-            html = render_dashboard(self.store)
+            room_id = ""
+            if self.path.startswith("/raum/"):
+                room_id = self.path.split("/")[2]
+
+            html = render_dashboard(self.store, room_id=room_id)
             body = html.encode("utf-8")
 
             self.send_response(200)

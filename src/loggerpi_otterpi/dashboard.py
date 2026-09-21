@@ -1,4 +1,4 @@
-"""Dashboard für den OtterPi – zeigt AtmoWEB-Daten aus SQLite."""
+"""Dashboard für den OtterPi – Raum-basiert mit Geräte-Übersicht."""
 
 import json
 from datetime import datetime, timedelta, timezone
@@ -7,10 +7,233 @@ from zoneinfo import ZoneInfo
 from otterpi_store import BatchStore
 
 BERLIN = ZoneInfo("Europe/Berlin")
+VERSION = "v1.2.3"
+
+ROOMS = {
+    "r1304": {
+        "name": "R1304 · Kulturraum I",
+        "icon": "🌿",
+        "devices": [
+            {"name": "MEMMERT HPP260 links", "key": "atmoweb_101"},
+            {"name": "MEMMERT HPP260 rechts", "key": "atmoweb_102"},
+        ],
+    },
+    "r1306": {
+        "name": "R1306 · Molekularlab",
+        "icon": "🧬",
+        "devices": [],
+    },
+    "r1307": {
+        "name": "R1307 · Vorraum Kühlkammer",
+        "icon": "❄️",
+        "devices": [],
+    },
+    "r1308": {
+        "name": "R1308 · Kulturraum II",
+        "icon": "🌿",
+        "devices": [],
+    },
+    "r1309": {
+        "name": "R1309 · RNA-lab",
+        "icon": "🧪",
+        "devices": [],
+    },
+    "r1310": {
+        "name": "R1310 · Histolab",
+        "icon": "🔬",
+        "devices": [],
+    },
+    "r1311": {
+        "name": "R1311 · Immunolab",
+        "icon": "🦠",
+        "devices": [],
+    },
+    "r1313": {
+        "name": "R1313 · Praktikumsraum",
+        "icon": "🎓",
+        "devices": [],
+    },
+}
 
 
-def render_dashboard(store: BatchStore) -> str:
+def render_dashboard(store: BatchStore, room_id: str = "") -> str:
     """Generiert das Dashboard-HTML."""
+    if room_id and room_id in ROOMS:
+        return _render_room_detail(store, room_id)
+
+    return _render_overview(store)
+
+
+def _render_overview(store: BatchStore) -> str:
+    """Einstiegsseite mit Raum-Kacheln."""
+    batches = _recent_batches(store, hours=48)
+
+    room_cards = ""
+    for room_id, room in ROOMS.items():
+        has_devices = bool(room["devices"])
+
+        if has_devices:
+            device_lines = ""
+            for device in room["devices"]:
+                current = _device_current(batches, device["key"])
+                device_lines += (
+                    f'<div class="device-line">'
+                    f'<span class="lamp {current["status"]}"></span>'
+                    f"<span>{device['name']}</span>"
+                    f'<span class="device-value">{current["value"]}</span>'
+                    f"</div>"
+                )
+
+            card = (
+                f'<a class="room-card" href="/raum/{room_id}">'
+                f"<h2>{room['icon']} {room['name']}</h2>"
+                f'<div class="device-list">{device_lines}</div>'
+                f"</a>"
+            )
+        else:
+            card = (
+                f'<div class="room-card room-card-empty">'
+                f"<h2>{room['icon']} {room['name']}</h2>"
+                f'<div class="device-list">'
+                f'<div class="device-line no-devices">Keine Geräte</div>'
+                f"</div>"
+                f"</div>"
+            )
+
+        room_cards += card
+
+    return f"""<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🦦 ZOOLOGY-observer Dashboard</title>
+<style>
+* {{ box-sizing: border-box; }}
+
+body {{
+    margin: 0;
+    min-height: 100vh;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: linear-gradient(rgba(10,20,30,.55), rgba(10,20,30,.70)), url("/otter2.png");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: white;
+    padding: 30px;
+}}
+
+.container {{
+    width: min(1200px, 95%);
+    margin: auto;
+    background: rgba(20,35,50,.58);
+    backdrop-filter: blur(6px);
+    border-radius: 25px;
+    padding: 40px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.4);
+}}
+
+h1 {{ text-align: center; margin-top: 0; }}
+.subtitle {{ text-align: center; color: #d1d5db; }}
+
+.rooms-grid {{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 30px;
+}}
+
+.room-card {{
+    display: block;
+    background: rgba(31,41,55,.78);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 18px;
+    padding: 20px;
+    text-decoration: none;
+    color: white;
+    transition: .2s;
+}}
+
+.room-card:hover {{
+    background: rgba(147,197,253,.15);
+    border-color: rgba(147,197,253,.5);
+    transform: translateY(-2px);
+}}
+
+.room-card h2 {{ margin-top: 0; font-size: 1.1rem; }}
+
+.room-card-empty {{
+    cursor: default;
+    opacity: .7;
+}}
+
+.room-card-empty:hover {{
+    background: rgba(31,41,55,.78);
+    border-color: rgba(255,255,255,.08);
+    transform: none;
+}}
+
+.device-list {{ margin-top: 12px; }}
+
+.device-line {{
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 10px;
+    align-items: center;
+    margin: 6px 0;
+    font-size: .9rem;
+}}
+
+.device-value {{ color: #d1d5db; }}
+
+.no-devices {{ color: #6b7280; font-style: italic; }}
+
+.lamp {{
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}}
+
+.lamp-ok {{ background: #22c55e; }}
+.lamp-warn {{ background: #eab308; }}
+.lamp-critical {{ background: #ef4444; }}
+.lamp-off {{ background: #6b7280; }}
+
+.footer {{
+    text-align: center;
+    margin-top: 30px;
+    color: #d1d5db;
+    opacity: .85;
+    font-size: .9rem;
+}}
+
+@media(max-width:700px) {{
+    body {{ padding: 15px; }}
+    .container {{ width: 100%; padding: 20px; border-radius: 18px; }}
+    .rooms-grid {{ grid-template-columns: 1fr; }}
+}}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🦦 ZOOLOGY-observer Dashboard</h1>
+<div class="subtitle">Räume & Geräte · Letzte Aktualisierung</div>
+
+<div class="rooms-grid">
+{room_cards}
+</div>
+
+<div class="footer">🦦 otterpi · ZOOLOGY-observer Dashboard {VERSION}</div>
+</div>
+</body>
+</html>
+"""
+
+
+def _render_room_detail(store: BatchStore, room_id: str) -> str:
+    """Detailseite für einen Raum."""
+    room = ROOMS[room_id]
     batches = _recent_batches(store, hours=48)
 
     current = _current_values(batches)
@@ -25,7 +248,7 @@ def render_dashboard(store: BatchStore) -> str:
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>🦦 ZOOLOGY-observer Dashboard v1.2.2</title>
+<title>🦦 {room["name"]}</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 * {{ box-sizing: border-box; }}
@@ -55,11 +278,26 @@ body {{
 h1 {{ text-align: center; margin-top: 0; }}
 .subtitle {{ text-align: center; color: #d1d5db; }}
 
+.back-btn {{
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 20px;
+    background: rgba(147,197,253,.15);
+    border: 1px solid rgba(147,197,253,.4);
+    color: #bfdbfe;
+    text-decoration: none;
+    margin-bottom: 20px;
+}}
+
+.back-btn:hover {{
+    background: rgba(147,197,253,.3);
+}}
+
 .grid {{
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 20px;
-    margin-top: 30px;
+    margin-top: 20px;
 }}
 
 .card {{
@@ -79,9 +317,6 @@ h1 {{ text-align: center; margin-top: 0; }}
     font-weight: 700;
     margin: 10px 0 0 0;
 }}
-
-.value-blue {{ color: #38bdf8; }}
-.value-orange {{ color: #eab308; }}
 
 .unit {{ font-size: 1rem; color: #9ca3af; }}
 
@@ -127,8 +362,9 @@ h1 {{ text-align: center; margin-top: 0; }}
 </head>
 <body>
 <div class="container">
-<h1>🦦 ZOOLOGY-observer Dashboard v1.2.2</h1>
-<div class="subtitle">MEMMERT HPP260 Klimaschränke · Letzte 48 Stunden</div>
+<a class="back-btn" href="/">← Zur Übersicht</a>
+<h1>{room["icon"]} {room["name"]}</h1>
+<div class="subtitle">Letzte 48 Stunden</div>
 
 <div class="grid">
     <div class="card">
@@ -175,7 +411,7 @@ h1 {{ text-align: center; margin-top: 0; }}
     </div>
 </div>
 
-<div class="footer">🦦 otterpi · ZOOLOGY-observer Dashboard v1.2.2</div>
+<div class="footer">🦦 otterpi · ZOOLOGY-observer Dashboard {VERSION}</div>
 </div>
 
 <script>
@@ -230,7 +466,7 @@ new Chart(document.getElementById('humChart'), {{
 
 
 def _recent_batches(store: BatchStore, hours: int = 48) -> list[dict]:
-    """Liest die letzten Batches aus SQLite (max. 192 für 48h bei 15-min-Intervall)."""
+    """Liest die letzten Batches aus SQLite."""
     import sqlite3
 
     cutoff = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
@@ -246,9 +482,7 @@ def _recent_batches(store: BatchStore, hours: int = 48) -> list[dict]:
         if created_at >= cutoff:
             batches.append(data)
 
-    # Chronologisch sortieren (älteste zuerst)
     batches.reverse()
-
     return batches
 
 
@@ -303,6 +537,37 @@ def _current_values(batches: list[dict]) -> dict:
     return current
 
 
+def _device_current(batches: list[dict], key: str) -> dict:
+    """Ermittelt aktuelle Werte + Status für ein Gerät."""
+    result = {
+        "temp": 0.0,
+        "hum": 0.0,
+        "value": "–",
+        "status": "lamp-off",
+    }
+
+    if not batches:
+        return result
+
+    latest = batches[-1]
+    measurements = latest.get("measurements", {})
+
+    temp = measurements.get(f"{key}.temperature_1", {})
+    hum = measurements.get(f"{key}.humidity", {})
+
+    if temp.get("value") is not None:
+        result["temp"] = temp["value"]
+        result["value"] = f"{temp['value']:.1f} °C"
+
+    if hum.get("value") is not None:
+        result["hum"] = hum["value"]
+
+    if result["temp"] > 0 or result["hum"] > 0:
+        result["status"] = "lamp-ok"
+
+    return result
+
+
 def _series(batches: list[dict], key: str) -> list[dict]:
     """Extrahiert eine Messwert-Reihe aus den Batches."""
     series = []
@@ -312,7 +577,6 @@ def _series(batches: list[dict], key: str) -> list[dict]:
         measured_at = measurement.get("measured_at")
 
         if value is not None and measured_at:
-            # measured_at ist bereits in lokaler AtmoWEB-Zeit
             label = measured_at[11:16]
             series.append({"label": label, "value": value})
 
