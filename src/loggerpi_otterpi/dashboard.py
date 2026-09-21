@@ -283,11 +283,11 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
         </div>
         <div class="metric-grid">
             <div class="metric">
-                <span>Temperatur</span>
+                <span>🌡 Temperatur</span>
                 <strong>{device["temp"]:.1f} <small>°C</small></strong>
             </div>
             <div class="metric">
-                <span>Rel. Feuchte</span>
+                <span>💧 Rel. Feuchte</span>
                 <strong>{device["hum"]:.1f} <small>%</small></strong>
             </div>
         </div>
@@ -308,7 +308,7 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
         labels: {device["chart_id"].replace("-", "_")}Labels,
         datasets: [
             {{ label: 'Temperatur', data: {device["temp_values_json"]},
-                borderColor: '#f97316', borderWidth: 1.5,
+                borderColor: '#fb923c', borderWidth: 1.5,
                 yAxisID: 'temperature', tension: 0.3 }},
             {{ label: 'Rel. Feuchte', data: {device["hum_values_json"]},
                 borderColor: '#38bdf8', borderWidth: 1.5,
@@ -321,9 +321,19 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
         plugins: {{ legend: {{ labels: {{ color: '#d1d5db' }} }} }},
         scales: {{
             x: {{ ticks: {{ color: '#9ca3af' }} }},
-            temperature: {{ type: 'linear', position: 'left', ticks: {{ color: '#f97316' }} }},
+            temperature: {{
+                type: 'linear', position: 'left',
+                ticks: {{
+                    color: '#fb923c',
+                    callback: (value) => value + ' °C'
+                }}
+            }},
             humidity: {{
-                type: 'linear', position: 'right', ticks: {{ color: '#38bdf8' }},
+                type: 'linear', position: 'right',
+                ticks: {{
+                    color: '#38bdf8',
+                    callback: (value) => value + ' %'
+                }},
                 grid: {{ drawOnChartArea: false }}
             }}
         }}
