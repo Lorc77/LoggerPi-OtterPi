@@ -12,7 +12,7 @@ VERSION = "v1.2.3"
 ROOMS = {
     "r1304": {
         "name": "R1304 · Kulturraum I",
-        "icon": "🌿",
+        "icon": "🧫",
         "devices": [
             {"name": "MEMMERT HPP260 links", "key": "atmoweb_101"},
             {"name": "MEMMERT HPP260 rechts", "key": "atmoweb_102"},
@@ -107,7 +107,7 @@ def _render_overview(store: BatchStore) -> str:
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>🦦 ZOOLOGY-observer Dashboard</title>
+<title>📡 ZOOLOGY-Observer Dashboard</title>
 <style>
 * {{ box-sizing: border-box; }}
 
@@ -217,14 +217,14 @@ h1 {{ text-align: center; margin-top: 0; }}
 </head>
 <body>
 <div class="container">
-<h1>🦦 ZOOLOGY-observer Dashboard</h1>
+<h1>📡 ZOOLOGY-Observer Dashboard</h1>
 <div class="subtitle">Räume & Geräte · Letzte Aktualisierung</div>
 
 <div class="rooms-grid">
 {room_cards}
 </div>
 
-<div class="footer">🦦 otterpi · ZOOLOGY-observer Dashboard {VERSION}</div>
+<div class="footer">🦦 otterpi · ZOOLOGY-Observer Dashboard {VERSION}</div>
 </div>
 </body>
 </html>
@@ -411,7 +411,7 @@ h1 {{ text-align: center; margin-top: 0; }}
     </div>
 </div>
 
-<div class="footer">🦦 otterpi · ZOOLOGY-observer Dashboard {VERSION}</div>
+<div class="footer">🦦 otterpi · ZOOLOGY-Observer Dashboard {VERSION}</div>
 </div>
 
 <script>
