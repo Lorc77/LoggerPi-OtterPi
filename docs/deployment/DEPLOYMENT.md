@@ -485,7 +485,7 @@ Repository:
     main
 
 Version:
-    v1.2.2
+    v1.2.3
 
 Letzter bekannter Release-Commit:
     61cd803

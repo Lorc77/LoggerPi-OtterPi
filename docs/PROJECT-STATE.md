@@ -20,12 +20,13 @@ Der erste reproduzierbare Deployment-Mechanismus für LoggerPi und
 OtterPi ist implementiert und auf beiden Zielsystemen praktisch
 verifiziert.
 
-LoggerPi und OtterPi laufen produktiv auf Version `v1.2.2` und
+LoggerPi und OtterPi laufen produktiv auf Version `v1.2.3` und
 übertragen Core Batches kontinuierlich (alle 15 Minuten).
 
 Seit `v1.1.0` ist die Übertragung durch Bearer-Token-Authentication
 geschützt. Seit `v1.2.0` stellt der OtterPi ein Dashboard unter
-`https://zoology.makki.route64.de` bereit.
+`https://zoology.makki.route64.de` bereit. Seit `v1.2.3` ist das
+Dashboard raum-basiert (Übersicht + Detailseiten).
 
 Der zentrale Deployment-Wrapper befindet sich unter:
 

@@ -168,7 +168,7 @@ Aktueller Stand: **68 Tests**, alle bestehen.
 
 ## Versionierung
 
-Aktuelle Version: **v1.2.2**
+Aktuelle Version: **v1.2.3**
 
 Die Version wird geführt über:
 

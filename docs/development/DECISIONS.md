@@ -953,6 +953,24 @@ Schlanker – kein neuer Service, ein Prozess.
 
 ---
 
+## DEC-029 — Raum-basiertes Dashboard
+
+**Status:** Angenommen
+**Datum:** 2026-09-21
+
+### Entscheidung
+
+Das Dashboard wird raum-basiert umgebaut:
+
+- `/` → Übersicht mit Raum-Kacheln
+- `/raum/<id>` → Detailseite mit Charts
+
+### Begründung
+
+Bessere Orientierung – Räume statt Geräte.
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:
