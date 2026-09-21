@@ -478,17 +478,17 @@ Dabei müssen insbesondere geprüft werden:
 
 ## 13. Aktueller Stand
 
-Stand 2026-09-20:
+Stand 2026-09-21:
 
 ```text
 Repository:
     main
 
 Version:
-    v1.0.4
+    v1.2.2
 
 Letzter bekannter Release-Commit:
-    98c8e00
+    61cd803
 
 Application Deployment:
     implementiert
@@ -508,8 +508,15 @@ OtterPi Backend:
 API:
     POST /api/v1/batches
 
+Authentication:
+    Bearer Token (seit v1.1.0)
+
+Dashboard:
+    https://zoology.makki.route64.de (seit v1.2.0)
+
 nginx:
     Reverse-Proxy für loggerpi.makki.route64.de eingerichtet und verifiziert
+    Reverse-Proxy für zoology.makki.route64.de eingerichtet und verifiziert
 
 TLS:
     Zertifikate auf OtterPi vorhanden

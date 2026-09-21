@@ -14,12 +14,18 @@
 
 **Stand:** 2026-09-20
 
+**Stand:** 2026-09-21
+
 Der erste reproduzierbare Deployment-Mechanismus für LoggerPi und
 OtterPi ist implementiert und auf beiden Zielsystemen praktisch
 verifiziert.
 
-LoggerPi und OtterPi laufen produktiv auf Version `v1.0.4` und
+LoggerPi und OtterPi laufen produktiv auf Version `v1.2.2` und
 übertragen Core Batches kontinuierlich (alle 15 Minuten).
+
+Seit `v1.1.0` ist die Übertragung durch Bearer-Token-Authentication
+geschützt. Seit `v1.2.0` stellt der OtterPi ein Dashboard unter
+`https://zoology.makki.route64.de` bereit.
 
 Der zentrale Deployment-Wrapper befindet sich unter:
 
@@ -1574,7 +1580,7 @@ abgesichert.
 Derzeit bestehen:
 
 ```text
-68 Tests
+72 Tests
 Alle Tests bestehen.
 ```
 
@@ -1821,6 +1827,18 @@ neuen Pfades unverändert produktiv.
 ## Aktuelle offene Arbeitspakete
 
 ### P0 – Produktionsdeployment verifiziert ✅
+
+Seit 2026-09-20 laufen LoggerPi und OtterPi produktiv auf `v1.2.2`.
+
+### P0 – Authentication implementiert ✅
+
+Seit `v1.1.0` ist die Übertragung durch Bearer-Token-Authentication
+geschützt.
+
+### P0 – Dashboard implementiert ✅
+
+Seit `v1.2.0` stellt der OtterPi ein Dashboard unter
+`https://zoology.makki.route64.de` bereit (Charts, 48h, Ortszeit).
 
 Der Application-Deploymentmechanismus ist implementiert und auf
 LoggerPi und OtterPi praktisch ausgerollt (Stand 2026-09-20).

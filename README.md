@@ -77,6 +77,7 @@ in das gemeinsame Modell integriert.
 | `src/loggerpi_otterpi/otterpi.py` | OtterPi-HTTP-Ingestion |
 | `src/loggerpi_otterpi/otterpi_store.py` | BatchStore (SQLite) |
 | `src/loggerpi_otterpi/otterpi_observer.py` | OtterPi-Prozess-Einstiegspunkt |
+| `src/loggerpi_otterpi/dashboard.py` | Dashboard (Charts, 48h) |
 
 ---
 
@@ -121,14 +122,17 @@ Da `model/` ein Unterverzeichnis ist, wird `PYTHONPATH` gesetzt:
 PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
 ```
 
-### Aktueller Betriebsstand (2026-09-20)
+### Aktueller Betriebsstand (2026-09-21)
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.0.4` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.0.4` | Empfängt Batches, speichert in SQLite |
+| LoggerPi | `v1.2.2` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.2.2` | Empfängt Batches, speichert in SQLite |
 
 Der E2E-Datenpfad (LoggerPi → nginx → OtterPi → SQLite) ist verifiziert.
+
+Dashboard: `https://zoology.makki.route64.de`
+Authentication: Bearer Token (seit v1.1.0)
 
 ---
 
@@ -164,7 +168,7 @@ Aktueller Stand: **68 Tests**, alle bestehen.
 
 ## Versionierung
 
-Aktuelle Version: **v1.0.4**
+Aktuelle Version: **v1.2.2**
 
 Die Version wird geführt über:
 

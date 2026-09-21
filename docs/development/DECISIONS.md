@@ -883,6 +883,76 @@ nachweislich.
 
 ---
 
+## DEC-026 — Bearer-Token-Authentication
+
+**Status:** Angenommen
+**Datum:** 2026-09-21
+
+### Kontext
+
+Die Übertragung LoggerPi → OtterPi war ungeschützt.
+
+### Entscheidung
+
+Seit `v1.1.0` verwendet die Übertragung einen Bearer-Token:
+
+```text
+Authorization: Bearer <token>
+```
+
+Der Token wird in `loggerpi.env` (`LOGGERPI_TOKEN`) und `otterpi.env`
+(`OTTERPI_TOKEN`) gespeichert.
+
+### Begründung
+
+Schlanke, aber sinnvolle Absicherung der Übertragung.
+
+---
+
+## DEC-027 — Dashboard auf dem OtterPi
+
+**Status:** Angenommen
+**Datum:** 2026-09-21
+
+### Kontext
+
+Die gesammelten Batches waren nur in SQLite sichtbar.
+
+### Entscheidung
+
+Seit `v1.2.0` stellt der OtterPi ein Dashboard unter
+`https://zoology.makki.route64.de` bereit.
+
+Das Dashboard zeigt:
+- aktuelle Werte (Temp/Feuchte der MEMMERT HPP260)
+- Charts (letzte 48h)
+- System-Info
+
+### Begründung
+
+Erster sichtbarer Mehrwert – Daten werden nutzbar.
+
+---
+
+## DEC-028 — Dashboard im OtterPi-Observer integriert
+
+**Status:** Angenommen
+**Datum:** 2026-09-21
+
+### Kontext
+
+Das Dashboard hätte als separater Service laufen können.
+
+### Entscheidung
+
+Das Dashboard ist in den OtterPi-Observer integriert (`do_GET`).
+
+### Begründung
+
+Schlanker – kein neuer Service, ein Prozess.
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:

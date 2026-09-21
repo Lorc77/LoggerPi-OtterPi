@@ -25,7 +25,7 @@ def render_dashboard(store: BatchStore) -> str:
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>🦦 ZOOLOGY-observer Dashboard v1.2.1</title>
+<title>🦦 ZOOLOGY-observer Dashboard v1.2.2</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 * {{ box-sizing: border-box; }}
@@ -127,7 +127,7 @@ h1 {{ text-align: center; margin-top: 0; }}
 </head>
 <body>
 <div class="container">
-<h1>🦦 ZOOLOGY-observer Dashboard v1.2.1</h1>
+<h1>🦦 ZOOLOGY-observer Dashboard v1.2.2</h1>
 <div class="subtitle">MEMMERT HPP260 Klimaschränke · Letzte 48 Stunden</div>
 
 <div class="grid">
@@ -175,7 +175,7 @@ h1 {{ text-align: center; margin-top: 0; }}
     </div>
 </div>
 
-<div class="footer">🦦 otterpi · ZOOLOGY-observer Dashboard v1.2.1</div>
+<div class="footer">🦦 otterpi · ZOOLOGY-observer Dashboard v1.2.2</div>
 </div>
 
 <script>
