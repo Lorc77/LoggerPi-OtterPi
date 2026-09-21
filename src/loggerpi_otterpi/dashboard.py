@@ -7,12 +7,12 @@ from zoneinfo import ZoneInfo
 from otterpi_store import BatchStore
 
 BERLIN = ZoneInfo("Europe/Berlin")
-VERSION = "v1.2.3"
+VERSION = "v1.2.4"
 
 ROOMS = {
     "r1304": {
         "name": "R1304 · Kulturraum I",
-        "icon": "🧫",
+        "icon": "🦗",
         "devices": [
             {"name": "MEMMERT HPP260 links", "key": "atmoweb_101"},
             {"name": "MEMMERT HPP260 rechts", "key": "atmoweb_102"},
@@ -30,7 +30,7 @@ ROOMS = {
     },
     "r1308": {
         "name": "R1308 · Kulturraum II",
-        "icon": "🌿",
+        "icon": "🧫",
         "devices": [],
     },
     "r1309": {
@@ -76,6 +76,7 @@ def _render_overview(store: BatchStore) -> str:
             device_lines = ""
             for device in room["devices"]:
                 current = _device_current(batches, device["key"])
+                current["status"] = _device_status(batches, device["key"])
                 device_lines += (
                     f'<div class="device-line">'
                     f'<span class="lamp {current["status"]}"></span>'
@@ -195,10 +196,10 @@ h1 {{ text-align: center; margin-top: 0; }}
     border-radius: 50%;
 }}
 
-.lamp-ok {{ background: #22c55e; }}
-.lamp-warn {{ background: #eab308; }}
-.lamp-critical {{ background: #ef4444; }}
-.lamp-off {{ background: #6b7280; }}
+.lamp.status-ok {{ background: #22c55e; }}
+.lamp.status-warn {{ background: #eab308; }}
+.lamp.status-critical {{ background: #ef4444; }}
+.lamp.status-off {{ background: #6b7280; }}
 
 .footer {{
     text-align: center;
@@ -242,6 +243,92 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
     hum_101 = _series(batches, "atmoweb_101.humidity")
     temp_102 = _series(batches, "atmoweb_102.temperature_1")
     hum_102 = _series(batches, "atmoweb_102.humidity")
+    series_by_device = {
+        "atmoweb_101": (temp_101, hum_101),
+        "atmoweb_102": (temp_102, hum_102),
+    }
+
+    device_views = []
+    for device in room["devices"]:
+        temp_series, hum_series = series_by_device.get(device["key"], ([], []))
+        device_current = _device_current(batches, device["key"])
+        chart_id = f"chart-{device['key']}"
+        device_views.append(
+            {
+                "name": device["name"],
+                "status": _device_status(batches, device["key"]),
+                "temp": device_current["temp"],
+                "hum": device_current["hum"],
+                "chart_id": chart_id,
+                "temp_labels": [point["label"] for point in temp_series],
+                "temp_values": [point["value"] for point in temp_series],
+                "hum_labels": [point["label"] for point in hum_series],
+                "hum_values": [point["value"] for point in hum_series],
+                "labels_json": json.dumps([point["label"] for point in temp_series or hum_series]),
+                "temp_values_json": json.dumps([point["value"] for point in temp_series]),
+                "hum_values_json": json.dumps([point["value"] for point in hum_series]),
+            }
+        )
+
+    device_cards = "".join(
+        f"""
+    <section class="device-card">
+        <div class="device-header">
+            <div>
+                <h2>{device["name"]}</h2>
+                <span class="device-status-label">Status</span>
+            </div>
+            <span class="status-light {device["status"]}" aria-label="Gerätestatus"></span>
+        </div>
+        <div class="metric-grid">
+            <div class="metric">
+                <span>Temperatur</span>
+                <strong>{device["temp"]:.1f} <small>°C</small></strong>
+            </div>
+            <div class="metric">
+                <span>Rel. Feuchte</span>
+                <strong>{device["hum"]:.1f} <small>%</small></strong>
+            </div>
+        </div>
+        <div class="device-chart">
+            <canvas id="{device["chart_id"]}"></canvas>
+        </div>
+    </section>
+"""
+        for device in device_views
+    )
+
+    device_scripts = "".join(
+        f"""
+const {device["chart_id"].replace("-", "_")}Labels = {device["labels_json"]};
+new Chart(document.getElementById('{device["chart_id"]}'), {{
+    type: 'line',
+    data: {{
+        labels: {device["chart_id"].replace("-", "_")}Labels,
+        datasets: [
+            {{ label: 'Temperatur', data: {device["temp_values_json"]},
+                borderColor: '#f97316', yAxisID: 'temperature', tension: 0.3 }},
+            {{ label: 'Rel. Feuchte', data: {device["hum_values_json"]},
+                borderColor: '#38bdf8', yAxisID: 'humidity', tension: 0.3 }}
+        ]
+    }},
+    options: {{
+        responsive: true,
+        interaction: {{ mode: 'index', intersect: false }},
+        plugins: {{ legend: {{ labels: {{ color: '#d1d5db' }} }} }},
+        scales: {{
+            x: {{ ticks: {{ color: '#9ca3af' }} }},
+            temperature: {{ type: 'linear', position: 'left', ticks: {{ color: '#f97316' }} }},
+            humidity: {{
+                type: 'linear', position: 'right', ticks: {{ color: '#38bdf8' }},
+                grid: {{ drawOnChartArea: false }}
+            }}
+        }}
+    }}
+}});
+"""
+        for device in device_views
+    )
 
     return f"""<!DOCTYPE html>
 <html lang="de">
@@ -295,40 +382,86 @@ h1 {{ text-align: center; margin-top: 0; }}
 
 .grid {{
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px;
     margin-top: 20px;
 }}
 
-.card {{
+.device-card, .system-card {{
     background: rgba(31,41,55,.78);
     border: 1px solid rgba(255,255,255,.08);
     border-radius: 18px;
     padding: 20px;
 }}
 
-.card h2 {{ margin-top: 0; font-size: 1.1rem; }}
-
-.title-blue {{ color: #38bdf8; }}
-.title-orange {{ color: #eab308; }}
-
-.value {{
-    font-size: 2rem;
-    font-weight: 700;
-    margin: 10px 0 0 0;
+.device-header {{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 76px;
 }}
 
-.unit {{ font-size: 1rem; color: #9ca3af; }}
+.device-header h2 {{ margin: 0; font-size: 1.1rem; }}
 
-.chart-card {{
-    grid-column: 1 / -1;
-    background: rgba(31,41,55,.78);
+.device-status-label {{
+    display: block;
+    margin-top: 5px;
+    color: #9ca3af;
+    font-size: .8rem;
+}}
+
+.status-light {{
+    flex: 0 0 auto;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 3px solid rgba(255,255,255,.25);
+    box-shadow: 0 0 18px currentColor;
+}}
+
+.status-ok {{ color: #22c55e; background: #22c55e; }}
+.status-warn {{ color: #eab308; background: #eab308; }}
+.status-critical {{ color: #ef4444; background: #ef4444; }}
+.status-off {{ color: #6b7280; background: #6b7280; box-shadow: none; }}
+
+.metric-grid {{
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 18px;
+}}
+
+.metric {{
+    min-width: 0;
+    padding: 12px;
+    background: rgba(255,255,255,.06);
     border: 1px solid rgba(255,255,255,.08);
-    border-radius: 18px;
-    padding: 20px;
+    border-radius: 10px;
 }}
 
-.chart-card h2 {{ margin-top: 0; }}
+.metric span {{
+    display: block;
+    color: #d1d5db;
+    font-size: .8rem;
+}}
+
+.metric strong {{
+    display: block;
+    margin-top: 5px;
+    font-size: 1.35rem;
+}}
+
+.metric small {{
+    color: #9ca3af;
+    font-size: .8rem;
+}}
+
+.device-chart {{
+    position: relative;
+    height: 280px;
+    margin-top: 18px;
+}}
 
 .system-card {{
     grid-column: 1 / -1;
@@ -367,32 +500,7 @@ h1 {{ text-align: center; margin-top: 0; }}
 <div class="subtitle">Letzte 48 Stunden</div>
 
 <div class="grid">
-    <div class="card">
-        <h2 class="title-blue">🌡 Temperatur links</h2>
-        <div class="value">{current["temp_101"]:.1f} <span class="unit">°C</span></div>
-    </div>
-    <div class="card">
-        <h2 class="title-blue">💧 Rel. Feuchte links</h2>
-        <div class="value">{current["hum_101"]:.1f} <span class="unit">%</span></div>
-    </div>
-    <div class="card">
-        <h2 class="title-orange">🌡 Temperatur rechts</h2>
-        <div class="value">{current["temp_102"]:.1f} <span class="unit">°C</span></div>
-    </div>
-    <div class="card">
-        <h2 class="title-orange">💧 Rel. Feuchte rechts</h2>
-        <div class="value">{current["hum_102"]:.1f} <span class="unit">%</span></div>
-    </div>
-
-    <div class="chart-card">
-        <h2>📈 Temperatur (48h)</h2>
-        <canvas id="tempChart"></canvas>
-    </div>
-
-    <div class="chart-card">
-        <h2>📈 Rel. Feuchte (48h)</h2>
-        <canvas id="humChart"></canvas>
-    </div>
+{device_cards}
 
     <div class="system-card">
         <h2>🖥 System</h2>
@@ -415,50 +523,7 @@ h1 {{ text-align: center; margin-top: 0; }}
 </div>
 
 <script>
-const tempLabels = {json.dumps([b["label"] for b in temp_101])};
-const temp101 = {json.dumps([b["value"] for b in temp_101])};
-const temp102 = {json.dumps([b["value"] for b in temp_102])};
-const humLabels = {json.dumps([b["label"] for b in hum_101])};
-const hum101 = {json.dumps([b["value"] for b in hum_101])};
-const hum102 = {json.dumps([b["value"] for b in hum_102])};
-
-new Chart(document.getElementById('tempChart'), {{
-    type: 'line',
-    data: {{
-        labels: tempLabels,
-        datasets: [
-            {{ label: 'HPP260 links', data: temp101, borderColor: '#38bdf8', tension: 0.3 }},
-            {{ label: 'HPP260 rechts', data: temp102, borderColor: '#eab308', tension: 0.3 }}
-        ]
-    }},
-    options: {{
-        responsive: true,
-        plugins: {{ legend: {{ labels: {{ color: '#d1d5db' }} }} }},
-        scales: {{
-            x: {{ ticks: {{ color: '#9ca3af' }} }},
-            y: {{ ticks: {{ color: '#9ca3af' }} }}
-        }}
-    }}
-}});
-
-new Chart(document.getElementById('humChart'), {{
-    type: 'line',
-    data: {{
-        labels: humLabels,
-        datasets: [
-            {{ label: 'HPP260 links', data: hum101, borderColor: '#38bdf8', tension: 0.3 }},
-            {{ label: 'HPP260 rechts', data: hum102, borderColor: '#eab308', tension: 0.3 }}
-        ]
-    }},
-    options: {{
-        responsive: true,
-        plugins: {{ legend: {{ labels: {{ color: '#d1d5db' }} }} }},
-        scales: {{
-            x: {{ ticks: {{ color: '#9ca3af' }} }},
-            y: {{ ticks: {{ color: '#9ca3af' }} }}
-        }}
-    }}
-}});
+{device_scripts}
 </script>
 </body>
 </html>
@@ -566,6 +631,25 @@ def _device_current(batches: list[dict], key: str) -> dict:
         result["status"] = "lamp-ok"
 
     return result
+
+
+def _device_status(batches: list[dict], key: str) -> str:
+    """Ermittelt den erweiterten Status für die Gerätekachel."""
+    if not batches:
+        return "status-off"
+
+    measurements = batches[-1].get("measurements", {})
+    temp = measurements.get(f"{key}.temperature_1", {})
+    hum = measurements.get(f"{key}.humidity", {})
+    validities = {temp.get("validity"), hum.get("validity")}
+
+    if "invalid" in validities:
+        return "status-critical"
+    if validities <= {"valid", "stale"} and len(validities) == 1:
+        return "status-warn" if "stale" in validities else "status-ok"
+    if temp.get("value") is not None or hum.get("value") is not None:
+        return "status-warn"
+    return "status-off"
 
 
 def _series(batches: list[dict], key: str) -> list[dict]:
