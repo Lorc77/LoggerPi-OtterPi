@@ -16,6 +16,7 @@ OTTERPI_FILES=(
     otterpi_observer.py
     otterpi_store.py
     dashboard.py
+    otter2.png
 )
 
 for file in "${OTTERPI_FILES[@]}"; do

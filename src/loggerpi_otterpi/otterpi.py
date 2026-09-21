@@ -88,20 +88,31 @@ class OtterPiHandler(BaseHTTPRequestHandler):
         )
 
     def do_GET(self) -> None:
-        if self.path != "/":
-            self.send_error(404)
+        if self.path == "/":
+            from dashboard import render_dashboard
+
+            html = render_dashboard(self.store)
+            body = html.encode("utf-8")
+
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=UTF-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
             return
 
-        from dashboard import render_dashboard
+        if self.path == "/otter2.png":
+            with open("/opt/loggerpi-otterpi/otter2.png", "rb") as f:
+                body = f.read()
 
-        html = render_dashboard(self.store)
-        body = html.encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "image/png")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
 
-        self.send_response(200)
-        self.send_header("Content-Type", "text/html; charset=UTF-8")
-        self.send_header("Content-Length", str(len(body)))
-        self.end_headers()
-        self.wfile.write(body)
+        self.send_error(404)
 
     def _send_json(self, status: int, data: dict) -> None:
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")

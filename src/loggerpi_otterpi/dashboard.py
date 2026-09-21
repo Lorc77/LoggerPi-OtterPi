@@ -2,13 +2,16 @@
 
 import json
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 from otterpi_store import BatchStore
+
+BERLIN = ZoneInfo("Europe/Berlin")
 
 
 def render_dashboard(store: BatchStore) -> str:
     """Generiert das Dashboard-HTML."""
-    batches = _recent_batches(store, hours=24)
+    batches = _recent_batches(store, hours=48)
 
     current = _current_values(batches)
 
@@ -22,7 +25,7 @@ def render_dashboard(store: BatchStore) -> str:
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>🦦 ZOOLOGY-observer Dashboard v1.2.0</title>
+<title>🦦 ZOOLOGY-observer Dashboard v1.2.1</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 * {{ box-sizing: border-box; }}
@@ -74,6 +77,9 @@ h1 {{ text-align: center; margin-top: 0; }}
     margin: 10px 0 0 0;
 }}
 
+.value-blue {{ color: #38bdf8; }}
+.value-orange {{ color: #eab308; }}
+
 .unit {{ font-size: 1rem; color: #9ca3af; }}
 
 .chart-card {{
@@ -118,34 +124,34 @@ h1 {{ text-align: center; margin-top: 0; }}
 </head>
 <body>
 <div class="container">
-<h1>🦦 ZOOLOGY-observer Dashboard v1.2.0</h1>
-<div class="subtitle">MEMMERT HPP260 Klimaschränke · Letzte 24 Stunden</div>
+<h1>🦦 ZOOLOGY-observer Dashboard v1.2.1</h1>
+<div class="subtitle">MEMMERT HPP260 Klimaschränke · Letzte 48 Stunden</div>
 
 <div class="grid">
     <div class="card">
         <h2>🌡 Temperatur links</h2>
-        <div class="value">{current["temp_101"]:.1f} <span class="unit">°C</span></div>
+        <div class="value value-blue">{current["temp_101"]:.1f} <span class="unit">°C</span></div>
     </div>
     <div class="card">
         <h2>💧 Rel. Feuchte links</h2>
-        <div class="value">{current["hum_101"]:.1f} <span class="unit">%</span></div>
+        <div class="value value-blue">{current["hum_101"]:.1f} <span class="unit">%</span></div>
     </div>
     <div class="card">
         <h2>🌡 Temperatur rechts</h2>
-        <div class="value">{current["temp_102"]:.1f} <span class="unit">°C</span></div>
+        <div class="value value-orange">{current["temp_102"]:.1f} <span class="unit">°C</span></div>
     </div>
     <div class="card">
         <h2>💧 Rel. Feuchte rechts</h2>
-        <div class="value">{current["hum_102"]:.1f} <span class="unit">%</span></div>
+        <div class="value value-orange">{current["hum_102"]:.1f} <span class="unit">%</span></div>
     </div>
 
     <div class="chart-card">
-        <h2>📈 Temperatur (24h)</h2>
+        <h2>📈 Temperatur (48h)</h2>
         <canvas id="tempChart"></canvas>
     </div>
 
     <div class="chart-card">
-        <h2>📈 Rel. Feuchte (24h)</h2>
+        <h2>📈 Rel. Feuchte (48h)</h2>
         <canvas id="humChart"></canvas>
     </div>
 
@@ -155,7 +161,7 @@ h1 {{ text-align: center; margin-top: 0; }}
             <span>Letzter Batch:</span><span>{current["last_batch"]}</span>
         </div>
         <div class="system-line">
-            <span>Batches (24h):</span><span>{len(batches)}</span>
+            <span>Batches (48h):</span><span>{len(batches)}</span>
         </div>
         <div class="system-line">
             <span>CPU-Temperatur:</span><span>{current["cpu_temp"]:.1f} °C</span>
@@ -166,7 +172,7 @@ h1 {{ text-align: center; margin-top: 0; }}
     </div>
 </div>
 
-<div class="footer">🦦 otterpi · ZOOLOGY-observer Dashboard v1.2.0</div>
+<div class="footer">🦦 otterpi · ZOOLOGY-observer Dashboard v1.2.1</div>
 </div>
 
 <script>
@@ -220,14 +226,14 @@ new Chart(document.getElementById('humChart'), {{
 """
 
 
-def _recent_batches(store: BatchStore, hours: int = 24) -> list[dict]:
-    """Liest die letzten Batches aus SQLite (max. 96 für 24h bei 15-min-Intervall)."""
+def _recent_batches(store: BatchStore, hours: int = 48) -> list[dict]:
+    """Liest die letzten Batches aus SQLite (max. 192 für 48h bei 15-min-Intervall)."""
     import sqlite3
 
     cutoff = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
 
     with sqlite3.connect(store.path) as conn:
-        rows = conn.execute("SELECT payload FROM batches ORDER BY rowid DESC LIMIT 96").fetchall()
+        rows = conn.execute("SELECT payload FROM batches ORDER BY rowid DESC LIMIT 192").fetchall()
 
     batches = []
     for (payload,) in rows:
@@ -260,7 +266,9 @@ def _current_values(batches: list[dict]) -> dict:
 
     latest = batches[-1]
 
-    current["last_batch"] = latest.get("created_at", "–")[:19].replace("T", " ")
+    current["last_batch"] = (
+        datetime.fromisoformat(latest["created_at"]).astimezone(BERLIN).strftime("%d.%m.%Y %H:%M")
+    )
 
     measurements = latest.get("measurements", {})
 
@@ -299,7 +307,7 @@ def _series(batches: list[dict], key: str) -> list[dict]:
         measured_at = measurement.get("measured_at")
 
         if value is not None and measured_at:
-            label = measured_at[11:16]
+            label = datetime.fromisoformat(measured_at).astimezone(BERLIN).strftime("%H:%M")
             series.append({"label": label, "value": value})
 
     return series
