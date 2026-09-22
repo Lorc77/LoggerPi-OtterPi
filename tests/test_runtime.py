@@ -249,3 +249,145 @@ def test_runtime_replays_queued_batch_before_new_batch(tmp_path, monkeypatch):
     assert delivery.batches[0].to_dict() == queued_batch.to_dict()
     assert delivery.batches[1].to_dict() == batch.to_dict()
     assert queue.pending() == []
+
+
+class FakeFreezerReader:
+    """Fake für FreezerReader (liefert bereits den Key 'freezer.temperature')."""
+
+    def __init__(self, measurements):
+        self.measurements = measurements
+        self.calls = 0
+
+    def read_measurements(self):
+        self.calls += 1
+        return self.measurements
+
+
+def test_runtime_with_freezer_reader(tmp_path, monkeypatch):
+    """Freezer-Reader trägt freezer.temperature in den Batch ein."""
+    measurements = {
+        "temperature_1": Measurement(
+            value=20.5,
+            unit="celsius",
+            measured_at="2026-09-17T12:00:00+00:00",
+            validity="valid",
+            source="atmoweb",
+        )
+    }
+    freezer_measurements = {
+        "freezer.temperature": Measurement(
+            value=-82.0,
+            unit="celsius",
+            measured_at="2026-09-17T12:00:00+00:00",
+            validity="valid",
+            source="freezer_serial",
+        )
+    }
+
+    reader = FakeReader(measurements)
+    freezer_reader = FakeFreezerReader(freezer_measurements)
+    delivery = FakeDelivery(True)
+    queue = BatchQueue(tmp_path / "queue.jsonl")
+
+    _patch_system_info(monkeypatch)
+
+    runtime = LoggerRuntime(
+        logger_id="logger-001",
+        readers={"atmoweb_101": reader},
+        sequence_store=SequenceStore(tmp_path / "sequence"),
+        delivery=delivery,
+        queue=queue,
+        freezer_reader=freezer_reader,
+    )
+
+    batch = runtime.run_once()
+
+    assert reader.calls == 1
+    assert freezer_reader.calls == 1
+    assert len(delivery.batches) == 1
+
+    assert batch.measurements == {
+        "atmoweb_101.temperature_1": measurements["temperature_1"],
+        "freezer.temperature": freezer_measurements["freezer.temperature"],
+    }
+
+
+def test_runtime_without_freezer_reader(tmp_path, monkeypatch):
+    """Ohne Freezer-Reader gibt es keinen freezer.temperature im Batch."""
+    measurements = {
+        "temperature_1": Measurement(
+            value=20.5,
+            unit="celsius",
+            measured_at="2026-09-17T12:00:00+00:00",
+            validity="valid",
+            source="atmoweb",
+        )
+    }
+
+    reader = FakeReader(measurements)
+    delivery = FakeDelivery(True)
+    queue = BatchQueue(tmp_path / "queue.jsonl")
+
+    _patch_system_info(monkeypatch)
+
+    runtime = LoggerRuntime(
+        logger_id="logger-001",
+        readers={"atmoweb_101": reader},
+        sequence_store=SequenceStore(tmp_path / "sequence"),
+        delivery=delivery,
+        queue=queue,
+        # kein freezer_reader → None
+    )
+
+    batch = runtime.run_once()
+
+    assert reader.calls == 1
+    assert "freezer.temperature" not in batch.measurements
+
+
+def test_runtime_with_freezer_queued_when_delivery_fails(tmp_path, monkeypatch):
+    """Freezer-Batch wird bei fehlgeschlagener Zustellung in die Queue gelegt."""
+    measurements = {
+        "temperature_1": Measurement(
+            value=20.5,
+            unit="celsius",
+            measured_at="2026-09-17T12:00:00+00:00",
+            validity="valid",
+            source="atmoweb",
+        )
+    }
+    freezer_measurements = {
+        "freezer.temperature": Measurement(
+            value=-82.0,
+            unit="celsius",
+            measured_at="2026-09-17T12:00:00+00:00",
+            validity="valid",
+            source="freezer_serial",
+        )
+    }
+
+    reader = FakeReader(measurements)
+    freezer_reader = FakeFreezerReader(freezer_measurements)
+    delivery = FakeDelivery(False)  # schlägt fehl
+    queue = BatchQueue(tmp_path / "queue.jsonl")
+
+    _patch_system_info(monkeypatch)
+
+    runtime = LoggerRuntime(
+        logger_id="logger-001",
+        readers={"atmoweb_101": reader},
+        sequence_store=SequenceStore(tmp_path / "sequence"),
+        delivery=delivery,
+        queue=queue,
+        freezer_reader=freezer_reader,
+    )
+
+    batch = runtime.run_once()
+
+    assert len(delivery.batches) == 1
+
+    pending = queue.pending()
+
+    assert len(pending) == 1
+    assert pending[0].to_dict() == batch.to_dict()
+    assert "freezer.temperature" in pending[0].measurements

@@ -18,11 +18,15 @@ LOGGERPI_FILES=(
     batch_factory.py
     composer.py
     delivery.py
+    freezer.py
+    freezer_config.py
     loggerpi_observer.py
     loggerpi_runner.py
     batch_queue.py  # ← umbenannt von queue.py
     runtime.py
     system_info.py
+    thingspeak_delivery.py
+    thingspeak_config.py
 )
 
 for file in "${LOGGERPI_FILES[@]}"; do

@@ -1,13 +1,15 @@
+from typing import Optional
+
 from atmoweb import AtmoWebReader
 from batch_factory import SequenceStore
 from batch_queue import BatchQueue
 from composer import compose_batch
 from delivery import BatchDelivery
+from freezer import FreezerReader
+from thingspeak_delivery import ThingSpeakDelivery
 
 
 class LoggerRuntime:
-    """Orchestrates one LoggerPi collection and delivery cycle."""
-
     def __init__(
         self,
         *,
@@ -16,27 +18,34 @@ class LoggerRuntime:
         sequence_store: SequenceStore,
         delivery: BatchDelivery,
         queue: BatchQueue,
+        freezer_reader: Optional[FreezerReader] = None,
+        thingspeak_delivery: Optional[ThingSpeakDelivery] = None,
     ) -> None:
         self.logger_id = logger_id
         self.readers = readers
         self.sequence_store = sequence_store
         self.delivery = delivery
         self.queue = queue
+        self.freezer_reader = freezer_reader
+        self.thingspeak_delivery = thingspeak_delivery
 
     def run_once(self):
-        # 1. Queue-Replay: bereits wartende Batches zustellen
+        # 1. Queue-Replay
         for queued_batch in self.queue.pending():
             if self.delivery.send(queued_batch):
                 self.queue.remove(queued_batch)
             else:
                 break
 
-        # 2. Measurements von allen Readern sammeln
+        # 2. Measurements sammeln
         measurements = {}
 
         for source, reader in self.readers.items():
             for name, measurement in reader.read_measurements().items():
                 measurements[f"{source}.{name}"] = measurement
+
+        if self.freezer_reader is not None:
+            measurements.update(self.freezer_reader.read_measurements())
 
         # 3. Batch erzeugen
         batch = compose_batch(
@@ -45,8 +54,12 @@ class LoggerRuntime:
             measurements=measurements,
         )
 
-        # 4. Batch zustellen oder in Queue legen
+        # 4. OtterPi-Delivery (oder Queue)
         if not self.delivery.send(batch):
             self.queue.enqueue(batch)
+
+        # 5. ThingSpeak-Injektion (optional, semi-redundant)
+        if self.thingspeak_delivery is not None:
+            self.thingspeak_delivery.send(batch)
 
         return batch
