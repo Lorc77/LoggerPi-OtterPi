@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 from otterpi_store import BatchStore
 
 BERLIN = ZoneInfo("Europe/Berlin")
-VERSION = "v1.3.7"
+VERSION = "v1.3.8"
 
 ROOMS = {
     "r1304": {
@@ -344,6 +344,8 @@ h1 {{ text-align: center; margin-top: 0; }}
 }}
 
 .device-card, .system-card {{
+    min-width: 0;
+    overflow: hidden;
     background: rgba(31,41,55,.78);
     border: 1px solid rgba(255,255,255,.08);
     border-radius: 18px;
@@ -363,7 +365,13 @@ h1 {{ text-align: center; margin-top: 0; }}
     min-height: 76px;
 }}
 
-.device-header h2 {{ margin: 0; font-size: 1.1rem; }}
+.device-header h2 {{
+    margin: 0;
+    font-size: 1.1rem;
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}}
 
 .device-status-label {{
     display: block;
@@ -403,6 +411,7 @@ h1 {{ text-align: center; margin-top: 0; }}
 
 .metric-full {{
     width: 100%;
+    min-width: 0;
     padding: 12px;
     background: rgba(255,255,255,.06);
     border: 1px solid rgba(255,255,255,.08);
@@ -431,6 +440,7 @@ h1 {{ text-align: center; margin-top: 0; }}
     position: relative;
     height: 280px;
     margin-top: 18px;
+    max-width: 100%;
 }}
 
 .placeholder-chart {{
@@ -628,6 +638,8 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
             }},
             tooltip: {{
                 usePointStyle: true,
+                boxWidth: 6,
+                boxHeight: 6,
                 callbacks: {{
                     labelColor: (context) => ({{
                         borderColor: context.dataset.borderColor,
@@ -639,7 +651,7 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                     }}),
                     title: (items) => {{
                         if (items.length > 0) {{
-                            return `⏰ Messzeit: ${{items[0].label}} h`;
+                            return `⏰ Messzeit: ${{items[0].label}} Uhr`;
                         }}
                         return '';
                     }},
@@ -712,6 +724,8 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
             }},
             tooltip: {{
                 usePointStyle: true,
+                boxWidth: 6,
+                boxHeight: 6,
                 callbacks: {{
                     labelColor: (context) => ({{
                         borderColor: context.dataset.borderColor,
@@ -723,7 +737,7 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                     }}),
                     title: (items) => {{
                         if (items.length > 0) {{
-                            return `⏰ Messzeit: ${{items[0].label}} h`;
+                            return `⏰ Messzeit: ${{items[0].label}} Uhr`;
                         }}
                         return '';
                     }},

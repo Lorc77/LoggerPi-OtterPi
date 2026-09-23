@@ -12,16 +12,21 @@
 
 ## Deployment-Stand
 
-**Stand:** 2026-09-20
+**Stand:** 2026-09-23
 
-**Stand:** 2026-09-21
+LoggerPi und OtterPi laufen produktiv auf Version `v1.3.7`.
 
-Der erste reproduzierbare Deployment-Mechanismus für LoggerPi und
-OtterPi ist implementiert und auf beiden Zielsystemen praktisch
-verifiziert.
+Seit `v1.3.0` ist der Freezer direkt über die Seriell-Schnittstelle
+(FTDI FT232R A9NX8YRE) angebunden – ohne den bisherigen Umweg über
+`minicom` und `freezer.log`.
 
-LoggerPi und OtterPi laufen produktiv auf Version `v1.2.3` und
-übertragen Core Batches kontinuierlich (alle 15 Minuten).
+Seit `v1.3.0` existiert zusätzlich eine optionale ThingSpeak-Injektion
+(semi-redundanter Speicher), die ausgewählte Werte im Legacy-Format
+an ThingSpeak überträgt (field1–field7).
+
+Das Dashboard zeigt seit `v1.3.1` eine Freezer-Kachel in R1304
+(inkl. DryAger-Platzhalter) und seit `v1.3.3` korrekte
+Zeitstempel-Konvertierung (UTC→Berlin nur bei UTC-Zeitstempeln).
 
 Seit `v1.1.0` ist die Übertragung durch Bearer-Token-Authentication
 geschützt. Seit `v1.2.0` stellt der OtterPi ein Dashboard unter

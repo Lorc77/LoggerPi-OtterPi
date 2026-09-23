@@ -1338,6 +1338,19 @@ Ergänzt:
 
 ---
 
+### Aktueller Betriebsstand (2026-09-23)
+
+| Komponente | Status |
+|-----------|--------|
+| LoggerPi-OtterPi | v1.3.7 |
+| Freezer-Reader | ✅ direkt Serial (FTDI A9NX8YRE) |
+| minicom/freezer-log.service | ❌ deaktiviert |
+| Legacy-observer.py | ❌ gestoppt + aus rc.local entfernt |
+| ThingSpeak-Injektion | ✅ aktiv (field1–7) |
+| Cron backup_log.sh | ❌ entfernt |
+
+---
+
 ## Kurzfassung für uns beide
 
 Der wichtigste Satz für die Zukunft ist eigentlich:

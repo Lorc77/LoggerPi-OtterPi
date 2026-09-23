@@ -971,6 +971,63 @@ Bessere Orientierung – Räume statt Geräte.
 
 ---
 
+## DEC-030 — Freezer direkt über Seriell statt minicom+freezer.log
+
+**Status:** Angenommen
+**Datum:** 2026-09-22
+
+### Kontext
+
+Der Freezer (Thermo Scientific HFC-Serie) sendet alle ~60 Minuten
+eine Meldung über RS-232. Bisher wurde diese über `minicom` in
+`freezer.log` geschrieben und vom Legacy-Observer gelesen.
+
+### Entscheidung
+
+Der neue `FreezerReader` liest die Meldungen direkt von der
+Seriell-Schnittstelle (FTDI FT232R A9NX8YRE, 1200 8N2).
+
+`minicom`/`freezer-log.service` wurde deaktiviert.
+
+### Begründung
+
+- Kein Umweg über eine Logdatei
+- Kein separater Prozess (minicom)
+- Ressourcenschonend (dauerhafte Verbindung, kein Polling)
+- `measured_at` = Empfangszeit auf dem LoggerPi (UTC), da der
+  Freezer keine eigene Zeit sendet
+
+---
+
+## DEC-031 — ThingSpeak-Injektion als semi-redundanter Speicher
+
+**Status:** Angenommen
+**Datum:** 2026-09-22
+
+### Kontext
+
+ThingSpeak wurde bisher über den Legacy-Observer beschrieben.
+Nach dessen Ablösung soll ThingSpeak als semi-redundanter
+Speicher weitergeführt werden.
+
+### Entscheidung
+
+Eine optionale `ThingSpeakDelivery` liest Werte aus dem Core Batch
+und sendet sie im Legacy-Format an ThingSpeak (field1–field7).
+
+Aktivierbar über `LOGGERPI_THINGSPEAK_ENABLED=1`.
+
+`field8` (LED) wird bewusst noch nicht gesendet – bis States/Events
+in den Batch integriert sind.
+
+### Begründung
+
+- ThingSpeak bleibt als Backup erhalten
+- Kein Legacy-Wissen im Core Batch
+- Leicht entfernbar (eigene Komponente)
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:

@@ -94,11 +94,28 @@ Service:
 loggerpi.observer.service
 ```
 
+Die Service-Datei `loggerpi.observer.service` enthält seit v1.3.x:
+
+    After=network-online.target dhcpcd.service
+
+Damit startet der Service erst, nachdem `dhcpcd` die Netzwerk-
+Konfiguration (IP + Route) abgeschlossen hat – verhindert den
+`Network is unreachable`-Fehler beim ersten Zyklus nach dem Boot LEIDER NOCH NICHT.
+
 Konfiguration:
 
 ```text
 /etc/loggerpi-otterpi/loggerpi.env
 ```
+
+### Neue Umgebungsvariablen (seit v1.3.0)
+
+| Variable | Bedeutung | Default |
+|----------|-----------|---------|
+| `LOGGERPI_FREEZER_ENABLED` | Freezer-Reader aktivieren | `1` |
+| `LOGGERPI_THINGSPEAK_ENABLED` | ThingSpeak-Injektion aktivieren | `0` |
+| `LOGGERPI_THINGSPEAK_CHANNEL_ID` | ThingSpeak Channel-ID | – |
+| `LOGGERPI_THINGSPEAK_API_KEY` | ThingSpeak Write API Key | – |
 
 Installationsverzeichnis:
 
@@ -124,14 +141,20 @@ Die Installation kopiert die Anwendungsdateien **flach** nach
 ├── batch_factory.py
 ├── batch_queue.py
 ├── composer.py
+├── dashboard.py (nur OtterPi)
 ├── delivery.py
+├── freezer.py
+├── freezer_config.py
 ├── loggerpi_observer.py
 ├── loggerpi_runner.py
+├── otter2.png (nur OtterPi)
 ├── otterpi.py (nur OtterPi)
 ├── otterpi_observer.py (nur OtterPi)
 ├── otterpi_store.py (nur OtterPi)
 ├── runtime.py
 ├── system_info.py
+├── thingspeak_delivery.py
+├── thingspeak_config.py
 └── model/
     ├── batch.py
     └── measurement.py
