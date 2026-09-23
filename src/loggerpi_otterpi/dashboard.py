@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 from otterpi_store import BatchStore
 
 BERLIN = ZoneInfo("Europe/Berlin")
-VERSION = "v1.3.1"
+VERSION = "v1.3.2"
 
 ROOMS = {
     "r1304": {
@@ -15,6 +15,7 @@ ROOMS = {
         "icon": "🦗",
         "devices": [
             {"name": "FREEZER -80 °C", "key": "freezer", "type": "freezer"},
+            {"name": "DRYAGER", "key": "dryager", "type": "placeholder"},
             {"name": "MEMMERT HPP260 links", "key": "atmoweb_101", "type": "atmoweb"},
             {"name": "MEMMERT HPP260 rechts", "key": "atmoweb_102", "type": "atmoweb"},
         ],
@@ -242,7 +243,6 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
 
     current = _current_values(batches)
 
-    # Serial-Daten für alle Geräte
     temp_101 = _series(batches, "atmoweb_101.temperature_1")
     hum_101 = _series(batches, "atmoweb_101.humidity")
     temp_102 = _series(batches, "atmoweb_102.temperature_1")
@@ -253,6 +253,7 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
         "atmoweb_101": (temp_101, hum_101),
         "atmoweb_102": (temp_102, hum_102),
         "freezer": (temp_freezer, []),
+        "dryager": ([], []),
     }
 
     device_views = []
@@ -281,32 +282,9 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
 
     device_cards = "".join(_render_device_card(device, device_views) for device in device_views)
 
-    # DryAger-Platzhalter-Kachel (R1304, rechts neben Freezer)
-    if room_id == "r1304":
-        device_cards += """
-    <section class="device-card device-card-placeholder">
-        <div class="device-header">
-            <div>
-                <h2>DryAger</h2>
-                <span class="device-status-label">geplant</span>
-            </div>
-            <span class="status-light status-off" aria-label="Platzhalter"></span>
-        </div>
-        <div class="metric-grid">
-            <div class="metric">
-                <span>🌡 Temperatur</span>
-                <strong>– <small>°C</small></strong>
-            </div>
-            <div class="metric">
-                <span>💧 Rel. Feuchte</span>
-                <strong>– <small>%</small></strong>
-            </div>
-        </div>
-        <div class="device-chart placeholder-chart"></div>
-    </section>
-"""
-
-    device_scripts = "".join(_render_device_script(device) for device in device_views)
+    device_scripts = "".join(
+        _render_device_script(device) for device in device_views if device["type"] != "placeholder"
+    )
 
     return f"""<!DOCTYPE html>
 <html lang="de">
@@ -423,19 +401,28 @@ h1 {{ text-align: center; margin-top: 0; }}
     border-radius: 10px;
 }}
 
-.metric span {{
+.metric-full {{
+    width: 100%;
+    padding: 12px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 10px;
+    margin-top: 18px;
+}}
+
+.metric span, .metric-full span {{
     display: block;
     color: #d1d5db;
     font-size: .8rem;
 }}
 
-.metric strong {{
+.metric strong, .metric-full strong {{
     display: block;
     margin-top: 5px;
     font-size: 1.35rem;
 }}
 
-.metric small {{
+.metric small, .metric-full small {{
     color: #9ca3af;
     font-size: .8rem;
 }}
@@ -530,8 +517,33 @@ h1 {{ text-align: center; margin-top: 0; }}
 
 def _render_device_card(device: dict, device_views: list[dict]) -> str:
     """Erzeugt die HTML-Karte für ein Gerät."""
+    if device["type"] == "placeholder":
+        # DryAger-Platzhalter-Kachel
+        return f"""
+    <section class="device-card device-card-placeholder">
+        <div class="device-header">
+            <div>
+                <h2>{device["name"]}</h2>
+                <span class="device-status-label">geplant</span>
+            </div>
+            <span class="status-light status-off" aria-label="Platzhalter"></span>
+        </div>
+        <div class="metric-grid">
+            <div class="metric">
+                <span>🌡 Temperatur</span>
+                <strong>– <small>°C</small></strong>
+            </div>
+            <div class="metric">
+                <span>💧 Rel. Feuchte</span>
+                <strong>– <small>%</small></strong>
+            </div>
+        </div>
+        <div class="device-chart placeholder-chart"></div>
+    </section>
+"""
+
     if device["type"] == "freezer":
-        # Freezer-Kachel: nur Temperatur
+        # Freezer-Kachel: nur Temperatur, über volle Breite
         return f"""
     <section class="device-card">
         <div class="device-header">
@@ -541,17 +553,16 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
             </div>
             <span class="status-light {device["status"]}" aria-label="Gerätestatus"></span>
         </div>
-        <div class="metric-grid">
-            <div class="metric">
-                <span>🌡 Temperatur</span>
-                <strong>{device["temp"]:.1f} <small>°C</small></strong>
-            </div>
+        <div class="metric-full">
+            <span>🌡 Temperatur</span>
+            <strong>{device["temp"]:.1f} <small>°C</small></strong>
         </div>
         <div class="device-chart">
             <canvas id="{device["chart_id"]}"></canvas>
         </div>
     </section>
 """
+
     # AtmoWEB-Kachel: Temperatur + Feuchte
     return f"""
     <section class="device-card">
@@ -582,6 +593,9 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
 def _render_device_script(device: dict) -> str:
     """Erzeugt das Chart.js-Skript für ein Gerät."""
     chart_var = device["chart_id"].replace("-", "_")
+
+    if device["type"] == "placeholder":
+        return ""
 
     if device["type"] == "freezer":
         # Nur Temperatur-Dataset (orange)
@@ -768,6 +782,9 @@ def _device_current(batches: list[dict], key: str, device_type: str = "atmoweb")
     latest = batches[-1]
     measurements = latest.get("measurements", {})
 
+    if device_type == "placeholder":
+        return result
+
     if device_type == "freezer":
         temp = measurements.get("freezer.temperature", {})
         if temp.get("value") is not None:
@@ -799,6 +816,9 @@ def _device_current(batches: list[dict], key: str, device_type: str = "atmoweb")
 def _device_status(batches: list[dict], key: str, device_type: str = "atmoweb") -> str:
     """Ermittelt den erweiterten Status für die Gerätekachel."""
     if not batches:
+        return "status-off"
+
+    if device_type == "placeholder":
         return "status-off"
 
     measurements = batches[-1].get("measurements", {})
