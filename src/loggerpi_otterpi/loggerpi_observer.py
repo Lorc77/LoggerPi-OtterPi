@@ -8,6 +8,7 @@ from batch_queue import BatchQueue
 from delivery import BatchDelivery
 from freezer_config import create_freezer_reader
 from loggerpi_runner import run
+from memmert_config import create_memmert_readers
 from runtime import LoggerRuntime
 from thingspeak_config import create_thingspeak_delivery
 
@@ -33,11 +34,7 @@ def _get_interval() -> float:
 
 
 def _enabled(name: str, default: str = "1") -> bool:
-    """Liest ein optionales Enable-Flag.
-
-    Freezer ist standardmäßig aktiviert (Default "1").
-    ThingSpeak ist standardmäßig deaktiviert (Default "0").
-    """
+    """Liest ein optionales Enable-Flag."""
     return os.environ.get(name, default) == "1"
 
 
@@ -51,6 +48,10 @@ def main() -> None:
 
     freezer_reader = create_freezer_reader() if _enabled("LOGGERPI_FREEZER_ENABLED", "1") else None
 
+    memmert_readers = (
+        create_memmert_readers() if _enabled("LOGGERPI_MEMMERT_ENABLED", "0") else None
+    )
+
     thingspeak_delivery = (
         create_thingspeak_delivery() if _enabled("LOGGERPI_THINGSPEAK_ENABLED", "0") else None
     )
@@ -62,6 +63,7 @@ def main() -> None:
         delivery=BatchDelivery(otterpi_url, token=token),
         queue=BatchQueue(queue_file),
         freezer_reader=freezer_reader,
+        memmert_readers=memmert_readers,
         thingspeak_delivery=thingspeak_delivery,
     )
 

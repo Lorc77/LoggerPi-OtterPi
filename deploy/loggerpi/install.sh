@@ -23,6 +23,8 @@ LOGGERPI_FILES=(
     loggerpi_observer.py
     loggerpi_runner.py
     batch_queue.py  # ← umbenannt von queue.py
+    memmert.py
+    memmert_config.py
     runtime.py
     system_info.py
     thingspeak_delivery.py

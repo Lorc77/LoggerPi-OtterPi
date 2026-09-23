@@ -186,7 +186,13 @@ nein
 
 ### `measured_at`
 
-Zeitpunkt der tatsächlichen Erfassung eines Messwertes.
+Zeitpunkt der Erfassung auf dem LoggerPi (UTC), einheitlich für
+alle Messwerte.
+
+Die LoggerPi-Systemzeit ist die maßgebliche Zeitquelle. Die
+Quellen-Gerätezeit wird nicht als `measured_at` verwendet, sondern
+kann separat (z.B. über ein Reader-Attribut `device_time`)
+verfügbar sein.
 
 Typ:
 

@@ -100,7 +100,15 @@ Zeitpunkt der Erzeugung des Batches auf dem LoggerPi.
 
 ### `measured_at`
 
-Zeitpunkt der tatsächlichen Erfassung eines Messwertes.
+Zeitpunkt der Messwerterfassung, einheitlich gesetzt auf die
+LoggerPi-Empfangszeit (UTC).
+
+Der LoggerPi ist die vertrauenswürdige Zeitquelle (Linux mit
+NTP/Zeitsynchronisation). Gerätezeiten können abweichen (z.B.
+falsch konfigurierte Zeitzone, keine automatische Sommerzeit-
+Umstellung). Die Gerätezeit wird bei Bedarf separat erfasst
+(z.B. über ein Reader-Attribut `device_time`) und ist nicht
+Teil von `measured_at`.
 
 ### `received_at`
 

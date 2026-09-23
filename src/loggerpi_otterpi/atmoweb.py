@@ -1,6 +1,15 @@
+"""AtmoWEB-Reader für das LoggerPi-OtterPi-Datenmodell.
+
+Liest Messwerte und Zustände von MEMMERT AtmoWEB-Geräten (HPP260).
+
+`measured_at` wird einheitlich auf die LoggerPi-Empfangszeit (UTC)
+gesetzt. Die Gerätezeit wird separat als Attribut `device_time`
+verfügbar gemacht (für Diagnose/Zugriff bei Bedarf).
+"""
+
 import json
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -29,6 +38,9 @@ class AtmoWebReader:
         self.port = port
         self.timeout = timeout
 
+        # Gerätezeit (vom AtmoWEB geliefert), separat verfügbar
+        self.device_time: Optional[str] = None
+
     @property
     def base_url(self) -> str:
         return f"http://{self.host}:{self.port}"
@@ -50,7 +62,6 @@ class AtmoWebReader:
 
         try:
             # Standard: JSON-Fragment (reales AtmoWEB)
-            # "key": value, "key2": value2, ...
             json_text = "{" + body.strip().rstrip(",") + "}"
             data = json.loads(json_text)
         except json.JSONDecodeError:
@@ -103,7 +114,11 @@ class AtmoWebReader:
             "FanRead",
         )
 
-        measured_at = _parse_timestamp(data.get("Time"))
+        # Gerätezeit separat merken (für Diagnose/Zugriff)
+        self.device_time = _parse_timestamp(data.get("Time"))
+
+        # Einheitlich: LoggerPi-Empfangszeit (UTC)
+        measured_at = datetime.now(timezone.utc).isoformat()
 
         measurements: dict[str, Measurement] = {}
 

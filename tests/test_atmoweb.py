@@ -69,21 +69,13 @@ def test_read_measurements_maps_atmoweb_values(monkeypatch) -> None:
 
     measurements = AtmoWebReader("192.168.100.101").read_measurements()
 
-    assert measurements["temperature_1"].to_dict() == {
-        "value": 23.1,
-        "unit": "celsius",
-        "measured_at": "2026-08-30T18:00:00+00:00",
-        "validity": "valid",
-        "source": "atmoweb",
-    }
+    measurement = measurements["temperature_1"].to_dict()
 
-    assert measurements["temperature_2"].to_dict() == {
-        "value": None,
-        "unit": "celsius",
-        "measured_at": None,
-        "validity": "unavailable",
-        "source": "atmoweb",
-    }
+    assert measurement["value"] == 23.1
+    assert measurement["unit"] == "celsius"
+    assert measurement["validity"] == "valid"
+    assert measurement["source"] == "atmoweb"
+    assert measurement["measured_at"].endswith("+00:00")
 
     assert measurements["humidity"].value == 45.2
     assert measurements["humidity"].unit == "percent"

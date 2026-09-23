@@ -1028,6 +1028,48 @@ in den Batch integriert sind.
 
 ---
 
+## DEC-032 — `measured_at` einheitlich als LoggerPi-Empfangszeit
+
+**Status:** Angenommen
+**Datum:** 2026-09-23
+
+### Kontext
+
+Verschiedene Datenquellen liefern unterschiedliche Zeitstempel:
+
+- AtmoWEB sendet `Time` mit eigener (teilweise falscher) Zeitzone
+  (real beobachtet: `+01:00` statt `+02:00` in der Sommerzeit)
+- Freezer sendet keine Zeit
+- MEMMERT IPP300 (geplant) liefert keine Zeit
+
+Die Gerätezeiten können abweichen (falsche Zeitzone, keine
+automatische Sommerzeit-Umstellung).
+
+### Entscheidung
+
+`measured_at` wird einheitlich auf die LoggerPi-Empfangszeit (UTC)
+gesetzt – für alle Datenquellen.
+
+Die Gerätezeit wird weiterhin abgefragt (wo möglich) und als
+separates Attribut am Reader (`reader.device_time`) verfügbar
+gemacht. Sie ist nicht Teil von `measured_at`.
+
+### Begründung
+
+- Konsistente Zeitbasis für alle Messwerte
+- Keine Abhängigkeit von korrekt konfigurierten Gerätezeiten
+- Sommerzeit-sicher (LoggerPi stellt automatisch um)
+- LoggerPi ist die vertrauenswürdige Zeitquelle (NTP/Zeitsynchronisation)
+- Gerätezeit bleibt für Diagnose/Zugriff bei Bedarf erhalten
+
+### Konsequenzen
+
+- `measured_at` in allen Readern = `datetime.now(timezone.utc)`
+- Gerätezeit nur noch als separates Attribut (`device_time`)
+- Doku (`core-batch-v1.md`, `core-batch-v1-json.md`) angepasst
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:

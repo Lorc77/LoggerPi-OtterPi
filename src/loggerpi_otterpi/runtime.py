@@ -6,10 +6,13 @@ from batch_queue import BatchQueue
 from composer import compose_batch
 from delivery import BatchDelivery
 from freezer import FreezerReader
+from memmert import MemmertReader
 from thingspeak_delivery import ThingSpeakDelivery
 
 
 class LoggerRuntime:
+    """Orchestrates one LoggerPi collection and delivery cycle."""
+
     def __init__(
         self,
         *,
@@ -19,6 +22,7 @@ class LoggerRuntime:
         delivery: BatchDelivery,
         queue: BatchQueue,
         freezer_reader: Optional[FreezerReader] = None,
+        memmert_readers: Optional[dict[str, MemmertReader]] = None,
         thingspeak_delivery: Optional[ThingSpeakDelivery] = None,
     ) -> None:
         self.logger_id = logger_id
@@ -27,6 +31,7 @@ class LoggerRuntime:
         self.delivery = delivery
         self.queue = queue
         self.freezer_reader = freezer_reader
+        self.memmert_readers = memmert_readers or {}
         self.thingspeak_delivery = thingspeak_delivery
 
     def run_once(self):
@@ -47,6 +52,10 @@ class LoggerRuntime:
         if self.freezer_reader is not None:
             measurements.update(self.freezer_reader.read_measurements())
 
+        for source, reader in self.memmert_readers.items():
+            for name, measurement in reader.read_measurements().items():
+                measurements[f"{source}.{name}"] = measurement
+
         # 3. Batch erzeugen
         batch = compose_batch(
             logger_id=self.logger_id,
@@ -58,7 +67,7 @@ class LoggerRuntime:
         if not self.delivery.send(batch):
             self.queue.enqueue(batch)
 
-        # 5. ThingSpeak-Injektion (optional, semi-redundant)
+        # 5. ThingSpeak-Injektion (optional)
         if self.thingspeak_delivery is not None:
             self.thingspeak_delivery.send(batch)
 
