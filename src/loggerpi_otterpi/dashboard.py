@@ -11,8 +11,6 @@ VERSION = "v1.3.4"
 
 ROOMS = {
     "r1304": {
-        "name": "R1304 · Kulturraum I",
-        "icon": "🦗",
         "devices": [
             {"name": "FREEZER -80 °C", "key": "freezer", "type": "freezer"},
             {"name": "DRYAGER", "key": "dryager", "type": "placeholder"},
@@ -470,6 +468,7 @@ h1 {{ text-align: center; margin-top: 0; }}
     body {{ padding: 15px; }}
     .container {{ width: 100%; padding: 20px; border-radius: 18px; }}
     .grid {{ grid-template-columns: 1fr; }}
+    .system-line {{ grid-template-columns: 160px 1fr; }}
 }}
 </style>
 </head>
@@ -627,7 +626,17 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
             }},
             tooltip: {{
                 usePointStyle: true,
+                boxWidth: 8,
+                boxHeight: 8,
                 callbacks: {{
+                    labelColor: (context) => ({{
+                        borderColor: context.dataset.borderColor,
+                        backgroundColor: context.dataset.borderColor
+                    }}),
+                    labelPointStyle: () => ({{
+                        pointStyle: 'circle',
+                        rotation: 0
+                    }}),
                     title: (items) => {{
                         if (items.length > 0) {{
                             return `⏰ Messzeit: ${{items[0].label}} h`;
@@ -645,7 +654,7 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
             x: {{
                 ticks: {{
                     color: '#9ca3af',
-                    callback: (value) => value + ' h'
+                    callback: (value) => {chart_var}Labels[value]
                 }}
             }},
             y: {{
@@ -703,7 +712,17 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
             }},
             tooltip: {{
                 usePointStyle: true,
+                boxWidth: 8,
+                boxHeight: 8,
                 callbacks: {{
+                    labelColor: (context) => ({{
+                        borderColor: context.dataset.borderColor,
+                        backgroundColor: context.dataset.borderColor
+                    }}),
+                    labelPointStyle: () => ({{
+                        pointStyle: 'circle',
+                        rotation: 0
+                    }}),
                     title: (items) => {{
                         if (items.length > 0) {{
                             return `⏰ Messzeit: ${{items[0].label}} h`;
@@ -724,7 +743,7 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
             x: {{
                 ticks: {{
                     color: '#9ca3af',
-                    callback: (value) => value + ' h'
+                    callback: (value) => {chart_var}Labels[value]
                 }}
             }},
             temperature: {{
