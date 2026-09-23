@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 from otterpi_store import BatchStore
 
 BERLIN = ZoneInfo("Europe/Berlin")
-VERSION = "v1.4.1"
+VERSION = "v1.4.2"
 
 ROOMS = {
     "r1304": {
@@ -716,7 +716,10 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                 type: 'linear',
                 ticks: {{
                     color: '#fb923c',
-                    callback: (value) => value + ' °C'
+                    callback: (value) => {{
+                        const rounded = Math.round(value * 10) / 10;
+                        return rounded + ' °C'
+                    }}
                 }}
             }}
         }}
@@ -841,7 +844,10 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                 position: 'left',
                 ticks: {{
                     color: '#fb923c',
-                    callback: (value) => value + ' °C'
+                    callback: (value) => {{
+                        const rounded = Math.round(value * 10) / 10;
+                        return rounded + ' °C';
+                    }}
                 }}
             }},
             humidity: {{
@@ -849,7 +855,10 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                 position: 'right',
                 ticks: {{
                     color: '#38bdf8',
-                    callback: (value) => value + ' %'
+                    callback: (value) => {{
+                        const rounded = Math.round(value * 10) / 10;
+                        return rounded + ' %';
+                    }}
                 }},
                 grid: {{ drawOnChartArea: false }}
             }}
