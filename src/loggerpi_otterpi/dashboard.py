@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 from otterpi_store import BatchStore
 
 BERLIN = ZoneInfo("Europe/Berlin")
-VERSION = "v1.3.2"
+VERSION = "v1.3.3"
 
 ROOMS = {
     "r1304": {
@@ -858,7 +858,14 @@ def _series(batches: list[dict], key: str) -> list[dict]:
         measured_at = measurement.get("measured_at")
 
         if value is not None and measured_at:
-            label = measured_at[11:16]
+            dt = datetime.fromisoformat(measured_at)
+
+            # Nur UTC (+00:00) → nach Berlin konvertieren
+            # AtmoWEB liefert lokale Zeit – die lassen wir unverändert
+            if dt.tzinfo is not None and dt.utcoffset().total_seconds() == 0:
+                dt = dt.astimezone(BERLIN)
+
+            label = dt.strftime("%H:%M")
             series.append({"label": label, "value": value})
 
     return series

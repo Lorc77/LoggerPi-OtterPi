@@ -154,7 +154,7 @@ def _freezer_value(measurements: dict) -> Optional[int]:
 
 
 def _format_number(value: float) -> str:
-    """Formatiert eine Zahl mit sinnvoller Genauigkeit (1 Nachkommastelle)."""
+    """Formatiert eine Zahl mit sinnvoller Genauigkeit (2 Nachkommastellen)."""
     if value == int(value):
         return str(int(value))
-    return f"{value:.1f}"
+    return f"{value:.2f}"

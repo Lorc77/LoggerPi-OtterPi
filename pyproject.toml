@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "loggerpi-otterpi"
-version = "1.3.2"
+version = "1.3.3"
 description = "LoggerPi-OtterPi"
 requires-python = ">=3.9"
 dependencies = ["pyserial>=3.5",]

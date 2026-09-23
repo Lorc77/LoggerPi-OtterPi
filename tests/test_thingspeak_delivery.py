@@ -70,12 +70,12 @@ class TestBuildThingSpeakPayload:
         update = payload["updates"][0]
 
         assert update["delta_t"] == 900
-        assert update["field1"] == "20.5"
-        assert update["field2"] == "60.4"
-        assert update["field3"] == "21.5"
-        assert update["field4"] == "62.7"
-        assert update["field5"] == "48.2"
-        assert update["field6"] == "12.4"
+        assert update["field1"] == "20.50"
+        assert update["field2"] == "60.40"
+        assert update["field3"] == "21.50"
+        assert update["field4"] == "62.70"
+        assert update["field5"] == "48.20"
+        assert update["field6"] == "12.40"
         assert update["field7"] == -82
 
     def test_payload_omits_missing_fields(self):
@@ -166,7 +166,7 @@ class TestMeasurementValue:
             "key": _make_measurement(20.5),
         }
 
-        assert _measurement_value(measurements, "key") == "20.5"
+        assert _measurement_value(measurements, "key") == "20.50"
 
     def test_integer_value(self):
         measurements = {
