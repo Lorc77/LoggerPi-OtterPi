@@ -1,6 +1,6 @@
 [Unit]
 Description=LoggerPi Observer
-After=network-online.target
+After=network-online.target dhcpcd.service
 Wants=network-online.target
 
 [Service]

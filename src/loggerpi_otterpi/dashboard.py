@@ -7,15 +7,16 @@ from zoneinfo import ZoneInfo
 from otterpi_store import BatchStore
 
 BERLIN = ZoneInfo("Europe/Berlin")
-VERSION = "v1.2.4"
+VERSION = "v1.3.1"
 
 ROOMS = {
     "r1304": {
         "name": "R1304 · Kulturraum I",
         "icon": "🦗",
         "devices": [
-            {"name": "MEMMERT HPP260 links", "key": "atmoweb_101"},
-            {"name": "MEMMERT HPP260 rechts", "key": "atmoweb_102"},
+            {"name": "FREEZER -80 °C", "key": "freezer", "type": "freezer"},
+            {"name": "MEMMERT HPP260 links", "key": "atmoweb_101", "type": "atmoweb"},
+            {"name": "MEMMERT HPP260 rechts", "key": "atmoweb_102", "type": "atmoweb"},
         ],
     },
     "r1306": {
@@ -75,8 +76,9 @@ def _render_overview(store: BatchStore) -> str:
         if has_devices:
             device_lines = ""
             for device in room["devices"]:
-                current = _device_current(batches, device["key"])
-                current["status"] = _device_status(batches, device["key"])
+                device_type = device.get("type", "atmoweb")
+                current = _device_current(batches, device["key"], device_type)
+                current["status"] = _device_status(batches, device["key"], device_type)
                 device_lines += (
                     f'<div class="device-line">'
                     f'<span class="lamp {current["status"]}"></span>'
@@ -240,24 +242,30 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
 
     current = _current_values(batches)
 
+    # Serial-Daten für alle Geräte
     temp_101 = _series(batches, "atmoweb_101.temperature_1")
     hum_101 = _series(batches, "atmoweb_101.humidity")
     temp_102 = _series(batches, "atmoweb_102.temperature_1")
     hum_102 = _series(batches, "atmoweb_102.humidity")
+    temp_freezer = _series(batches, "freezer.temperature")
+
     series_by_device = {
         "atmoweb_101": (temp_101, hum_101),
         "atmoweb_102": (temp_102, hum_102),
+        "freezer": (temp_freezer, []),
     }
 
     device_views = []
     for device in room["devices"]:
+        device_type = device.get("type", "atmoweb")
         temp_series, hum_series = series_by_device.get(device["key"], ([], []))
-        device_current = _device_current(batches, device["key"])
-        chart_id = f"chart-{device['key']}"
+        device_current = _device_current(batches, device["key"], device_type)
+        chart_id = f"chart-{device['key'].replace('_', '-')}"
         device_views.append(
             {
                 "name": device["name"],
-                "status": _device_status(batches, device["key"]),
+                "type": device_type,
+                "status": _device_status(batches, device["key"], device_type),
                 "temp": device_current["temp"],
                 "hum": device_current["hum"],
                 "chart_id": chart_id,
@@ -271,85 +279,34 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
             }
         )
 
-    device_cards = "".join(
-        f"""
-    <section class="device-card">
+    device_cards = "".join(_render_device_card(device, device_views) for device in device_views)
+
+    # DryAger-Platzhalter-Kachel (R1304, rechts neben Freezer)
+    if room_id == "r1304":
+        device_cards += """
+    <section class="device-card device-card-placeholder">
         <div class="device-header">
             <div>
-                <h2>{device["name"]}</h2>
-                <span class="device-status-label">Status</span>
+                <h2>DryAger</h2>
+                <span class="device-status-label">geplant</span>
             </div>
-            <span class="status-light {device["status"]}" aria-label="Gerätestatus"></span>
+            <span class="status-light status-off" aria-label="Platzhalter"></span>
         </div>
         <div class="metric-grid">
             <div class="metric">
                 <span>🌡 Temperatur</span>
-                <strong>{device["temp"]:.1f} <small>°C</small></strong>
+                <strong>– <small>°C</small></strong>
             </div>
             <div class="metric">
                 <span>💧 Rel. Feuchte</span>
-                <strong>{device["hum"]:.1f} <small>%</small></strong>
+                <strong>– <small>%</small></strong>
             </div>
         </div>
-        <div class="device-chart">
-            <canvas id="{device["chart_id"]}"></canvas>
-        </div>
+        <div class="device-chart placeholder-chart"></div>
     </section>
 """
-        for device in device_views
-    )
 
-    device_scripts = "".join(
-        f"""
-const {device["chart_id"].replace("-", "_")}Labels = {device["labels_json"]};
-new Chart(document.getElementById('{device["chart_id"]}'), {{
-    type: 'line',
-    data: {{
-        labels: {device["chart_id"].replace("-", "_")}Labels,
-        datasets: [
-            {{ label: 'Temperatur', data: {device["temp_values_json"]},
-                borderColor: '#fb923c', borderWidth: 1.5,
-                yAxisID: 'temperature', tension: 0.3 }},
-            {{ label: 'Rel. Feuchte', data: {device["hum_values_json"]},
-                borderColor: '#38bdf8', borderWidth: 1.5,
-                yAxisID: 'humidity', tension: 0.3 }}
-        ]
-    }},
-    options: {{
-        responsive: true,
-        interaction: {{ mode: 'index', intersect: false }},
-        plugins: {{
-            legend: {{
-                labels: {{
-                    color: '#d1d5db',
-                    usePointStyle: true,
-                    pointStyle: 'line',
-                }}
-            }}
-        }},
-        scales: {{
-            x: {{ ticks: {{ color: '#9ca3af' }} }},
-            temperature: {{
-                type: 'linear', position: 'left',
-                ticks: {{
-                    color: '#fb923c',
-                    callback: (value) => value + ' °C'
-                }}
-            }},
-            humidity: {{
-                type: 'linear', position: 'right',
-                ticks: {{
-                    color: '#38bdf8',
-                    callback: (value) => value + ' %'
-                }},
-                grid: {{ drawOnChartArea: false }}
-            }}
-        }}
-    }}
-}});
-"""
-        for device in device_views
-    )
+    device_scripts = "".join(_render_device_script(device) for device in device_views)
 
     return f"""<!DOCTYPE html>
 <html lang="de">
@@ -413,6 +370,11 @@ h1 {{ text-align: center; margin-top: 0; }}
     border: 1px solid rgba(255,255,255,.08);
     border-radius: 18px;
     padding: 20px;
+}}
+
+.device-card-placeholder {{
+    opacity: .6;
+    border-style: dashed;
 }}
 
 .device-header {{
@@ -484,6 +446,16 @@ h1 {{ text-align: center; margin-top: 0; }}
     margin-top: 18px;
 }}
 
+.placeholder-chart {{
+    background: rgba(255,255,255,.03);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    font-style: italic;
+}}
+
 .system-card {{
     grid-column: 1 / -1;
     background: rgba(31,41,55,.78);
@@ -551,6 +523,160 @@ h1 {{ text-align: center; margin-top: 0; }}
 """
 
 
+# ---------------------------------------------------------------------------
+# Hilfsfunktionen zur Karten-Erzeugung
+# ---------------------------------------------------------------------------
+
+
+def _render_device_card(device: dict, device_views: list[dict]) -> str:
+    """Erzeugt die HTML-Karte für ein Gerät."""
+    if device["type"] == "freezer":
+        # Freezer-Kachel: nur Temperatur
+        return f"""
+    <section class="device-card">
+        <div class="device-header">
+            <div>
+                <h2>{device["name"]}</h2>
+                <span class="device-status-label">Status</span>
+            </div>
+            <span class="status-light {device["status"]}" aria-label="Gerätestatus"></span>
+        </div>
+        <div class="metric-grid">
+            <div class="metric">
+                <span>🌡 Temperatur</span>
+                <strong>{device["temp"]:.1f} <small>°C</small></strong>
+            </div>
+        </div>
+        <div class="device-chart">
+            <canvas id="{device["chart_id"]}"></canvas>
+        </div>
+    </section>
+"""
+    # AtmoWEB-Kachel: Temperatur + Feuchte
+    return f"""
+    <section class="device-card">
+        <div class="device-header">
+            <div>
+                <h2>{device["name"]}</h2>
+                <span class="device-status-label">Status</span>
+            </div>
+            <span class="status-light {device["status"]}" aria-label="Gerätestatus"></span>
+        </div>
+        <div class="metric-grid">
+            <div class="metric">
+                <span>🌡 Temperatur</span>
+                <strong>{device["temp"]:.1f} <small>°C</small></strong>
+            </div>
+            <div class="metric">
+                <span>💧 Rel. Feuchte</span>
+                <strong>{device["hum"]:.1f} <small>%</small></strong>
+            </div>
+        </div>
+        <div class="device-chart">
+            <canvas id="{device["chart_id"]}"></canvas>
+        </div>
+    </section>
+"""
+
+
+def _render_device_script(device: dict) -> str:
+    """Erzeugt das Chart.js-Skript für ein Gerät."""
+    chart_var = device["chart_id"].replace("-", "_")
+
+    if device["type"] == "freezer":
+        # Nur Temperatur-Dataset (orange)
+        return f"""
+const {chart_var}Labels = {device["labels_json"]};
+new Chart(document.getElementById('{device["chart_id"]}'), {{
+    type: 'line',
+    data: {{
+        labels: {chart_var}Labels,
+        datasets: [
+            {{ label: 'Temperatur', data: {device["temp_values_json"]},
+                borderColor: '#fb923c', borderWidth: 1.5,
+                pointRadius: 2, pointHoverRadius: 4,
+                tension: 0.3 }}
+        ]
+    }},
+    options: {{
+        responsive: true,
+        interaction: {{ mode: 'index', intersect: false }},
+        plugins: {{
+            legend: {{
+                labels: {{
+                    color: '#d1d5db',
+                    usePointStyle: true,
+                    pointStyle: 'line',
+                }}
+            }}
+        }},
+        scales: {{
+            x: {{ ticks: {{ color: '#9ca3af' }} }},
+            y: {{
+                type: 'linear',
+                ticks: {{
+                    color: '#fb923c',
+                    callback: (value) => value + ' °C'
+                }}
+            }}
+        }}
+    }}
+}});
+"""
+
+    # AtmoWEB: Temperatur + Feuchte
+    return f"""
+const {chart_var}Labels = {device["labels_json"]};
+new Chart(document.getElementById('{device["chart_id"]}'), {{
+    type: 'line',
+    data: {{
+        labels: {chart_var}Labels,
+        datasets: [
+            {{ label: 'Temperatur', data: {device["temp_values_json"]},
+                borderColor: '#fb923c', borderWidth: 1.5,
+                pointRadius: 2, pointHoverRadius: 4,
+                yAxisID: 'temperature', tension: 0.3 }},
+            {{ label: 'Rel. Feuchte', data: {device["hum_values_json"]},
+                borderColor: '#38bdf8', borderWidth: 1.5,
+                pointRadius: 2, pointHoverRadius: 4,
+                yAxisID: 'humidity', tension: 0.3 }}
+        ]
+    }},
+    options: {{
+        responsive: true,
+        interaction: {{ mode: 'index', intersect: false }},
+        plugins: {{
+            legend: {{
+                labels: {{
+                    color: '#d1d5db',
+                    usePointStyle: true,
+                    pointStyle: 'line',
+                }}
+            }}
+        }},
+        scales: {{
+            x: {{ ticks: {{ color: '#9ca3af' }} }},
+            temperature: {{
+                type: 'linear', position: 'left',
+                ticks: {{
+                    color: '#fb923c',
+                    callback: (value) => value + ' °C'
+                }}
+            }},
+            humidity: {{
+                type: 'linear', position: 'right',
+                ticks: {{
+                    color: '#38bdf8',
+                    callback: (value) => value + ' %'
+                }},
+                grid: {{ drawOnChartArea: false }}
+            }}
+        }}
+    }}
+}});
+"""
+
+
 def _recent_batches(store: BatchStore, hours: int = 48) -> list[dict]:
     """Liest die letzten Batches aus SQLite."""
     import sqlite3
@@ -579,6 +705,7 @@ def _current_values(batches: list[dict]) -> dict:
         "hum_101": 0.0,
         "temp_102": 0.0,
         "hum_102": 0.0,
+        "temp_freezer": 0.0,
         "last_batch": "–",
         "cpu_temp": 0.0,
         "memory_used": 0.0,
@@ -601,6 +728,7 @@ def _current_values(batches: list[dict]) -> dict:
     hum_101 = measurements.get("atmoweb_101.humidity", {})
     temp_102 = measurements.get("atmoweb_102.temperature_1", {})
     hum_102 = measurements.get("atmoweb_102.humidity", {})
+    temp_freezer = measurements.get("freezer.temperature", {})
 
     if temp_101.get("value") is not None:
         current["temp_101"] = temp_101["value"]
@@ -610,6 +738,8 @@ def _current_values(batches: list[dict]) -> dict:
         current["temp_102"] = temp_102["value"]
     if hum_102.get("value") is not None:
         current["hum_102"] = hum_102["value"]
+    if temp_freezer.get("value") is not None:
+        current["temp_freezer"] = temp_freezer["value"]
 
     system = latest.get("system", {})
     cpu = system.get("cpu", {})
@@ -623,7 +753,7 @@ def _current_values(batches: list[dict]) -> dict:
     return current
 
 
-def _device_current(batches: list[dict], key: str) -> dict:
+def _device_current(batches: list[dict], key: str, device_type: str = "atmoweb") -> dict:
     """Ermittelt aktuelle Werte + Status für ein Gerät."""
     result = {
         "temp": 0.0,
@@ -638,6 +768,18 @@ def _device_current(batches: list[dict], key: str) -> dict:
     latest = batches[-1]
     measurements = latest.get("measurements", {})
 
+    if device_type == "freezer":
+        temp = measurements.get("freezer.temperature", {})
+        if temp.get("value") is not None:
+            result["temp"] = temp["value"]
+            result["value"] = f"{temp['value']:.1f} °C"
+
+        if result["temp"] != 0.0:
+            result["status"] = "lamp-ok"
+
+        return result
+
+    # AtmoWEB
     temp = measurements.get(f"{key}.temperature_1", {})
     hum = measurements.get(f"{key}.humidity", {})
 
@@ -654,12 +796,26 @@ def _device_current(batches: list[dict], key: str) -> dict:
     return result
 
 
-def _device_status(batches: list[dict], key: str) -> str:
+def _device_status(batches: list[dict], key: str, device_type: str = "atmoweb") -> str:
     """Ermittelt den erweiterten Status für die Gerätekachel."""
     if not batches:
         return "status-off"
 
     measurements = batches[-1].get("measurements", {})
+
+    if device_type == "freezer":
+        temp = measurements.get("freezer.temperature", {})
+        validity = temp.get("validity")
+
+        if validity == "invalid":
+            return "status-critical"
+        if validity == "valid":
+            return "status-ok"
+        if validity == "stale":
+            return "status-warn"
+        return "status-off"
+
+    # AtmoWEB
     temp = measurements.get(f"{key}.temperature_1", {})
     hum = measurements.get(f"{key}.humidity", {})
     validities = {temp.get("validity"), hum.get("validity")}
