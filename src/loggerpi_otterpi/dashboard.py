@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 from otterpi_store import BatchStore
 
 BERLIN = ZoneInfo("Europe/Berlin")
-VERSION = "v1.3.3"
+VERSION = "v1.3.4"
 
 ROOMS = {
     "r1304": {
@@ -518,7 +518,6 @@ h1 {{ text-align: center; margin-top: 0; }}
 def _render_device_card(device: dict, device_views: list[dict]) -> str:
     """Erzeugt die HTML-Karte für ein Gerät."""
     if device["type"] == "placeholder":
-        # DryAger-Platzhalter-Kachel
         return f"""
     <section class="device-card device-card-placeholder">
         <div class="device-header">
@@ -534,7 +533,7 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
                 <strong>– <small>°C</small></strong>
             </div>
             <div class="metric">
-                <span>💧 Rel. Feuchte</span>
+                <span>💧 Relative Feuchte</span>
                 <strong>– <small>%</small></strong>
             </div>
         </div>
@@ -543,7 +542,6 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
 """
 
     if device["type"] == "freezer":
-        # Freezer-Kachel: nur Temperatur, über volle Breite
         return f"""
     <section class="device-card">
         <div class="device-header">
@@ -563,7 +561,7 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
     </section>
 """
 
-    # AtmoWEB-Kachel: Temperatur + Feuchte
+    # AtmoWEB-Kachel
     return f"""
     <section class="device-card">
         <div class="device-header">
@@ -579,7 +577,7 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
                 <strong>{device["temp"]:.1f} <small>°C</small></strong>
             </div>
             <div class="metric">
-                <span>💧 Rel. Feuchte</span>
+                <span>💧 Relative Feuchte</span>
                 <strong>{device["hum"]:.1f} <small>%</small></strong>
             </div>
         </div>
@@ -598,7 +596,6 @@ def _render_device_script(device: dict) -> str:
         return ""
 
     if device["type"] == "freezer":
-        # Nur Temperatur-Dataset (orange)
         return f"""
 const {chart_var}Labels = {device["labels_json"]};
 new Chart(document.getElementById('{device["chart_id"]}'), {{
@@ -620,7 +617,16 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                 labels: {{
                     color: '#d1d5db',
                     usePointStyle: true,
-                    pointStyle: 'line',
+                    pointStyle: 'circle',
+                }}
+            }},
+            tooltip: {{
+                callbacks: {{
+                    label: (context) => {{
+                        const value = context.parsed.y;
+                        const timeLabel = context.label;
+                        return `Temperatur: ${{value}} °C    ⏰ Messzeit: ${{timeLabel}} Uhr`;
+                    }}
                 }}
             }}
         }},
@@ -650,7 +656,7 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                 borderColor: '#fb923c', borderWidth: 1.5,
                 pointRadius: 2, pointHoverRadius: 4,
                 yAxisID: 'temperature', tension: 0.3 }},
-            {{ label: 'Rel. Feuchte', data: {device["hum_values_json"]},
+            {{ label: 'Relative Feuchte', data: {device["hum_values_json"]},
                 borderColor: '#38bdf8', borderWidth: 1.5,
                 pointRadius: 2, pointHoverRadius: 4,
                 yAxisID: 'humidity', tension: 0.3 }}
@@ -664,7 +670,19 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                 labels: {{
                     color: '#d1d5db',
                     usePointStyle: true,
-                    pointStyle: 'line',
+                    pointStyle: 'circle',
+                }}
+            }},
+            tooltip: {{
+                callbacks: {{
+                    label: (context) => {{
+                        const value = context.parsed.y;
+                        const timeLabel = context.label;
+                        if (context.dataset.label === 'Temperatur') {{
+                            return `Temperatur: ${{value}} °C    ⏰ Messzeit: ${{timeLabel}} Uhr`;
+                        }}
+                        return `Rel. Feuchte: ${{value}} %    ⏰ Messzeit: ${{timeLabel}} Uhr`;
+                    }}
                 }}
             }}
         }},
@@ -796,7 +814,6 @@ def _device_current(batches: list[dict], key: str, device_type: str = "atmoweb")
 
         return result
 
-    # AtmoWEB
     temp = measurements.get(f"{key}.temperature_1", {})
     hum = measurements.get(f"{key}.humidity", {})
 
@@ -835,7 +852,6 @@ def _device_status(batches: list[dict], key: str, device_type: str = "atmoweb") 
             return "status-warn"
         return "status-off"
 
-    # AtmoWEB
     temp = measurements.get(f"{key}.temperature_1", {})
     hum = measurements.get(f"{key}.humidity", {})
     validities = {temp.get("validity"), hum.get("validity")}
@@ -861,7 +877,7 @@ def _series(batches: list[dict], key: str) -> list[dict]:
             dt = datetime.fromisoformat(measured_at)
 
             # Nur UTC (+00:00) → nach Berlin konvertieren
-            # AtmoWEB liefert lokale Zeit – die lassen wir unverändert
+            # Andere Quellen (z.B. AtmoWEB) liefern lokale Zeit – unverändert lassen
             if dt.tzinfo is not None and dt.utcoffset().total_seconds() == 0:
                 dt = dt.astimezone(BERLIN)
 
