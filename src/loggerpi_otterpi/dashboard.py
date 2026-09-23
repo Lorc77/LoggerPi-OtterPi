@@ -7,10 +7,12 @@ from zoneinfo import ZoneInfo
 from otterpi_store import BatchStore
 
 BERLIN = ZoneInfo("Europe/Berlin")
-VERSION = "v1.3.4"
+VERSION = "v1.3.7"
 
 ROOMS = {
     "r1304": {
+        "name": "R1304 · Kulturraum I",
+        "icon": "🦗",
         "devices": [
             {"name": "FREEZER -80 °C", "key": "freezer", "type": "freezer"},
             {"name": "DRYAGER", "key": "dryager", "type": "placeholder"},
@@ -626,8 +628,6 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
             }},
             tooltip: {{
                 usePointStyle: true,
-                boxWidth: 8,
-                boxHeight: 8,
                 callbacks: {{
                     labelColor: (context) => ({{
                         borderColor: context.dataset.borderColor,
@@ -712,8 +712,6 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
             }},
             tooltip: {{
                 usePointStyle: true,
-                boxWidth: 8,
-                boxHeight: 8,
                 callbacks: {{
                     labelColor: (context) => ({{
                         borderColor: context.dataset.borderColor,
