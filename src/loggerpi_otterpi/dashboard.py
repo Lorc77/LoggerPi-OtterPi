@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 from otterpi_store import BatchStore
 
 BERLIN = ZoneInfo("Europe/Berlin")
-VERSION = "v1.3.8"
+VERSION = "v1.4.1"
 
 ROOMS = {
     "r1304": {
@@ -18,6 +18,8 @@ ROOMS = {
             {"name": "DRYAGER", "key": "dryager", "type": "placeholder"},
             {"name": "MEMMERT HPP260 links", "key": "atmoweb_101", "type": "atmoweb"},
             {"name": "MEMMERT HPP260 rechts", "key": "atmoweb_102", "type": "atmoweb"},
+            {"name": "MEMMERT IPP300 links", "key": "memmert_ipp300_links", "type": "memmert"},
+            {"name": "MEMMERT IPP300 rechts", "key": "memmert_ipp300_rechts", "type": "memmert"},
         ],
     },
     "r1306": {
@@ -248,12 +250,16 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
     temp_102 = _series(batches, "atmoweb_102.temperature_1")
     hum_102 = _series(batches, "atmoweb_102.humidity")
     temp_freezer = _series(batches, "freezer.temperature")
+    temp_memmert_links = _series(batches, "memmert_ipp300_links.temperature")
+    temp_memmert_rechts = _series(batches, "memmert_ipp300_rechts.temperature")
 
     series_by_device = {
         "atmoweb_101": (temp_101, hum_101),
         "atmoweb_102": (temp_102, hum_102),
         "freezer": (temp_freezer, []),
         "dryager": ([], []),
+        "memmert_ipp300_links": (temp_memmert_links, []),
+        "memmert_ipp300_rechts": (temp_memmert_rechts, []),
     }
 
     device_views = []
@@ -275,6 +281,7 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
                 "hum_labels": [point["label"] for point in hum_series],
                 "hum_values": [point["value"] for point in hum_series],
                 "labels_json": json.dumps([point["label"] for point in temp_series or hum_series]),
+                "dates_json": json.dumps([point["date"] for point in temp_series or hum_series]),
                 "temp_values_json": json.dumps([point["value"] for point in temp_series]),
                 "hum_values_json": json.dumps([point["value"] for point in hum_series]),
             }
@@ -552,7 +559,7 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
     </section>
 """
 
-    if device["type"] == "freezer":
+    if device["type"] in ("freezer", "memmert"):
         return f"""
     <section class="device-card">
         <div class="device-header">
@@ -606,9 +613,11 @@ def _render_device_script(device: dict) -> str:
     if device["type"] == "placeholder":
         return ""
 
-    if device["type"] == "freezer":
+    if device["type"] in ("freezer", "memmert"):
+        # Nur Temperatur-Dataset (orange)
         return f"""
 const {chart_var}Labels = {device["labels_json"]};
+const {chart_var}Dates = {device["dates_json"]};
 new Chart(document.getElementById('{device["chart_id"]}'), {{
     type: 'line',
     data: {{
@@ -651,7 +660,41 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                     }}),
                     title: (items) => {{
                         if (items.length > 0) {{
-                            return `⏰ Messzeit: ${{items[0].label}} Uhr`;
+                            const idx = items[0].dataIndex;
+                            const dateStr = {chart_var}Dates[idx] || '';
+                            const label = items[0].label;
+
+                            let dateLabel = '';
+                            if (dateStr) {{
+                                const today = new Date();
+                                const date = new Date(dateStr + 'T00:00:00');
+
+                                // Normalisiere auf Mitternacht für sauberen Vergleich
+                                const todayMidnight = new Date(
+                                    today.getFullYear(), today.getMonth(), today.getDate()
+                                );
+                                const dateMidnight = new Date(
+                                    date.getFullYear(), date.getMonth(), date.getDate()
+                                );
+
+                                const diffDays = Math.round(
+                                    (todayMidnight - dateMidnight) / (1000 * 60 * 60 * 24)
+                                );
+
+                                if (diffDays === 0) {{
+                                    dateLabel = 'heute';
+                                }} else if (diffDays === 1) {{
+                                    dateLabel = 'gestern';
+                                }} else {{
+                                    // Format: TT.MM.JJJJ
+                                    const dd = String(date.getDate()).padStart(2, '0');
+                                    const mm = String(date.getMonth() + 1).padStart(2, '0');
+                                    const yyyy = date.getFullYear();
+                                    dateLabel = `${{dd}}.${{mm}}.${{yyyy}}`;
+                                }}
+                            }}
+
+                            return `📅 Datum: ${{dateLabel}}\n⏰ Messzeit: ${{label}} Uhr`;
                         }}
                         return '';
                     }},
@@ -684,6 +727,7 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
     # AtmoWEB: Temperatur + Feuchte
     return f"""
 const {chart_var}Labels = {device["labels_json"]};
+const {chart_var}Dates = {device["dates_json"]};
 new Chart(document.getElementById('{device["chart_id"]}'), {{
     type: 'line',
     data: {{
@@ -737,7 +781,41 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                     }}),
                     title: (items) => {{
                         if (items.length > 0) {{
-                            return `⏰ Messzeit: ${{items[0].label}} Uhr`;
+                            const idx = items[0].dataIndex;
+                            const dateStr = {chart_var}Dates[idx] || '';
+                            const label = items[0].label;
+
+                            let dateLabel = '';
+                            if (dateStr) {{
+                                const today = new Date();
+                                const date = new Date(dateStr + 'T00:00:00');
+
+                                // Normalisiere auf Mitternacht für sauberen Vergleich
+                                const todayMidnight = new Date(
+                                    today.getFullYear(), today.getMonth(), today.getDate()
+                                );
+                                const dateMidnight = new Date(
+                                    date.getFullYear(), date.getMonth(), date.getDate()
+                                );
+
+                                const diffDays = Math.round(
+                                    (todayMidnight - dateMidnight) / (1000 * 60 * 60 * 24)
+                                );
+
+                                if (diffDays === 0) {{
+                                    dateLabel = 'heute';
+                                }} else if (diffDays === 1) {{
+                                    dateLabel = 'gestern';
+                                }} else {{
+                                    // Format: TT.MM.JJJJ
+                                    const dd = String(date.getDate()).padStart(2, '0');
+                                    const mm = String(date.getMonth() + 1).padStart(2, '0');
+                                    const yyyy = date.getFullYear();
+                                    dateLabel = `${{dd}}.${{mm}}.${{yyyy}}`;
+                                }}
+                            }}
+
+                            return `📅 Datum: ${{dateLabel}}\n⏰ Messzeit: ${{label}} Uhr`;
                         }}
                         return '';
                     }},
@@ -810,6 +888,8 @@ def _current_values(batches: list[dict]) -> dict:
         "temp_102": 0.0,
         "hum_102": 0.0,
         "temp_freezer": 0.0,
+        "temp_memmert_links": 0.0,
+        "temp_memmert_rechts": 0.0,
         "last_batch": "–",
         "cpu_temp": 0.0,
         "memory_used": 0.0,
@@ -833,6 +913,8 @@ def _current_values(batches: list[dict]) -> dict:
     temp_102 = measurements.get("atmoweb_102.temperature_1", {})
     hum_102 = measurements.get("atmoweb_102.humidity", {})
     temp_freezer = measurements.get("freezer.temperature", {})
+    temp_memmert_links = measurements.get("memmert_ipp300_links.temperature", {})
+    temp_memmert_rechts = measurements.get("memmert_ipp300_rechts.temperature", {})
 
     if temp_101.get("value") is not None:
         current["temp_101"] = temp_101["value"]
@@ -844,6 +926,10 @@ def _current_values(batches: list[dict]) -> dict:
         current["hum_102"] = hum_102["value"]
     if temp_freezer.get("value") is not None:
         current["temp_freezer"] = temp_freezer["value"]
+    if temp_memmert_links.get("value") is not None:
+        current["temp_memmert_links"] = temp_memmert_links["value"]
+    if temp_memmert_rechts.get("value") is not None:
+        current["temp_memmert_rechts"] = temp_memmert_rechts["value"]
 
     system = latest.get("system", {})
     cpu = system.get("cpu", {})
@@ -875,8 +961,8 @@ def _device_current(batches: list[dict], key: str, device_type: str = "atmoweb")
     if device_type == "placeholder":
         return result
 
-    if device_type == "freezer":
-        temp = measurements.get("freezer.temperature", {})
+    if device_type in ("freezer", "memmert"):
+        temp = measurements.get(f"{key}.temperature", {})
         if temp.get("value") is not None:
             result["temp"] = temp["value"]
             result["value"] = f"{temp['value']:.1f} °C"
@@ -912,8 +998,8 @@ def _device_status(batches: list[dict], key: str, device_type: str = "atmoweb") 
 
     measurements = batches[-1].get("measurements", {})
 
-    if device_type == "freezer":
-        temp = measurements.get("freezer.temperature", {})
+    if device_type in ("freezer", "memmert"):
+        temp = measurements.get(f"{key}.temperature", {})
         validity = temp.get("validity")
 
         if validity == "invalid":
@@ -954,6 +1040,7 @@ def _series(batches: list[dict], key: str) -> list[dict]:
                 dt = dt.astimezone(BERLIN)
 
             label = dt.strftime("%H:%M")
-            series.append({"label": label, "value": value})
+            date = dt.strftime("%Y-%m-%d")  # ISO-Format für JS-Vergleich
+            series.append({"label": label, "date": date, "value": value})
 
     return series
