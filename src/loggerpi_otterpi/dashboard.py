@@ -603,10 +603,15 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
     data: {{
         labels: {chart_var}Labels,
         datasets: [
-            {{ label: 'Temperatur', data: {device["temp_values_json"]},
-                borderColor: '#fb923c', borderWidth: 1.5,
-                pointRadius: 2, pointHoverRadius: 4,
-                tension: 0.3 }}
+            {{
+                label: 'Temperatur',
+                data: {device["temp_values_json"]},
+                borderColor: '#fb923c',
+                borderWidth: 1.5,
+                pointRadius: 2,
+                pointHoverRadius: 4,
+                tension: 0.3
+            }}
         ]
     }},
     options: {{
@@ -617,21 +622,32 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                 labels: {{
                     color: '#d1d5db',
                     usePointStyle: true,
-                    pointStyle: 'circle',
+                    pointStyle: 'line',
                 }}
             }},
             tooltip: {{
+                usePointStyle: true,
                 callbacks: {{
+                    title: (items) => {{
+                        if (items.length > 0) {{
+                            return `⏰ Messzeit: ${{items[0].label}} h`;
+                        }}
+                        return '';
+                    }},
                     label: (context) => {{
                         const value = context.parsed.y;
-                        const timeLabel = context.label;
-                        return `Temperatur: ${{value}} °C    ⏰ Messzeit: ${{timeLabel}} Uhr`;
+                        return `Temperatur: ${{value}} °C`;
                     }}
                 }}
             }}
         }},
         scales: {{
-            x: {{ ticks: {{ color: '#9ca3af' }} }},
+            x: {{
+                ticks: {{
+                    color: '#9ca3af',
+                    callback: (value) => value + ' h'
+                }}
+            }},
             y: {{
                 type: 'linear',
                 ticks: {{
@@ -652,14 +668,26 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
     data: {{
         labels: {chart_var}Labels,
         datasets: [
-            {{ label: 'Temperatur', data: {device["temp_values_json"]},
-                borderColor: '#fb923c', borderWidth: 1.5,
-                pointRadius: 2, pointHoverRadius: 4,
-                yAxisID: 'temperature', tension: 0.3 }},
-            {{ label: 'Relative Feuchte', data: {device["hum_values_json"]},
-                borderColor: '#38bdf8', borderWidth: 1.5,
-                pointRadius: 2, pointHoverRadius: 4,
-                yAxisID: 'humidity', tension: 0.3 }}
+            {{
+                label: 'Temperatur',
+                data: {device["temp_values_json"]},
+                borderColor: '#fb923c',
+                borderWidth: 1.5,
+                pointRadius: 2,
+                pointHoverRadius: 4,
+                yAxisID: 'temperature',
+                tension: 0.3
+            }},
+            {{
+                label: 'Relative Feuchte',
+                data: {device["hum_values_json"]},
+                borderColor: '#38bdf8',
+                borderWidth: 1.5,
+                pointRadius: 2,
+                pointHoverRadius: 4,
+                yAxisID: 'humidity',
+                tension: 0.3
+            }}
         ]
     }},
     options: {{
@@ -670,33 +698,46 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                 labels: {{
                     color: '#d1d5db',
                     usePointStyle: true,
-                    pointStyle: 'circle',
+                    pointStyle: 'line',
                 }}
             }},
             tooltip: {{
+                usePointStyle: true,
                 callbacks: {{
+                    title: (items) => {{
+                        if (items.length > 0) {{
+                            return `⏰ Messzeit: ${{items[0].label}} h`;
+                        }}
+                        return '';
+                    }},
                     label: (context) => {{
                         const value = context.parsed.y;
-                        const timeLabel = context.label;
                         if (context.dataset.label === 'Temperatur') {{
-                            return `Temperatur: ${{value}} °C    ⏰ Messzeit: ${{timeLabel}} Uhr`;
+                            return `Temperatur: ${{value}} °C`;
                         }}
-                        return `Rel. Feuchte: ${{value}} %    ⏰ Messzeit: ${{timeLabel}} Uhr`;
+                        return `Rel. Feuchte: ${{value}} %`;
                     }}
                 }}
             }}
         }},
         scales: {{
-            x: {{ ticks: {{ color: '#9ca3af' }} }},
+            x: {{
+                ticks: {{
+                    color: '#9ca3af',
+                    callback: (value) => value + ' h'
+                }}
+            }},
             temperature: {{
-                type: 'linear', position: 'left',
+                type: 'linear',
+                position: 'left',
                 ticks: {{
                     color: '#fb923c',
                     callback: (value) => value + ' °C'
                 }}
             }},
             humidity: {{
-                type: 'linear', position: 'right',
+                type: 'linear',
+                position: 'right',
                 ticks: {{
                     color: '#38bdf8',
                     callback: (value) => value + ' %'
