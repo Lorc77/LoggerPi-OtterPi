@@ -1454,6 +1454,19 @@ Eine Ablösung der Legacy-Anwendung ist erst nach erfolgreicher Anbindung
 aller relevanten Datenquellen (Freezer, IPP300) und der Verifikation des
 neuen Datenpfads vorgesehen.
 
+### Aktueller Betriebsstand (2026-09-23)
+
+| Komponente | Status |
+|-----------|--------|
+| LoggerPi-OtterPi | v1.4.2 |
+| Freezer-Reader | ✅ direkt Serial (FTDI A9NX8YRE) |
+| MEMMERT IPP300 links | ✅ 14.0 °C (Adresse 1) |
+| MEMMERT IPP300 rechts | ✅ 23.9 °C (Adresse 2) |
+| minicom/freezer-log.service | ❌ deaktiviert |
+| Legacy-observer.py | ❌ gestoppt + aus rc.local entfernt |
+| ThingSpeak-Injektion | ✅ aktiv (field1–7) |
+| Cron backup_log.sh | ❌ entfernt |
+
 ---
 
 # ENDE – OBSERVER TECHNICAL BASELINE v4

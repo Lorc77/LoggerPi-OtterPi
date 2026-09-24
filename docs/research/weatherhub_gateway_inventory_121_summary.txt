@@ -1,0 +1,36 @@
+WeatherHub Gateway Inventory
+============================
+
+Binary files:     78
+Sensor packets:   86
+Valid CRC:        85
+Invalid CRC:      1
+Unique sensors:   18
+
+Sensor types:
+  ID01: 85 packets, 17 unique sensors
+  IDFF: 1 packets, 1 unique sensors
+
+Package lengths:
+  0x16 / 22: 85 packets
+  0xFF / 255: 1 packets
+
+Sensor IDs:
+  0101F89974E0  ID01
+  010678C5AB4A  ID01
+  0106CAF71038  ID01
+  0146471130BF  ID01
+  015A4FC910F4  ID01
+  015C32E3CED1  ID01
+  015D087CA01C  ID01
+  015E664F727F  ID01
+  015EB583B95C  ID01
+  015F9410F3EB  ID01
+  01651662457B  ID01
+  0167554C25BE  ID01
+  0167CE8A9AF4  ID01
+  0169706EBE2C  ID01
+  017262BF9016  ID01
+  017453BF9A79  ID01
+  017A5CD3FC1C  ID01
+  FFFFFFFFFFFF  IDFF

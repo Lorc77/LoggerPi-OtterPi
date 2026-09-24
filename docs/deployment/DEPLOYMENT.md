@@ -108,7 +108,7 @@ Konfiguration:
 /etc/loggerpi-otterpi/loggerpi.env
 ```
 
-### Neue Umgebungsvariablen (seit v1.3.0)
+### Neue Umgebungsvariablen (seit v1.3.0 / v1.4.0)
 
 | Variable | Bedeutung | Default |
 |----------|-----------|---------|
@@ -116,6 +116,11 @@ Konfiguration:
 | `LOGGERPI_THINGSPEAK_ENABLED` | ThingSpeak-Injektion aktivieren | `0` |
 | `LOGGERPI_THINGSPEAK_CHANNEL_ID` | ThingSpeak Channel-ID | – |
 | `LOGGERPI_THINGSPEAK_API_KEY` | ThingSpeak Write API Key | – |
+| `LOGGERPI_MEMMERT_ENABLED` | MEMMERT-Reader aktivieren | `0` |
+| `MEMMERT_IPP300_LINKS_PORT` | Seriell-Pfad MEMMERT links | – |
+| `MEMMERT_IPP300_LINKS_ADDRESS` | MEMMERT-Adresse links | – |
+| `MEMMERT_IPP300_RECHTS_PORT` | Seriell-Pfad MEMMERT rechts | – |
+| `MEMMERT_IPP300_RECHTS_ADDRESS` | MEMMERT-Adresse rechts | – |
 
 Installationsverzeichnis:
 

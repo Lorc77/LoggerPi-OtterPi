@@ -1201,7 +1201,7 @@ Damit sind insbesondere festgelegt:
 Die konkrete Authentication ist noch nicht final festgelegt (geplant:
 API-Key-/Token-Ansatz, Stand 2026-09-20).
 
-### Implementierungsstand (2026-09-20)
+### Implementierungsstand (2026-09-23)
 
 Der Core Batch v1 ist für die aktuell implementierten Bereiche praktisch
 verifiziert:
@@ -1211,7 +1211,10 @@ verifiziert:
 - `memory` ✅
 - `measurements` (AtmoWEB mit Quellen-Prefix) ✅
 - Measurement-Modell mit `null`- und `validity`-Semantik ✅
-- `states`, `operation`, `serial`, `freezer`, `services` – noch nicht
+- `freezer.temperature` ✅
+- `memmert_ipp300_links.temperature` ✅
+- `memmert_ipp300_rechts.temperature` ✅
+- `states`, `operation`, `serial`, `services` – noch nicht
   implementiert (geplant für spätere Datenquellen)
 
 Die Bereiche `connectivity.upload` und `connectivity.queue` sind als

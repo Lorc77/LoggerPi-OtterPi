@@ -1,0 +1,1717 @@
+Capture-Verzeichnis: /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output
+Binärdateien:        78
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-122100-222353.bin
+Typ:         unknown
+Länge:       12
+Hex:         74 65 73 74 2d 70 61 79 6c 6f 61 64
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150326-192615.bin
+Typ:         boot_packet
+Länge:       15
+Hex:         0f 6a b5 1f 9b 00 1d 8c 0d f8 1c 00 01 00 32
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150327-696167.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0169706EBE2C
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T12:59:56+00:00
+CRC:         56 (erwartet 56) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 13 3d 00 d2 8f 05 00 d2 8f 02
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 4925}
+  temperature_1: {'value': 21.0, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -25.1, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150327-696167.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      64
+Sensor-ID:   017262BF9016
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T12:59:57+00:00
+CRC:         04 (erwartet 04) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a ce 00 d3 0f 03 00 d3 0f 01
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15054}
+  temperature_1: {'value': 21.1, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -25.3, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150327-696167.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      128
+Sensor-ID:   01651662457B
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T12:59:58+00:00
+CRC:         77 (erwartet 77) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 0e ad 00 d9 00 f0 00 da 00 f0
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 3757}
+  temperature_1: {'value': 21.700000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 24.0, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150327-696167.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      192
+Sensor-ID:   0167CE8A9AF4
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:00:32+00:00
+CRC:         42 (erwartet 42) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a ca 00 e0 8f 0b 00 e0 8f 03
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15050}
+  temperature_1: {'value': 22.400000000000002, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -24.5, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150327-696167.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      256
+Sensor-ID:   015EB583B95C
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:01:08+00:00
+CRC:         46 (erwartet 46) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d0 00 e0 00 9e 00 df 40 9f
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15056}
+  temperature_1: {'value': 22.400000000000002, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 15.8, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150327-696167.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      320
+Sensor-ID:   0146471130BF
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:01:18+00:00
+CRC:         4B (erwartet 4B) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 15 9e 00 d7 00 c0 00 d7 00 be
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 5534}
+  temperature_1: {'value': 21.5, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 19.200000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150327-696167.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      384
+Sensor-ID:   015D087CA01C
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:02:36+00:00
+CRC:         50 (erwartet 50) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 28 41 00 db 00 b4 00 db 00 b3
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 10305}
+  temperature_1: {'value': 21.900000000000002, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 18.0, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150327-696167.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      448
+Sensor-ID:   010678C5AB4A
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:02:54+00:00
+CRC:         3B (erwartet 3B) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 0d 69 00 dc 8f 24 00 db 0f 21
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 3433}
+  temperature_1: {'value': 22.0, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -22.0, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150327-696167.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      512
+Sensor-ID:   015F9410F3EB
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:03:20+00:00
+CRC:         2D (erwartet 2D) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: a8 3d 00 d8 8f 23 00 d8 8f 1d
+Dekodiert:
+  status: {'battery_low': True, 'event_transmission': False, 'counter': 10301}
+  temperature_1: {'value': 21.6, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -22.1, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150336-286784.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015A4FC910F4
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:03:34+00:00
+CRC:         7D (erwartet 7D) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: a8 3b 00 d4 00 8a 00 d5 00 8a
+Dekodiert:
+  status: {'battery_low': True, 'event_transmission': False, 'counter': 10299}
+  temperature_1: {'value': 21.200000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 13.8, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150338-886571.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   017A5CD3FC1C
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:03:37+00:00
+CRC:         78 (erwartet 78) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: ac 42 00 da 0f 06 00 da 0f 07
+Dekodiert:
+  status: {'battery_low': True, 'event_transmission': False, 'counter': 11330}
+  temperature_1: {'value': 21.8, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -25.0, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150340-486466.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015C32E3CED1
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:03:38+00:00
+CRC:         3C (erwartet 3C) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d0 00 db 40 7d 00 da 40 85
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15056}
+  temperature_1: {'value': 21.900000000000002, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 12.5, 'overflow': False, 'error': False, 'up05': False, 'down05': True}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150419-083875.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0106CAF71038
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:04:17+00:00
+CRC:         3B (erwartet 3B) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 15 9e 00 e2 0f 04 00 e1 0f 02
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 5534}
+  temperature_1: {'value': 22.6, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -25.200000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150444-681655.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0101F89974E0
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:04:43+00:00
+CRC:         02 (erwartet 02) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 2c 4b 00 dc 00 20 00 dd 00 20
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 11339}
+  temperature_1: {'value': 22.0, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 3.2, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150458-280611.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0167554C25BE
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:04:56+00:00
+CRC:         0B (erwartet 0B) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d1 00 d8 00 97 00 d8 00 95
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15057}
+  temperature_1: {'value': 21.6, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 15.100000000000001, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150513-879474.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   017453BF9A79
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:05:12+00:00
+CRC:         20 (erwartet 20) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d0 00 e0 0f 2a 00 e0 0f 2b
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15056}
+  temperature_1: {'value': 22.400000000000002, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -21.400000000000002, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150528-478253.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015E664F727F
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:05:26+00:00
+CRC:         7A (erwartet 7A) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a cf 00 da 80 73 00 da 80 6e
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15055}
+  temperature_1: {'value': 21.8, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 11.5, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150701-071352.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   017262BF9016
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:06:59+00:00
+CRC:         40 (erwartet 40) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a cf 00 d2 0f 03 00 d3 0f 03
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15055}
+  temperature_1: {'value': 21.0, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -25.3, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150702-671247.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0169706EBE2C
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:07:01+00:00
+CRC:         03 (erwartet 03) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 13 3e 00 d2 0f 03 00 d2 8f 05
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 4926}
+  temperature_1: {'value': 21.0, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -25.3, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150738-268533.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0167CE8A9AF4
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:07:36+00:00
+CRC:         2D (erwartet 2D) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a cb 00 e0 8f 18 00 e0 8f 0b
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15051}
+  temperature_1: {'value': 22.400000000000002, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -23.200000000000003, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150811-866076.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015EB583B95C
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:08:10+00:00
+CRC:         2D (erwartet 2D) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d1 00 e0 00 9d 00 e0 00 9e
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15057}
+  temperature_1: {'value': 22.400000000000002, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 15.700000000000001, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150822-465362.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0146471130BF
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:08:20+00:00
+CRC:         78 (erwartet 78) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 15 9f 00 d8 00 c2 00 d7 00 c0
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 5535}
+  temperature_1: {'value': 21.6, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 19.400000000000002, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150942-099313.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015D087CA01C
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:09:40+00:00
+CRC:         7E (erwartet 7E) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 28 42 00 db 00 b6 00 db 00 b4
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 10306}
+  temperature_1: {'value': 21.900000000000002, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 18.2, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-150959-697905.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   010678C5AB4A
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:09:58+00:00
+CRC:         39 (erwartet 39) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 0d 6a 00 dc 8f 27 00 dc 8f 24
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 3434}
+  temperature_1: {'value': 22.0, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -21.700000000000003, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151027-295751.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015F9410F3EB
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:10:25+00:00
+CRC:         66 (erwartet 66) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: a8 3e 00 d9 8f 29 00 d8 8f 23
+Dekodiert:
+  status: {'battery_low': True, 'event_transmission': False, 'counter': 10302}
+  temperature_1: {'value': 21.700000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -21.5, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151038-894925.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015A4FC910F4
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:10:37+00:00
+CRC:         26 (erwartet 26) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: a8 3c 00 d4 00 8a 00 d4 00 8a
+Dekodiert:
+  status: {'battery_low': True, 'event_transmission': False, 'counter': 10300}
+  temperature_1: {'value': 21.200000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 13.8, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151042-494704.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   017A5CD3FC1C
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:10:40+00:00
+CRC:         1F (erwartet 1F) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: ac 43 00 da 0f 04 00 da 0f 06
+Dekodiert:
+  status: {'battery_low': True, 'event_transmission': False, 'counter': 11331}
+  temperature_1: {'value': 21.8, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -25.200000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151044-094542.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015C32E3CED1
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:10:41+00:00
+CRC:         5B (erwartet 5B) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d1 00 da 40 7a 00 db 40 7d
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15057}
+  temperature_1: {'value': 21.8, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 12.200000000000001, 'overflow': False, 'error': False, 'up05': False, 'down05': True}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151121-691696.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0106CAF71038
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:11:20+00:00
+CRC:         6B (erwartet 6B) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 15 9f 00 e2 8f 07 00 e2 0f 04
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 5535}
+  temperature_1: {'value': 22.6, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -24.900000000000002, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151146-289817.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0101F89974E0
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:11:44+00:00
+CRC:         2B (erwartet 2B) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 2c 4c 00 dd 00 21 00 dc 00 20
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 11340}
+  temperature_1: {'value': 22.1, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 3.3000000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151159-888883.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0167554C25BE
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:11:58+00:00
+CRC:         38 (erwartet 38) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d2 00 d8 00 99 00 d8 00 97
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15058}
+  temperature_1: {'value': 21.6, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 15.3, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151215-487771.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   017453BF9A79
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:12:13+00:00
+CRC:         44 (erwartet 44) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d1 00 e0 0f 28 00 e0 0f 2a
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15057}
+  temperature_1: {'value': 22.400000000000002, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -21.6, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151230-086694.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015E664F727F
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:12:28+00:00
+CRC:         2F (erwartet 2F) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d0 00 db 80 7a 00 da 80 73
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15056}
+  temperature_1: {'value': 21.900000000000002, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 12.200000000000001, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151403-679459.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   017262BF9016
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:14:02+00:00
+CRC:         68 (erwartet 68) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d0 00 d3 0f 01 00 d2 0f 03
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15056}
+  temperature_1: {'value': 21.1, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -25.5, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151405-280356.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0169706EBE2C
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:14:03+00:00
+CRC:         67 (erwartet 67) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 13 3f 00 d2 4f 00 00 d2 0f 03
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 4927}
+  temperature_1: {'value': 21.0, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -25.6, 'overflow': False, 'error': False, 'up05': False, 'down05': True}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151405-280356.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      64
+Sensor-ID:   01651662457B
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:14:03+00:00
+CRC:         49 (erwartet 49) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 0e af 00 d9 00 ef 00 d8 00 f0
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 3759}
+  temperature_1: {'value': 21.700000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 23.900000000000002, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151439-876735.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0167CE8A9AF4
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:14:38+00:00
+CRC:         78 (erwartet 78) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a cc 00 e1 8f 2c 00 e0 8f 18
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15052}
+  temperature_1: {'value': 22.5, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -21.200000000000003, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151513-474147.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015EB583B95C
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:15:11+00:00
+CRC:         54 (erwartet 54) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d2 00 df 00 9e 00 e0 00 9d
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15058}
+  temperature_1: {'value': 22.3, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 15.8, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151525-073154.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0146471130BF
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:15:23+00:00
+CRC:         27 (erwartet 27) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 15 a0 00 d8 00 c4 00 d8 00 c2
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 5536}
+  temperature_1: {'value': 21.6, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 19.6, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151643-667297.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015D087CA01C
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:16:42+00:00
+CRC:         2A (erwartet 2A) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 28 43 00 db 00 b8 00 db 00 b6
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 10307}
+  temperature_1: {'value': 21.900000000000002, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 18.400000000000002, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151701-266127.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   010678C5AB4A
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:16:59+00:00
+CRC:         65 (erwartet 65) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 0d 6b 00 db 8f 2a 00 dc 8f 27
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 3435}
+  temperature_1: {'value': 21.900000000000002, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -21.400000000000002, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151728-863822.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015F9410F3EB
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:17:27+00:00
+CRC:         1A (erwartet 1A) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: a8 3f 00 d9 8f 2e 00 d9 8f 29
+Dekodiert:
+  status: {'battery_low': True, 'event_transmission': False, 'counter': 10303}
+  temperature_1: {'value': 21.700000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -21.0, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151741-462879.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015A4FC910F4
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:17:39+00:00
+CRC:         50 (erwartet 50) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: a8 3d 80 d7 00 89 00 d4 00 8a
+Dekodiert:
+  status: {'battery_low': True, 'event_transmission': False, 'counter': 10301}
+  temperature_1: {'value': 21.5, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+  temperature_2: {'value': 13.700000000000001, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151745-063651.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   017A5CD3FC1C
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:17:43+00:00
+CRC:         45 (erwartet 45) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: ac 44 00 da 0f 03 00 da 0f 04
+Dekodiert:
+  status: {'battery_low': True, 'event_transmission': False, 'counter': 11332}
+  temperature_1: {'value': 21.8, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -25.3, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151745-063651.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      64
+Sensor-ID:   015C32E3CED1
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:17:43+00:00
+CRC:         40 (erwartet 40) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d2 00 da 00 7b 00 da 40 7a
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15058}
+  temperature_1: {'value': 21.8, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 12.3, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151824-659491.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0106CAF71038
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:18:23+00:00
+CRC:         19 (erwartet 19) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 15 a0 00 e3 0f 07 00 e2 8f 07
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 5536}
+  temperature_1: {'value': 22.700000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -24.900000000000002, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151848-257826.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0101F89974E0
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:18:46+00:00
+CRC:         57 (erwartet 57) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 2c 4d 00 dc 00 23 00 dd 00 21
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 11341}
+  temperature_1: {'value': 22.0, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 3.5, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151902-856633.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0167554C25BE
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:19:01+00:00
+CRC:         67 (erwartet 67) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d3 00 d9 00 9b 00 d8 00 99
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15059}
+  temperature_1: {'value': 21.700000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 15.5, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151919-455273.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   017453BF9A79
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:19:17+00:00
+CRC:         6C (erwartet 6C) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d2 00 e1 0f 26 00 e0 0f 28
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15058}
+  temperature_1: {'value': 22.5, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -21.8, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-151933-054217.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015E664F727F
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:19:31+00:00
+CRC:         6A (erwartet 6A) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d1 00 db 80 83 00 db 80 7a
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15057}
+  temperature_1: {'value': 21.900000000000002, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 13.100000000000001, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-152105-647144.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   017262BF9016
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:21:04+00:00
+CRC:         0F (erwartet 0F) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d1 00 d4 0f 00 00 d3 0f 01
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15057}
+  temperature_1: {'value': 21.200000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -25.6, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-152107-246997.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0169706EBE2C
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:21:05+00:00
+CRC:         0A (erwartet 0A) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 13 40 00 d3 0e fe 00 d2 4f 00
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 4928}
+  temperature_1: {'value': 21.1, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -25.8, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-152108-846924.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   01651662457B
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:21:06+00:00
+CRC:         75 (erwartet 75) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 0e b0 00 db 00 f0 00 d9 00 ef
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 3760}
+  temperature_1: {'value': 21.900000000000002, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 24.0, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-152141-444373.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0167CE8A9AF4
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:21:39+00:00
+CRC:         38 (erwartet 38) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a cd 00 e2 8f 2f 00 e1 8f 2c
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15053}
+  temperature_1: {'value': 22.6, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -20.900000000000002, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-152216-041804.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015EB583B95C
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:22:14+00:00
+CRC:         7D (erwartet 7D) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d3 00 df 00 9d 00 df 00 9e
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15059}
+  temperature_1: {'value': 22.3, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 15.700000000000001, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-152225-641029.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0146471130BF
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:22:24+00:00
+CRC:         52 (erwartet 52) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 15 a1 00 d8 00 c5 00 d8 00 c4
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 5537}
+  temperature_1: {'value': 21.6, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 19.700000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-152347-234909.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015D087CA01C
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:23:45+00:00
+CRC:         58 (erwartet 58) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 28 44 00 dc 00 b9 00 db 00 b8
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 10308}
+  temperature_1: {'value': 22.0, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 18.5, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-152402-833635.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   010678C5AB4A
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:24:01+00:00
+CRC:         13 (erwartet 13) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 0d 6c 00 db 8f 2d 00 db 8f 2a
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 3436}
+  temperature_1: {'value': 21.900000000000002, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -21.1, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-152432-431409.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015F9410F3EB
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:24:30+00:00
+CRC:         4F (erwartet 4F) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: a8 40 00 d9 8f 34 00 d9 8f 2e
+Dekodiert:
+  status: {'battery_low': True, 'event_transmission': False, 'counter': 10304}
+  temperature_1: {'value': 21.700000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -20.400000000000002, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-152446-030320.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015A4FC910F4
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:24:44+00:00
+CRC:         00 (erwartet 00) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: a8 3e 00 d8 00 8a 80 d7 00 89
+Dekodiert:
+  status: {'battery_low': True, 'event_transmission': False, 'counter': 10302}
+  temperature_1: {'value': 21.6, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 13.8, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-152447-630194.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015C32E3CED1
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:24:45+00:00
+CRC:         33 (erwartet 33) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d3 00 da 80 84 00 da 00 7b
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15059}
+  temperature_1: {'value': 21.8, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 13.200000000000001, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-152449-230071.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   017A5CD3FC1C
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:24:47+00:00
+CRC:         6D (erwartet 6D) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: ac 45 00 da 0f 01 00 da 0f 03
+Dekodiert:
+  status: {'battery_low': True, 'event_transmission': False, 'counter': 11333}
+  temperature_1: {'value': 21.8, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -25.5, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-152526-827238.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0106CAF71038
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:25:25+00:00
+CRC:         41 (erwartet 41) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 15 a1 00 e3 0f 06 00 e3 0f 07
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 5537}
+  temperature_1: {'value': 22.700000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -25.0, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-152550-425492.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0101F89974E0
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:25:48+00:00
+CRC:         02 (erwartet 02) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 2c 4e 00 dc 00 25 00 dc 00 23
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 11342}
+  temperature_1: {'value': 22.0, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 3.7, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-152605-024296.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0167554C25BE
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:26:03+00:00
+CRC:         16 (erwartet 16) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d4 00 d9 80 9f 00 d9 00 9b
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15060}
+  temperature_1: {'value': 21.700000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 15.9, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-152621-623223.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   017453BF9A79
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:26:20+00:00
+CRC:         12 (erwartet 12) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d3 00 e1 0f 24 00 e1 0f 26
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15059}
+  temperature_1: {'value': 22.5, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -22.0, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-152634-222240.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015E664F727F
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:26:32+00:00
+CRC:         24 (erwartet 24) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d2 00 db 80 8c 00 db 80 83
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15058}
+  temperature_1: {'value': 21.900000000000002, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 14.0, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-152808-814882.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   017262BF9016
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:28:07+00:00
+CRC:         37 (erwartet 37) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d2 00 d4 0e ff 00 d4 0f 00
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15058}
+  temperature_1: {'value': 21.200000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -25.700000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei: /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-152810-414968.bin
+FEHLER: Ungültige Payload-Länge 243.
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-152812-014841.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0169706EBE2C
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:28:09+00:00
+CRC:         30 (erwartet 30) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 13 41 00 d3 4e fb 00 d3 0e fe
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 4929}
+  temperature_1: {'value': 21.1, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -26.1, 'overflow': False, 'error': False, 'up05': False, 'down05': True}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-152845-612154.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0167CE8A9AF4
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:28:44+00:00
+CRC:         6A (erwartet 6A) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a ce 00 e2 0f 31 00 e2 8f 2f
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15054}
+  temperature_1: {'value': 22.6, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -20.700000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-152919-209634.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015EB583B95C
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:29:17+00:00
+CRC:         25 (erwartet 25) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d4 00 df 00 9d 00 df 00 9d
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15060}
+  temperature_1: {'value': 22.3, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 15.700000000000001, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-152928-808930.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0146471130BF
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:29:27+00:00
+CRC:         33 (erwartet 33) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 15 a2 00 da 40 ba 00 d8 00 c5
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 5538}
+  temperature_1: {'value': 21.8, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 18.6, 'overflow': False, 'error': False, 'up05': False, 'down05': True}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-153049-402812.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015D087CA01C
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:30:47+00:00
+CRC:         06 (erwartet 06) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 28 45 00 dd 00 bb 00 dc 00 b9
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 10309}
+  temperature_1: {'value': 22.1, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 18.7, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-153105-001698.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   010678C5AB4A
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:31:03+00:00
+CRC:         42 (erwartet 42) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 0d 6d 00 db 8f 30 00 db 8f 2d
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 3437}
+  temperature_1: {'value': 21.900000000000002, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -20.8, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-153134-599433.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015F9410F3EB
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:31:33+00:00
+CRC:         05 (erwartet 05) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: a8 41 00 d9 8f 3a 00 d9 8f 34
+Dekodiert:
+  status: {'battery_low': True, 'event_transmission': False, 'counter': 10305}
+  temperature_1: {'value': 21.700000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -19.8, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-153149-198330.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015A4FC910F4
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:31:47+00:00
+CRC:         2B (erwartet 2B) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 28 3f 00 d7 00 8a 00 d8 00 8a
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 10303}
+  temperature_1: {'value': 21.5, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 13.8, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-153150-798184.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015C32E3CED1
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:31:48+00:00
+CRC:         6D (erwartet 6D) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d4 00 d9 80 8c 00 da 80 84
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15060}
+  temperature_1: {'value': 21.700000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 14.0, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-153152-397955.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   017A5CD3FC1C
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:31:50+00:00
+CRC:         14 (erwartet 14) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: ac 46 00 da 0f 00 00 da 0f 01
+Dekodiert:
+  status: {'battery_low': True, 'event_transmission': False, 'counter': 11334}
+  temperature_1: {'value': 21.8, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -25.6, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-153229-995231.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0106CAF71038
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:32:28+00:00
+CRC:         71 (erwartet 71) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 15 a2 00 e4 8f 0c 00 e3 0f 06
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 5538}
+  temperature_1: {'value': 22.8, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -24.400000000000002, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-153252-593514.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0101F89974E0
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:32:50+00:00
+CRC:         2E (erwartet 2E) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 2c 4f 00 dc 00 26 00 dc 00 25
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 11343}
+  temperature_1: {'value': 22.0, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 3.8000000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-153309-192224.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0167554C25BE
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:33:07+00:00
+CRC:         47 (erwartet 47) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d5 00 d8 80 a2 00 d9 80 9f
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15061}
+  temperature_1: {'value': 21.6, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 16.2, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-153323-791080.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   017453BF9A79
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:33:22+00:00
+CRC:         76 (erwartet 76) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d4 00 e1 4f 21 00 e1 0f 24
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15060}
+  temperature_1: {'value': 22.5, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -22.3, 'overflow': False, 'error': False, 'up05': False, 'down05': True}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-153337-390035.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   015E664F727F
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:33:35+00:00
+CRC:         5E (erwartet 5E) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d3 00 db 80 94 00 db 80 8c
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15059}
+  temperature_1: {'value': 21.900000000000002, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': 14.8, 'overflow': False, 'error': False, 'up05': True, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-153511-982974.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   017262BF9016
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:35:10+00:00
+CRC:         5D (erwartet 5D) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 3a d3 00 d4 0e fd 00 d4 0e ff
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 15059}
+  temperature_1: {'value': 21.200000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -25.900000000000002, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Datei:       /home/ZOOLOGY-observ/weatherhub_gateway_proxy_test_output/20260924-153513-582754.bin
+Typ:         sensor_packet
+Länge:       -
+Offset:      0
+Sensor-ID:   0169706EBE2C
+Sensor-Typ:  01
+Sensor:      ID01
+Header:      0xD2
+Paketlänge:  22
+Payload:     10
+Timestamp:   2026-09-24T13:35:11+00:00
+CRC:         55 (erwartet 55) gültig=True
+Header OK:   True
+Länge OK:    True
+Payload-Hex: 13 42 00 d3 0e fa 00 d3 4e fb
+Dekodiert:
+  status: {'battery_low': False, 'event_transmission': False, 'counter': 4930}
+  temperature_1: {'value': 21.1, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+  temperature_2: {'value': -26.200000000000003, 'overflow': False, 'error': False, 'up05': False, 'down05': False}
+========================================================================
+Decode-Test abgeschlossen.

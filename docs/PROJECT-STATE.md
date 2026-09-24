@@ -14,15 +14,20 @@
 
 **Stand:** 2026-09-23
 
-LoggerPi und OtterPi laufen produktiv auf Version `v1.3.7`.
+LoggerPi und OtterPi laufen produktiv auf Version `v1.4.2`.
 
 Seit `v1.3.0` ist der Freezer direkt über die Seriell-Schnittstelle
 (FTDI FT232R A9NX8YRE) angebunden – ohne den bisherigen Umweg über
-`minicom` und `freezer.log`.
+`minicom` und `freezer.log`. Die ThingSpeak-Injektion (semi-redundant)
+überträgt ausgewählte Werte im Legacy-Format (field1–field7).
 
-Seit `v1.3.0` existiert zusätzlich eine optionale ThingSpeak-Injektion
-(semi-redundanter Speicher), die ausgewählte Werte im Legacy-Format
-an ThingSpeak überträgt (field1–field7).
+Seit `v1.4.0` sind die beiden MEMMERT IPP300 über ihre seriellen
+Schnittstellen angebunden (`memmert_ipp300_links`/`rechts`).
+`measured_at` wird seit v1.4.0 einheitlich auf die LoggerPi-
+Empfangszeit (UTC) gesetzt (DEC-032).
+
+Seit `v1.4.1` zeigt das Dashboard MEMMERT-Kacheln in R1304 sowie
+ein Datum (heute/gestern/xx.xx.xxxx) im Chart-Tooltip.
 
 Das Dashboard zeigt seit `v1.3.1` eine Freezer-Kachel in R1304
 (inkl. DryAger-Platzhalter) und seit `v1.3.3` korrekte

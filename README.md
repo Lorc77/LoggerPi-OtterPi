@@ -66,6 +66,13 @@ in das gemeinsame Modell integriert.
 |------------|--------------|
 | `src/loggerpi_otterpi/model/` | Datenmodelle: `Batch`, `Measurement` |
 | `src/loggerpi_otterpi/atmoweb.py` | AtmoWEB-Reader (Memmert) |
+| `src/loggerpi_otterpi/atmoweb_config.py` | AtmoWEB-Gerätekonfiguration |
+| `src/loggerpi_otterpi/freezer.py` | Freezer-Reader (HFC-Serie, direkt Serial) |
+| `src/loggerpi_otterpi/freezer_config.py` | Freezer-Konfiguration |
+| `src/loggerpi_otterpi/memmert.py` | MEMMERT IPP300-Reader (seriell) |
+| `src/loggerpi_otterpi/memmert_config.py` | MEMMERT-Konfiguration |
+| `src/loggerpi_otterpi/thingspeak_delivery.py` | ThingSpeak-Injektion (semi-redundant) |
+| `src/loggerpi_otterpi/thingspeak_config.py` | ThingSpeak-Konfiguration |
 | `src/loggerpi_otterpi/batch_factory.py` | Batch-Erzeugung + persistente Sequence |
 | `src/loggerpi_otterpi/composer.py` | Zusammenführung Systemdaten + Measurements |
 | `src/loggerpi_otterpi/batch_queue.py` | persistente lokale Queue (JSON Lines) |
@@ -122,17 +129,23 @@ Da `model/` ein Unterverzeichnis ist, wird `PYTHONPATH` gesetzt:
 PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
 ```
 
-### Aktueller Betriebsstand (2026-09-21)
+### Aktueller Betriebsstand (2026-09-23)
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.2.2` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.2.2` | Empfängt Batches, speichert in SQLite |
+| LoggerPi | `v1.4.2` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.4.2` | Empfängt Batches, speichert in SQLite |
 
 Der E2E-Datenpfad (LoggerPi → nginx → OtterPi → SQLite) ist verifiziert.
 
 Dashboard: `https://zoology.makki.route64.de`
 Authentication: Bearer Token (seit v1.1.0)
+
+Datenquellen:
+- AtmoWEB 101/102 (MEMMERT HPP260) ✅
+- Freezer (HFC-Serie, direkt Serial) ✅
+- MEMMERT IPP300 links/rechts ✅
+- ThingSpeak-Injektion (field1–7) ✅
 
 ---
 
@@ -162,19 +175,17 @@ pytest
 git diff --check
 ```
 
-Aktueller Stand: **68 Tests**, alle bestehen.
+Aktueller Stand: **133 Tests**, alle bestehen.
 
 ---
 
-## Versionierung
-
-Aktuelle Version: **v1.2.3**
+Aktuelle Version: **v1.4.2**
 
 Die Version wird geführt über:
 
-- `pyproject.toml` → `version = "1.0.4"`
-- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.0.4"`
-- Git-Tag `v1.0.4`
+- `pyproject.toml` → `version = "1.4.2"`
+- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.4.2"`
+- Git-Tag `v1.4.2`
 
 ---
 
