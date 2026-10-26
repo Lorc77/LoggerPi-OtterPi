@@ -85,6 +85,9 @@ in das gemeinsame Modell integriert.
 | `src/loggerpi_otterpi/otterpi_store.py` | BatchStore (SQLite) |
 | `src/loggerpi_otterpi/otterpi_observer.py` | OtterPi-Prozess-Einstiegspunkt |
 | `src/loggerpi_otterpi/dashboard.py` | Dashboard (Charts, 48h) |
+| `src/loggerpi_otterpi/weatherhub.py` | WeatherHub-Adapter (Reader) |
+| `src/loggerpi_otterpi/weatherhub_gateway_decoder.py` | WeatherHub-Gateway-Decoder |
+| `src/loggerpi_otterpi/weatherhub_gateway_listener.py` | WeatherHub-Gateway-Listener (TCP) |
 
 ---
 
@@ -129,12 +132,12 @@ Da `model/` ein Unterverzeichnis ist, wird `PYTHONPATH` gesetzt:
 PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
 ```
 
-### Aktueller Betriebsstand (2026-09-23)
+### Aktueller Betriebsstand (2026-10-27)
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.4.2` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.4.2` | Empfängt Batches, speichert in SQLite |
+| LoggerPi | `v1.5.0` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.5.0` | Empfängt Batches, speichert in SQLite |
 
 Der E2E-Datenpfad (LoggerPi → nginx → OtterPi → SQLite) ist verifiziert.
 
@@ -146,6 +149,7 @@ Datenquellen:
 - Freezer (HFC-Serie, direkt Serial) ✅
 - MEMMERT IPP300 links/rechts ✅
 - ThingSpeak-Injektion (field1–7) ✅
+- WeatherHub Sensoren (Gateway Proxy, 17 Sensoren) ✅
 
 ---
 
@@ -175,17 +179,18 @@ pytest
 git diff --check
 ```
 
-Aktueller Stand: **133 Tests**, alle bestehen.
+Aktueller Stand: **136 Tests**, alle bestehen.
 
 ---
 
-Aktuelle Version: **v1.4.2**
+Aktuelle Version: **v1.5.0**
 
 Die Version wird geführt über:
 
-- `pyproject.toml` → `version = "1.4.2"`
-- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.4.2"`
-- Git-Tag `v1.4.2`
+- `pyproject.toml` → `version = "1.5.0"`
+- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.5.0"`
+- `src/loggerpi_otterpi/dashboard.py` → `VERSION = "v1.5.0"`
+- Git-Tag `v1.5.0`
 
 ---
 

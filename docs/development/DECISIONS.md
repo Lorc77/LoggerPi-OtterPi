@@ -1076,6 +1076,62 @@ WeatherHub	LoggerPi UTC	gateway_timestamp
 
 ---
 
+## DEC-033 — WeatherHub Gateway Proxy Integration
+
+**Status:** Angenommen
+**Datum:** 2026-10-26
+
+### Kontext
+
+Die WeatherHub-Sensoren senden ihre Daten per Funk an ein
+MOBILE-ALERTS-Gateway. Normalerweise überträgt das Gateway die Daten
+an die TFA-Cloud (`www.data199.com`).
+
+Ziel war es, die Sensordaten lokal am LoggerPi zu empfangen und in das
+bestehende LoggerPi-OtterPi-Datenmodell zu integrieren.
+
+### Entscheidung
+
+Das Gateway `.121` wird in den **Proxymodus** versetzt. Es sendet seine
+Daten nicht mehr an die Cloud, sondern per HTTP PUT an den LoggerPi
+(Port 3778).
+
+Auf dem LoggerPi läuft ein **WeatherHubGatewayListener** als
+Background-Thread innerhalb des `loggerpi.observer.service`. Er
+empfängt die HTTP-PUT-Requests, dekodiert die Payload mit dem
+**WeatherHubGatewayDecoder** und übergibt die dekodierten Pakete an
+den **WeatherHubReader**.
+
+Der Reader speichert die neuesten Werte pro Sensor und gibt sie beim
+nächsten Batch-Zyklus (alle 15 Minuten) an die Runtime zurück.
+
+Gateway `.132` bleibt unverändert im Cloud-Modus.
+
+### Begründung
+
+- Kein Umweg über die TFA-Cloud (lokal, datensparsam)
+- Proxymodus nutzt die vorhandene Gateway-Firmware (kein Hardware-Eingriff)
+- Listener als Thread ist ressourcenschonend (wartet auf Verbindungen)
+- Reader sammelt kontinuierlich und integriert in den Batch-Zyklus
+- 17 Sensoren werden empfangen (ID01, ID03, ID0E)
+
+### Konsequenzen
+
+- `LOGGERPI_WEATHERHUB_ENABLED=1` aktiviert die Integration
+- `WEATHERHUB_LISTENER_HOST` / `WEATHERHUB_LISTENER_PORT` konfigurieren den Listener
+- `WEATHERHUB_GATEWAY_ALLOWLIST` begrenzt erlaubte Gateway-IPs
+- `WEATHERHUB_CLOUD_FORWARD_ENABLED` ermöglicht optionalen Cloud-Forward
+- `MAX_BODY_BYTES` wurde auf 2 MB erhöht (große Gateway-Payloads)
+
+### Deployment
+
+- Version `v1.5.0`
+- `loggerpi.env.example` um WeatherHub-Variablen erweitert
+- `deploy/loggerpi/install.sh` um WeatherHub-Dateien erweitert
+- GitHub Actions CI: 136 Tests, alle grün (Python 3.9 + 3.13)
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:

@@ -12,9 +12,30 @@
 
 ## Deployment-Stand
 
-**Stand:** 2026-09-23
+**Stand:** 2026-10-26
 
-LoggerPi und OtterPi laufen produktiv auf Version `v1.4.2`.
+| System | Version | Status |
+|--------|---------|--------|
+| LoggerPi | `v1.5.0` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.5.0` | Empfängt Batches, speichert in SQLite |
+
+LoggerPi und OtterPi laufen produktiv auf Version `v1.5.0`.
+
+Seit `v1.5.0` sind die WeatherHub-Sensoren über den Gateway-Proxy
+integriert. Das Gateway `.121` wurde in den Proxymodus versetzt und
+sendet seine Daten direkt an den LoggerPi (Port 3778). Der
+WeatherHub-Listener empfängt die Daten kontinuierlich, der Reader
+sammelt die neuesten Werte, und beim nächsten Batch-Zyklus (alle
+15 Minuten) werden die Measurements an den OtterPi übertragen.
+
+Aktuell werden **17 Sensoren** empfangen:
+- 15 × ID01 (Temperatursensoren mit 2 Kanälen)
+- 1 × ID03 (Temperatur + Feuchte)
+- 1 × ID0E (Temperatur + Feuchte, dezimal)
+
+Der komplette Datenpfad ist praktisch verifiziert (Stand 2026-10-26):
+WeatherHub-Sensoren → Gateway .121 (Proxy) → LoggerPi-Listener →
+WeatherHubDecoder → WeatherHubReader → Core Batch → OtterPi → SQLite.
 
 Seit `v1.3.0` ist der Freezer direkt über die Seriell-Schnittstelle
 (FTDI FT232R A9NX8YRE) angebunden – ohne den bisherigen Umweg über
@@ -303,6 +324,27 @@ Der OtterPi bewertet deren fachliche Bedeutung, Health und Zustand.
 - reale LoggerPi-Runtime-/Service-Inventur wurde durchgeführt
 - Legacy-Freezer-Logging aus XDG/LXDE-Terminal-Autostart auf einen stabilen `systemd --user`-Service umgestellt
 - Freezer-Logger nach Reboot erfolgreich automatisch gestartet und praktisch verifiziert
+- WeatherHub Gateway Proxy Integration (v1.5.0)
+- WeatherHub Gateway Decoder (ID01, ID02, ID03, ID04, ID07, ID0E, ID10)
+- WeatherHub Gateway Listener (TCP, IP-Allowlist, Cloud-Forward optional)
+- WeatherHub Reader/Adapter (Measurement-Erzeugung)
+- Runtime-Integration (Thread-Start/Stop, Batch-Integration)
+- Praktische Verifikation mit Gateway .121 (17 Sensoren empfangen)
+
+### Aktueller Betriebsstand (2026-10-26)
+
+| Komponente | Status |
+|-----------|--------|
+| LoggerPi-OtterPi | v1.5.0 |
+| WeatherHub Gateway .121 | ✅ Proxy-Modus aktiv (→ LoggerPi:3778) |
+| WeatherHub Gateway .132 | ✅ Unverändert (Cloud-Modus) |
+| WeatherHub Sensoren | ✅ 17 Sensoren empfangen |
+| WeatherHub Measurements im Batch | ✅ 34 Measurements (ID01, ID03, ID0E) |
+| Freezer-Reader | ✅ direkt Serial (FTDI A9NX8YRE) |
+| MEMMERT IPP300 links | ✅ aktiv |
+| MEMMERT IPP300 rechts | ✅ aktiv |
+| ThingSpeak-Injektion | ✅ aktiv (field1–7) |
+| Tests | ✅ 136 Tests bestanden |
 
 ### Aktueller Arbeitspunkt
 
@@ -2089,10 +2131,22 @@ für die aktuellen Sensorwerte separate XHR-POST-Requests pro Sensor
 verwendet. Diese deutlich kleineren Datenkanäle werden aktuell als möglicher
 bevorzugter Zugriff für die benötigten Momentanwerte untersucht.
 
-Der WeatherHub-Strang ist kein Bestandteil des Core-Batch-Design-Freeze.
-Eine spätere Integration erfolgt ausschließlich über einen LoggerPi-Adapter,
-sobald der für die Momentanwerte relevante Zugriff und die erforderliche
-Datenstruktur ausreichend reproduzierbar geklärt sind.
+Der WeatherHub-Strang ist **seit v1.5.0 produktiv integriert**.
+Die Integration erfolgt über einen LoggerPi-Adapter (WeatherHubReader),
+der die vom Gateway-Proxy empfangenen und dekodierten Sensordaten in
+das gemeinsame Measurement-Modell überführt.
+
+Der Portalzugriff (`www.wh-observer.de`) ist **nicht** Bestandteil der
+produktiven Integration – der lokale Gateway-Proxy-Datenpfad wird
+verwendet.
+
+Zukünftige Erweiterungen:
+- Weitere Sensorfamilien (ID06, ID08, ID0B, ID11)
+- State/Event-Verarbeitung (ID04 Wasserkontakt, ID10 Tür/Fenster)
+- Stale-Logik für WeatherHub-Sensoren
+- Gateway-Deduplizierung (wenn .132 ebenfalls in Proxymodus geht)
+- Cloud-Forward optional (WEATHERHUB_CLOUD_FORWARD_ENABLED)
+- Dashboard-Anzeige für WeatherHub-Sensoren
 
 ## Arbeitsregel
 

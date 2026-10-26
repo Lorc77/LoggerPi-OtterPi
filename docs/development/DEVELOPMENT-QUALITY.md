@@ -276,7 +276,7 @@ muss bestätigen, dass die Dateien bereits korrekt formatiert sind.
 pytest
 ```
 
-Aktueller Stand: **68 Tests**, alle bestehen.
+Aktueller Stand: **136 Tests**, alle bestehen.
 
 Alle Tests müssen erfolgreich sein.
 
@@ -543,7 +543,7 @@ entsprechende Service-Instanz praktisch verifiziert werden.
 Ein erfolgreicher lokaler Testlauf unter Windows gilt nicht als
 Nachweis eines erfolgreichen Raspberry-Pi-Deployments.
 
-### Praktische Verifikation (2026-09-20)
+### Praktische Verifikation (2026-10-27)
 
 Der E2E-Datenpfad (LoggerPi → OtterPi → SQLite) ist praktisch verifiziert:
 
@@ -551,5 +551,6 @@ Der E2E-Datenpfad (LoggerPi → OtterPi → SQLite) ist praktisch verifiziert:
 - OtterPi empfängt und speichert in SQLite
 - nginx-Reverse-Proxy funktioniert
 - Duplicate Handling funktioniert
-
-Weitere Datenquellen (Freezer, IPP300) sind noch nicht angebunden.
+- WeatherHub-Integration ist aktiv (17 Sensoren, 34 Measurements im Batch)
+- WeatherHub-Decoder ist durch Test-Fixtures abgesichert
+- WeatherHub-Listener läuft als Thread im LoggerPi-Service

@@ -209,7 +209,7 @@ Die `pyproject.toml` definiert:
 Dadurch funktionieren die Imports unter Windows (z. B. `from batch_queue import BatchQueue`)
 ohne zusätzliche `PYTHONPATH`-Setzung.
 
-Aktueller Stand: **68 Tests**, alle bestehen.
+Aktueller Stand: **136 Tests**, alle bestehen.
 
 ### Linting und Formatierung
 
@@ -270,14 +270,14 @@ Aktueller Stand:
 - Architektur: ARM64 (`aarch64`)
 - System-Python: Python 3.13.5
 
-### Aktueller Betriebsstand (2026-09-20)
+### Aktueller Betriebsstand (2026-10-27)
 
 Beide Zielsysteme laufen produktiv:
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.0.4` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.0.4` | Empfängt Batches, speichert in SQLite |
+| LoggerPi | `v1.5.0` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.5.0` | Empfängt Batches, speichert in SQLite |
 
 ## Grundsätze für die Zielsysteme
 
@@ -300,11 +300,12 @@ Entwicklungsrechner.
 Die grundlegende Windows-Entwicklungsumgebung wurde eingerichtet und
 erfolgreich verifiziert.
 
-### Aktueller Stand (2026-09-20)
+### Aktueller Stand (2026-10-27)
 
-- LoggerPi und OtterPi laufen produktiv auf `v1.0.4`
+- LoggerPi und OtterPi laufen produktiv auf `v1.5.0`
 - E2E-Datenpfad (LoggerPi → OtterPi → SQLite) ist verifiziert
-- 68 Tests bestehen
+- WeatherHub-Integration ist aktiv (17 Sensoren)
+- 136 Tests bestehen
 - Ruff-Quality-Gates sind grün
 
 Verifiziert sind:

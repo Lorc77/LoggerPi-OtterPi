@@ -33,13 +33,13 @@ unter „Noch technisch zu klären“ dokumentiert.
 
 | ID | Thema | Entscheidung | Status |
 |---|---|---|---|
-| OF-1 | Cloud-Forward | Wird implementiert | Entschieden |
+| OF-1 | Cloud-Forward | Wird implementiert | Implementiert (optional) |
 | OF-2 | Mehrere Gateways | Ja, mit robuster Deduplizierung | Entschieden |
 | OF-3 | Sensor-Allowlist | Keine | Entschieden |
-| OF-4 | Sensorfamilien | Nur ID01, ID02, ID03, ID04, ID07, ID0E, ID10 | Entschieden |
+| OF-4 | Sensorfamilien | Nur ID01, ID02, ID03, ID04, ID07, ID0E, ID10 | Implementiert |
 | OF-5 | ID04/ID10 | Kein Measurement, spätere State/Event-Verarbeitung | Entschieden |
-| OF-6 | Stale-Logik | Konfigurierbar über `.env` | Entschieden |
-| OF-7 | Service/Thread | Thread innerhalb bestehender Runtime bevorzugt | Entschieden |
+| OF-6 | Stale-Logik | Konfigurierbar über `.env` | Noch offen |
+| OF-7 | Service/Thread | Thread innerhalb bestehender Runtime bevorzugt | Implementiert |
 
 ---
 
@@ -482,16 +482,16 @@ unbeabsichtigt wieder aufheben.
 Aktuell:
 
 ```text
-[ ] Decoder
-[ ] Adapter
+[x] Decoder
+[x] Adapter (WeatherHubReader)
 [ ] WeatherHub State
-[ ] WeatherHub Reader/Listener
-[ ] Gateway-Deduplizierung
-[ ] Cloud-Forward
-[ ] Stale-Logik
-[ ] Runtime-Integration
-[ ] Tests
-[ ] Deployment
+[x] WeatherHub Reader/Listener
+[ ] Gateway-Deduplizierung (nur wenn .132 auch in Proxymodus)
+[ ] Cloud-Forward (optional, WEATHERHUB_CLOUD_FORWARD_ENABLED)
+[ ] Stale-Logik (noch offen)
+[x] Runtime-Integration
+[x] Tests
+[x] Deployment (v1.5.0)
 ```
 
 Dieses Dokument beschreibt die Entscheidungen vor Beginn der eigentlichen
