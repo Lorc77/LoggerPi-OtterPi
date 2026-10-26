@@ -1068,6 +1068,12 @@ gemacht. Sie ist nicht Teil von `measured_at`.
 - Gerätezeit nur noch als separates Attribut (`device_time`)
 - Doku (`core-batch-v1.md`, `core-batch-v1-json.md`) angepasst
 
+Quelle	measured_at	zusätzliche Gerätezeit
+AtmoWEB	LoggerPi UTC	device_time
+Freezer	LoggerPi UTC	keine
+MEMMERT IPP300	LoggerPi UTC	keine
+WeatherHub	LoggerPi UTC	gateway_timestamp
+
 ---
 
 # Offene Entscheidungen
