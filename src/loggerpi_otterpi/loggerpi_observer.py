@@ -1,6 +1,7 @@
 """Production process entry point for LoggerPi."""
 
 import os
+from typing import Set
 
 from atmoweb_config import create_atmoweb_readers
 from batch_factory import SequenceStore
@@ -11,6 +12,8 @@ from loggerpi_runner import run
 from memmert_config import create_memmert_readers
 from runtime import LoggerRuntime
 from thingspeak_config import create_thingspeak_delivery
+from weatherhub import WeatherHubReader
+from weatherhub_gateway_listener import WeatherHubGatewayListener
 
 
 def _require_env(name: str) -> str:
@@ -38,6 +41,26 @@ def _enabled(name: str, default: str = "1") -> bool:
     return os.environ.get(name, default) == "1"
 
 
+def _create_weatherhub_listener() -> tuple[WeatherHubGatewayListener, WeatherHubReader]:
+    """Erstellt den WeatherHub-Listener und den zugehörigen Reader."""
+    host = _require_env("WEATHERHUB_LISTENER_HOST")
+    port = int(_require_env("WEATHERHUB_LISTENER_PORT"))
+    allowlist_raw = _require_env("WEATHERHUB_GATEWAY_ALLOWLIST")
+    allowlist: Set[str] = {ip.strip() for ip in allowlist_raw.split(",") if ip.strip()}
+    cloud_forward_enabled = _enabled("WEATHERHUB_CLOUD_FORWARD_ENABLED", "0")
+
+    reader = WeatherHubReader()
+    listener = WeatherHubGatewayListener(
+        host=host,
+        port=port,
+        allowlist=allowlist,
+        on_packets_received=reader.update_from_packets,
+        cloud_forward_enabled=cloud_forward_enabled,
+    )
+
+    return listener, reader
+
+
 def main() -> None:
     logger_id = _require_env("LOGGERPI_ID")
     otterpi_url = _require_env("OTTERPI_URL")
@@ -56,6 +79,12 @@ def main() -> None:
         create_thingspeak_delivery() if _enabled("LOGGERPI_THINGSPEAK_ENABLED", "0") else None
     )
 
+    # WeatherHub initialisieren
+    weatherhub_listener = None
+    weatherhub_reader = None
+    if _enabled("LOGGERPI_WEATHERHUB_ENABLED", "0"):
+        weatherhub_listener, weatherhub_reader = _create_weatherhub_listener()
+
     runtime = LoggerRuntime(
         logger_id=logger_id,
         readers=create_atmoweb_readers(),
@@ -65,6 +94,8 @@ def main() -> None:
         freezer_reader=freezer_reader,
         memmert_readers=memmert_readers,
         thingspeak_delivery=thingspeak_delivery,
+        weatherhub_listener=weatherhub_listener,
+        weatherhub_reader=weatherhub_reader,
     )
 
     run(

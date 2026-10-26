@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 from otterpi_store import BatchStore
 
 BERLIN = ZoneInfo("Europe/Berlin")
-VERSION = "v1.4.2"
+VERSION = "v1.5.0"
 
 ROOMS = {
     "r1304": {
@@ -1045,8 +1045,10 @@ def _series(batches: list[dict], key: str) -> list[dict]:
 
             # Nur UTC (+00:00) → nach Berlin konvertieren
             # Andere Quellen (z.B. AtmoWEB) liefern lokale Zeit – unverändert lassen
-            if dt.tzinfo is not None and dt.utcoffset().total_seconds() == 0:
-                dt = dt.astimezone(BERLIN)
+            if dt.tzinfo is not None:
+                offset = dt.utcoffset()
+                if offset is not None and offset.total_seconds() == 0:
+                    dt = dt.astimezone(BERLIN)
 
             label = dt.strftime("%H:%M")
             date = dt.strftime("%Y-%m-%d")  # ISO-Format für JS-Vergleich

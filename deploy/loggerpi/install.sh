@@ -22,13 +22,16 @@ LOGGERPI_FILES=(
     freezer_config.py
     loggerpi_observer.py
     loggerpi_runner.py
-    batch_queue.py  # ← umbenannt von queue.py
+    batch_queue.py
     memmert.py
     memmert_config.py
     runtime.py
     system_info.py
     thingspeak_delivery.py
     thingspeak_config.py
+    weatherhub.py
+    weatherhub_gateway_decoder.py
+    weatherhub_gateway_listener.py
 )
 
 for file in "${LOGGERPI_FILES[@]}"; do

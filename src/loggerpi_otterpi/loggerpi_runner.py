@@ -38,22 +38,25 @@ class LoggerPiRunner:
             self._interval_seconds,
         )
 
-        while not self._stop_event.is_set():
-            started = time.monotonic()
+        try:
+            while not self._stop_event.is_set():
+                started = time.monotonic()
 
-            try:
-                self._runtime.run_once()
-            except Exception:
-                LOGGER.exception("LoggerRuntime cycle failed")
+                try:
+                    self._runtime.run_once()
+                except Exception:
+                    LOGGER.exception("LoggerRuntime cycle failed")
 
-            elapsed = time.monotonic() - started
-            delay = max(0.0, self._interval_seconds - elapsed)
+                elapsed = time.monotonic() - started
+                delay = max(0.0, self._interval_seconds - elapsed)
 
-            if delay > 0:
-                # Blockiert ressourcenschonend bis zum Timeout ODER bis Stopp angefordert wird
-                self._stop_event.wait(delay)
-
-        LOGGER.info("LoggerPi runner stopped")
+                if delay > 0:
+                    # Blockiert ressourcenschonend bis zum Timeout ODER bis Stopp angefordert wird
+                    self._stop_event.wait(delay)
+        finally:
+            # Wichtig: Runtime stoppen (WeatherHub-Listener beenden)
+            self._runtime.stop()
+            LOGGER.info("LoggerPi runner stopped")
 
 
 def _handle_signal(

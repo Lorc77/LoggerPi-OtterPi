@@ -8,6 +8,8 @@ from delivery import BatchDelivery
 from freezer import FreezerReader
 from memmert import MemmertReader
 from thingspeak_delivery import ThingSpeakDelivery
+from weatherhub import WeatherHubReader
+from weatherhub_gateway_listener import WeatherHubGatewayListener
 
 
 class LoggerRuntime:
@@ -24,6 +26,8 @@ class LoggerRuntime:
         freezer_reader: Optional[FreezerReader] = None,
         memmert_readers: Optional[dict[str, MemmertReader]] = None,
         thingspeak_delivery: Optional[ThingSpeakDelivery] = None,
+        weatherhub_listener: Optional[WeatherHubGatewayListener] = None,
+        weatherhub_reader: Optional[WeatherHubReader] = None,
     ) -> None:
         self.logger_id = logger_id
         self.readers = readers
@@ -33,6 +37,18 @@ class LoggerRuntime:
         self.freezer_reader = freezer_reader
         self.memmert_readers = memmert_readers or {}
         self.thingspeak_delivery = thingspeak_delivery
+        self.weatherhub_listener = weatherhub_listener
+        self.weatherhub_reader = weatherhub_reader
+
+        # Listener starten, wenn vorhanden
+        if self.weatherhub_listener is not None:
+            self.weatherhub_listener.start()
+
+    def stop(self) -> None:
+        """Stoppt den WeatherHub-Listener (sauberer Shutdown)."""
+        if self.weatherhub_listener is not None:
+            self.weatherhub_listener.stop()
+            self.weatherhub_listener.join(timeout=5.0)
 
     def run_once(self):
         # 1. Queue-Replay
@@ -55,6 +71,9 @@ class LoggerRuntime:
         for source, reader in self.memmert_readers.items():
             for name, measurement in reader.read_measurements().items():
                 measurements[f"{source}.{name}"] = measurement
+
+        if self.weatherhub_reader is not None:
+            measurements.update(self.weatherhub_reader.read_measurements())
 
         # 3. Batch erzeugen
         batch = compose_batch(
