@@ -11,7 +11,7 @@ import struct
 import threading
 import urllib.request
 from datetime import datetime, timezone
-from typing import Callable, List, Optional, Set, Union
+from typing import Callable, Optional, Union
 
 from weatherhub_gateway_decoder import (
     BootPacket,
@@ -23,7 +23,7 @@ from weatherhub_gateway_decoder import (
 LOGGER = logging.getLogger(__name__)
 
 MAX_HEADER_BYTES = 16 * 1024
-MAX_BODY_BYTES = 64 * 1024
+MAX_BODY_BYTES = 2 * 1024 * 1024  # 2 MB - erhöht für große Gateway-Payloads
 SOCKET_TIMEOUT_SECONDS = 10.0
 
 
@@ -34,8 +34,8 @@ class WeatherHubGatewayListener(threading.Thread):
         self,
         host: str,
         port: int,
-        allowlist: Set[str],
-        on_packets_received: Callable[[List[Union[BootPacket, GatewayPacket]]], None],
+        allowlist: set[str],
+        on_packets_received: Callable[[list[Union[BootPacket, GatewayPacket]]], None],
         cloud_forward_enabled: bool = False,
     ) -> None:
         super().__init__(name="WeatherHubGatewayListener")
@@ -84,7 +84,11 @@ class WeatherHubGatewayListener(threading.Thread):
                         with connection:
                             self._handle_connection(connection, client_address)
                     except Exception as exc:
-                        LOGGER.warning("Error handling connection from %s: %s", client_address, exc)
+                        LOGGER.warning(
+                            "Error handling connection from %s: %s",
+                            client_address,
+                            exc,
+                        )
 
         except Exception as exc:
             LOGGER.exception("WeatherHubGatewayListener failed: %s", exc)
@@ -92,12 +96,18 @@ class WeatherHubGatewayListener(threading.Thread):
             self._server_socket = None
             LOGGER.info("WeatherHubGatewayListener stopped.")
 
-    def _handle_connection(self, connection: socket.socket, client_address: tuple[str, int]) -> None:
+    def _handle_connection(
+        self, connection: socket.socket, client_address: tuple[str, int]
+    ) -> None:
         client_ip, client_port = client_address
 
         # Check IP Allowlist
         if self.allowlist and client_ip not in self.allowlist:
-            LOGGER.warning("Connection rejected from %s:%s (IP not in allowlist)", client_ip, client_port)
+            LOGGER.warning(
+                "Connection rejected from %s:%s (IP not in allowlist)",
+                client_ip,
+                client_port,
+            )
             return
 
         connection.settimeout(SOCKET_TIMEOUT_SECONDS)
@@ -119,10 +129,13 @@ class WeatherHubGatewayListener(threading.Thread):
             raise ValueError(f"Request does not use PUT: {request_line}")
 
         # Optional: Extract HTTP_IDENTIFY for logging and forwarding
-        identify = next((line for line in header_lines if line.lower().startswith("http_identify:")), None)
+        identify = next(
+            (line for line in header_lines if line.lower().startswith("http_identify:")),
+            None,
+        )
         identify_value = ""
         if identify:
-            identify_value = identify[len("HTTP_IDENTIFY:"):].strip()
+            identify_value = identify[len("HTTP_IDENTIFY:") :].strip()
             LOGGER.debug("Gateway identify: %s", identify_value)
         else:
             LOGGER.debug("Gateway identify header missing")
@@ -152,6 +165,7 @@ class WeatherHubGatewayListener(threading.Thread):
 
     def _forward_to_cloud(self, identify_value: str, body: bytes) -> None:
         """Asynchronously forwards the raw payload to the WeatherHub cloud."""
+
         def _do_forward():
             try:
                 url = "http://www.data199.com/gateway/put"
@@ -219,9 +233,30 @@ class WeatherHubGatewayListener(threading.Thread):
         """Build the required 24-byte binary response with current timestamp."""
         response_body = bytearray(
             (
-                0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
-                0x17, 0x61, 0xD4, 0x80, 0x00, 0x00, 0x00, 0x01,
+                0x00,
+                0x00,
+                0x00,
+                0x01,
+                0x00,
+                0x00,
+                0x00,
+                0x00,
+                0x00,
+                0x00,
+                0x00,
+                0x00,
+                0x00,
+                0x00,
+                0x00,
+                0x01,
+                0x17,
+                0x61,
+                0xD4,
+                0x80,
+                0x00,
+                0x00,
+                0x00,
+                0x01,
             )
         )
         timestamp = int(datetime.now(timezone.utc).timestamp())

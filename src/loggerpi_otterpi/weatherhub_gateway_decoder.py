@@ -6,7 +6,7 @@ Does not have any dependencies on the runtime, storage, or network.
 
 import logging
 from dataclasses import dataclass
-from typing import Any, Dict, List, Union
+from typing import Any, Union
 
 LOGGER = logging.getLogger(__name__)
 
@@ -18,16 +18,18 @@ class WeatherHubDecoderError(ValueError):
 @dataclass(frozen=True)
 class BootPacket:
     """Represents a 15-byte gateway boot/control packet."""
+
     raw_data: bytes
 
 
 @dataclass(frozen=True)
 class GatewayPacket:
     """Represents a decoded 64-byte sensor packet."""
+
     gateway_timestamp: int
     sensor_id: str
     sensor_type: int
-    decoded_values: Dict[str, Any]
+    decoded_values: dict[str, Any]
     raw_data: bytes
 
 
@@ -43,7 +45,7 @@ SUPPORTED_SENSOR_TYPES = {
 }
 
 
-def decode_temperature(data: bytes) -> Dict[str, Any]:
+def decode_temperature(data: bytes) -> dict[str, Any]:
     if len(data) < 2:
         raise WeatherHubDecoderError("Temperature data too short.")
 
@@ -64,7 +66,7 @@ def decode_temperature(data: bytes) -> Dict[str, Any]:
     }
 
 
-def decode_humidity(data: bytes) -> Dict[str, Any]:
+def decode_humidity(data: bytes) -> dict[str, Any]:
     if len(data) < 2:
         raise WeatherHubDecoderError("Humidity data too short.")
 
@@ -79,7 +81,7 @@ def decode_humidity(data: bytes) -> Dict[str, Any]:
     }
 
 
-def decode_humidity_decimal(data: bytes) -> Dict[str, Any]:
+def decode_humidity_decimal(data: bytes) -> dict[str, Any]:
     if len(data) < 2:
         raise WeatherHubDecoderError("Decimal humidity data too short.")
 
@@ -90,7 +92,7 @@ def decode_humidity_decimal(data: bytes) -> Dict[str, Any]:
     }
 
 
-def decode_sensor_status(data: bytes) -> Dict[str, Any]:
+def decode_sensor_status(data: bytes) -> dict[str, Any]:
     if len(data) < 2:
         raise WeatherHubDecoderError("Status data too short.")
 
@@ -101,7 +103,7 @@ def decode_sensor_status(data: bytes) -> Dict[str, Any]:
     }
 
 
-def decode_door_window(data: bytes) -> Dict[str, Any]:
+def decode_door_window(data: bytes) -> dict[str, Any]:
     if len(data) < 2:
         raise WeatherHubDecoderError("Door/window data too short.")
 
@@ -116,8 +118,8 @@ def decode_door_window(data: bytes) -> Dict[str, Any]:
     }
 
 
-def decode_current_values(sensor_type: int, payload: bytes) -> Dict[str, Any]:
-    result: Dict[str, Any] = {}
+def decode_current_values(sensor_type: int, payload: bytes) -> dict[str, Any]:
+    result: dict[str, Any] = {}
 
     # Status bytes are present in these sensor families
     if sensor_type in {0x01, 0x02, 0x03, 0x04, 0x07, 0x0E}:
@@ -163,7 +165,9 @@ def decode_packet(packet: bytes) -> GatewayPacket:
     checksum_expected = sum(packet[:63]) & 0x7F
     checksum_actual = packet[63]
     if checksum_expected != checksum_actual:
-        raise WeatherHubDecoderError(f"CRC mismatch: expected {checksum_expected}, got {checksum_actual}.")
+        raise WeatherHubDecoderError(
+            f"CRC mismatch: expected {checksum_expected}, got {checksum_actual}."
+        )
 
     package_header = packet[0]
     timestamp = int.from_bytes(packet[1:5], byteorder="big")
@@ -191,16 +195,22 @@ def decode_packet(packet: bytes) -> GatewayPacket:
 
     if package_header != sensor_def["header"]:
         raise WeatherHubDecoderError(
-            f"Header mismatch for {sensor_def['name']}: expected {sensor_def['header']}, got {package_header}."
+            f"Header mismatch for {sensor_def['name']}: "
+            f"expected {sensor_def['header']}, got {package_header}."
         )
 
-    if packet_length != sensor_def["packet_length"] or payload_length != sensor_def["payload_length"]:
+    if (
+        packet_length != sensor_def["packet_length"]
+        or payload_length != sensor_def["payload_length"]
+    ):
         raise WeatherHubDecoderError(f"Length mismatch for {sensor_def['name']}.")
 
     try:
         decoded_values = decode_current_values(sensor_type, payload)
     except Exception as exc:
-        raise WeatherHubDecoderError(f"Failed to decode values for {sensor_def['name']}: {exc}") from exc
+        raise WeatherHubDecoderError(
+            f"Failed to decode values for {sensor_def['name']}: {exc}"
+        ) from exc
 
     return GatewayPacket(
         gateway_timestamp=timestamp,
@@ -211,7 +221,7 @@ def decode_packet(packet: bytes) -> GatewayPacket:
     )
 
 
-def decode_payload(body: bytes) -> List[Union[BootPacket, GatewayPacket]]:
+def decode_payload(body: bytes) -> list[Union[BootPacket, GatewayPacket]]:
     """Decode an entire HTTP PUT body from the Gateway.
 
     Silently skips invalid 64-byte packets (e.g. CRC error) but parses the rest,
@@ -222,9 +232,11 @@ def decode_payload(body: bytes) -> List[Union[BootPacket, GatewayPacket]]:
         return [BootPacket(raw_data=body)]
 
     if len(body) == 0 or len(body) % 64 != 0:
-        raise WeatherHubDecoderError(f"Invalid total payload length: {len(body)} (must be 15 or a multiple of 64)")
+        raise WeatherHubDecoderError(
+            f"Invalid total payload length: {len(body)} (must be 15 or a multiple of 64)"
+        )
 
-    results: List[Union[BootPacket, GatewayPacket]] = []
+    results: list[Union[BootPacket, GatewayPacket]] = []
 
     for offset in range(0, len(body), 64):
         packet_bytes = body[offset : offset + 64]

@@ -41,6 +41,9 @@ select = [
     "FA102",
 ]
 
+[tool.ruff.lint.per-file-ignores]
+"src/loggerpi_otterpi/*.py" = ["UP006", "UP035"]
+
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
