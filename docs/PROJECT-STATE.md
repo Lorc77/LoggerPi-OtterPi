@@ -12,14 +12,14 @@
 
 ## Deployment-Stand
 
-**Stand:** 2026-10-26
+**Stand:** 2026-10-27
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.5.0` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.5.0` | Empfängt Batches, speichert in SQLite |
+| LoggerPi | `v1.6.0` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.6.0` | Empfängt Batches, speichert in SQLite |
 
-LoggerPi und OtterPi laufen produktiv auf Version `v1.5.0`.
+LoggerPi und OtterPi laufen produktiv auf Version `v1.6.0`.
 
 Seit `v1.5.0` sind die WeatherHub-Sensoren über den Gateway-Proxy
 integriert. Das Gateway `.121` wurde in den Proxymodus versetzt und
@@ -331,20 +331,20 @@ Der OtterPi bewertet deren fachliche Bedeutung, Health und Zustand.
 - Runtime-Integration (Thread-Start/Stop, Batch-Integration)
 - Praktische Verifikation mit Gateway .121 (17 Sensoren empfangen)
 
-### Aktueller Betriebsstand (2026-10-26)
+### Aktueller Betriebsstand (2026-10-27)
 
 | Komponente | Status |
 |-----------|--------|
-| LoggerPi-OtterPi | v1.5.0 |
+| LoggerPi-OtterPi | v1.6.0 |
 | WeatherHub Gateway .121 | ✅ Proxy-Modus aktiv (→ LoggerPi:3778) |
 | WeatherHub Gateway .132 | ✅ Unverändert (Cloud-Modus) |
 | WeatherHub Sensoren | ✅ 17 Sensoren empfangen |
 | WeatherHub Measurements im Batch | ✅ 34 Measurements (ID01, ID03, ID0E) |
-| Freezer-Reader | ✅ direkt Serial (FTDI A9NX8YRE) |
-| MEMMERT IPP300 links | ✅ aktiv |
-| MEMMERT IPP300 rechts | ✅ aktiv |
-| ThingSpeak-Injektion | ✅ aktiv (field1–7) |
-| Tests | ✅ 136 Tests bestanden |
+| Dashboard | ✅ WeatherHub-Sensoren in Räumen zugeordnet |
+| Dashboard | ✅ Raumklima (Temperatur + Feuchte) berechnet |
+| Dashboard | ✅ Englische UI-Texte |
+| Batch | ✅ AtmoWEB: Nur Measurements mit Wert im Batch |
+| Tests | ✅ 165 Tests bestanden |
 
 ### Aktueller Arbeitspunkt
 

@@ -4,60 +4,14 @@ import json
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
+from dashboard_config import ROOMS
 from otterpi_store import BatchStore
 
 BERLIN = ZoneInfo("Europe/Berlin")
-VERSION = "v1.5.0"
+VERSION = "v1.6.0"
 
-ROOMS = {
-    "r1304": {
-        "name": "R1304 · Kulturraum I",
-        "icon": "🦗",
-        "devices": [
-            {"name": "FREEZER -80 °C", "key": "freezer", "type": "freezer"},
-            {"name": "DRYAGER", "key": "dryager", "type": "placeholder"},
-            {"name": "MEMMERT HPP260 links", "key": "atmoweb_101", "type": "atmoweb"},
-            {"name": "MEMMERT HPP260 rechts", "key": "atmoweb_102", "type": "atmoweb"},
-            {"name": "MEMMERT IPP300 links", "key": "memmert_ipp300_links", "type": "memmert"},
-            {"name": "MEMMERT IPP300 rechts", "key": "memmert_ipp300_rechts", "type": "memmert"},
-        ],
-    },
-    "r1306": {
-        "name": "R1306 · Molekularlab",
-        "icon": "🧬",
-        "devices": [],
-    },
-    "r1307": {
-        "name": "R1307 · Vorraum Kühlkammer",
-        "icon": "❄️",
-        "devices": [],
-    },
-    "r1308": {
-        "name": "R1308 · Kulturraum II",
-        "icon": "🧫",
-        "devices": [],
-    },
-    "r1309": {
-        "name": "R1309 · RNA-lab",
-        "icon": "🧪",
-        "devices": [],
-    },
-    "r1310": {
-        "name": "R1310 · Histolab",
-        "icon": "🔬",
-        "devices": [],
-    },
-    "r1311": {
-        "name": "R1311 · Immunolab",
-        "icon": "🦠",
-        "devices": [],
-    },
-    "r1313": {
-        "name": "R1313 · Praktikumsraum",
-        "icon": "🎓",
-        "devices": [],
-    },
-}
+# ROOMS wird jetzt aus dashboard_config.py importiert
+# Die komplette Datei bleibt identisch wie zuvor, nur der Import ist geändert
 
 
 def render_dashboard(store: BatchStore, room_id: str = "") -> str:
@@ -76,6 +30,16 @@ def _render_overview(store: BatchStore) -> str:
     for room_id, room in ROOMS.items():
         has_devices = bool(room["devices"])
 
+        # Raumklima berechnen
+        climate = _room_climate(batches, room)
+
+        climate_html = ""
+        if climate["temp"] is not None:
+            climate_html += f'<span class="room-climate">🌡️ {climate["temp"]:.1f} °C'
+            if climate["hum"] is not None:
+                climate_html += f" · 💧 {climate['hum']:.0f} %"
+            climate_html += "</span>"
+
         if has_devices:
             device_lines = ""
             for device in room["devices"]:
@@ -92,16 +56,16 @@ def _render_overview(store: BatchStore) -> str:
 
             card = (
                 f'<a class="room-card" href="/raum/{room_id}">'
-                f"<h2>{room['icon']} {room['name']}</h2>"
+                f'<h2 class="room-header">{room["icon"]} {room["name"]}{climate_html}</h2>'
                 f'<div class="device-list">{device_lines}</div>'
                 f"</a>"
             )
         else:
             card = (
                 f'<div class="room-card room-card-empty">'
-                f"<h2>{room['icon']} {room['name']}</h2>"
+                f'<h2 class="room-header">{room["icon"]} {room["name"]}{climate_html}</h2>'
                 f'<div class="device-list">'
-                f'<div class="device-line no-devices">Keine Geräte</div>'
+                f'<div class="device-line no-devices">No devices</div>'
                 f"</div>"
                 f"</div>"
             )
@@ -166,7 +130,21 @@ h1 {{ text-align: center; margin-top: 0; }}
     transform: translateY(-2px);
 }}
 
-.room-card h2 {{ margin-top: 0; font-size: 1.1rem; }}
+.room-header {{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 0;
+    font-size: 1.1rem;
+}}
+
+.room-climate {{
+    color: #d1d5db;
+    font-size: .9rem;
+    font-weight: normal;
+    white-space: nowrap;
+}}
 
 .room-card-empty {{
     cursor: default;
@@ -219,13 +197,14 @@ h1 {{ text-align: center; margin-top: 0; }}
     body {{ padding: 15px; }}
     .container {{ width: 100%; padding: 20px; border-radius: 18px; }}
     .rooms-grid {{ grid-template-columns: 1fr; }}
+    .room-header {{ flex-direction: column; align-items: flex-start; }}
 }}
 </style>
 </head>
 <body>
 <div class="container">
 <h1>📡 ZOOLOGY-Observer Dashboard</h1>
-<div class="subtitle">Räume & Geräte · Letzte Aktualisierung</div>
+<div class="subtitle">Rooms & Devices · Last Update</div>
 
 <div class="rooms-grid">
 {room_cards}
@@ -245,6 +224,16 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
 
     current = _current_values(batches)
 
+    # Raumklima berechnen
+    climate = _room_climate(batches, room)
+
+    climate_display = "–"
+    if climate["temp"] is not None:
+        climate_display = f"🌡️ {climate['temp']:.1f} °C"
+        if climate["hum"] is not None:
+            climate_display += f" · 💧 {climate['hum']:.0f} %"
+
+    # Serien für bestehende Geräte
     temp_101 = _series(batches, "atmoweb_101.temperature_1")
     hum_101 = _series(batches, "atmoweb_101.humidity")
     temp_102 = _series(batches, "atmoweb_102.temperature_1")
@@ -257,7 +246,6 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
         "atmoweb_101": (temp_101, hum_101),
         "atmoweb_102": (temp_102, hum_102),
         "freezer": (temp_freezer, []),
-        "dryager": ([], []),
         "memmert_ipp300_links": (temp_memmert_links, []),
         "memmert_ipp300_rechts": (temp_memmert_rechts, []),
     }
@@ -286,6 +274,13 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
                 "hum_values_json": json.dumps([point["value"] for point in hum_series]),
             }
         )
+
+    # Letzte Kachel bei ungerader Anzahl auf volle Breite
+    for i, device in enumerate(device_views):
+        if len(device_views) % 2 == 1 and i == len(device_views) - 1:
+            device["full_width"] = True
+        else:
+            device["full_width"] = False
 
     device_cards = "".join(_render_device_card(device, device_views) for device in device_views)
 
@@ -357,6 +352,10 @@ h1 {{ text-align: center; margin-top: 0; }}
     border: 1px solid rgba(255,255,255,.08);
     border-radius: 18px;
     padding: 20px;
+}}
+
+.device-card-full {{
+    grid-column: 1 / -1;
 }}
 
 .device-card-placeholder {{
@@ -488,14 +487,15 @@ h1 {{ text-align: center; margin-top: 0; }}
     .container {{ width: 100%; padding: 20px; border-radius: 18px; }}
     .grid {{ grid-template-columns: 1fr; }}
     .system-line {{ grid-template-columns: 160px 1fr; }}
+    .device-card-full {{ grid-column: 1 / -1; }}
 }}
 </style>
 </head>
 <body>
 <div class="container">
-<a class="back-btn" href="/">← Zur Übersicht</a>
+<a class="back-btn" href="/">← Back to Overview</a>
 <h1>{room["icon"]} {room["name"]}</h1>
-<div class="subtitle">Letzte 48 Stunden</div>
+<div class="subtitle">{climate_display}</div>
 
 <div class="grid">
 {device_cards}
@@ -503,13 +503,13 @@ h1 {{ text-align: center; margin-top: 0; }}
     <div class="system-card">
         <h2>🖥 System</h2>
         <div class="system-line">
-            <span>Letzter Batch:</span><span>{current["last_batch"]}</span>
+            <span>Last batch:</span><span>{current["last_batch"]}</span>
         </div>
         <div class="system-line">
             <span>Batches (48h):</span><span>{len(batches)}</span>
         </div>
         <div class="system-line">
-            <span>CPU-Temperatur:</span><span>{current["cpu_temp"]:.1f} °C</span>
+            <span>CPU Temperature:</span><span>{current["cpu_temp"]:.1f} °C</span>
         </div>
         <div class="system-line">
             <span>Memory:</span><span>{current["memory_used"]:.0f}%</span>
@@ -541,17 +541,17 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
         <div class="device-header">
             <div>
                 <h2>{device["name"]}</h2>
-                <span class="device-status-label">geplant</span>
+                <span class="device-status-label">planned</span>
             </div>
-            <span class="status-light status-off" aria-label="Platzhalter"></span>
+            <span class="status-light status-off" aria-label="Placeholder"></span>
         </div>
         <div class="metric-grid">
             <div class="metric">
-                <span>🌡 Temperatur</span>
+                <span>🌡 Temperature</span>
                 <strong>– <small>°C</small></strong>
             </div>
             <div class="metric">
-                <span>💧 Relative Feuchte</span>
+                <span>💧 Relative Humidity</span>
                 <strong>– <small>%</small></strong>
             </div>
         </div>
@@ -559,18 +559,21 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
     </section>
 """
 
-    if device["type"] in ("freezer", "memmert"):
+    full_width_class = " device-card-full" if device.get("full_width") else ""
+
+    if device["type"] in ("freezer", "memmert", "weatherhub_id01"):
+        # Nur Temperatur-Kachel (ohne Feuchte)
         return f"""
-    <section class="device-card">
+    <section class="device-card{full_width_class}">
         <div class="device-header">
             <div>
                 <h2>{device["name"]}</h2>
-                <span class="device-status-label">Status</span>
+                <span class="device-status-label">Device Status</span>
             </div>
-            <span class="status-light {device["status"]}" aria-label="Gerätestatus"></span>
+            <span class="status-light {device["status"]}" aria-label="Device Status"></span>
         </div>
         <div class="metric-full">
-            <span>🌡 Temperatur</span>
+            <span>🌡 Temperature</span>
             <strong>{device["temp"]:.1f} <small>°C</small></strong>
         </div>
         <div class="device-chart">
@@ -579,23 +582,23 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
     </section>
 """
 
-    # AtmoWEB-Kachel
+    # AtmoWEB und weatherhub_id0e (Temp + Feuchte)
     return f"""
-    <section class="device-card">
+    <section class="device-card{full_width_class}">
         <div class="device-header">
             <div>
                 <h2>{device["name"]}</h2>
-                <span class="device-status-label">Status</span>
+                <span class="device-status-label">Device Status</span>
             </div>
-            <span class="status-light {device["status"]}" aria-label="Gerätestatus"></span>
+            <span class="status-light {device["status"]}" aria-label="Device Status"></span>
         </div>
         <div class="metric-grid">
             <div class="metric">
-                <span>🌡 Temperatur</span>
+                <span>🌡 Temperature</span>
                 <strong>{device["temp"]:.1f} <small>°C</small></strong>
             </div>
             <div class="metric">
-                <span>💧 Relative Feuchte</span>
+                <span>💧 Relative Humidity</span>
                 <strong>{device["hum"]:.1f} <small>%</small></strong>
             </div>
         </div>
@@ -613,7 +616,7 @@ def _render_device_script(device: dict) -> str:
     if device["type"] == "placeholder":
         return ""
 
-    if device["type"] in ("freezer", "memmert"):
+    if device["type"] in ("freezer", "memmert", "weatherhub_id01"):
         # Nur Temperatur-Dataset (orange)
         return f"""
 const {chart_var}Labels = {device["labels_json"]};
@@ -624,7 +627,7 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
         labels: {chart_var}Labels,
         datasets: [
             {{
-                label: 'Temperatur',
+                label: 'Temperature',
                 data: {device["temp_values_json"]},
                 borderColor: '#fb923c',
                 borderWidth: 1.5,
@@ -669,7 +672,6 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                                 const today = new Date();
                                 const date = new Date(dateStr + 'T00:00:00');
 
-                                // Normalisiere auf Mitternacht für sauberen Vergleich
                                 const todayMidnight = new Date(
                                     today.getFullYear(), today.getMonth(), today.getDate()
                                 );
@@ -682,11 +684,10 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                                 );
 
                                 if (diffDays === 0) {{
-                                    dateLabel = 'heute';
+                                    dateLabel = 'today';
                                 }} else if (diffDays === 1) {{
-                                    dateLabel = 'gestern';
+                                    dateLabel = 'yesterday';
                                 }} else {{
-                                    // Format: TT.MM.JJJJ
                                     const dd = String(date.getDate()).padStart(2, '0');
                                     const mm = String(date.getMonth() + 1).padStart(2, '0');
                                     const yyyy = date.getFullYear();
@@ -694,13 +695,13 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                                 }}
                             }}
 
-                            return `📅 Datum: ${{dateLabel}}\n⏰ Messzeit: ${{label}} Uhr`;
+                            return `📅 Date: ${{dateLabel}}\\n⏰ Measurement time: ${{label}}`;
                         }}
                         return '';
                     }},
                     label: (context) => {{
                         const value = context.parsed.y;
-                        return `Temperatur: ${{value}} °C`;
+                        return `Temperature: ${{value}} °C`;
                     }}
                 }}
             }}
@@ -727,7 +728,7 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
 }});
 """
 
-    # AtmoWEB: Temperatur + Feuchte
+    # AtmoWEB und weatherhub_id0e (Temp + Feuchte)
     return f"""
 const {chart_var}Labels = {device["labels_json"]};
 const {chart_var}Dates = {device["dates_json"]};
@@ -737,7 +738,7 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
         labels: {chart_var}Labels,
         datasets: [
             {{
-                label: 'Temperatur',
+                label: 'Temperature',
                 data: {device["temp_values_json"]},
                 borderColor: '#fb923c',
                 borderWidth: 1.5,
@@ -747,7 +748,7 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                 tension: 0.3
             }},
             {{
-                label: 'Relative Feuchte',
+                label: 'Relative Humidity',
                 data: {device["hum_values_json"]},
                 borderColor: '#38bdf8',
                 borderWidth: 1.5,
@@ -793,7 +794,6 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                                 const today = new Date();
                                 const date = new Date(dateStr + 'T00:00:00');
 
-                                // Normalisiere auf Mitternacht für sauberen Vergleich
                                 const todayMidnight = new Date(
                                     today.getFullYear(), today.getMonth(), today.getDate()
                                 );
@@ -806,11 +806,10 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                                 );
 
                                 if (diffDays === 0) {{
-                                    dateLabel = 'heute';
+                                    dateLabel = 'today';
                                 }} else if (diffDays === 1) {{
-                                    dateLabel = 'gestern';
+                                    dateLabel = 'yesterday';
                                 }} else {{
-                                    // Format: TT.MM.JJJJ
                                     const dd = String(date.getDate()).padStart(2, '0');
                                     const mm = String(date.getMonth() + 1).padStart(2, '0');
                                     const yyyy = date.getFullYear();
@@ -818,16 +817,16 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                                 }}
                             }}
 
-                            return `📅 Datum: ${{dateLabel}}\n⏰ Messzeit: ${{label}} Uhr`;
+                            return `📅 Date: ${{dateLabel}}\\n⏰ Measurement time: ${{label}}`;
                         }}
                         return '';
                     }},
                     label: (context) => {{
                         const value = context.parsed.y;
-                        if (context.dataset.label === 'Temperatur') {{
-                            return `Temperatur: ${{value}} °C`;
+                        if (context.dataset.label === 'Temperature') {{
+                            return `Temperature: ${{value}} °C`;
                         }}
-                        return `Rel. Feuchte: ${{value}} %`;
+                        return `Rel. Humidity: ${{value}} %`;
                     }}
                 }}
             }}
@@ -866,6 +865,46 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
     }}
 }});
 """
+
+
+def _room_climate(batches: list[dict], room: dict) -> dict:
+    """Berechnet Raumtemperatur und -feuchte aus den WeatherHub-Sensoren."""
+    temps = []
+    hums = []
+
+    if not batches:
+        return {"temp": None, "hum": None}
+
+    latest = batches[-1]
+    measurements = latest.get("measurements", {})
+
+    # Alle ID01-Sensoren im Raum (temperature_1 = Raumtemperatur)
+    for device in room["devices"]:
+        if device.get("type") == "weatherhub_id01":
+            key = device["key"]
+            temp = measurements.get(f"{key}.temperature_1", {})
+            if temp.get("value") is not None:
+                temps.append(temp["value"])
+
+    # ID03-Sensoren im Raum (temperature = Raumtemperatur, humidity = Raumfeuchte)
+    for sensor_key in room.get("weatherhub_climate", []):
+        temp = measurements.get(f"{sensor_key}.temperature", {})
+        if temp.get("value") is not None:
+            temps.append(temp["value"])
+
+        hum = measurements.get(f"{sensor_key}.humidity", {})
+        if hum.get("value") is not None:
+            hums.append(hum["value"])
+
+    result = {"temp": None, "hum": None}
+
+    if temps:
+        result["temp"] = sum(temps) / len(temps)
+
+    if hums:
+        result["hum"] = sum(hums) / len(hums)
+
+    return result
 
 
 def _recent_batches(store: BatchStore, hours: int = 48) -> list[dict]:
@@ -981,6 +1020,36 @@ def _device_current(batches: list[dict], key: str, device_type: str = "atmoweb")
 
         return result
 
+    if device_type == "weatherhub_id01":
+        # Nur Gerätetemperatur (temperature_2) anzeigen
+        temp = measurements.get(f"{key}.temperature_2", {})
+        if temp.get("value") is not None:
+            result["temp"] = temp["value"]
+            result["value"] = f"{temp['value']:.1f} °C"
+
+        if result["temp"] != 0.0:
+            result["status"] = "lamp-ok"
+
+        return result
+
+    if device_type == "weatherhub_id0e":
+        # DryAger: Temperatur + Feuchte im Gerät
+        temp = measurements.get(f"{key}.temperature", {})
+        hum = measurements.get(f"{key}.humidity", {})
+
+        if temp.get("value") is not None:
+            result["temp"] = temp["value"]
+            result["value"] = f"{temp['value']:.1f} °C"
+
+        if hum.get("value") is not None:
+            result["hum"] = hum["value"]
+
+        if result["temp"] > 0 or result["hum"] > 0:
+            result["status"] = "lamp-ok"
+
+        return result
+
+    # AtmoWEB (temperature_1 + humidity)
     temp = measurements.get(f"{key}.temperature_1", {})
     hum = measurements.get(f"{key}.humidity", {})
 
@@ -1007,8 +1076,15 @@ def _device_status(batches: list[dict], key: str, device_type: str = "atmoweb") 
 
     measurements = batches[-1].get("measurements", {})
 
-    if device_type in ("freezer", "memmert"):
-        temp = measurements.get(f"{key}.temperature", {})
+    if device_type in ("freezer", "memmert", "weatherhub_id01", "weatherhub_id0e"):
+        if device_type in ("freezer", "memmert"):
+            measurement_key = f"{key}.temperature"
+        elif device_type == "weatherhub_id01":
+            measurement_key = f"{key}.temperature_2"
+        else:  # weatherhub_id0e
+            measurement_key = f"{key}.temperature"
+
+        temp = measurements.get(measurement_key, {})
         validity = temp.get("validity")
 
         if validity == "invalid":

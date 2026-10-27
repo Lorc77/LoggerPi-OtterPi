@@ -147,11 +147,14 @@ Die Installation kopiert die Anwendungsdateien **flach** nach
 ├── batch_queue.py
 ├── composer.py
 ├── dashboard.py (nur OtterPi)
+├── dashboard_config.py (nur OtterPi)
 ├── delivery.py
 ├── freezer.py
 ├── freezer_config.py
 ├── loggerpi_observer.py
 ├── loggerpi_runner.py
+├── memmert.py
+├── memmert_config.py
 ├── otter2.png (nur OtterPi)
 ├── otterpi.py (nur OtterPi)
 ├── otterpi_observer.py (nur OtterPi)
@@ -160,6 +163,9 @@ Die Installation kopiert die Anwendungsdateien **flach** nach
 ├── system_info.py
 ├── thingspeak_delivery.py
 ├── thingspeak_config.py
+├── weatherhub.py
+├── weatherhub_gateway_decoder.py
+├── weatherhub_gateway_listener.py
 └── model/
     ├── batch.py
     └── measurement.py
@@ -228,6 +234,40 @@ SQLite:
 ```text
 /var/lib/loggerpi-otterpi/batches.sqlite3
 ```
+
+Die Datei `dashboard_config.py` (Raum- und Sensor-Zuordnung) wird
+automatisch mit deployt und liegt danach unter:
+
+```text
+/opt/loggerpi-otterpi/dashboard_config.py
+```
+
+### Sensor-Umzüge / Dashboard-Konfiguration ändern
+
+Wenn Sensoren umziehen oder neue Geräte hinzukommen:
+
+**Variante 1: Deployment (empfohlen)**
+
+1. `dashboard_config.py` im Repository anpassen
+2. Committen und pushen
+3. Auf dem OtterPi:
+   ```bash
+   sudo /usr/local/sbin/loggerpi-otterpi-update otterpi
+   ```
+
+**Variante 2: Direkte Änderung auf dem OtterPi (ohne Deployment)**
+
+1. Datei direkt bearbeiten:
+   ```bash
+   sudo nano /opt/loggerpi-otterpi/dashboard_config.py
+   ```
+2. Service neu starten:
+   ```bash
+   sudo systemctl restart otterpi.observer.service
+   ```
+
+**Wichtig:** Bei Variante 2 ist die Änderung nicht im Git-Repository
+dokumentiert. Sie geht beim nächsten Deployment verloren.
 
 ---
 

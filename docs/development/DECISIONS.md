@@ -1132,6 +1132,109 @@ Gateway `.132` bleibt unverändert im Cloud-Modus.
 
 ---
 
+## DEC-034 — Batch: Nur Measurements mit tatsächlichem Wert (AtmoWEB)
+
+**Status:** Angenommen
+**Datum:** 2026-10-27
+
+### Kontext
+
+AtmoWEB-Geräte liefern für nicht unterstützte Sensoren (z.B. CO2, O2, Vakuum)
+`N/A` zurück. Diese Werte wurden bisher als `unavailable`-Measurements mit
+`value: null` in den Batch aufgenommen.
+
+### Entscheidung
+
+AtmoWEB-Reader nimmt nur Measurements mit `value is not None` in den Batch auf.
+
+Wenn ein neues AtmoWEB-Gerät angeschlossen wird, das z.B. CO2 unterstützt,
+erscheinen die Werte automatisch wieder im Batch (weil dann `valid` statt
+`unavailable`).
+
+MEMMERT-Reader behält `unavailable`-Einträge bei, weil konfigurierte Geräte
+(z.B. IPP300 rechts in Reparatur) im Dashboard sichtbar bleiben sollen.
+
+### Konsequenz
+
+- Batch wird schlanker (keine null-Platzhalter für nicht unterstützte Sensoren)
+- Dashboard kann nicht unterstützte Messwerte nicht mehr anzeigen
+- Neue Geräte mit zusätzlichen Sensoren erscheinen automatisch
+
+---
+
+## DEC-035 — Dashboard: WeatherHub-Sensoren in Räumen
+
+**Status:** Angenommen
+**Datum:** 2026-10-27
+
+### Kontext
+
+17 WeatherHub-Sensoren (15× ID01, 1× ID03, 1× ID0E) sind im Batch verfügbar.
+
+### Entscheidung
+
+Dashboard zeigt:
+
+- **ID01-Sensoren:** Nur Gerätetemperatur (`temperature_2`) als Kachel mit Chart
+- **ID03-Sensoren:** Keine Kachel, nur Raumklima (Temperatur + Feuchte)
+- **ID0E (DryAger):** Temperatur + Feuchte als Kachel (AtmoWEB-Stil)
+- **Raumtemperatur:** Mittelwert aus ID01-`temperature_1` + ID03-`temperature`
+- **Raumfeuchte:** Mittelwert aller ID03-`humidity` Werte
+- **Letzte Kachel bei ungerader Anzahl:** Volle Breite
+
+### Konsequenz
+
+- Übersicht zeigt Raumklima in der Raum-Kopfzeile
+- Detailseiten zeigen nur relevante Gerätekacheln
+- ID0E wird nicht in Raumtemperatur-Berechnung einbezogen (liegt im Gerät)
+
+---
+
+## DEC-036 — Dashboard-Konfiguration in separater Datei
+
+**Status:** Angenommen
+**Datum:** 2026-10-27
+
+### Kontext
+
+Sensor-Standorte können sich ändern (Umzüge, neue Geräte). Die Konfiguration
+sollte ohne Änderung der Dashboard-Logik anpassbar sein.
+
+### Entscheidung
+
+Die Raum- und Sensor-Zuordnung wird in `dashboard_config.py` ausgelagert.
+`dashboard.py` importiert die `ROOMS`-Struktur aus dieser Datei.
+
+### Konsequenz
+
+- Sensor-Umzüge erfordern nur Änderungen in `dashboard_config.py`
+- Deployment über `loggerpi-otterpi-update otterpi`
+- Alternativ: Direkte Datei-Änderung auf dem OtterPi + Service-Restart
+
+---
+
+## DEC-037 — Dashboard auf Englisch umgestellt
+
+**Status:** Angenommen
+**Datum:** 2026-10-27
+
+### Kontext
+
+Das Dashboard war bisher auf Deutsch.
+
+### Entscheidung
+
+Alle UI-Texte wurden auf Englisch umgestellt (Titel, Buttons, Chart-Legenden,
+Tooltips, Raumnamen). `ZOOLOGY-Observer` bleibt als Eigenname erhalten.
+Datumsformat bleibt deutsch (`27.10.2026 16:45 Uhr`).
+
+### Konsequenz
+
+- Einheitliche englische UI
+- Kein Mix aus Deutsch und Englisch
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:

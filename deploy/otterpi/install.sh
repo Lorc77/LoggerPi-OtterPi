@@ -16,6 +16,7 @@ OTTERPI_FILES=(
     otterpi_observer.py
     otterpi_store.py
     dashboard.py
+    dashboard_config.py
     otter2.png
 )
 

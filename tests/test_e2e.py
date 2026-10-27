@@ -164,11 +164,9 @@ def test_atmoweb_measurement_batch_queue_http_e2e(tmp_path: Path) -> None:
         assert measurements["vacuum"].unit == "mbar"
         assert measurements["vacuum"].validity == "valid"
 
-        assert measurements["temperature_3"].value is None
-        assert measurements["temperature_3"].validity == "unavailable"
-
-        assert measurements["temperature_4"].value is None
-        assert measurements["temperature_4"].validity == "unknown"
+        # Nicht unterstützte Messwerte werden nicht in den Batch aufgenommen
+        assert "temperature_3" not in measurements
+        assert "temperature_4" not in measurements
 
         sequence_store = SequenceStore(tmp_path / "sequence")
         queue = BatchQueue(tmp_path / "queue.jsonl")
@@ -228,6 +226,10 @@ def test_atmoweb_measurement_batch_queue_http_e2e(tmp_path: Path) -> None:
         assert received["body"]["measurements"]["vacuum"]["value"] == 1013.25
         assert received["body"]["measurements"]["vacuum"]["unit"] == "mbar"
         assert received["body"]["measurements"]["vacuum"]["source"] == "atmoweb"
+
+        # Nicht unterstützte Messwerte sind nicht im Batch enthalten
+        assert "temperature_3" not in received["body"]["measurements"]
+        assert "temperature_4" not in received["body"]["measurements"]
 
     finally:
         atmoweb_server.shutdown()

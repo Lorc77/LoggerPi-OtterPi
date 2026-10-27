@@ -133,12 +133,20 @@ class AtmoWebReader:
             ("O2Read", "o2", "percent"),
             ("FanRead", "fan_speed", "rpm"),
         ):
-            measurements[name] = _measurement_from_atmoweb(
+            measurement = _measurement_from_atmoweb(
                 key=key,
                 value=data.get(key),
                 unit=unit,
                 measured_at=measured_at,
             )
+
+            # Nur Measurements mit tatsächlichem Wert aufnehmen.
+            # Wenn ein Gerät einen Sensor nicht unterstützt (N/A),
+            # wird der Wert nicht in den Batch übernommen.
+            # Wenn später ein Gerät angeschlossen wird, das z.B. CO₂
+            # unterstützt, erscheint der Wert automatisch wieder.
+            if measurement.value is not None:
+                measurements[name] = measurement
 
         return measurements
 

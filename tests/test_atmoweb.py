@@ -103,10 +103,11 @@ def test_read_measurements_maps_nd_to_unknown(monkeypatch) -> None:
 
     monkeypatch.setattr("atmoweb.urlopen", fake_urlopen)
 
-    measurement = AtmoWebReader("192.168.100.101").read_measurements()["temperature_1"]
+    measurements = AtmoWebReader("192.168.100.101").read_measurements()
 
-    assert measurement.value is None
-    assert measurement.validity == "unknown"
+    # N/D und N/A-Werte werden nicht in den Batch aufgenommen,
+    # da das Gerät diese Messwerte nicht unterstützt.
+    assert measurements == {}
 
 
 def test_read_state_maps_atmoweb_states(monkeypatch) -> None:
