@@ -8,10 +8,7 @@ from dashboard_config import ROOMS
 from otterpi_store import BatchStore
 
 BERLIN = ZoneInfo("Europe/Berlin")
-VERSION = "v1.6.0"
-
-# ROOMS wird jetzt aus dashboard_config.py importiert
-# Die komplette Datei bleibt identisch wie zuvor, nur der Import ist geändert
+VERSION = "v1.6.1"
 
 
 def render_dashboard(store: BatchStore, room_id: str = "") -> str:
@@ -229,7 +226,7 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
 
     climate_display = "–"
     if climate["temp"] is not None:
-        climate_display = f"🌡️ {climate['temp']:.1f} °C"
+        climate_display = f"Room temperature/climate: 🌡️ {climate['temp']:.1f} °C"
         if climate["hum"] is not None:
             climate_display += f" · 💧 {climate['hum']:.0f} %"
 
@@ -249,6 +246,20 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
         "memmert_ipp300_links": (temp_memmert_links, []),
         "memmert_ipp300_rechts": (temp_memmert_rechts, []),
     }
+
+    # WeatherHub-Serien dynamisch erzeugen
+    for device in room["devices"]:
+        device_type = device.get("type", "atmoweb")
+        key = device["key"]
+
+        if device_type == "weatherhub_id01":
+            temp_series = _series(batches, f"{key}.temperature_2")
+            series_by_device[key] = (temp_series, [])
+
+        elif device_type == "weatherhub_id0e":
+            temp_series = _series(batches, f"{key}.temperature")
+            hum_series = _series(batches, f"{key}.humidity")
+            series_by_device[key] = (temp_series, hum_series)
 
     device_views = []
     for device in room["devices"]:
@@ -695,7 +706,7 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                                 }}
                             }}
 
-                            return `📅 Date: ${{dateLabel}}\\n⏰ Measurement time: ${{label}}`;
+                            return `📅 Date: ${{dateLabel}}\\n⏰ Time: ${{label}}`;
                         }}
                         return '';
                     }},
@@ -817,7 +828,7 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                                 }}
                             }}
 
-                            return `📅 Date: ${{dateLabel}}\\n⏰ Measurement time: ${{label}}`;
+                            return `📅 Date: ${{dateLabel}}\\n⏰ Time: ${{label}}`;
                         }}
                         return '';
                     }},
