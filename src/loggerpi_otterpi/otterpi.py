@@ -101,12 +101,14 @@ class OtterPiHandler(BaseHTTPRequestHandler):
             device_id = ""
             climate_id = ""
             range_key = "7d"
+            start_date = ""
+            end_date = ""
 
             if self.path.startswith("/room/"):
                 room_id = self.path.split("/")[2]
 
             elif self.path.startswith("/device/"):
-                # /device/<key> oder /device/<key>?range=7d
+                # /device/<key> oder /device/<key>?range=7d&start_date=...
                 path_part = self.path.split("/")[2]
 
                 # Query-Parameter extrahieren
@@ -115,12 +117,15 @@ class OtterPiHandler(BaseHTTPRequestHandler):
                     for param in query.split("&"):
                         if param.startswith("range="):
                             range_key = param.split("=")[1]
-                            break
+                        elif param.startswith("start_date="):
+                            start_date = param.split("=")[1]
+                        elif param.startswith("end_date="):
+                            end_date = param.split("=")[1]
 
                 device_id = path_part
 
             elif self.path.startswith("/climate/"):
-                # /climate/<room_id> oder /climate/<room_id>?range=7d
+                # /climate/<room_id> oder /climate/<room_id>?range=7d&start_date=...
                 path_part = self.path.split("/")[2]
 
                 # Query-Parameter extrahieren
@@ -129,7 +134,10 @@ class OtterPiHandler(BaseHTTPRequestHandler):
                     for param in query.split("&"):
                         if param.startswith("range="):
                             range_key = param.split("=")[1]
-                            break
+                        elif param.startswith("start_date="):
+                            start_date = param.split("=")[1]
+                        elif param.startswith("end_date="):
+                            end_date = param.split("=")[1]
 
                 climate_id = path_part
 
@@ -139,6 +147,8 @@ class OtterPiHandler(BaseHTTPRequestHandler):
                 device_id=device_id,
                 range_key=range_key,
                 climate_id=climate_id,
+                start_date=start_date,
+                end_date=end_date,
             )
             body = html.encode("utf-8")
 

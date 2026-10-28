@@ -2,14 +2,14 @@
 
 import json
 from datetime import datetime, timedelta, timezone
-from typing import Any
+from typing import Any, Optional
 from zoneinfo import ZoneInfo
 
 from dashboard_config import ROOMS
 from otterpi_store import BatchStore
 
 BERLIN = ZoneInfo("Europe/Berlin")
-VERSION = "v1.7.0"
+VERSION = "v1.7.1"
 
 # Zeitraum-Optionen für die Detailseiten (in Stunden)
 TIME_RANGES = {
@@ -21,6 +21,20 @@ TIME_RANGES = {
     "365d": 365 * 24,
 }
 
+# Harmonische Farben für Individual-Sensor-Charts
+SENSOR_COLORS = [
+    "#fb923c",  # Orange
+    "#38bdf8",  # Hellblau
+    "#a78bfa",  # Violett
+    "#34d399",  # Grün
+    "#f472b6",  # Pink
+    "#fbbf24",  # Gelb
+    "#22d3ee",  # Cyan
+    "#f87171",  # Rot
+    "#a3e635",  # Limette
+    "#c084fc",  # Lila
+]
+
 
 def render_dashboard(
     store: BatchStore,
@@ -28,18 +42,54 @@ def render_dashboard(
     device_id: str = "",
     range_key: str = "7d",
     climate_id: str = "",
+    start_date: str = "",
+    end_date: str = "",
 ) -> str:
     """Generiert das Dashboard-HTML."""
     if climate_id:
-        return _render_climate_detail(store, climate_id, range_key=range_key)
+        return _render_climate_detail(
+            store,
+            climate_id,
+            range_key=range_key,
+            start_date=start_date,
+            end_date=end_date,
+        )
 
     if device_id:
-        return _render_device_detail(store, device_id, range_key=range_key)
+        return _render_device_detail(
+            store,
+            device_id,
+            range_key=range_key,
+            start_date=start_date,
+            end_date=end_date,
+        )
 
     if room_id and room_id in ROOMS:
         return _render_room_detail(store, room_id)
 
     return _render_overview(store)
+
+
+def _status_text(status: str) -> str:
+    """Wandelt einen Status in lesbaren Text um."""
+    return {
+        "status-ok": "OK",
+        "status-warn": "STALE",
+        "status-critical": "INVALID",
+        "status-off": "OFFLINE",
+    }.get(status, "UNKNOWN")
+
+
+def _climate_display_text(climate: dict) -> str:
+    """Erzeugt den Klima-Anzeigetext."""
+    if climate["temp"] is None:
+        return "–"
+
+    text = f"🌡️ Room temperature: {climate['temp']:.1f} °C"
+    if climate["hum"] is not None:
+        text += f" · 💧 Relative Humidity: {climate['hum']:.0f} %"
+
+    return text
 
 
 def _render_overview(store: BatchStore) -> str:
@@ -247,13 +297,10 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
     # Raumklima berechnen
     climate = _room_climate(batches, room)
 
-    climate_display = "–"
+    climate_display = _climate_display_text(climate)
     climate_link = ""
     if climate["temp"] is not None:
-        climate_display = f"🌡️ {climate['temp']:.1f} °C"
-        if climate["hum"] is not None:
-            climate_display += f" · 💧 {climate['hum']:.0f} %"
-        climate_link = f'<a class="climate-link" href="/climate/{room_id}">{climate_display}</a>'
+        climate_link = f'<a class="climate-btn" href="/climate/{room_id}">{climate_display}</a>'
     else:
         climate_link = climate_display
 
@@ -293,13 +340,15 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
         device_type = device.get("type", "atmoweb")
         temp_series, hum_series = series_by_device.get(device["key"], ([], []))
         device_current = _device_current(batches, device["key"], device_type)
+        status = _device_status(batches, device["key"], device_type)
         chart_id = f"chart-{device['key'].replace('_', '-')}"
         device_views.append(
             {
                 "name": device["name"],
                 "key": device["key"],
                 "type": device_type,
-                "status": _device_status(batches, device["key"], device_type),
+                "status": status,
+                "status_text": _status_text(status),
                 "temp": device_current["temp"],
                 "hum": device_current["hum"],
                 "chart_id": chart_id,
@@ -377,16 +426,22 @@ h1 {{ text-align: center; margin-top: 0; }}
     background: rgba(147,197,253,.3);
 }}
 
-.climate-link {{
-    color: #d1d5db;
+.climate-btn {{
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 20px;
+    background: rgba(147,197,253,.15);
+    border: 1px solid rgba(147,197,253,.4);
+    color: #bfdbfe;
     text-decoration: none;
-    border-bottom: 1px dashed rgba(209,213,219,.4);
+    font-size: .9rem;
     transition: .2s;
 }}
 
-.climate-link:hover {{
+.climate-btn:hover {{
+    background: rgba(147,197,253,.3);
+    border-color: rgba(147,197,253,.8);
     color: white;
-    border-bottom-color: white;
 }}
 
 .grid {{
@@ -451,9 +506,8 @@ h1 {{ text-align: center; margin-top: 0; }}
 .device-status-label {{
     display: block;
     margin-top: 5px;
-    color: #9ca3af;
+    color: #d1d5db;
     font-size: .8rem;
-    font-family: monospace;
 }}
 
 .status-light {{
@@ -573,7 +627,7 @@ h1 {{ text-align: center; margin-top: 0; }}
 <div class="container">
 <a class="back-btn" href="/">← Back to Overview</a>
 <h1>{room["icon"]} {room["name"]}</h1>
-<div class="subtitle">Room temperature/climate: {climate_link}</div>
+<div class="subtitle">{climate_link}</div>
 
 <div class="grid">
 {device_cards}
@@ -610,6 +664,8 @@ def _render_climate_detail(
     store: BatchStore,
     climate_id: str,
     range_key: str = "7d",
+    start_date: str = "",
+    end_date: str = "",
 ) -> str:
     """Detailseite für das Raumklima eines Raumes."""
     if climate_id not in ROOMS:
@@ -622,7 +678,20 @@ def _render_climate_detail(
         range_key = "7d"
 
     hours = TIME_RANGES[range_key]
-    batches = _recent_batches(store, hours=hours)
+
+    # Bei Custom-Datum: Stunden basierend auf Datumsbereich berechnen
+    if start_date and end_date:
+        try:
+            start_dt = datetime.strptime(start_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            end_dt = datetime.strptime(end_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            hours = max(24, int((end_dt - start_dt).total_seconds() / 3600) + 24)
+            range_key = "custom"
+        except ValueError:
+            pass
+
+    # Bei 15-Min-Intervall: 4 Batches/Stunde + Puffer
+    limit = hours * 4 + 100
+    batches = _recent_batches(store, hours=hours, limit=limit)
 
     # Beteiligte Sensoren ermitteln
     temp_sensor_keys = []  # (key, display_name, measurement_key)
@@ -663,6 +732,17 @@ def _render_climate_detail(
             f'href="/climate/{climate_id}?range={key}">{label}</a>\n    '
         )
 
+    # Custom-Datum-Formular
+    max_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    custom_date_html = f"""
+    <form class="custom-date-form" method="get" action="/climate/{climate_id}">
+        <input type="date" name="start_date" value="{start_date}" min="2025-01-01" max="{max_date}">
+        <span>to</span>
+        <input type="date" name="end_date" value="{end_date}" min="2025-01-01" max="{max_date}">
+        <button type="submit">Apply</button>
+    </form>
+    """
+
     # Mittelwert-Serien berechnen
     temp_avg_series = _calculate_average_series(batches, temp_sensor_keys)
     hum_avg_series = _calculate_average_series(batches, hum_sensor_keys) if hum_sensor_keys else []
@@ -694,12 +774,7 @@ def _render_climate_detail(
 
     # Aktuelle Werte
     climate = _room_climate(batches, room)
-
-    climate_display = "–"
-    if climate["temp"] is not None:
-        climate_display = f"🌡️ {climate['temp']:.1f} °C"
-        if climate["hum"] is not None:
-            climate_display += f" · 💧 {climate['hum']:.0f} %"
+    climate_display = _climate_display_text(climate)
 
     # Letzte Aktualisierung
     last_update = "–"
@@ -739,15 +814,15 @@ def _render_climate_detail(
     # Statistik-HTML
     stats_html = f"""
             <div class="stat">
-                <span>🌡️ Min Avg Temp</span>
+                <span>🌡️ Min Ø Temperature</span>
                 <strong>{temp_stats["temp_min"]:.1f} <small>°C</small></strong>
             </div>
             <div class="stat">
-                <span>🌡️ Max Avg Temp</span>
+                <span>🌡️ Max Ø Temperature</span>
                 <strong>{temp_stats["temp_max"]:.1f} <small>°C</small></strong>
             </div>
             <div class="stat">
-                <span>🌡️ Avg Temp</span>
+                <span>🌡️ Ø Temperature</span>
                 <strong>{temp_stats["temp_avg"]:.1f} <small>°C</small></strong>
             </div>
     """
@@ -755,15 +830,15 @@ def _render_climate_detail(
     if hum_avg_series:
         stats_html += f"""
             <div class="stat">
-                <span>💧 Min Avg Humidity</span>
+                <span>💧 Min Ø Humidity</span>
                 <strong>{hum_stats["hum_min"]:.1f} <small>%</small></strong>
             </div>
             <div class="stat">
-                <span>💧 Max Avg Humidity</span>
+                <span>💧 Max Ø Humidity</span>
                 <strong>{hum_stats["hum_max"]:.1f} <small>%</small></strong>
             </div>
             <div class="stat">
-                <span>💧 Avg Humidity</span>
+                <span>💧 Ø Humidity</span>
                 <strong>{hum_stats["hum_avg"]:.1f} <small>%</small></strong>
             </div>
         """
@@ -776,17 +851,18 @@ def _render_climate_detail(
     hum_avg_dates = json.dumps([point["date"] for point in hum_avg_series])
     hum_avg_values = json.dumps([point["value"] for point in hum_avg_series])
 
-    # Einzelsensor-Datasets für Temperatur
+    # Einzelsensor-Datasets für Temperatur (verschiedene Farben)
     temp_sensor_datasets = []
-    for sensor_data in temp_series_by_sensor:
+    for i, sensor_data in enumerate(temp_series_by_sensor):
         series = sensor_data["series"]
         values = json.dumps([point["value"] for point in series])
         name = sensor_data["name"].replace("<i>", "").replace("</i>", "")
+        color = SENSOR_COLORS[i % len(SENSOR_COLORS)]
         temp_sensor_datasets.append(
             f"""{{
                 label: '{name}',
                 data: {values},
-                borderColor: '#fb923c',
+                borderColor: '{color}',
                 borderWidth: 1,
                 pointRadius: 1,
                 pointHoverRadius: 3,
@@ -796,17 +872,18 @@ def _render_climate_detail(
         )
     temp_sensor_datasets_str = ",\n            ".join(temp_sensor_datasets)
 
-    # Einzelsensor-Datasets für Feuchte
+    # Einzelsensor-Datasets für Feuchte (verschiedene Farben)
     hum_sensor_datasets = []
-    for sensor_data in hum_series_by_sensor:
+    for i, sensor_data in enumerate(hum_series_by_sensor):
         series = sensor_data["series"]
         values = json.dumps([point["value"] for point in series])
         name = sensor_data["name"].replace("<i>", "").replace("</i>", "")
+        color = SENSOR_COLORS[(i + 2) % len(SENSOR_COLORS)]
         hum_sensor_datasets.append(
             f"""{{
                 label: '{name}',
                 data: {values},
-                borderColor: '#38bdf8',
+                borderColor: '{color}',
                 borderWidth: 1,
                 pointRadius: 1,
                 pointHoverRadius: 3,
@@ -850,7 +927,7 @@ new Chart(document.getElementById('chart-hum-avg'), {{
     data: {{
         labels: humAvgLabels,
         datasets: [{{
-            label: 'Avg Humidity',
+            label: 'Ø Humidity',
             data: humAvgValues,
             borderColor: '#38bdf8',
             borderWidth: 2,
@@ -875,13 +952,13 @@ new Chart(document.getElementById('chart-hum-avg'), {{
                             const idx = items[0].dataIndex;
                             const dateStr = humAvgDates[idx] || '';
                             const label = items[0].label;
-                            return `📅 ${{dateStr || ''}}\\n⏰ ${{label}}`;
+                            return `📅 Date: ${{dateStr || ''}}\\n⏰ Time: ${{label}}`;
                         }}
                         return '';
                     }},
                     label: (context) => {{
                         const value = (Math.round(context.parsed.y * 10) / 10).toFixed(1);
-                        return `Avg Humidity: ${{value}} %`;
+                        return `Ø Humidity: ${{value}} %`;
                     }}
                 }}
             }}
@@ -939,7 +1016,7 @@ new Chart(document.getElementById('chart-hum-sensors'), {{
                             const idx = items[0].dataIndex;
                             const dateStr = humSensorDates[idx] || '';
                             const label = items[0].label;
-                            return `📅 ${{dateStr || ''}}\\n⏰ ${{label}}`;
+                            return `📅 Date: ${{dateStr || ''}}\\n⏰ Time: ${{label}}`;
                         }}
                         return '';
                     }},
@@ -1023,6 +1100,7 @@ h1 {{ text-align: center; margin-top: 0; }}
     gap: 8px;
     margin-top: 20px;
     flex-wrap: wrap;
+    align-items: center;
 }}
 
 .time-range-btn {{
@@ -1044,6 +1122,36 @@ h1 {{ text-align: center; margin-top: 0; }}
     background: rgba(147,197,253,.5);
     border-color: rgba(147,197,253,.8);
     color: white;
+}}
+
+.custom-date-form {{
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-left: 10px;
+}}
+
+.custom-date-form input {{
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(147,197,253,.4);
+    background: rgba(31,41,55,.78);
+    color: white;
+    font-size: .85rem;
+}}
+
+.custom-date-form button {{
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: rgba(147,197,253,.15);
+    border: 1px solid rgba(147,197,253,.4);
+    color: #bfdbfe;
+    cursor: pointer;
+    font-size: .85rem;
+}}
+
+.custom-date-form button:hover {{
+    background: rgba(147,197,253,.3);
 }}
 
 .chart-container {{
@@ -1146,6 +1254,7 @@ h1 {{ text-align: center; margin-top: 0; }}
     .info-grid {{ grid-template-columns: 1fr; }}
     .stat-grid {{ grid-template-columns: 1fr; }}
     .info-line {{ grid-template-columns: 140px 1fr; }}
+    .custom-date-form {{ margin-left: 0; margin-top: 10px; }}
 }}
 </style>
 </head>
@@ -1157,10 +1266,11 @@ h1 {{ text-align: center; margin-top: 0; }}
 
 <div class="time-range-buttons">
     {range_buttons_html}
+    {custom_date_html}
 </div>
 
 <div class="chart-container">
-    <span class="chart-title">🌡️ Average Temperature</span>
+    <span class="chart-title">🌡️ Ø Temperature</span>
     <canvas id="chart-temp-avg"></canvas>
 </div>
 
@@ -1175,15 +1285,15 @@ h1 {{ text-align: center; margin-top: 0; }}
 
 <div class="info-grid">
     <div class="info-card">
-        <h3>📋 Climate Information</h3>
-        {sensor_info_lines}
-    </div>
-
-    <div class="info-card">
         <h3>📊 Statistics</h3>
         <div class="stat-grid">
             {stats_html}
         </div>
+    </div>
+
+    <div class="info-card">
+        <h3>📋 Sensor Information</h3>
+        {sensor_info_lines}
     </div>
 </div>
 
@@ -1201,7 +1311,7 @@ new Chart(document.getElementById('chart-temp-avg'), {{
     data: {{
         labels: tempAvgLabels,
         datasets: [{{
-            label: 'Avg Temperature',
+            label: 'Ø Temperature',
             data: tempAvgValues,
             borderColor: '#fb923c',
             borderWidth: 2,
@@ -1226,13 +1336,13 @@ new Chart(document.getElementById('chart-temp-avg'), {{
                             const idx = items[0].dataIndex;
                             const dateStr = tempAvgDates[idx] || '';
                             const label = items[0].label;
-                            return `📅 ${{dateStr || ''}}\\n⏰ ${{label}}`;
+                            return `📅 Date: ${{dateStr || ''}}\\n⏰ Time: ${{label}}`;
                         }}
                         return '';
                     }},
                     label: (context) => {{
                         const value = (Math.round(context.parsed.y * 10) / 10).toFixed(1);
-                        return `Avg Temperature: ${{value}} °C`;
+                        return `Ø Temperature: ${{value}} °C`;
                     }}
                 }}
             }}
@@ -1288,7 +1398,7 @@ new Chart(document.getElementById('chart-temp-sensors'), {{
                             const idx = items[0].dataIndex;
                             const dateStr = tempSensorDates[idx] || '';
                             const label = items[0].label;
-                            return `📅 ${{dateStr || ''}}\\n⏰ ${{label}}`;
+                            return `📅 Date: ${{dateStr || ''}}\\n⏰ Time: ${{label}}`;
                         }}
                         return '';
                     }},
@@ -1327,6 +1437,8 @@ def _render_device_detail(
     store: BatchStore,
     device_key: str,
     range_key: str = "7d",
+    start_date: str = "",
+    end_date: str = "",
 ) -> str:
     """Detailseite für ein einzelnes Gerät."""
     # Zeitraum-Parameter validieren
@@ -1353,10 +1465,22 @@ def _render_device_detail(
 
     device_type = device_info.get("type", "atmoweb")
 
-    # Zeitraum aus Query-Parameter lesen (Standard: 7 Tage)
+    # Zeitraum aus Query-Parameter lesen
     hours = TIME_RANGES[range_key]
 
-    batches = _recent_batches(store, hours=hours)
+    # Bei Custom-Datum: Stunden basierend auf Datumsbereich berechnen
+    if start_date and end_date:
+        try:
+            start_dt = datetime.strptime(start_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            end_dt = datetime.strptime(end_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            hours = max(24, int((end_dt - start_dt).total_seconds() / 3600) + 24)
+            range_key = "custom"
+        except ValueError:
+            pass
+
+    # Bei 15-Min-Intervall: 4 Batches/Stunde + Puffer
+    limit = hours * 4 + 100
+    batches = _recent_batches(store, hours=hours, limit=limit)
 
     # Messwert-Schlüssel je nach Gerätetyp bestimmen
     if device_type == "weatherhub_id01":
@@ -1378,6 +1502,7 @@ def _render_device_detail(
 
     # Aktueller Status
     status = _device_status(batches, device_key, device_type)
+    status_text = _status_text(status)
 
     # Statistik
     stats = _calculate_stats(temp_series, hum_series)
@@ -1391,12 +1516,6 @@ def _render_device_detail(
             .astimezone(BERLIN)
             .strftime("%d.%m.%Y %H:%M Uhr")
         )
-
-    # Sensor-Status-Label
-    if device_type.startswith("weatherhub"):
-        sensor_label = device_key.replace("weatherhub_", "").upper()
-    else:
-        sensor_label = device_type
 
     # Humidity-Statistik nur anzeigen, wenn Feuchte vorhanden
     hum_stats_html = ""
@@ -1431,6 +1550,23 @@ def _render_device_detail(
             f'<a class="time-range-btn{active_class}" '
             f'href="/device/{device_key}?range={key}">{label}</a>\n    '
         )
+
+    # Custom-Datum-Formular
+    max_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    custom_date_html = f"""
+    <form class="custom-date-form" method="get" action="/device/{device_key}">
+        <input type="date" name="start_date" value="{start_date}" min="2025-01-01" max="{max_date}">
+        <span>to</span>
+        <input type="date" name="end_date" value="{end_date}" min="2025-01-01" max="{max_date}">
+        <button type="submit">Apply</button>
+    </form>
+    """
+
+    # Chart-Daten
+    temp_labels_json = json.dumps([point["label"] for point in temp_series])
+    temp_dates_json = json.dumps([point["date"] for point in temp_series])
+    temp_values_json = json.dumps([point["value"] for point in temp_series])
+    hum_values_json = json.dumps([point["value"] for point in hum_series])
 
     return f"""<!DOCTYPE html>
 <html lang="de">
@@ -1501,9 +1637,8 @@ h1 {{ text-align: center; margin-top: 0; }}
 .device-status-label {{
     display: block;
     margin-top: 5px;
-    color: #9ca3af;
+    color: #d1d5db;
     font-size: .8rem;
-    font-family: monospace;
 }}
 
 .status-light {{
@@ -1525,6 +1660,7 @@ h1 {{ text-align: center; margin-top: 0; }}
     gap: 8px;
     margin-top: 20px;
     flex-wrap: wrap;
+    align-items: center;
 }}
 
 .time-range-btn {{
@@ -1546,6 +1682,36 @@ h1 {{ text-align: center; margin-top: 0; }}
     background: rgba(147,197,253,.5);
     border-color: rgba(147,197,253,.8);
     color: white;
+}}
+
+.custom-date-form {{
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-left: 10px;
+}}
+
+.custom-date-form input {{
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(147,197,253,.4);
+    background: rgba(31,41,55,.78);
+    color: white;
+    font-size: .85rem;
+}}
+
+.custom-date-form button {{
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: rgba(147,197,253,.15);
+    border: 1px solid rgba(147,197,253,.4);
+    color: #bfdbfe;
+    cursor: pointer;
+    font-size: .85rem;
+}}
+
+.custom-date-form button:hover {{
+    background: rgba(147,197,253,.3);
 }}
 
 .chart-container {{
@@ -1639,6 +1805,7 @@ h1 {{ text-align: center; margin-top: 0; }}
     .info-grid {{ grid-template-columns: 1fr; }}
     .stat-grid {{ grid-template-columns: 1fr; }}
     .info-line {{ grid-template-columns: 140px 1fr; }}
+    .custom-date-form {{ margin-left: 0; margin-top: 10px; }}
 }}
 </style>
 </head>
@@ -1646,18 +1813,19 @@ h1 {{ text-align: center; margin-top: 0; }}
 <div class="container">
 <a class="back-btn" href="/room/{room_id}">← Back to {room["name"]}</a>
 <h1>{device_info["name"]}</h1>
-<div class="subtitle">{room["icon"]} {room["name"]} · {sensor_label}</div>
+<div class="subtitle">{room["icon"]} {room["name"]}</div>
 
 <div class="device-header">
     <div>
         <h2>Current Status</h2>
-        <span class="device-status-label">{device_type}</span>
+        <span class="device-status-label">{status_text}</span>
     </div>
     <span class="status-light {status}" aria-label="Device Status"></span>
 </div>
 
 <div class="time-range-buttons">
     {range_buttons_html}
+    {custom_date_html}
 </div>
 
 <div class="chart-container">
@@ -1665,6 +1833,25 @@ h1 {{ text-align: center; margin-top: 0; }}
 </div>
 
 <div class="info-grid">
+    <div class="info-card">
+        <h3>📊 Statistics</h3>
+        <div class="stat-grid">
+            <div class="stat">
+                <span>🌡️ Min Temperature</span>
+                <strong>{stats["temp_min"]:.1f} <small>°C</small></strong>
+            </div>
+            <div class="stat">
+                <span>🌡️ Max Temperature</span>
+                <strong>{stats["temp_max"]:.1f} <small>°C</small></strong>
+            </div>
+            <div class="stat">
+                <span>🌡️ Avg Temperature</span>
+                <strong>{stats["temp_avg"]:.1f} <small>°C</small></strong>
+            </div>
+            {hum_stats_html}
+        </div>
+    </div>
+
     <div class="info-card">
         <h3>📋 Sensor Information</h3>
         <div class="info-line">
@@ -1689,26 +1876,7 @@ h1 {{ text-align: center; margin-top: 0; }}
         </div>
         <div class="info-line">
             <span class="info-label">Status:</span>
-            <span class="info-value">{status.replace("status-", "").upper()}</span>
-        </div>
-    </div>
-
-    <div class="info-card">
-        <h3>📊 Statistics</h3>
-        <div class="stat-grid">
-            <div class="stat">
-                <span>🌡️ Min Temperature</span>
-                <strong>{stats["temp_min"]:.1f} <small>°C</small></strong>
-            </div>
-            <div class="stat">
-                <span>🌡️ Max Temperature</span>
-                <strong>{stats["temp_max"]:.1f} <small>°C</small></strong>
-            </div>
-            <div class="stat">
-                <span>🌡️ Avg Temperature</span>
-                <strong>{stats["temp_avg"]:.1f} <small>°C</small></strong>
-            </div>
-            {hum_stats_html}
+            <span class="info-value">{status_text}</span>
         </div>
     </div>
 </div>
@@ -1717,37 +1885,78 @@ h1 {{ text-align: center; margin-top: 0; }}
 </div>
 
 <script>
-const tempLabels = {json.dumps([point["label"] for point in temp_series])};
-const tempDates = {json.dumps([point["date"] for point in temp_series])};
-const tempValues = {json.dumps([point["value"] for point in temp_series])};
-const humValues = {json.dumps([point["value"] for point in hum_series])};
+const tempLabels = {temp_labels_json};
+const tempDates = {temp_dates_json};
+const tempValues = {temp_values_json};
+const humValues = {hum_values_json};
+const hasHumidity = humValues.length > 0;
+
+const datasets = [
+    {{
+        label: 'Temperature',
+        data: tempValues,
+        borderColor: '#fb923c',
+        borderWidth: 1.5,
+        pointRadius: 2,
+        pointHoverRadius: 4,
+        yAxisID: 'temperature',
+        tension: 0.3
+    }}
+];
+
+if (hasHumidity) {{
+    datasets.push({{
+        label: 'Relative Humidity',
+        data: humValues,
+        borderColor: '#38bdf8',
+        borderWidth: 1.5,
+        pointRadius: 2,
+        pointHoverRadius: 4,
+        yAxisID: 'humidity',
+        tension: 0.3
+    }});
+}}
+
+const scales = {{
+    x: {{
+        ticks: {{
+            color: '#9ca3af',
+            callback: (value) => tempLabels[value]
+        }}
+    }},
+    temperature: {{
+        type: 'linear',
+        position: 'left',
+        ticks: {{
+            color: '#fb923c',
+            callback: (value) => {{
+                const rounded = Math.round(value * 10) / 10;
+                return rounded + ' °C';
+            }}
+        }}
+    }}
+}};
+
+if (hasHumidity) {{
+    scales.humidity = {{
+        type: 'linear',
+        position: 'right',
+        ticks: {{
+            color: '#38bdf8',
+            callback: (value) => {{
+                const rounded = Math.round(value * 10) / 10;
+                return rounded + ' %';
+            }}
+        }},
+        grid: {{ drawOnChartArea: false }}
+    }};
+}}
 
 new Chart(document.getElementById('device-chart'), {{
     type: 'line',
     data: {{
         labels: tempLabels,
-        datasets: [
-            {{
-                label: 'Temperature',
-                data: tempValues,
-                borderColor: '#fb923c',
-                borderWidth: 1.5,
-                pointRadius: 2,
-                pointHoverRadius: 4,
-                yAxisID: 'temperature',
-                tension: 0.3
-            }},
-            {{
-                label: 'Relative Humidity',
-                data: humValues,
-                borderColor: '#38bdf8',
-                borderWidth: 1.5,
-                pointRadius: 2,
-                pointHoverRadius: 4,
-                yAxisID: 'humidity',
-                tension: 0.3
-            }}
-        ]
+        datasets: datasets
     }},
     options: {{
         responsive: true,
@@ -1822,37 +2031,7 @@ new Chart(document.getElementById('device-chart'), {{
                 }}
             }}
         }},
-        scales: {{
-            x: {{
-                ticks: {{
-                    color: '#9ca3af',
-                    callback: (value) => tempLabels[value]
-                }}
-            }},
-            temperature: {{
-                type: 'linear',
-                position: 'left',
-                ticks: {{
-                    color: '#fb923c',
-                    callback: (value) => {{
-                        const rounded = Math.round(value * 10) / 10;
-                        return rounded + ' °C';
-                    }}
-                }}
-            }},
-            humidity: {{
-                type: 'linear',
-                position: 'right',
-                ticks: {{
-                    color: '#38bdf8',
-                    callback: (value) => {{
-                        const rounded = Math.round(value * 10) / 10;
-                        return rounded + ' %';
-                    }}
-                }},
-                grid: {{ drawOnChartArea: false }}
-            }}
-        }}
+        scales: scales
     }}
 }});
 </script>
@@ -1951,13 +2130,13 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
     device_link = f"/device/{device_key}"
 
     if device["type"] in ("freezer", "memmert", "weatherhub_id01"):
-        # Nur Temperatur-Kachel (ohne Feuchte)
+        # Nur Temperatur-Kachel (ohne Feuchte) - Status-Text statt Temperatur
         return f"""
     <a class="device-card{full_width_class}" href="{device_link}">
         <div class="device-header">
             <div>
                 <h2>{device["name"]}</h2>
-                <span class="device-status-label">{device["temp"]:.1f} °C</span>
+                <span class="device-status-label">{device["status_text"]}</span>
             </div>
             <span class="status-light {device["status"]}" aria-label="Device Status"></span>
         </div>
@@ -1971,14 +2150,14 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
     </a>
 """
 
-    # AtmoWEB und weatherhub_id0e (Temp + Feuchte)
+    # AtmoWEB und weatherhub_id0e (Temp + Feuchte) - Status-Text statt Temperatur
     return f"""
     <a class="device-card{full_width_class}" href="{device_link}">
         <div class="device-header">
             <div>
                 <h2>{device["name"]}</h2>
                 <span class="device-status-label">
-                    {device["temp"]:.1f} °C · {device["hum"]:.1f} %
+                    {device["status_text"]}
                 </span>
             </div>
             <span class="status-light {device["status"]}" aria-label="Device Status"></span>
@@ -2369,14 +2548,31 @@ def _room_climate(batches: list[dict], room: dict) -> dict:
     return result
 
 
-def _recent_batches(store: BatchStore, hours: int = 48) -> list[dict]:
-    """Liest die letzten Batches aus SQLite."""
+def _recent_batches(
+    store: BatchStore,
+    hours: int = 48,
+    limit: Optional[int] = None,
+) -> list[dict]:
+    """Liest die letzten Batches aus SQLite.
+
+    Args:
+        store: BatchStore
+        hours: Zeitraum in Stunden
+        limit: Max. Anzahl Batches (Default: 192 = 48h bei 15-Min-Intervall)
+    """
     import sqlite3
 
     cutoff = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
 
+    # Default: 192 Batches = 48h bei 15-Minuten-Intervall
+    if limit is None:
+        limit = 192
+
     with sqlite3.connect(store.path) as conn:
-        rows = conn.execute("SELECT payload FROM batches ORDER BY rowid DESC LIMIT 192").fetchall()
+        rows = conn.execute(
+            "SELECT payload FROM batches ORDER BY rowid DESC LIMIT ?",
+            (limit,),
+        ).fetchall()
 
     batches = []
     for (payload,) in rows:

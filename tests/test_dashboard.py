@@ -472,8 +472,8 @@ class TestRenderRoomDetail:
         html = _render_room_detail(store, "r1304")
 
         # Raumklima im Subtitle (ersetzt "Letzte 48 Stunden")
-        assert "🌡️ 21.3 °C" in html
-        assert "💧 48 %" in html
+        assert "🌡️ Room temperature: 21.3 °C" in html
+        assert "💧 Relative Humidity: 48 %" in html
         assert "Letzte 48 Stunden" not in html
 
     def test_room_detail_contains_english_back_button(self, sample_batches, tmp_path):
