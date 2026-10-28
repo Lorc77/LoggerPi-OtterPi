@@ -8,7 +8,7 @@ from dashboard_config import ROOMS
 from otterpi_store import BatchStore
 
 BERLIN = ZoneInfo("Europe/Berlin")
-VERSION = "v1.6.1"
+VERSION = "v1.6.2"
 
 
 def render_dashboard(store: BatchStore, room_id: str = "") -> str:
@@ -32,7 +32,7 @@ def _render_overview(store: BatchStore) -> str:
 
         climate_html = ""
         if climate["temp"] is not None:
-            climate_html += f'<span class="room-climate">🌡️ {climate["temp"]:.1f} °C'
+            climate_html += f'<span class="room-climate">🌡️️ {climate["temp"]:.1f} °C'
             if climate["hum"] is not None:
                 climate_html += f" · 💧 {climate['hum']:.0f} %"
             climate_html += "</span>"
@@ -226,7 +226,7 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
 
     climate_display = "–"
     if climate["temp"] is not None:
-        climate_display = f"Room temperature/climate: 🌡️ {climate['temp']:.1f} °C"
+        climate_display = f"Room temperature/climate: 🌡️️ {climate['temp']:.1f} °C"
         if climate["hum"] is not None:
             climate_display += f" · 💧 {climate['hum']:.0f} %"
 
@@ -458,6 +458,7 @@ h1 {{ text-align: center; margin-top: 0; }}
     height: 280px;
     margin-top: 18px;
     max-width: 100%;
+    width: 100%;
 }}
 
 .placeholder-chart {{
@@ -558,7 +559,7 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
         </div>
         <div class="metric-grid">
             <div class="metric">
-                <span>🌡 Temperature</span>
+                <span>🌡️ Temperature</span>
                 <strong>– <small>°C</small></strong>
             </div>
             <div class="metric">
@@ -584,7 +585,7 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
             <span class="status-light {device["status"]}" aria-label="Device Status"></span>
         </div>
         <div class="metric-full">
-            <span>🌡 Temperature</span>
+            <span>🌡️ Temperature</span>
             <strong>{device["temp"]:.1f} <small>°C</small></strong>
         </div>
         <div class="device-chart">
@@ -605,7 +606,7 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
         </div>
         <div class="metric-grid">
             <div class="metric">
-                <span>🌡 Temperature</span>
+                <span>🌡️ Temperature</span>
                 <strong>{device["temp"]:.1f} <small>°C</small></strong>
             </div>
             <div class="metric">
@@ -650,6 +651,7 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
     }},
     options: {{
         responsive: true,
+        maintainAspectRatio: false,
         interaction: {{ mode: 'index', intersect: false }},
         plugins: {{
             legend: {{
@@ -711,7 +713,7 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                         return '';
                     }},
                     label: (context) => {{
-                        const value = context.parsed.y;
+                        const value = (Math.round(context.parsed.y * 10) / 10).toFixed(1);
                         return `Temperature: ${{value}} °C`;
                     }}
                 }}
@@ -772,6 +774,7 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
     }},
     options: {{
         responsive: true,
+        maintainAspectRatio: false,
         interaction: {{ mode: 'index', intersect: false }},
         plugins: {{
             legend: {{
@@ -833,7 +836,7 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                         return '';
                     }},
                     label: (context) => {{
-                        const value = context.parsed.y;
+                        const value = (Math.round(context.parsed.y * 10) / 10).toFixed(1);
                         if (context.dataset.label === 'Temperature') {{
                             return `Temperature: ${{value}} °C`;
                         }}
