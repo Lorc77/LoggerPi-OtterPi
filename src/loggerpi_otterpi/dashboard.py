@@ -8,7 +8,7 @@ from dashboard_config import ROOMS
 from otterpi_store import BatchStore
 
 BERLIN = ZoneInfo("Europe/Berlin")
-VERSION = "v1.6.2"
+VERSION = "v1.6.3"
 
 
 def render_dashboard(store: BatchStore, room_id: str = "") -> str:
@@ -32,7 +32,7 @@ def _render_overview(store: BatchStore) -> str:
 
         climate_html = ""
         if climate["temp"] is not None:
-            climate_html += f'<span class="room-climate">🌡️️ {climate["temp"]:.1f} °C'
+            climate_html += f'<span class="room-climate">🌡️ {climate["temp"]:.1f} °C'
             if climate["hum"] is not None:
                 climate_html += f" · 💧 {climate['hum']:.0f} %"
             climate_html += "</span>"
@@ -226,7 +226,7 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
 
     climate_display = "–"
     if climate["temp"] is not None:
-        climate_display = f"Room temperature/climate: 🌡️️ {climate['temp']:.1f} °C"
+        climate_display = f"Room temperature/climate: 🌡️ {climate['temp']:.1f} °C"
         if climate["hum"] is not None:
             climate_display += f" · 💧 {climate['hum']:.0f} %"
 
@@ -270,6 +270,7 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
         device_views.append(
             {
                 "name": device["name"],
+                "key": device["key"],
                 "type": device_type,
                 "status": _device_status(batches, device["key"], device_type),
                 "temp": device_current["temp"],
@@ -395,6 +396,7 @@ h1 {{ text-align: center; margin-top: 0; }}
     margin-top: 5px;
     color: #9ca3af;
     font-size: .8rem;
+    font-family: monospace;
 }}
 
 .status-light {{
@@ -573,6 +575,12 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
 
     full_width_class = " device-card-full" if device.get("full_width") else ""
 
+    # Sensor-ID für WeatherHub-Geräte anzeigen (ohne "weatherhub_", in Großbuchstaben)
+    if device["type"].startswith("weatherhub"):
+        status_label = device["key"].replace("weatherhub_", "").upper()
+    else:
+        status_label = "Device Status"
+
     if device["type"] in ("freezer", "memmert", "weatherhub_id01"):
         # Nur Temperatur-Kachel (ohne Feuchte)
         return f"""
@@ -580,7 +588,7 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
         <div class="device-header">
             <div>
                 <h2>{device["name"]}</h2>
-                <span class="device-status-label">Device Status</span>
+                <span class="device-status-label">{status_label}</span>
             </div>
             <span class="status-light {device["status"]}" aria-label="Device Status"></span>
         </div>
@@ -600,7 +608,7 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
         <div class="device-header">
             <div>
                 <h2>{device["name"]}</h2>
-                <span class="device-status-label">Device Status</span>
+                <span class="device-status-label">{status_label}</span>
             </div>
             <span class="status-light {device["status"]}" aria-label="Device Status"></span>
         </div>
