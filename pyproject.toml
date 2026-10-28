@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "loggerpi-otterpi"
-version = "1.6.3"
+version = "1.7.0"
 description = "LoggerPi-OtterPi"
 requires-python = ">=3.9"
 dependencies = ["pyserial>=3.5",]
@@ -43,6 +43,7 @@ select = [
 
 [tool.ruff.lint.per-file-ignores]
 "src/loggerpi_otterpi/*.py" = ["UP006", "UP035"]
+"tests/*.py" = ["UP006", "UP035"]
 
 [tool.ruff.format]
 quote-style = "double"

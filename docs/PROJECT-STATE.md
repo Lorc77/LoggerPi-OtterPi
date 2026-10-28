@@ -12,14 +12,31 @@
 
 ## Deployment-Stand
 
-**Stand:** 2026-10-27
+**Stand:** 2026-10-28
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.6.0` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.6.0` | Empfängt Batches, speichert in SQLite |
+| LoggerPi | `v1.7.0` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.7.0` | Empfängt Batches, speichert in SQLite |
 
-LoggerPi und OtterPi laufen produktiv auf Version `v1.6.0`.
+LoggerPi und OtterPi laufen produktiv auf Version `v1.7.0`.
+
+Seit `v1.6.3` sind folgende Features implementiert:
+
+- **Stale-Logik für WeatherHub-Sensoren:** Konfigurierbar über
+  `WEATHERHUB_STALE_AFTER_SECONDS` (Default: 1800 Sekunden). Sensoren,
+  die länger als der Schwellenwert keine Daten senden, werden als
+  `stale` markiert und im Dashboard als Warnung angezeigt.
+- **Gerätedetailseite:** Jede Gerätekachel auf der Raumdetailseite
+  verlinkt auf eine eigene Detailseite mit erweitertem Chart
+  (24h, 7d, 14d, 30d, 90d, 365d), Sensor-Informationen und Statistik.
+- **Raumklima-Detailseite:** Die Raumklima-Anzeige auf der
+  Raumdetailseite ist klickbar und führt zu einer Detailseite mit
+  Mittelwert-Charts und Einzelsensor-Diagrammen.
+- **URL-Umbenennung:** `/raum/rXY` → `/room/rXY` (mit 301-Redirect).
+- **Batch-Archivierung:** Monatlicher Export von Batches älter als
+  12 Monate als `loggerpi-otterpi_batches_YYYY-MM.json.gz` nach
+  `/var/lib/loggerpi-otterpi/archive/`. Automatisch per systemd-Timer.
 
 Seit `v1.5.0` sind die WeatherHub-Sensoren über den Gateway-Proxy
 integriert. Das Gateway `.121` wurde in den Proxymodus versetzt und
@@ -331,7 +348,7 @@ Der OtterPi bewertet deren fachliche Bedeutung, Health und Zustand.
 - Runtime-Integration (Thread-Start/Stop, Batch-Integration)
 - Praktische Verifikation mit Gateway .121 (17 Sensoren empfangen)
 
-### Aktueller Betriebsstand (2026-10-27)
+### Aktueller Betriebsstand (2026-10-28)
 
 | Komponente | Status |
 |-----------|--------|
@@ -344,7 +361,12 @@ Der OtterPi bewertet deren fachliche Bedeutung, Health und Zustand.
 | Dashboard | ✅ Raumklima (Temperatur + Feuchte) berechnet |
 | Dashboard | ✅ Englische UI-Texte |
 | Batch | ✅ AtmoWEB: Nur Measurements mit Wert im Batch |
-| Tests | ✅ 165 Tests bestanden |
+| Tests | ✅ 189 Tests bestanden |
+| Stale-Logik WeatherHub | ✅ Implementiert (WEATHERHUB_STALE_AFTER_SECONDS) |
+| Gerätedetailseite | ✅ Implementiert (/device/<sensor_id>) |
+| Raumklima-Detailseite | ✅ Implementiert (/climate/<room_id>) |
+| URL-Umbenennung | ✅ /room/ mit 301-Redirect von /raum/ |
+| Batch-Archivierung | ✅ Implementiert (monatlich, 12 Monate Retention) |
 
 ### Aktueller Arbeitspunkt
 

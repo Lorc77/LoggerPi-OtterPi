@@ -49,7 +49,10 @@ def _create_weatherhub_listener() -> tuple[WeatherHubGatewayListener, WeatherHub
     allowlist: Set[str] = {ip.strip() for ip in allowlist_raw.split(",") if ip.strip()}
     cloud_forward_enabled = _enabled("WEATHERHUB_CLOUD_FORWARD_ENABLED", "0")
 
-    reader = WeatherHubReader()
+    # Stale-Schwellenwert für WeatherHub-Sensoren (Sekunden)
+    stale_after_seconds = float(os.environ.get("WEATHERHUB_STALE_AFTER_SECONDS", "1800"))
+
+    reader = WeatherHubReader(stale_after_seconds=stale_after_seconds)
     listener = WeatherHubGatewayListener(
         host=host,
         port=port,

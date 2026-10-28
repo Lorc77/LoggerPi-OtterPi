@@ -17,6 +17,7 @@ OTTERPI_FILES=(
     otterpi_store.py
     dashboard.py
     dashboard_config.py
+    archive_batches.py
     otter2.png
 )
 
@@ -60,11 +61,25 @@ install -o root -g root -m 0644 \
     "$SERVICE_FILE" \
     "/etc/systemd/system/$SERVICE_NAME"
 
+# Archivierungs-Service installieren
+install -o root -g root -m 0644 \
+    "$REPO_DIR/deploy/otterpi/archive-batches.service" \
+    "/etc/systemd/system/archive-batches.service"
+
+install -o root -g root -m 0644 \
+    "$REPO_DIR/deploy/otterpi/archive-batches.timer" \
+    "/etc/systemd/system/archive-batches.timer"
+
 install -d -o makki -g makki -m 0750 \
     /var/lib/loggerpi-otterpi
 
+# Archiv-Verzeichnis anlegen
+install -d -o makki -g makki -m 0750 \
+    /var/lib/loggerpi-otterpi/archive
+
 systemctl daemon-reload
 systemctl enable "$SERVICE_NAME"
+systemctl enable archive-batches.timer
 
 install -o root -g root -m 0755 \
     "$REPO_DIR/deploy/update.sh" \
@@ -81,6 +96,9 @@ echo "  sudo systemctl restart $SERVICE_NAME"
 echo
 echo "Status:"
 echo "  systemctl status $SERVICE_NAME --no-pager"
+echo
+echo "Archive timer:"
+echo "  systemctl status archive-batches.timer --no-pager"
 echo
 echo "Current version:"
 echo "  cat /opt/loggerpi-otterpi/VERSION"

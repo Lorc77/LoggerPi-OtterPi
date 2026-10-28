@@ -302,10 +302,13 @@ erfolgreich verifiziert.
 
 ### Aktueller Stand (2026-10-27)
 
-- LoggerPi und OtterPi laufen produktiv auf `v1.5.0`
+- LoggerPi und OtterPi laufen produktiv auf `v1.7.0`
 - E2E-Datenpfad (LoggerPi → OtterPi → SQLite) ist verifiziert
 - WeatherHub-Integration ist aktiv (17 Sensoren)
-- 136 Tests bestehen
+- Stale-Logik für WeatherHub implementiert
+- Gerätedetailseite + Raumklima-Detailseite im Dashboard
+- Batch-Archivierung implementiert (monatlich, 12 Monate Retention)
+- 189 Tests bestehen
 - Ruff-Quality-Gates sind grün
 
 Verifiziert sind:

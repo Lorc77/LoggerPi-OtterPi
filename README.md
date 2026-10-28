@@ -134,12 +134,12 @@ Da `model/` ein Unterverzeichnis ist, wird `PYTHONPATH` gesetzt:
 PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
 ```
 
-### Aktueller Betriebsstand (2026-10-27)
+### Aktueller Betriebsstand (2026-10-28)
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.6.0` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.6.0` | Empfängt Batches, speichert in SQLite |
+| LoggerPi | `v1.7.0` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.7.0` | Empfängt Batches, speichert in SQLite |
 
 Der E2E-Datenpfad (LoggerPi → nginx → OtterPi → SQLite) ist verifiziert.
 
@@ -181,18 +181,18 @@ pytest
 git diff --check
 ```
 
-Aktueller Stand: **165 Tests**, alle bestehen.
+Aktueller Stand: **189 Tests**, alle bestehen.
 
 ---
 
-Aktuelle Version: **v1.6.0**
+Aktuelle Version: **v1.7.0**
 
 Die Version wird geführt über:
 
-- `pyproject.toml` → `version = "1.6.0"`
-- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.6.0"`
-- `src/loggerpi_otterpi/dashboard.py` → `VERSION = "v1.6.0"`
-- Git-Tag `v1.6.0`
+- `pyproject.toml` → `version = "1.7.0"`
+- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.7.0"`
+- `src/loggerpi_otterpi/dashboard.py` → `VERSION = "v1.7.0"`
+- Git-Tag `v1.7.0`
 
 ---
 

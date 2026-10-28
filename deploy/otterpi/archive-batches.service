@@ -1,0 +1,15 @@
+[Unit]
+Description=Archive old batches from LoggerPi-OtterPi database
+After=network.target
+
+[Service]
+Type=oneshot
+User=makki
+Group=makki
+Environment=PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
+ExecStart=/usr/bin/python3 /opt/loggerpi-otterpi/archive_batches.py
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

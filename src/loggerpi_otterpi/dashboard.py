@@ -2,17 +2,40 @@
 
 import json
 from datetime import datetime, timedelta, timezone
+from typing import Any
 from zoneinfo import ZoneInfo
 
 from dashboard_config import ROOMS
 from otterpi_store import BatchStore
 
 BERLIN = ZoneInfo("Europe/Berlin")
-VERSION = "v1.6.3"
+VERSION = "v1.7.0"
+
+# Zeitraum-Optionen für die Detailseiten (in Stunden)
+TIME_RANGES = {
+    "24h": 24,
+    "7d": 7 * 24,
+    "14d": 14 * 24,
+    "30d": 30 * 24,
+    "90d": 90 * 24,
+    "365d": 365 * 24,
+}
 
 
-def render_dashboard(store: BatchStore, room_id: str = "") -> str:
+def render_dashboard(
+    store: BatchStore,
+    room_id: str = "",
+    device_id: str = "",
+    range_key: str = "7d",
+    climate_id: str = "",
+) -> str:
     """Generiert das Dashboard-HTML."""
+    if climate_id:
+        return _render_climate_detail(store, climate_id, range_key=range_key)
+
+    if device_id:
+        return _render_device_detail(store, device_id, range_key=range_key)
+
     if room_id and room_id in ROOMS:
         return _render_room_detail(store, room_id)
 
@@ -52,7 +75,7 @@ def _render_overview(store: BatchStore) -> str:
                 )
 
             card = (
-                f'<a class="room-card" href="/raum/{room_id}">'
+                f'<a class="room-card" href="/room/{room_id}">'
                 f'<h2 class="room-header">{room["icon"]} {room["name"]}{climate_html}</h2>'
                 f'<div class="device-list">{device_lines}</div>'
                 f"</a>"
@@ -225,10 +248,14 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
     climate = _room_climate(batches, room)
 
     climate_display = "–"
+    climate_link = ""
     if climate["temp"] is not None:
-        climate_display = f"Room temperature/climate: 🌡️ {climate['temp']:.1f} °C"
+        climate_display = f"🌡️ {climate['temp']:.1f} °C"
         if climate["hum"] is not None:
             climate_display += f" · 💧 {climate['hum']:.0f} %"
+        climate_link = f'<a class="climate-link" href="/climate/{room_id}">{climate_display}</a>'
+    else:
+        climate_link = climate_display
 
     # Serien für bestehende Geräte
     temp_101 = _series(batches, "atmoweb_101.temperature_1")
@@ -350,6 +377,18 @@ h1 {{ text-align: center; margin-top: 0; }}
     background: rgba(147,197,253,.3);
 }}
 
+.climate-link {{
+    color: #d1d5db;
+    text-decoration: none;
+    border-bottom: 1px dashed rgba(209,213,219,.4);
+    transition: .2s;
+}}
+
+.climate-link:hover {{
+    color: white;
+    border-bottom-color: white;
+}}
+
 .grid {{
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -364,6 +403,17 @@ h1 {{ text-align: center; margin-top: 0; }}
     border: 1px solid rgba(255,255,255,.08);
     border-radius: 18px;
     padding: 20px;
+    cursor: pointer;
+    transition: .2s;
+    text-decoration: none;
+    color: white;
+    display: block;
+}}
+
+.device-card:hover {{
+    background: rgba(147,197,253,.15);
+    border-color: rgba(147,197,253,.5);
+    transform: translateY(-2px);
 }}
 
 .device-card-full {{
@@ -373,6 +423,13 @@ h1 {{ text-align: center; margin-top: 0; }}
 .device-card-placeholder {{
     opacity: .6;
     border-style: dashed;
+    cursor: default;
+}}
+
+.device-card-placeholder:hover {{
+    background: rgba(31,41,55,.78);
+    border-color: rgba(255,255,255,.08);
+    transform: none;
 }}
 
 .device-header {{
@@ -479,6 +536,13 @@ h1 {{ text-align: center; margin-top: 0; }}
     border: 1px solid rgba(255,255,255,.08);
     border-radius: 18px;
     padding: 20px;
+    cursor: default;
+}}
+
+.system-card:hover {{
+    background: rgba(31,41,55,.78);
+    border-color: rgba(255,255,255,.08);
+    transform: none;
 }}
 
 .system-line {{
@@ -509,7 +573,7 @@ h1 {{ text-align: center; margin-top: 0; }}
 <div class="container">
 <a class="back-btn" href="/">← Back to Overview</a>
 <h1>{room["icon"]} {room["name"]}</h1>
-<div class="subtitle">{climate_display}</div>
+<div class="subtitle">Room temperature/climate: {climate_link}</div>
 
 <div class="grid">
 {device_cards}
@@ -537,6 +601,1313 @@ h1 {{ text-align: center; margin-top: 0; }}
 <script>
 {device_scripts}
 </script>
+</body>
+</html>
+"""
+
+
+def _render_climate_detail(
+    store: BatchStore,
+    climate_id: str,
+    range_key: str = "7d",
+) -> str:
+    """Detailseite für das Raumklima eines Raumes."""
+    if climate_id not in ROOMS:
+        return _render_not_found()
+
+    room = ROOMS[climate_id]
+
+    # Zeitraum-Parameter validieren
+    if range_key not in TIME_RANGES:
+        range_key = "7d"
+
+    hours = TIME_RANGES[range_key]
+    batches = _recent_batches(store, hours=hours)
+
+    # Beteiligte Sensoren ermitteln
+    temp_sensor_keys = []  # (key, display_name, measurement_key)
+    hum_sensor_keys = []  # (key, display_name, measurement_key)
+
+    # ID01-Sensoren (temperature_1 = Raumtemperatur)
+    for device in room["devices"]:
+        if device.get("type") == "weatherhub_id01":
+            key = device["key"]
+            temp_sensor_keys.append((key, device["name"], f"{key}.temperature_1"))
+
+    # ID03-Sensoren (temperature + humidity)
+    for sensor_key in room.get("weatherhub_climate", []):
+        # Sensorname aus ROOMS suchen
+        sensor_name = sensor_key
+        for rid, r in ROOMS.items():
+            for device in r["devices"]:
+                if device["key"] == sensor_key:
+                    sensor_name = device["name"]
+                    break
+
+        temp_sensor_keys.append((sensor_key, sensor_name, f"{sensor_key}.temperature"))
+        hum_sensor_keys.append((sensor_key, sensor_name, f"{sensor_key}.humidity"))
+
+    # Zeitraum-Buttons generieren
+    range_buttons_html = ""
+    for key, label in (
+        ("24h", "24h"),
+        ("7d", "7d"),
+        ("14d", "14d"),
+        ("30d", "30d"),
+        ("90d", "90d"),
+        ("365d", "365d"),
+    ):
+        active_class = " active" if key == range_key else ""
+        range_buttons_html += (
+            f'<a class="time-range-btn{active_class}" '
+            f'href="/climate/{climate_id}?range={key}">{label}</a>\n    '
+        )
+
+    # Mittelwert-Serien berechnen
+    temp_avg_series = _calculate_average_series(batches, temp_sensor_keys)
+    hum_avg_series = _calculate_average_series(batches, hum_sensor_keys) if hum_sensor_keys else []
+
+    # Einzelsensor-Serien für Charts
+    temp_series_by_sensor = []
+    for key, name, measurement_key in temp_sensor_keys:
+        series = _series(batches, measurement_key)
+        if series:
+            temp_series_by_sensor.append(
+                {
+                    "key": key,
+                    "name": name,
+                    "series": series,
+                }
+            )
+
+    hum_series_by_sensor = []
+    for key, name, measurement_key in hum_sensor_keys:
+        series = _series(batches, measurement_key)
+        if series:
+            hum_series_by_sensor.append(
+                {
+                    "key": key,
+                    "name": name,
+                    "series": series,
+                }
+            )
+
+    # Aktuelle Werte
+    climate = _room_climate(batches, room)
+
+    climate_display = "–"
+    if climate["temp"] is not None:
+        climate_display = f"🌡️ {climate['temp']:.1f} °C"
+        if climate["hum"] is not None:
+            climate_display += f" · 💧 {climate['hum']:.0f} %"
+
+    # Letzte Aktualisierung
+    last_update = "–"
+    if batches:
+        latest = batches[-1]
+        last_update = (
+            datetime.fromisoformat(latest["created_at"])
+            .astimezone(BERLIN)
+            .strftime("%d.%m.%Y %H:%M Uhr")
+        )
+
+    # Sensor-Info
+    sensor_info_lines = ""
+    sensor_info_lines += (
+        f'<div class="info-line">'
+        f'<span class="info-label">ID01 Sensors:</span>'
+        f'<span class="info-value">{len(temp_sensor_keys) - len(hum_sensor_keys)}</span>'
+        f"</div>"
+    )
+    sensor_info_lines += (
+        f'<div class="info-line">'
+        f'<span class="info-label">ID03 Sensors:</span>'
+        f'<span class="info-value">{len(hum_sensor_keys)}</span>'
+        f"</div>"
+    )
+    sensor_info_lines += (
+        f'<div class="info-line">'
+        f'<span class="info-label">Last Update:</span>'
+        f'<span class="info-value">{last_update}</span>'
+        f"</div>"
+    )
+
+    # Statistik für Mittelwerte
+    temp_stats = _calculate_stats(temp_avg_series, [])
+    hum_stats = _calculate_stats(hum_avg_series, [])
+
+    # Statistik-HTML
+    stats_html = f"""
+            <div class="stat">
+                <span>🌡️ Min Avg Temp</span>
+                <strong>{temp_stats["temp_min"]:.1f} <small>°C</small></strong>
+            </div>
+            <div class="stat">
+                <span>🌡️ Max Avg Temp</span>
+                <strong>{temp_stats["temp_max"]:.1f} <small>°C</small></strong>
+            </div>
+            <div class="stat">
+                <span>🌡️ Avg Temp</span>
+                <strong>{temp_stats["temp_avg"]:.1f} <small>°C</small></strong>
+            </div>
+    """
+
+    if hum_avg_series:
+        stats_html += f"""
+            <div class="stat">
+                <span>💧 Min Avg Humidity</span>
+                <strong>{hum_stats["hum_min"]:.1f} <small>%</small></strong>
+            </div>
+            <div class="stat">
+                <span>💧 Max Avg Humidity</span>
+                <strong>{hum_stats["hum_max"]:.1f} <small>%</small></strong>
+            </div>
+            <div class="stat">
+                <span>💧 Avg Humidity</span>
+                <strong>{hum_stats["hum_avg"]:.1f} <small>%</small></strong>
+            </div>
+        """
+
+    # Chart-Daten für Mittelwerte
+    temp_avg_labels = json.dumps([point["label"] for point in temp_avg_series])
+    temp_avg_dates = json.dumps([point["date"] for point in temp_avg_series])
+    temp_avg_values = json.dumps([point["value"] for point in temp_avg_series])
+    hum_avg_labels = json.dumps([point["label"] for point in hum_avg_series])
+    hum_avg_dates = json.dumps([point["date"] for point in hum_avg_series])
+    hum_avg_values = json.dumps([point["value"] for point in hum_avg_series])
+
+    # Einzelsensor-Datasets für Temperatur
+    temp_sensor_datasets = []
+    for sensor_data in temp_series_by_sensor:
+        series = sensor_data["series"]
+        values = json.dumps([point["value"] for point in series])
+        name = sensor_data["name"].replace("<i>", "").replace("</i>", "")
+        temp_sensor_datasets.append(
+            f"""{{
+                label: '{name}',
+                data: {values},
+                borderColor: '#fb923c',
+                borderWidth: 1,
+                pointRadius: 1,
+                pointHoverRadius: 3,
+                yAxisID: 'temperature',
+                tension: 0.3
+            }}"""
+        )
+    temp_sensor_datasets_str = ",\n            ".join(temp_sensor_datasets)
+
+    # Einzelsensor-Datasets für Feuchte
+    hum_sensor_datasets = []
+    for sensor_data in hum_series_by_sensor:
+        series = sensor_data["series"]
+        values = json.dumps([point["value"] for point in series])
+        name = sensor_data["name"].replace("<i>", "").replace("</i>", "")
+        hum_sensor_datasets.append(
+            f"""{{
+                label: '{name}',
+                data: {values},
+                borderColor: '#38bdf8',
+                borderWidth: 1,
+                pointRadius: 1,
+                pointHoverRadius: 3,
+                yAxisID: 'humidity',
+                tension: 0.3
+            }}"""
+        )
+    hum_sensor_datasets_str = ",\n            ".join(hum_sensor_datasets)
+
+    # Chart-HTML für Feuchte (nur wenn vorhanden)
+    hum_avg_chart_html = ""
+    if hum_avg_series:
+        hum_avg_chart_html = (
+            "<div class='chart-container'>"
+            "<span class='chart-title'>💧 Average Humidity</span>"
+            "<canvas id='chart-hum-avg'></canvas>"
+            "</div>"
+        )
+
+    hum_sensors_chart_html = ""
+    if hum_series_by_sensor:
+        hum_sensors_chart_html = (
+            "<div class='chart-container'>"
+            "<span class='chart-title'>💧 Individual Sensors - Humidity</span>"
+            "<canvas id='chart-hum-sensors'></canvas>"
+            "</div>"
+        )
+
+    # Chart-Skripte
+    hum_avg_script = ""
+    if hum_avg_series:
+        hum_avg_script = f"""
+<script>
+// Chart 2: Durchschnittsfeuchte
+const humAvgLabels = {hum_avg_labels};
+const humAvgDates = {hum_avg_dates};
+const humAvgValues = {hum_avg_values};
+
+new Chart(document.getElementById('chart-hum-avg'), {{
+    type: 'line',
+    data: {{
+        labels: humAvgLabels,
+        datasets: [{{
+            label: 'Avg Humidity',
+            data: humAvgValues,
+            borderColor: '#38bdf8',
+            borderWidth: 2,
+            pointRadius: 2,
+            pointHoverRadius: 4,
+            tension: 0.3
+        }}]
+    }},
+    options: {{
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {{ mode: 'index', intersect: false }},
+        plugins: {{
+            legend: {{ labels: {{ color: '#d1d5db', usePointStyle: true, pointStyle: 'line' }} }},
+            tooltip: {{
+                usePointStyle: true,
+                boxWidth: 6,
+                boxHeight: 6,
+                callbacks: {{
+                    title: (items) => {{
+                        if (items.length > 0) {{
+                            const idx = items[0].dataIndex;
+                            const dateStr = humAvgDates[idx] || '';
+                            const label = items[0].label;
+                            return `📅 ${{dateStr || ''}}\\n⏰ ${{label}}`;
+                        }}
+                        return '';
+                    }},
+                    label: (context) => {{
+                        const value = (Math.round(context.parsed.y * 10) / 10).toFixed(1);
+                        return `Avg Humidity: ${{value}} %`;
+                    }}
+                }}
+            }}
+        }},
+        scales: {{
+            x: {{ ticks: {{ color: '#9ca3af' }} }},
+            y: {{
+                type: 'linear',
+                ticks: {{
+                    color: '#38bdf8',
+                    callback: (value) => {{
+                        const rounded = Math.round(value * 10) / 10;
+                        return rounded + ' %';
+                    }}
+                }}
+            }}
+        }}
+    }}
+}});
+</script>
+"""
+
+    hum_sensors_script = ""
+    if hum_series_by_sensor:
+        hum_sensors_script = f"""
+<script>
+// Chart 4: Einzelne Sensoren - Feuchte
+const humSensorLabels = {hum_avg_labels if hum_avg_series else "[]"};
+const humSensorDates = {hum_avg_dates if hum_avg_series else "[]"};
+const humSensorDatasets = [
+    {hum_sensor_datasets_str}
+];
+
+new Chart(document.getElementById('chart-hum-sensors'), {{
+    type: 'line',
+    data: {{
+        labels: humSensorLabels,
+        datasets: humSensorDatasets
+    }},
+    options: {{
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {{ mode: 'index', intersect: false }},
+        plugins: {{
+            legend: {{
+                labels: {{ color: '#d1d5db', usePointStyle: true, pointStyle: 'line' }}
+            }},
+            tooltip: {{
+                usePointStyle: true,
+                boxWidth: 6,
+                boxHeight: 6,
+                callbacks: {{
+                    title: (items) => {{
+                        if (items.length > 0) {{
+                            const idx = items[0].dataIndex;
+                            const dateStr = humSensorDates[idx] || '';
+                            const label = items[0].label;
+                            return `📅 ${{dateStr || ''}}\\n⏰ ${{label}}`;
+                        }}
+                        return '';
+                    }},
+                    label: (context) => {{
+                        const value = (Math.round(context.parsed.y * 10) / 10).toFixed(1);
+                        return `${{context.dataset.label}}: ${{value}} %`;
+                    }}
+                }}
+            }}
+        }},
+        scales: {{
+            x: {{ ticks: {{ color: '#9ca3af' }} }},
+            y: {{
+                type: 'linear',
+                ticks: {{
+                    color: '#38bdf8',
+                    callback: (value) => {{
+                        const rounded = Math.round(value * 10) / 10;
+                        return rounded + ' %';
+                    }}
+                }}
+            }}
+        }}
+    }}
+}});
+</script>
+"""
+
+    return f"""<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Room Climate · {room["name"]}</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+* {{ box-sizing: border-box; }}
+
+body {{
+    margin: 0;
+    min-height: 100vh;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: linear-gradient(rgba(10,20,30,.55), rgba(10,20,30,.70)), url("/otter2.png");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: white;
+    padding: 30px;
+}}
+
+.container {{
+    width: min(1200px, 95%);
+    margin: auto;
+    background: rgba(20,35,50,.58);
+    backdrop-filter: blur(6px);
+    border-radius: 25px;
+    padding: 40px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.4);
+}}
+
+h1 {{ text-align: center; margin-top: 0; }}
+.subtitle {{ text-align: center; color: #d1d5db; }}
+
+.back-btn {{
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 20px;
+    background: rgba(147,197,253,.15);
+    border: 1px solid rgba(147,197,253,.4);
+    color: #bfdbfe;
+    text-decoration: none;
+    margin-bottom: 20px;
+}}
+
+.back-btn:hover {{
+    background: rgba(147,197,253,.3);
+}}
+
+.time-range-buttons {{
+    display: flex;
+    gap: 8px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}}
+
+.time-range-btn {{
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: rgba(147,197,253,.15);
+    border: 1px solid rgba(147,197,253,.4);
+    color: #bfdbfe;
+    text-decoration: none;
+    font-size: .9rem;
+    transition: .2s;
+}}
+
+.time-range-btn:hover {{
+    background: rgba(147,197,253,.3);
+}}
+
+.time-range-btn.active {{
+    background: rgba(147,197,253,.5);
+    border-color: rgba(147,197,253,.8);
+    color: white;
+}}
+
+.chart-container {{
+    position: relative;
+    height: 300px;
+    margin-top: 20px;
+    background: rgba(31,41,55,.78);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 18px;
+    padding: 20px;
+}}
+
+.chart-title {{
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    color: #d1d5db;
+    font-size: .9rem;
+    z-index: 1;
+}}
+
+.info-grid {{
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}}
+
+.info-card {{
+    min-width: 0;
+    background: rgba(31,41,55,.78);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 18px;
+    padding: 20px;
+}}
+
+.info-card h3 {{
+    margin-top: 0;
+    color: #d1d5db;
+    font-size: 1rem;
+}}
+
+.info-line {{
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 12px;
+    margin: 8px 0;
+    font-size: .9rem;
+}}
+
+.info-label {{
+    color: #9ca3af;
+}}
+
+.info-value {{
+    color: white;
+}}
+
+.stat-grid {{
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}}
+
+.stat {{
+    padding: 12px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 10px;
+}}
+
+.stat span {{
+    display: block;
+    color: #d1d5db;
+    font-size: .8rem;
+}}
+
+.stat strong {{
+    display: block;
+    margin-top: 5px;
+    font-size: 1.1rem;
+}}
+
+.stat small {{
+    color: #9ca3af;
+    font-size: .8rem;
+}}
+
+.footer {{
+    text-align: center;
+    margin-top: 30px;
+    color: #d1d5db;
+    opacity: .85;
+    font-size: .9rem;
+}}
+
+@media(max-width:700px) {{
+    body {{ padding: 15px; }}
+    .container {{ width: 100%; padding: 20px; border-radius: 18px; }}
+    .info-grid {{ grid-template-columns: 1fr; }}
+    .stat-grid {{ grid-template-columns: 1fr; }}
+    .info-line {{ grid-template-columns: 140px 1fr; }}
+}}
+</style>
+</head>
+<body>
+<div class="container">
+<a class="back-btn" href="/room/{climate_id}">← Back to {room["name"]}</a>
+<h1>{room["icon"]} Room Climate · {room["name"]}</h1>
+<div class="subtitle">{climate_display}</div>
+
+<div class="time-range-buttons">
+    {range_buttons_html}
+</div>
+
+<div class="chart-container">
+    <span class="chart-title">🌡️ Average Temperature</span>
+    <canvas id="chart-temp-avg"></canvas>
+</div>
+
+{hum_avg_chart_html}
+
+<div class="chart-container">
+    <span class="chart-title">🌡️ Individual Sensors - Temperature</span>
+    <canvas id="chart-temp-sensors"></canvas>
+</div>
+
+{hum_sensors_chart_html}
+
+<div class="info-grid">
+    <div class="info-card">
+        <h3>📋 Climate Information</h3>
+        {sensor_info_lines}
+    </div>
+
+    <div class="info-card">
+        <h3>📊 Statistics</h3>
+        <div class="stat-grid">
+            {stats_html}
+        </div>
+    </div>
+</div>
+
+<div class="footer">🦦 otterpi · ZOOLOGY-Observer Dashboard {VERSION}</div>
+</div>
+
+<script>
+// Chart 1: Durchschnittstemperatur
+const tempAvgLabels = {temp_avg_labels};
+const tempAvgDates = {temp_avg_dates};
+const tempAvgValues = {temp_avg_values};
+
+new Chart(document.getElementById('chart-temp-avg'), {{
+    type: 'line',
+    data: {{
+        labels: tempAvgLabels,
+        datasets: [{{
+            label: 'Avg Temperature',
+            data: tempAvgValues,
+            borderColor: '#fb923c',
+            borderWidth: 2,
+            pointRadius: 2,
+            pointHoverRadius: 4,
+            tension: 0.3
+        }}]
+    }},
+    options: {{
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {{ mode: 'index', intersect: false }},
+        plugins: {{
+            legend: {{ labels: {{ color: '#d1d5db', usePointStyle: true, pointStyle: 'line' }} }},
+            tooltip: {{
+                usePointStyle: true,
+                boxWidth: 6,
+                boxHeight: 6,
+                callbacks: {{
+                    title: (items) => {{
+                        if (items.length > 0) {{
+                            const idx = items[0].dataIndex;
+                            const dateStr = tempAvgDates[idx] || '';
+                            const label = items[0].label;
+                            return `📅 ${{dateStr || ''}}\\n⏰ ${{label}}`;
+                        }}
+                        return '';
+                    }},
+                    label: (context) => {{
+                        const value = (Math.round(context.parsed.y * 10) / 10).toFixed(1);
+                        return `Avg Temperature: ${{value}} °C`;
+                    }}
+                }}
+            }}
+        }},
+        scales: {{
+            x: {{ ticks: {{ color: '#9ca3af' }} }},
+            y: {{
+                type: 'linear',
+                ticks: {{
+                    color: '#fb923c',
+                    callback: (value) => {{
+                        const rounded = Math.round(value * 10) / 10;
+                        return rounded + ' °C';
+                    }}
+                }}
+            }}
+        }}
+    }}
+}});
+</script>
+
+{hum_avg_script}
+
+<script>
+// Chart 3: Einzelne Sensoren - Temperatur
+const tempSensorLabels = {temp_avg_labels};
+const tempSensorDates = {temp_avg_dates};
+const tempSensorDatasets = [
+    {temp_sensor_datasets_str}
+];
+
+new Chart(document.getElementById('chart-temp-sensors'), {{
+    type: 'line',
+    data: {{
+        labels: tempSensorLabels,
+        datasets: tempSensorDatasets
+    }},
+    options: {{
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {{ mode: 'index', intersect: false }},
+        plugins: {{
+            legend: {{
+                labels: {{ color: '#d1d5db', usePointStyle: true, pointStyle: 'line' }}
+            }},
+            tooltip: {{
+                usePointStyle: true,
+                boxWidth: 6,
+                boxHeight: 6,
+                callbacks: {{
+                    title: (items) => {{
+                        if (items.length > 0) {{
+                            const idx = items[0].dataIndex;
+                            const dateStr = tempSensorDates[idx] || '';
+                            const label = items[0].label;
+                            return `📅 ${{dateStr || ''}}\\n⏰ ${{label}}`;
+                        }}
+                        return '';
+                    }},
+                    label: (context) => {{
+                        const value = (Math.round(context.parsed.y * 10) / 10).toFixed(1);
+                        return `${{context.dataset.label}}: ${{value}} °C`;
+                    }}
+                }}
+            }}
+        }},
+        scales: {{
+            x: {{ ticks: {{ color: '#9ca3af' }} }},
+            y: {{
+                type: 'linear',
+                ticks: {{
+                    color: '#fb923c',
+                    callback: (value) => {{
+                        const rounded = Math.round(value * 10) / 10;
+                        return rounded + ' °C';
+                    }}
+                }}
+            }}
+        }}
+    }}
+}});
+</script>
+
+{hum_sensors_script}
+
+</body>
+</html>
+"""
+
+
+def _render_device_detail(
+    store: BatchStore,
+    device_key: str,
+    range_key: str = "7d",
+) -> str:
+    """Detailseite für ein einzelnes Gerät."""
+    # Zeitraum-Parameter validieren
+    if range_key not in TIME_RANGES:
+        range_key = "7d"
+
+    # Gerät in ROOMS suchen
+    device_info = None
+    room_id = None
+    room = None
+
+    for rid, r in ROOMS.items():
+        for device in r["devices"]:
+            if device["key"] == device_key:
+                device_info = device
+                room_id = rid
+                room = r
+                break
+        if device_info:
+            break
+
+    if device_info is None:
+        return _render_not_found()
+
+    device_type = device_info.get("type", "atmoweb")
+
+    # Zeitraum aus Query-Parameter lesen (Standard: 7 Tage)
+    hours = TIME_RANGES[range_key]
+
+    batches = _recent_batches(store, hours=hours)
+
+    # Messwert-Schlüssel je nach Gerätetyp bestimmen
+    if device_type == "weatherhub_id01":
+        temp_key = f"{device_key}.temperature_2"
+        hum_key = None
+    elif device_type == "weatherhub_id0e":
+        temp_key = f"{device_key}.temperature"
+        hum_key = f"{device_key}.humidity"
+    elif device_type in ("freezer", "memmert"):
+        temp_key = f"{device_key}.temperature"
+        hum_key = None
+    else:  # atmoweb
+        temp_key = f"{device_key}.temperature_1"
+        hum_key = f"{device_key}.humidity"
+
+    # Serien laden
+    temp_series = _series(batches, temp_key)
+    hum_series = _series(batches, hum_key) if hum_key else []
+
+    # Aktueller Status
+    status = _device_status(batches, device_key, device_type)
+
+    # Statistik
+    stats = _calculate_stats(temp_series, hum_series)
+
+    # Letzte Aktualisierung
+    last_update = "–"
+    if batches:
+        latest = batches[-1]
+        last_update = (
+            datetime.fromisoformat(latest["created_at"])
+            .astimezone(BERLIN)
+            .strftime("%d.%m.%Y %H:%M Uhr")
+        )
+
+    # Sensor-Status-Label
+    if device_type.startswith("weatherhub"):
+        sensor_label = device_key.replace("weatherhub_", "").upper()
+    else:
+        sensor_label = device_type
+
+    # Humidity-Statistik nur anzeigen, wenn Feuchte vorhanden
+    hum_stats_html = ""
+    if hum_key:
+        hum_stats_html = f"""
+            <div class="stat">
+                <span>💧 Min Humidity</span>
+                <strong>{stats["hum_min"]:.1f} <small>%</small></strong>
+            </div>
+            <div class="stat">
+                <span>💧 Max Humidity</span>
+                <strong>{stats["hum_max"]:.1f} <small>%</small></strong>
+            </div>
+            <div class="stat">
+                <span>💧 Avg Humidity</span>
+                <strong>{stats["hum_avg"]:.1f} <small>%</small></strong>
+            </div>
+        """
+
+    # Zeitraum-Buttons generieren
+    range_buttons_html = ""
+    for key, label in (
+        ("24h", "24h"),
+        ("7d", "7d"),
+        ("14d", "14d"),
+        ("30d", "30d"),
+        ("90d", "90d"),
+        ("365d", "365d"),
+    ):
+        active_class = " active" if key == range_key else ""
+        range_buttons_html += (
+            f'<a class="time-range-btn{active_class}" '
+            f'href="/device/{device_key}?range={key}">{label}</a>\n    '
+        )
+
+    return f"""<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{device_info["name"]}</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+* {{ box-sizing: border-box; }}
+
+body {{
+    margin: 0;
+    min-height: 100vh;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: linear-gradient(rgba(10,20,30,.55), rgba(10,20,30,.70)), url("/otter2.png");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: white;
+    padding: 30px;
+}}
+
+.container {{
+    width: min(1200px, 95%);
+    margin: auto;
+    background: rgba(20,35,50,.58);
+    backdrop-filter: blur(6px);
+    border-radius: 25px;
+    padding: 40px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.4);
+}}
+
+h1 {{ text-align: center; margin-top: 0; }}
+.subtitle {{ text-align: center; color: #d1d5db; }}
+
+.back-btn {{
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 20px;
+    background: rgba(147,197,253,.15);
+    border: 1px solid rgba(147,197,253,.4);
+    color: #bfdbfe;
+    text-decoration: none;
+    margin-bottom: 20px;
+}}
+
+.back-btn:hover {{
+    background: rgba(147,197,253,.3);
+}}
+
+.device-header {{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 20px;
+}}
+
+.device-header h2 {{
+    margin: 0;
+    font-size: 1.1rem;
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}}
+
+.device-status-label {{
+    display: block;
+    margin-top: 5px;
+    color: #9ca3af;
+    font-size: .8rem;
+    font-family: monospace;
+}}
+
+.status-light {{
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 3px solid rgba(255,255,255,.25);
+    box-shadow: 0 0 14px currentColor;
+}}
+
+.status-ok {{ color: #22c55e; background: #22c55e; }}
+.status-warn {{ color: #eab308; background: #eab308; }}
+.status-critical {{ color: #ef4444; background: #ef4444; }}
+.status-off {{ color: #6b7280; background: #6b7280; box-shadow: none; }}
+
+.time-range-buttons {{
+    display: flex;
+    gap: 8px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}}
+
+.time-range-btn {{
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: rgba(147,197,253,.15);
+    border: 1px solid rgba(147,197,253,.4);
+    color: #bfdbfe;
+    text-decoration: none;
+    font-size: .9rem;
+    transition: .2s;
+}}
+
+.time-range-btn:hover {{
+    background: rgba(147,197,253,.3);
+}}
+
+.time-range-btn.active {{
+    background: rgba(147,197,253,.5);
+    border-color: rgba(147,197,253,.8);
+    color: white;
+}}
+
+.chart-container {{
+    position: relative;
+    height: 400px;
+    margin-top: 20px;
+    background: rgba(31,41,55,.78);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 18px;
+    padding: 20px;
+}}
+
+.info-grid {{
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}}
+
+.info-card {{
+    min-width: 0;
+    background: rgba(31,41,55,.78);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 18px;
+    padding: 20px;
+}}
+
+.info-card h3 {{
+    margin-top: 0;
+    color: #d1d5db;
+    font-size: 1rem;
+}}
+
+.info-line {{
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 12px;
+    margin: 8px 0;
+    font-size: .9rem;
+}}
+
+.info-label {{
+    color: #9ca3af;
+}}
+
+.info-value {{
+    color: white;
+}}
+
+.stat-grid {{
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}}
+
+.stat {{
+    padding: 12px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 10px;
+}}
+
+.stat span {{
+    display: block;
+    color: #d1d5db;
+    font-size: .8rem;
+}}
+
+.stat strong {{
+    display: block;
+    margin-top: 5px;
+    font-size: 1.1rem;
+}}
+
+.stat small {{
+    color: #9ca3af;
+    font-size: .8rem;
+}}
+
+.footer {{
+    text-align: center;
+    margin-top: 30px;
+    color: #d1d5db;
+    opacity: .85;
+    font-size: .9rem;
+}}
+
+@media(max-width:700px) {{
+    body {{ padding: 15px; }}
+    .container {{ width: 100%; padding: 20px; border-radius: 18px; }}
+    .info-grid {{ grid-template-columns: 1fr; }}
+    .stat-grid {{ grid-template-columns: 1fr; }}
+    .info-line {{ grid-template-columns: 140px 1fr; }}
+}}
+</style>
+</head>
+<body>
+<div class="container">
+<a class="back-btn" href="/room/{room_id}">← Back to {room["name"]}</a>
+<h1>{device_info["name"]}</h1>
+<div class="subtitle">{room["icon"]} {room["name"]} · {sensor_label}</div>
+
+<div class="device-header">
+    <div>
+        <h2>Current Status</h2>
+        <span class="device-status-label">{device_type}</span>
+    </div>
+    <span class="status-light {status}" aria-label="Device Status"></span>
+</div>
+
+<div class="time-range-buttons">
+    {range_buttons_html}
+</div>
+
+<div class="chart-container">
+    <canvas id="device-chart"></canvas>
+</div>
+
+<div class="info-grid">
+    <div class="info-card">
+        <h3>📋 Sensor Information</h3>
+        <div class="info-line">
+            <span class="info-label">Device Name:</span>
+            <span class="info-value">{device_info["name"]}</span>
+        </div>
+        <div class="info-line">
+            <span class="info-label">Device Key:</span>
+            <span class="info-value">{device_key}</span>
+        </div>
+        <div class="info-line">
+            <span class="info-label">Type:</span>
+            <span class="info-value">{device_type}</span>
+        </div>
+        <div class="info-line">
+            <span class="info-label">Room:</span>
+            <span class="info-value">{room["name"]}</span>
+        </div>
+        <div class="info-line">
+            <span class="info-label">Last Update:</span>
+            <span class="info-value">{last_update}</span>
+        </div>
+        <div class="info-line">
+            <span class="info-label">Status:</span>
+            <span class="info-value">{status.replace("status-", "").upper()}</span>
+        </div>
+    </div>
+
+    <div class="info-card">
+        <h3>📊 Statistics</h3>
+        <div class="stat-grid">
+            <div class="stat">
+                <span>🌡️ Min Temperature</span>
+                <strong>{stats["temp_min"]:.1f} <small>°C</small></strong>
+            </div>
+            <div class="stat">
+                <span>🌡️ Max Temperature</span>
+                <strong>{stats["temp_max"]:.1f} <small>°C</small></strong>
+            </div>
+            <div class="stat">
+                <span>🌡️ Avg Temperature</span>
+                <strong>{stats["temp_avg"]:.1f} <small>°C</small></strong>
+            </div>
+            {hum_stats_html}
+        </div>
+    </div>
+</div>
+
+<div class="footer">🦦 otterpi · ZOOLOGY-Observer Dashboard {VERSION}</div>
+</div>
+
+<script>
+const tempLabels = {json.dumps([point["label"] for point in temp_series])};
+const tempDates = {json.dumps([point["date"] for point in temp_series])};
+const tempValues = {json.dumps([point["value"] for point in temp_series])};
+const humValues = {json.dumps([point["value"] for point in hum_series])};
+
+new Chart(document.getElementById('device-chart'), {{
+    type: 'line',
+    data: {{
+        labels: tempLabels,
+        datasets: [
+            {{
+                label: 'Temperature',
+                data: tempValues,
+                borderColor: '#fb923c',
+                borderWidth: 1.5,
+                pointRadius: 2,
+                pointHoverRadius: 4,
+                yAxisID: 'temperature',
+                tension: 0.3
+            }},
+            {{
+                label: 'Relative Humidity',
+                data: humValues,
+                borderColor: '#38bdf8',
+                borderWidth: 1.5,
+                pointRadius: 2,
+                pointHoverRadius: 4,
+                yAxisID: 'humidity',
+                tension: 0.3
+            }}
+        ]
+    }},
+    options: {{
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {{ mode: 'index', intersect: false }},
+        plugins: {{
+            legend: {{
+                labels: {{
+                    color: '#d1d5db',
+                    usePointStyle: true,
+                    pointStyle: 'line',
+                }}
+            }},
+            tooltip: {{
+                usePointStyle: true,
+                boxWidth: 6,
+                boxHeight: 6,
+                callbacks: {{
+                    labelColor: (context) => ({{
+                        borderColor: context.dataset.borderColor,
+                        backgroundColor: context.dataset.borderColor
+                    }}),
+                    labelPointStyle: () => ({{
+                        pointStyle: 'circle',
+                        rotation: 0
+                    }}),
+                    title: (items) => {{
+                        if (items.length > 0) {{
+                            const idx = items[0].dataIndex;
+                            const dateStr = tempDates[idx] || '';
+                            const label = items[0].label;
+
+                            let dateLabel = '';
+                            if (dateStr) {{
+                                const today = new Date();
+                                const date = new Date(dateStr + 'T00:00:00');
+
+                                const todayMidnight = new Date(
+                                    today.getFullYear(), today.getMonth(), today.getDate()
+                                );
+                                const dateMidnight = new Date(
+                                    date.getFullYear(), date.getMonth(), date.getDate()
+                                );
+
+                                const diffDays = Math.round(
+                                    (todayMidnight - dateMidnight) / (1000 * 60 * 60 * 24)
+                                );
+
+                                if (diffDays === 0) {{
+                                    dateLabel = 'today';
+                                }} else if (diffDays === 1) {{
+                                    dateLabel = 'yesterday';
+                                }} else {{
+                                    const dd = String(date.getDate()).padStart(2, '0');
+                                    const mm = String(date.getMonth() + 1).padStart(2, '0');
+                                    const yyyy = date.getFullYear();
+                                    dateLabel = `${{dd}}.${{mm}}.${{yyyy}}`;
+                                }}
+                            }}
+
+                            return `📅 Date: ${{dateLabel}}\\n⏰ Time: ${{label}}`;
+                        }}
+                        return '';
+                    }},
+                    label: (context) => {{
+                        const value = (Math.round(context.parsed.y * 10) / 10).toFixed(1);
+                        if (context.dataset.label === 'Temperature') {{
+                            return `Temperature: ${{value}} °C`;
+                        }}
+                        return `Rel. Humidity: ${{value}} %`;
+                    }}
+                }}
+            }}
+        }},
+        scales: {{
+            x: {{
+                ticks: {{
+                    color: '#9ca3af',
+                    callback: (value) => tempLabels[value]
+                }}
+            }},
+            temperature: {{
+                type: 'linear',
+                position: 'left',
+                ticks: {{
+                    color: '#fb923c',
+                    callback: (value) => {{
+                        const rounded = Math.round(value * 10) / 10;
+                        return rounded + ' °C';
+                    }}
+                }}
+            }},
+            humidity: {{
+                type: 'linear',
+                position: 'right',
+                ticks: {{
+                    color: '#38bdf8',
+                    callback: (value) => {{
+                        const rounded = Math.round(value * 10) / 10;
+                        return rounded + ' %';
+                    }}
+                }},
+                grid: {{ drawOnChartArea: false }}
+            }}
+        }}
+    }}
+}});
+</script>
+</body>
+</html>
+"""
+
+
+def _render_not_found() -> str:
+    """Zeigt eine 404-ähnliche Meldung."""
+    return """<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Not Found</title>
+<style>
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: system-ui, sans-serif;
+    background: linear-gradient(rgba(10,20,30,.55), rgba(10,20,30,.70)), url("/otter2.png");
+    background-size: cover;
+    background-position: center;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+}
+.container {
+    text-align: center;
+    background: rgba(20,35,50,.8);
+    border-radius: 25px;
+    padding: 40px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.4);
+}
+a {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 24px;
+    border-radius: 20px;
+    background: rgba(147,197,253,.15);
+    border: 1px solid rgba(147,197,253,.4);
+    color: #bfdbfe;
+    text-decoration: none;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🔍 Not Found</h1>
+<p>The requested resource does not exist.</p>
+<a href="/">← Back to Overview</a>
+</div>
 </body>
 </html>
 """
@@ -575,20 +1946,18 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
 
     full_width_class = " device-card-full" if device.get("full_width") else ""
 
-    # Sensor-ID für WeatherHub-Geräte anzeigen (ohne "weatherhub_", in Großbuchstaben)
-    if device["type"].startswith("weatherhub"):
-        status_label = device["key"].replace("weatherhub_", "").upper()
-    else:
-        status_label = "Device Status"
+    # Verlinkung auf die Gerätedetailseite
+    device_key = device["key"]
+    device_link = f"/device/{device_key}"
 
     if device["type"] in ("freezer", "memmert", "weatherhub_id01"):
         # Nur Temperatur-Kachel (ohne Feuchte)
         return f"""
-    <section class="device-card{full_width_class}">
+    <a class="device-card{full_width_class}" href="{device_link}">
         <div class="device-header">
             <div>
                 <h2>{device["name"]}</h2>
-                <span class="device-status-label">{status_label}</span>
+                <span class="device-status-label">{device["temp"]:.1f} °C</span>
             </div>
             <span class="status-light {device["status"]}" aria-label="Device Status"></span>
         </div>
@@ -599,16 +1968,18 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
         <div class="device-chart">
             <canvas id="{device["chart_id"]}"></canvas>
         </div>
-    </section>
+    </a>
 """
 
     # AtmoWEB und weatherhub_id0e (Temp + Feuchte)
     return f"""
-    <section class="device-card{full_width_class}">
+    <a class="device-card{full_width_class}" href="{device_link}">
         <div class="device-header">
             <div>
                 <h2>{device["name"]}</h2>
-                <span class="device-status-label">{status_label}</span>
+                <span class="device-status-label">
+                    {device["temp"]:.1f} °C · {device["hum"]:.1f} %
+                </span>
             </div>
             <span class="status-light {device["status"]}" aria-label="Device Status"></span>
         </div>
@@ -625,7 +1996,7 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
         <div class="device-chart">
             <canvas id="{device["chart_id"]}"></canvas>
         </div>
-    </section>
+    </a>
 """
 
 
@@ -887,6 +2258,75 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
     }}
 }});
 """
+
+
+def _calculate_average_series(
+    batches: list[dict],
+    sensor_keys: list[tuple[str, str, str]],
+) -> list[dict]:
+    """Berechnet eine Mittelwert-Reihe aus mehreren Sensoren pro Zeitpunkt."""
+    # Gruppiere Messwerte pro Batch-Zeitpunkt
+    series = []
+
+    for batch in batches:
+        batch_time = batch.get("created_at", "")
+        measurements = batch.get("measurements", {})
+
+        values = []
+        for _, _, measurement_key in sensor_keys:
+            measurement = measurements.get(measurement_key, {})
+            value = measurement.get("value")
+            if value is not None:
+                values.append(value)
+
+        if not values:
+            continue
+
+        avg_value = sum(values) / len(values)
+
+        # Zeitpunkt konvertieren (UTC → Berlin)
+        dt = datetime.fromisoformat(batch_time)
+        if dt.tzinfo is not None:
+            offset = dt.utcoffset()
+            if offset is not None and offset.total_seconds() == 0:
+                dt = dt.astimezone(BERLIN)
+
+        label = dt.strftime("%H:%M")
+        date = dt.strftime("%Y-%m-%d")
+        series.append({"label": label, "date": date, "value": avg_value})
+
+    return series
+
+
+def _calculate_stats(
+    temp_series: list[dict[str, Any]],
+    hum_series: list[dict[str, Any]],
+) -> dict[str, float]:
+    """Berechnet Statistiken (Min/Max/Ø) für die Detailseiten."""
+    stats = {
+        "temp_min": 0.0,
+        "temp_max": 0.0,
+        "temp_avg": 0.0,
+        "hum_min": 0.0,
+        "hum_max": 0.0,
+        "hum_avg": 0.0,
+    }
+
+    if temp_series:
+        temp_values = [point["value"] for point in temp_series if point["value"] is not None]
+        if temp_values:
+            stats["temp_min"] = min(temp_values)
+            stats["temp_max"] = max(temp_values)
+            stats["temp_avg"] = sum(temp_values) / len(temp_values)
+
+    if hum_series:
+        hum_values = [point["value"] for point in hum_series if point["value"] is not None]
+        if hum_values:
+            stats["hum_min"] = min(hum_values)
+            stats["hum_max"] = max(hum_values)
+            stats["hum_avg"] = sum(hum_values) / len(hum_values)
+
+    return stats
 
 
 def _room_climate(batches: list[dict], room: dict) -> dict:

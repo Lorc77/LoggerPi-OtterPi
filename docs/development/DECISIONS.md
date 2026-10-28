@@ -1235,6 +1235,134 @@ Datumsformat bleibt deutsch (`27.10.2026 16:45 Uhr`).
 
 ---
 
+## DEC-038 — Stale-Logik für WeatherHub-Sensoren
+
+**Status:** Angenommen
+**Datum:** 2026-10-28
+
+### Kontext
+
+WeatherHub-Sensoren senden typischerweise in einem mehrminütigen Intervall.
+Bisher gab es keine Stale-Logik – ein Sensor, der keine Daten mehr sendete,
+blieb dauerhaft als `valid` markiert.
+
+### Entscheidung
+
+WeatherHub-Sensoren erhalten eine Stale-Logik analog zum `FreezerReader`.
+
+Der Schwellenwert ist konfigurierbar über:
+
+```text
+WEATHERHUB_STALE_AFTER_SECONDS
+```
+
+Default: `1800` Sekunden (30 Minuten).
+
+Wenn ein Sensor länger als der Schwellenwert keine Daten gesendet hat,
+wird sein letzter bekannter Wert mit `validity = "stale"` markiert.
+Sobald der Sensor wieder sendet, wird er automatisch wieder `valid`.
+
+### Konsequenzen
+
+- `weatherhub.py`: `stale_after_seconds` Parameter
+- `loggerpi_observer.py`: Env-Variable einlesen
+- `loggerpi.env.example`: Variable dokumentiert
+- Dashboard zeigt `stale` als Warnung (gelbe Status-Lampe)
+
+---
+
+## DEC-039 — Gerätedetailseite im Dashboard
+
+**Status:** Angenommen
+**Datum:** 2026-10-28
+
+### Kontext
+
+Die Raumdetailseite zeigte Gerätekacheln mit kleinen Charts. Für eine
+detaillierte Analyse einzelner Geräte fehlte eine eigene Seite.
+
+### Entscheidung
+
+Jede Gerätekachel auf der Raumdetailseite verlinkt auf eine eigene
+Gerätedetailseite:
+
+```text
+/device/<sensor_id>
+```
+
+Die Detailseite enthält:
+
+- Erweiterten Chart mit Zeitraum-Auswahl (24h, 7d, 14d, 30d, 90d, 365d)
+- Sensor-Informationen (Name, Key, Typ, Raum, Letzte Aktualisierung, Status)
+- Statistik (Min/Max/Ø für Temperatur und Feuchte)
+
+Zusätzlich gibt es eine Raumklima-Detailseite:
+
+```text
+/climate/<room_id>
+```
+
+Diese zeigt Mittelwert-Charts und Einzelsensor-Diagramme.
+
+### Konsequenzen
+
+- `dashboard.py`: Neue Render-Funktionen `_render_device_detail()` und `_render_climate_detail()`
+- `otterpi.py`: Neue Routen `/device/` und `/climate/`
+- Kacheln auf Raumdetailseite sind jetzt Links
+
+---
+
+## DEC-040 — Batch-Archivierung
+
+**Status:** Angenommen
+**Datum:** 2026-10-28
+
+### Kontext
+
+Die SQLite-Datenbank wächst kontinuierlich. Ohne Archivierung würde sie
+unbegrenzt wachsen.
+
+### Entscheidung
+
+Batches älter als 12 Monate werden monatlich archiviert:
+
+- **Format:** JSON Lines + gzip
+- **Dateiname:** `loggerpi-otterpi_batches_YYYY-MM.json.gz`
+- **Pfad:** `/var/lib/loggerpi-otterpi/archive/`
+- **Aufbewahrung:** Unbegrenzt
+- **Löschung:** Erst nach erfolgreichem Export
+
+Automatisierung über systemd-Timer (1. des Monats, 03:00 Uhr).
+
+### Verwendung
+
+```bash
+# Normaler Lauf (Batches > 12 Monate)
+python3 /opt/loggerpi-otterpi/archive_batches.py
+
+# Force-Modus (alle Batches, z.B. für Tests)
+python3 /opt/loggerpi-otterpi/archive_batches.py --force
+
+# Mit Ausgabepfad (für Tests) - löscht NICHT die DB
+python3 /opt/loggerpi-otterpi/archive_batches.py --output /tmp/test.json.gz --force
+
+# Mit Datumsbereich
+python3 /opt/loggerpi-otterpi/archive_batches.py --year 2025 --month 10
+
+# Dry-Run
+python3 /opt/loggerpi-otterpi/archive_batches.py --dry-run
+```
+
+### Konsequenzen
+
+- `archive_batches.py`: Neues Skript auf dem OtterPi
+- `deploy/otterpi/archive-batches.service`: systemd-Service
+- `deploy/otterpi/archive-batches.timer`: Monatlicher Timer
+- `deploy/otterpi/install.sh`: Installiert Skript + Timer
+- 17 neue Tests für Archivierung
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:

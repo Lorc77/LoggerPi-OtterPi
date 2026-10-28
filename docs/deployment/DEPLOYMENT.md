@@ -269,6 +269,41 @@ Wenn Sensoren umziehen oder neue Geräte hinzukommen:
 **Wichtig:** Bei Variante 2 ist die Änderung nicht im Git-Repository
 dokumentiert. Sie geht beim nächsten Deployment verloren.
 
+### Batch-Archivierung
+
+Der OtterPi archiviert monatlich Batches älter als 12 Monate.
+
+**Automatisch:**
+
+```text
+archive-batches.timer (1. des Monats, 03:00 Uhr)
+```
+
+**Manuell:**
+
+```bash
+# Test-Export (löscht NICHT die DB)
+sudo -u makki python3 /opt/loggerpi-otterpi/archive_batches.py \
+    --output /tmp/loggerpi-otterpi_batches_TEST.json.gz \
+    --force \
+    --no-delete
+
+# Normaler Lauf
+sudo systemctl start archive-batches.service
+
+# Status prüfen
+systemctl status archive-batches.timer --no-pager
+```
+
+**Archiv-Dateien:**
+
+```text
+/var/lib/loggerpi-otterpi/archive/loggerpi-otterpi_batches_YYYY-MM.json.gz
+```
+
+**Retention:** 12 Monate in der Live-Datenbank. Ältere Batches werden
+nach erfolgreichem Export gelöscht.
+
 ---
 
 ## 5. OtterPi HTTP Listener
@@ -546,14 +581,14 @@ Dabei müssen insbesondere geprüft werden:
 
 ## 13. Aktueller Stand
 
-Stand 2026-09-21:
+Stand 2026-10-28:
 
 ```text
 Repository:
     main
 
 Version:
-    v1.2.3
+    v1.7.0
 
 Letzter bekannter Release-Commit:
     61cd803
@@ -594,4 +629,17 @@ End-to-End-Produktion:
     verifiziert (2026-09-20)
     LoggerPi sendet Batches alle 15 Minuten
     OtterPi speichert in SQLite
+
+Dashboard:
+    https://zoology.makki.route64.de (seit v1.2.0)
+    Raumdetailseiten: /room/<id>
+    Gerätedetailseiten: /device/<sensor_id>
+    Raumklima-Detailseiten: /climate/<room_id>
+    URL-Umbenennung: /raum/ → /room/ (301-Redirect)
+
+Archivierung:
+    Monatlich (1. des Monats, 03:00 Uhr)
+    Pfad: /var/lib/loggerpi-otterpi/archive/
+    Format: loggerpi-otterpi_batches_YYYY-MM.json.gz
+    Retention: 12 Monate in Live-DB
 ```

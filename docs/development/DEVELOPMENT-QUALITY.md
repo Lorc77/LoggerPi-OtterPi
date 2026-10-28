@@ -276,7 +276,7 @@ muss bestätigen, dass die Dateien bereits korrekt formatiert sind.
 pytest
 ```
 
-Aktueller Stand: **136 Tests**, alle bestehen.
+Aktueller Stand: **189 Tests**, alle bestehen.
 
 Alle Tests müssen erfolgreich sein.
 
@@ -554,3 +554,8 @@ Der E2E-Datenpfad (LoggerPi → OtterPi → SQLite) ist praktisch verifiziert:
 - WeatherHub-Integration ist aktiv (17 Sensoren, 34 Measurements im Batch)
 - WeatherHub-Decoder ist durch Test-Fixtures abgesichert
 - WeatherHub-Listener läuft als Thread im LoggerPi-Service
+- Stale-Logik für WeatherHub-Sensoren ist implementiert und getestet
+- Gerätedetailseite (/device/<sensor_id>) ist implementiert
+- Raumklima-Detailseite (/climate/<room_id>) ist implementiert
+- Batch-Archivierung (archive_batches.py) ist implementiert und getestet
+- Alle 189 Tests bestehen (Stand 2026-10-28)

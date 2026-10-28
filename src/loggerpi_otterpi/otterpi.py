@@ -88,14 +88,58 @@ class OtterPiHandler(BaseHTTPRequestHandler):
         )
 
     def do_GET(self) -> None:
-        if self.path == "/" or self.path.startswith("/raum/"):
+        # Neue Routen: /room/, /device/, /climate/ + Redirect von /raum/
+        if (
+            self.path == "/"
+            or self.path.startswith("/room/")
+            or self.path.startswith("/device/")
+            or self.path.startswith("/climate/")
+        ):
             from dashboard import render_dashboard
 
             room_id = ""
-            if self.path.startswith("/raum/"):
+            device_id = ""
+            climate_id = ""
+            range_key = "7d"
+
+            if self.path.startswith("/room/"):
                 room_id = self.path.split("/")[2]
 
-            html = render_dashboard(self.store, room_id=room_id)
+            elif self.path.startswith("/device/"):
+                # /device/<key> oder /device/<key>?range=7d
+                path_part = self.path.split("/")[2]
+
+                # Query-Parameter extrahieren
+                if "?" in path_part:
+                    path_part, query = path_part.split("?", 1)
+                    for param in query.split("&"):
+                        if param.startswith("range="):
+                            range_key = param.split("=")[1]
+                            break
+
+                device_id = path_part
+
+            elif self.path.startswith("/climate/"):
+                # /climate/<room_id> oder /climate/<room_id>?range=7d
+                path_part = self.path.split("/")[2]
+
+                # Query-Parameter extrahieren
+                if "?" in path_part:
+                    path_part, query = path_part.split("?", 1)
+                    for param in query.split("&"):
+                        if param.startswith("range="):
+                            range_key = param.split("=")[1]
+                            break
+
+                climate_id = path_part
+
+            html = render_dashboard(
+                self.store,
+                room_id=room_id,
+                device_id=device_id,
+                range_key=range_key,
+                climate_id=climate_id,
+            )
             body = html.encode("utf-8")
 
             self.send_response(200)
@@ -103,6 +147,14 @@ class OtterPiHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
+            return
+
+        # Redirect von alten /raum/ URLs auf /room/
+        if self.path.startswith("/raum/"):
+            room_id = self.path.split("/")[2]
+            self.send_response(301)
+            self.send_header("Location", f"/room/{room_id}")
+            self.end_headers()
             return
 
         if self.path == "/otter2.png":

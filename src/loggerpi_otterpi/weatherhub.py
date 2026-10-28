@@ -14,7 +14,8 @@ from weatherhub_gateway_decoder import BootPacket, GatewayPacket
 class WeatherHubReader:
     """Adapter between WeatherHub Gateway packets and Core Measurements."""
 
-    def __init__(self) -> None:
+    def __init__(self, stale_after_seconds: float = 1800.0) -> None:
+        self.stale_after_seconds = stale_after_seconds
         self._latest_packets: dict[str, GatewayPacket] = {}
         self._reception_times: dict[str, str] = {}
 
@@ -31,6 +32,15 @@ class WeatherHubReader:
 
             self._latest_packets[packet.sensor_id] = packet
             self._reception_times[packet.sensor_id] = received_at
+
+    def _is_stale(self, sensor_id: str) -> bool:
+        """True, wenn der letzte Empfang für diesen Sensor zu lange her ist."""
+        if sensor_id not in self._reception_times:
+            return True
+
+        received_at = datetime.fromisoformat(self._reception_times[sensor_id])
+        age_seconds = (datetime.now(timezone.utc) - received_at).total_seconds()
+        return age_seconds > self.stale_after_seconds
 
     @property
     def gateway_timestamps(self) -> dict[str, int]:
@@ -118,10 +128,15 @@ class WeatherHubReader:
                 if value_dict.get("error") or value_dict.get("overflow"):
                     validity = "invalid"
 
+                # Stale-Logik: Wenn der Sensor zu lange nicht gesendet hat,
+                # wird der letzte bekannte Wert als "stale" markiert.
+                if self._is_stale(sensor_id):
+                    validity = "stale"
+
                 value = value_dict.get("value")
 
                 measurement = Measurement(
-                    value=value if validity == "valid" else None,
+                    value=value if validity == "valid" or validity == "stale" else None,
                     unit=unit,
                     measured_at=received_at,
                     validity=validity,
