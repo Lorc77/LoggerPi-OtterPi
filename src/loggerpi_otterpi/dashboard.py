@@ -9,17 +9,28 @@ from dashboard_config import ROOMS
 from otterpi_store import BatchStore
 
 BERLIN = ZoneInfo("Europe/Berlin")
-VERSION = "v1.7.1"
+VERSION = "v1.7.2"
 
 # Zeitraum-Optionen für die Detailseiten (in Stunden)
 TIME_RANGES = {
     "24h": 24,
+    "48h": 48,
     "7d": 7 * 24,
     "14d": 14 * 24,
     "30d": 30 * 24,
     "90d": 90 * 24,
-    "365d": 365 * 24,
+    "365d": 365 * 24,  # Funktionalität bleibt, Button wird ausgeblendet
 }
+
+# Sichtbare Zeitraum-Buttons (ohne 365d)
+VISIBLE_TIME_RANGES = (
+    ("24h", "24h"),
+    ("48h", "48h"),
+    ("7d", "7d"),
+    ("14d", "14d"),
+    ("30d", "30d"),
+    ("90d", "90d"),
+)
 
 # Harmonische Farben für Individual-Sensor-Charts
 SENSOR_COLORS = [
@@ -33,6 +44,20 @@ SENSOR_COLORS = [
     "#f87171",  # Rot
     "#a3e635",  # Limette
     "#c084fc",  # Lila
+]
+
+# Farben für Humidity-Charts (Standard: Hellblau)
+HUMIDITY_COLORS = [
+    "#38bdf8",  # Hellblau (Standard)
+    "#a78bfa",  # Violett
+    "#34d399",  # Grün
+    "#f472b6",  # Pink
+    "#22d3ee",  # Cyan
+    "#fbbf24",  # Gelb
+    "#f87171",  # Rot
+    "#a3e635",  # Limette
+    "#c084fc",  # Lila
+    "#fb923c",  # Orange
 ]
 
 
@@ -90,6 +115,62 @@ def _climate_display_text(climate: dict) -> str:
         text += f" · 💧 Relative Humidity: {climate['hum']:.0f} %"
 
     return text
+
+
+def _tooltip_date_logic(dates_json: str) -> str:
+    """Erzeugt die JS-Tooltip-Logik für Datum/Zeit."""
+    return f"""
+                    title: (items) => {{
+                        if (items.length > 0) {{
+                            const idx = items[0].dataIndex;
+                            const dateStr = {dates_json}[idx] || '';
+                            const label = items[0].label;
+
+                            let dateLabel = '';
+                            if (dateStr) {{
+                                const today = new Date();
+                                const date = new Date(dateStr + 'T00:00:00');
+
+                                const todayMidnight = new Date(
+                                    today.getFullYear(), today.getMonth(), today.getDate()
+                                );
+                                const dateMidnight = new Date(
+                                    date.getFullYear(), date.getMonth(), date.getDate()
+                                );
+
+                                const diffDays = Math.round(
+                                    (todayMidnight - dateMidnight) / (1000 * 60 * 60 * 24)
+                                );
+
+                                if (diffDays === 0) {{
+                                    dateLabel = 'today';
+                                }} else if (diffDays === 1) {{
+                                    dateLabel = 'yesterday';
+                                }} else {{
+                                    const dd = String(date.getDate()).padStart(2, '0');
+                                    const mm = String(date.getMonth() + 1).padStart(2, '0');
+                                    const yyyy = date.getFullYear();
+                                    dateLabel = `${{dd}}.${{mm}}.${{yyyy}}`;
+                                }}
+                            }}
+
+                            return `📅 Date: ${{dateLabel}}\\n⏰ Time: ${{label}}`;
+                        }}
+                        return '';
+                    }},"""
+
+
+def _tooltip_label_color() -> str:
+    """Erzeugt die JS-Tooltip-Farb-Logik."""
+    return """
+                    labelColor: (context) => ({
+                        borderColor: context.dataset.borderColor,
+                        backgroundColor: context.dataset.borderColor
+                    }),
+                    labelPointStyle: () => ({
+                        pointStyle: 'circle',
+                        rotation: 0
+                    }),"""
 
 
 def _render_overview(store: BatchStore) -> str:
@@ -411,6 +492,12 @@ body {{
 h1 {{ text-align: center; margin-top: 0; }}
 .subtitle {{ text-align: center; color: #d1d5db; }}
 
+.back-buttons {{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}}
+
 .back-btn {{
     display: inline-block;
     padding: 8px 20px;
@@ -419,7 +506,6 @@ h1 {{ text-align: center; margin-top: 0; }}
     border: 1px solid rgba(147,197,253,.4);
     color: #bfdbfe;
     text-decoration: none;
-    margin-bottom: 20px;
 }}
 
 .back-btn:hover {{
@@ -625,7 +711,10 @@ h1 {{ text-align: center; margin-top: 0; }}
 </head>
 <body>
 <div class="container">
-<a class="back-btn" href="/">← Back to Overview</a>
+<div class="back-buttons">
+    <a class="back-btn" href="/">← Back to Overview</a>
+    <a class="back-btn" href="/room/{room_id}">← Back to {room["name"]}</a>
+</div>
 <h1>{room["icon"]} {room["name"]}</h1>
 <div class="subtitle">{climate_link}</div>
 
@@ -716,16 +805,9 @@ def _render_climate_detail(
         temp_sensor_keys.append((sensor_key, sensor_name, f"{sensor_key}.temperature"))
         hum_sensor_keys.append((sensor_key, sensor_name, f"{sensor_key}.humidity"))
 
-    # Zeitraum-Buttons generieren
+    # Zeitraum-Buttons generieren (ohne 365d)
     range_buttons_html = ""
-    for key, label in (
-        ("24h", "24h"),
-        ("7d", "7d"),
-        ("14d", "14d"),
-        ("30d", "30d"),
-        ("90d", "90d"),
-        ("365d", "365d"),
-    ):
+    for key, label in VISIBLE_TIME_RANGES:
         active_class = " active" if key == range_key else ""
         range_buttons_html += (
             f'<a class="time-range-btn{active_class}" '
@@ -774,7 +856,6 @@ def _render_climate_detail(
 
     # Aktuelle Werte
     climate = _room_climate(batches, room)
-    climate_display = _climate_display_text(climate)
 
     # Letzte Aktualisierung
     last_update = "–"
@@ -872,13 +953,13 @@ def _render_climate_detail(
         )
     temp_sensor_datasets_str = ",\n            ".join(temp_sensor_datasets)
 
-    # Einzelsensor-Datasets für Feuchte (verschiedene Farben)
+    # Einzelsensor-Datasets für Feuchte (verschiedene Farben, startet mit Hellblau)
     hum_sensor_datasets = []
     for i, sensor_data in enumerate(hum_series_by_sensor):
         series = sensor_data["series"]
         values = json.dumps([point["value"] for point in series])
         name = sensor_data["name"].replace("<i>", "").replace("</i>", "")
-        color = SENSOR_COLORS[(i + 2) % len(SENSOR_COLORS)]
+        color = HUMIDITY_COLORS[i % len(HUMIDITY_COLORS)]
         hum_sensor_datasets.append(
             f"""{{
                 label: '{name}',
@@ -911,6 +992,13 @@ def _render_climate_detail(
             "<canvas id='chart-hum-sensors'></canvas>"
             "</div>"
         )
+
+    # Tooltip-Hilfsfunktionen
+    tooltip_label_color = _tooltip_label_color()
+    tooltip_date_logic_temp = _tooltip_date_logic("tempAvgDates")
+    tooltip_date_logic_hum = _tooltip_date_logic("humAvgDates")
+    tooltip_date_logic_temp_sensors = _tooltip_date_logic("tempSensorDates")
+    tooltip_date_logic_hum_sensors = _tooltip_date_logic("humSensorDates")
 
     # Chart-Skripte
     hum_avg_script = ""
@@ -947,15 +1035,8 @@ new Chart(document.getElementById('chart-hum-avg'), {{
                 boxWidth: 6,
                 boxHeight: 6,
                 callbacks: {{
-                    title: (items) => {{
-                        if (items.length > 0) {{
-                            const idx = items[0].dataIndex;
-                            const dateStr = humAvgDates[idx] || '';
-                            const label = items[0].label;
-                            return `📅 Date: ${{dateStr || ''}}\\n⏰ Time: ${{label}}`;
-                        }}
-                        return '';
-                    }},
+                    {tooltip_label_color}
+                    {tooltip_date_logic_hum}
                     label: (context) => {{
                         const value = (Math.round(context.parsed.y * 10) / 10).toFixed(1);
                         return `Ø Humidity: ${{value}} %`;
@@ -1011,15 +1092,8 @@ new Chart(document.getElementById('chart-hum-sensors'), {{
                 boxWidth: 6,
                 boxHeight: 6,
                 callbacks: {{
-                    title: (items) => {{
-                        if (items.length > 0) {{
-                            const idx = items[0].dataIndex;
-                            const dateStr = humSensorDates[idx] || '';
-                            const label = items[0].label;
-                            return `📅 Date: ${{dateStr || ''}}\\n⏰ Time: ${{label}}`;
-                        }}
-                        return '';
-                    }},
+                    {tooltip_label_color}
+                    {tooltip_date_logic_hum_sensors}
                     label: (context) => {{
                         const value = (Math.round(context.parsed.y * 10) / 10).toFixed(1);
                         return `${{context.dataset.label}}: ${{value}} %`;
@@ -1043,6 +1117,34 @@ new Chart(document.getElementById('chart-hum-sensors'), {{
     }}
 }});
 </script>
+"""
+
+    # Große aktuelle Werte-Header
+    current_temp = climate["temp"] if climate["temp"] is not None else 0.0
+    current_hum = climate["hum"] if climate["hum"] is not None else 0.0
+    has_humidity = climate["hum"] is not None
+
+    if has_humidity:
+        current_values_header = f"""
+<div class="current-values-header">
+    <div class="current-value-box">
+        <span class="current-value-label">🌡️ Temperature</span>
+        <span class="current-value">{current_temp:.1f} <small>°C</small></span>
+    </div>
+    <div class="current-value-box">
+        <span class="current-value-label">💧 Relative Humidity</span>
+        <span class="current-value">{current_hum:.0f} <small>%</small></span>
+    </div>
+</div>
+"""
+    else:
+        current_values_header = f"""
+<div class="current-values-header">
+    <div class="current-value-box">
+        <span class="current-value-label">🌡️ Temperature</span>
+        <span class="current-value">{current_temp:.1f} <small>°C</small></span>
+    </div>
+</div>
 """
 
     return f"""<!DOCTYPE html>
@@ -1080,6 +1182,12 @@ body {{
 h1 {{ text-align: center; margin-top: 0; }}
 .subtitle {{ text-align: center; color: #d1d5db; }}
 
+.back-buttons {{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}}
+
 .back-btn {{
     display: inline-block;
     padding: 8px 20px;
@@ -1088,11 +1196,45 @@ h1 {{ text-align: center; margin-top: 0; }}
     border: 1px solid rgba(147,197,253,.4);
     color: #bfdbfe;
     text-decoration: none;
-    margin-bottom: 20px;
 }}
 
 .back-btn:hover {{
     background: rgba(147,197,253,.3);
+}}
+
+.current-values-header {{
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}}
+
+.current-value-box {{
+    min-width: 0;
+    background: rgba(31,41,55,.78);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 18px;
+    padding: 24px;
+    text-align: center;
+}}
+
+.current-value-label {{
+    display: block;
+    color: #d1d5db;
+    font-size: .9rem;
+    margin-bottom: 8px;
+}}
+
+.current-value {{
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: white;
+}}
+
+.current-value small {{
+    font-size: 1.2rem;
+    color: #9ca3af;
 }}
 
 .time-range-buttons {{
@@ -1255,14 +1397,19 @@ h1 {{ text-align: center; margin-top: 0; }}
     .stat-grid {{ grid-template-columns: 1fr; }}
     .info-line {{ grid-template-columns: 140px 1fr; }}
     .custom-date-form {{ margin-left: 0; margin-top: 10px; }}
+    .current-values-header {{ grid-template-columns: 1fr; }}
 }}
 </style>
 </head>
 <body>
 <div class="container">
-<a class="back-btn" href="/room/{climate_id}">← Back to {room["name"]}</a>
+<div class="back-buttons">
+    <a class="back-btn" href="/">← Back to Overview</a>
+    <a class="back-btn" href="/room/{climate_id}">← Back to {room["name"]}</a>
+</div>
 <h1>{room["icon"]} Room Climate · {room["name"]}</h1>
-<div class="subtitle">{climate_display}</div>
+
+{current_values_header}
 
 <div class="time-range-buttons">
     {range_buttons_html}
@@ -1270,7 +1417,7 @@ h1 {{ text-align: center; margin-top: 0; }}
 </div>
 
 <div class="chart-container">
-    <span class="chart-title">🌡️ Ø Temperature</span>
+    <span class="chart-title">🌡️ Average Temperature</span>
     <canvas id="chart-temp-avg"></canvas>
 </div>
 
@@ -1311,7 +1458,7 @@ new Chart(document.getElementById('chart-temp-avg'), {{
     data: {{
         labels: tempAvgLabels,
         datasets: [{{
-            label: 'Ø Temperature',
+            label: 'Average Temperature',
             data: tempAvgValues,
             borderColor: '#fb923c',
             borderWidth: 2,
@@ -1331,18 +1478,11 @@ new Chart(document.getElementById('chart-temp-avg'), {{
                 boxWidth: 6,
                 boxHeight: 6,
                 callbacks: {{
-                    title: (items) => {{
-                        if (items.length > 0) {{
-                            const idx = items[0].dataIndex;
-                            const dateStr = tempAvgDates[idx] || '';
-                            const label = items[0].label;
-                            return `📅 Date: ${{dateStr || ''}}\\n⏰ Time: ${{label}}`;
-                        }}
-                        return '';
-                    }},
+                    {tooltip_label_color}
+                    {tooltip_date_logic_temp}
                     label: (context) => {{
                         const value = (Math.round(context.parsed.y * 10) / 10).toFixed(1);
-                        return `Ø Temperature: ${{value}} °C`;
+                        return `Average Temperature: ${{value}} °C`;
                     }}
                 }}
             }}
@@ -1393,15 +1533,8 @@ new Chart(document.getElementById('chart-temp-sensors'), {{
                 boxWidth: 6,
                 boxHeight: 6,
                 callbacks: {{
-                    title: (items) => {{
-                        if (items.length > 0) {{
-                            const idx = items[0].dataIndex;
-                            const dateStr = tempSensorDates[idx] || '';
-                            const label = items[0].label;
-                            return `📅 Date: ${{dateStr || ''}}\\n⏰ Time: ${{label}}`;
-                        }}
-                        return '';
-                    }},
+                    {tooltip_label_color}
+                    {tooltip_date_logic_temp_sensors}
                     label: (context) => {{
                         const value = (Math.round(context.parsed.y * 10) / 10).toFixed(1);
                         return `${{context.dataset.label}}: ${{value}} °C`;
@@ -1500,6 +1633,9 @@ def _render_device_detail(
     temp_series = _series(batches, temp_key)
     hum_series = _series(batches, hum_key) if hum_key else []
 
+    # Aktuelle Werte
+    device_current = _device_current(batches, device_key, device_type)
+
     # Aktueller Status
     status = _device_status(batches, device_key, device_type)
     status_text = _status_text(status)
@@ -1535,16 +1671,9 @@ def _render_device_detail(
             </div>
         """
 
-    # Zeitraum-Buttons generieren
+    # Zeitraum-Buttons generieren (ohne 365d)
     range_buttons_html = ""
-    for key, label in (
-        ("24h", "24h"),
-        ("7d", "7d"),
-        ("14d", "14d"),
-        ("30d", "30d"),
-        ("90d", "90d"),
-        ("365d", "365d"),
-    ):
+    for key, label in VISIBLE_TIME_RANGES:
         active_class = " active" if key == range_key else ""
         range_buttons_html += (
             f'<a class="time-range-btn{active_class}" '
@@ -1567,6 +1696,32 @@ def _render_device_detail(
     temp_dates_json = json.dumps([point["date"] for point in temp_series])
     temp_values_json = json.dumps([point["value"] for point in temp_series])
     hum_values_json = json.dumps([point["value"] for point in hum_series])
+
+    # Große aktuelle Werte-Header
+    has_humidity = len(hum_series) > 0
+
+    if has_humidity:
+        current_values_header = f"""
+<div class="current-values-header">
+    <div class="current-value-box">
+        <span class="current-value-label">🌡️ Temperature</span>
+        <span class="current-value">{device_current["temp"]:.1f} <small>°C</small></span>
+    </div>
+    <div class="current-value-box">
+        <span class="current-value-label">💧 Relative Humidity</span>
+        <span class="current-value">{device_current["hum"]:.0f} <small>%</small></span>
+    </div>
+</div>
+"""
+    else:
+        current_values_header = f"""
+<div class="current-values-header">
+    <div class="current-value-box">
+        <span class="current-value-label">🌡️ Temperature</span>
+        <span class="current-value">{device_current["temp"]:.1f} <small>°C</small></span>
+    </div>
+</div>
+"""
 
     return f"""<!DOCTYPE html>
 <html lang="de">
@@ -1603,6 +1758,12 @@ body {{
 h1 {{ text-align: center; margin-top: 0; }}
 .subtitle {{ text-align: center; color: #d1d5db; }}
 
+.back-buttons {{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}}
+
 .back-btn {{
     display: inline-block;
     padding: 8px 20px;
@@ -1611,7 +1772,6 @@ h1 {{ text-align: center; margin-top: 0; }}
     border: 1px solid rgba(147,197,253,.4);
     color: #bfdbfe;
     text-decoration: none;
-    margin-bottom: 20px;
 }}
 
 .back-btn:hover {{
@@ -1654,6 +1814,41 @@ h1 {{ text-align: center; margin-top: 0; }}
 .status-warn {{ color: #eab308; background: #eab308; }}
 .status-critical {{ color: #ef4444; background: #ef4444; }}
 .status-off {{ color: #6b7280; background: #6b7280; box-shadow: none; }}
+
+.current-values-header {{
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}}
+
+.current-value-box {{
+    min-width: 0;
+    background: rgba(31,41,55,.78);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 18px;
+    padding: 24px;
+    text-align: center;
+}}
+
+.current-value-label {{
+    display: block;
+    color: #d1d5db;
+    font-size: .9rem;
+    margin-bottom: 8px;
+}}
+
+.current-value {{
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: white;
+}}
+
+.current-value small {{
+    font-size: 1.2rem;
+    color: #9ca3af;
+}}
 
 .time-range-buttons {{
     display: flex;
@@ -1806,14 +2001,17 @@ h1 {{ text-align: center; margin-top: 0; }}
     .stat-grid {{ grid-template-columns: 1fr; }}
     .info-line {{ grid-template-columns: 140px 1fr; }}
     .custom-date-form {{ margin-left: 0; margin-top: 10px; }}
+    .current-values-header {{ grid-template-columns: 1fr; }}
 }}
 </style>
 </head>
 <body>
 <div class="container">
-<a class="back-btn" href="/room/{room_id}">← Back to {room["name"]}</a>
+<div class="back-buttons">
+    <a class="back-btn" href="/">← Back to Overview</a>
+    <a class="back-btn" href="/room/{room_id}">← Back to {room["name"]}</a>
+</div>
 <h1>{device_info["name"]}</h1>
-<div class="subtitle">{room["icon"]} {room["name"]}</div>
 
 <div class="device-header">
     <div>
@@ -1822,6 +2020,8 @@ h1 {{ text-align: center; margin-top: 0; }}
     </div>
     <span class="status-light {status}" aria-label="Device Status"></span>
 </div>
+
+{current_values_header}
 
 <div class="time-range-buttons">
     {range_buttons_html}
