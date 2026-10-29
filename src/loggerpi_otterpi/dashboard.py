@@ -9,7 +9,7 @@ from dashboard_config import ROOMS
 from otterpi_store import BatchStore
 
 BERLIN = ZoneInfo("Europe/Berlin")
-VERSION = "v1.7.3"
+VERSION = "v1.7.4"
 
 # Zeitraum-Optionen für die Detailseiten (in Stunden)
 TIME_RANGES = {
@@ -2091,21 +2091,10 @@ const datasets = [
         borderWidth: 1.5,
         pointRadius: 2,
         pointHoverRadius: 4,
+        yAxisID: 'temperature',
         tension: 0.3
     }}
 ];
-
-if (hasHumidity) {{
-    datasets.push({{
-        label: 'Relative Humidity',
-        data: humValues,
-        borderColor: '#38bdf8',
-        borderWidth: 1.5,
-        pointRadius: 2,
-        pointHoverRadius: 4,
-        tension: 0.3
-    }});
-}}
 
 const scales = {{
     x: {{
@@ -2113,11 +2102,8 @@ const scales = {{
             color: '#9ca3af',
             callback: (value) => tempLabels[value]
         }}
-    }}
-}};
-
-if (hasHumidity) {{
-    scales.temperature = {{
+    }},
+    temperature: {{
         type: 'linear',
         position: 'left',
         ticks: {{
@@ -2127,7 +2113,20 @@ if (hasHumidity) {{
                 return rounded + ' °C';
             }}
         }}
-    }};
+    }}
+}};
+
+if (hasHumidity) {{
+    datasets.push({{
+        label: 'Relative Humidity',
+        data: humValues,
+        borderColor: '#38bdf8',
+        borderWidth: 1.5,
+        pointRadius: 2,
+        pointHoverRadius: 4,
+        yAxisID: 'humidity',
+        tension: 0.3
+    }}));
     scales.humidity = {{
         type: 'linear',
         position: 'right',
@@ -2139,17 +2138,6 @@ if (hasHumidity) {{
             }}
         }},
         grid: {{ drawOnChartArea: false }}
-    }};
-}} else {{
-    scales.y = {{
-        type: 'linear',
-        ticks: {{
-            color: '#fb923c',
-            callback: (value) => {{
-                const rounded = Math.round(value * 10) / 10;
-                return rounded + ' °C';
-            }}
-        }}
     }};
 }}
 
@@ -2500,34 +2488,75 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
 }});
 """
 
-    # AtmoWEB und weatherhub_id0e (Temp + Feuchte)
+    # AtmoWEB und weatherhub_id0e (Temp + Feuchte) - ZWEI ACHSEN (links orange, rechts hellblau)
     return f"""
 const {chart_var}Labels = {device["labels_json"]};
 const {chart_var}Dates = {device["dates_json"]};
+const {chart_var}HasHumidity = {device["hum_values_json"]}.length > 0;
+
+const {chart_var}Datasets = [
+    {{
+        label: 'Temperature',
+        data: {device["temp_values_json"]},
+        borderColor: '#fb923c',
+        borderWidth: 1.5,
+        pointRadius: 2,
+        pointHoverRadius: 4,
+        yAxisID: 'temperature',
+        tension: 0.3
+    }}
+];
+
+const {chart_var}Scales = {{
+    x: {{
+        ticks: {{
+            color: '#9ca3af',
+            callback: (value) => {chart_var}Labels[value]
+        }}
+    }},
+    temperature: {{
+        type: 'linear',
+        position: 'left',
+        ticks: {{
+            color: '#fb923c',
+            callback: (value) => {{
+                const rounded = Math.round(value * 10) / 10;
+                return rounded + ' °C';
+            }}
+        }}
+    }}
+}};
+
+if ({chart_var}HasHumidity) {{
+    {chart_var}Datasets.push({{
+        label: 'Relative Humidity',
+        data: {device["hum_values_json"]},
+        borderColor: '#38bdf8',
+        borderWidth: 1.5,
+        pointRadius: 2,
+        pointHoverRadius: 4,
+        yAxisID: 'humidity',
+        tension: 0.3
+    }});
+    {chart_var}Scales.humidity = {{
+        type: 'linear',
+        position: 'right',
+        ticks: {{
+            color: '#38bdf8',
+            callback: (value) => {{
+                const rounded = Math.round(value * 10) / 10;
+                return rounded + ' %';
+            }}
+        }},
+        grid: {{ drawOnChartArea: false }}
+    }};
+}}
+
 new Chart(document.getElementById('{device["chart_id"]}'), {{
     type: 'line',
     data: {{
         labels: {chart_var}Labels,
-        datasets: [
-            {{
-                label: 'Temperature',
-                data: {device["temp_values_json"]},
-                borderColor: '#fb923c',
-                borderWidth: 1.5,
-                pointRadius: 2,
-                pointHoverRadius: 4,
-                tension: 0.3
-            }},
-            {{
-                label: 'Relative Humidity',
-                data: {device["hum_values_json"]},
-                borderColor: '#38bdf8',
-                borderWidth: 1.5,
-                pointRadius: 2,
-                pointHoverRadius: 4,
-                tension: 0.3
-            }}
-        ]
+        datasets: {chart_var}Datasets
     }},
     options: {{
         responsive: true,
@@ -2602,37 +2631,7 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                 }}
             }}
         }},
-        scales: {{
-            x: {{
-                ticks: {{
-                    color: '#9ca3af',
-                    callback: (value) => {chart_var}Labels[value]
-                }}
-            }},
-            temperature: {{
-                type: 'linear',
-                position: 'left',
-                ticks: {{
-                    color: '#fb923c',
-                    callback: (value) => {{
-                        const rounded = Math.round(value * 10) / 10;
-                        return rounded + ' °C';
-                    }}
-                }}
-            }},
-            humidity: {{
-                type: 'linear',
-                position: 'right',
-                ticks: {{
-                    color: '#38bdf8',
-                    callback: (value) => {{
-                        const rounded = Math.round(value * 10) / 10;
-                        return rounded + ' %';
-                    }}
-                }},
-                grid: {{ drawOnChartArea: false }}
-            }}
-        }}
+        scales: {chart_var}Scales
     }}
 }});
 """
