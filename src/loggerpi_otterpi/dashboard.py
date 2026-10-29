@@ -9,7 +9,7 @@ from dashboard_config import ROOMS
 from otterpi_store import BatchStore
 
 BERLIN = ZoneInfo("Europe/Berlin")
-VERSION = "v1.7.2"
+VERSION = "v1.7.3"
 
 # Zeitraum-Optionen für die Detailseiten (in Stunden)
 TIME_RANGES = {
@@ -112,7 +112,7 @@ def _climate_display_text(climate: dict) -> str:
 
     text = f"🌡️ Room temperature: {climate['temp']:.1f} °C"
     if climate["hum"] is not None:
-        text += f" · 💧 Relative Humidity: {climate['hum']:.0f} %"
+        text += f" · 💧 Relative Humidity: {climate['hum']:.1f} %"
 
     return text
 
@@ -492,12 +492,6 @@ body {{
 h1 {{ text-align: center; margin-top: 0; }}
 .subtitle {{ text-align: center; color: #d1d5db; }}
 
-.back-buttons {{
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-}}
-
 .back-btn {{
     display: inline-block;
     padding: 8px 20px;
@@ -506,6 +500,7 @@ h1 {{ text-align: center; margin-top: 0; }}
     border: 1px solid rgba(147,197,253,.4);
     color: #bfdbfe;
     text-decoration: none;
+    margin-bottom: 20px;
 }}
 
 .back-btn:hover {{
@@ -711,10 +706,7 @@ h1 {{ text-align: center; margin-top: 0; }}
 </head>
 <body>
 <div class="container">
-<div class="back-buttons">
-    <a class="back-btn" href="/">← Back to Overview</a>
-    <a class="back-btn" href="/room/{room_id}">← Back to {room["name"]}</a>
-</div>
+<a class="back-btn" href="/">← Back to Overview</a>
 <h1>{room["icon"]} {room["name"]}</h1>
 <div class="subtitle">{climate_link}</div>
 
@@ -888,9 +880,9 @@ def _render_climate_detail(
         f"</div>"
     )
 
-    # Statistik für Mittelwerte
+    # Statistik für Mittelwerte - KORRIGIERT
     temp_stats = _calculate_stats(temp_avg_series, [])
-    hum_stats = _calculate_stats(hum_avg_series, [])
+    hum_stats = _calculate_stats([], hum_avg_series)
 
     # Statistik-HTML
     stats_html = f"""
@@ -947,7 +939,6 @@ def _render_climate_detail(
                 borderWidth: 1,
                 pointRadius: 1,
                 pointHoverRadius: 3,
-                yAxisID: 'temperature',
                 tension: 0.3
             }}"""
         )
@@ -968,7 +959,6 @@ def _render_climate_detail(
                 borderWidth: 1,
                 pointRadius: 1,
                 pointHoverRadius: 3,
-                yAxisID: 'humidity',
                 tension: 0.3
             }}"""
         )
@@ -979,7 +969,7 @@ def _render_climate_detail(
     if hum_avg_series:
         hum_avg_chart_html = (
             "<div class='chart-container'>"
-            "<span class='chart-title'>💧 Average Humidity</span>"
+            "<span class='chart-title'>💧 Average Relative Humidity</span>"
             "<canvas id='chart-hum-avg'></canvas>"
             "</div>"
         )
@@ -1015,7 +1005,7 @@ new Chart(document.getElementById('chart-hum-avg'), {{
     data: {{
         labels: humAvgLabels,
         datasets: [{{
-            label: 'Ø Humidity',
+            label: 'Ø Rel. Humidity',
             data: humAvgValues,
             borderColor: '#38bdf8',
             borderWidth: 2,
@@ -1039,7 +1029,7 @@ new Chart(document.getElementById('chart-hum-avg'), {{
                     {tooltip_date_logic_hum}
                     label: (context) => {{
                         const value = (Math.round(context.parsed.y * 10) / 10).toFixed(1);
-                        return `Ø Humidity: ${{value}} %`;
+                        return `Ø Rel. Humidity: ${{value}} %`;
                     }}
                 }}
             }}
@@ -1119,7 +1109,7 @@ new Chart(document.getElementById('chart-hum-sensors'), {{
 </script>
 """
 
-    # Große aktuelle Werte-Header
+    # Große aktuelle Werte-Header (kleiner Stil wie auf Raumübersicht)
     current_temp = climate["temp"] if climate["temp"] is not None else 0.0
     current_hum = climate["hum"] if climate["hum"] is not None else 0.0
     has_humidity = climate["hum"] is not None
@@ -1133,7 +1123,7 @@ new Chart(document.getElementById('chart-hum-sensors'), {{
     </div>
     <div class="current-value-box">
         <span class="current-value-label">💧 Relative Humidity</span>
-        <span class="current-value">{current_hum:.0f} <small>%</small></span>
+        <span class="current-value">{current_hum:.1f} <small>%</small></span>
     </div>
 </div>
 """
@@ -1184,7 +1174,7 @@ h1 {{ text-align: center; margin-top: 0; }}
 
 .back-buttons {{
     display: flex;
-    justify-content: space-between;
+    gap: 10px;
     margin-bottom: 20px;
 }}
 
@@ -1203,37 +1193,38 @@ h1 {{ text-align: center; margin-top: 0; }}
 }}
 
 .current-values-header {{
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
     gap: 20px;
     margin-top: 20px;
+    flex-wrap: wrap;
 }}
 
 .current-value-box {{
-    min-width: 0;
+    min-width: 200px;
+    flex: 1;
     background: rgba(31,41,55,.78);
     border: 1px solid rgba(255,255,255,.08);
-    border-radius: 18px;
-    padding: 24px;
-    text-align: center;
+    border-radius: 12px;
+    padding: 16px 20px;
+    text-align: left;
 }}
 
 .current-value-label {{
     display: block;
     color: #d1d5db;
-    font-size: .9rem;
-    margin-bottom: 8px;
+    font-size: .85rem;
+    margin-bottom: 4px;
 }}
 
 .current-value {{
     display: block;
-    font-size: 2.5rem;
+    font-size: 1.6rem;
     font-weight: 600;
     color: white;
 }}
 
 .current-value small {{
-    font-size: 1.2rem;
+    font-size: 1rem;
     color: #9ca3af;
 }}
 
@@ -1397,15 +1388,15 @@ h1 {{ text-align: center; margin-top: 0; }}
     .stat-grid {{ grid-template-columns: 1fr; }}
     .info-line {{ grid-template-columns: 140px 1fr; }}
     .custom-date-form {{ margin-left: 0; margin-top: 10px; }}
-    .current-values-header {{ grid-template-columns: 1fr; }}
+    .current-values-header {{ flex-direction: column; }}
 }}
 </style>
 </head>
 <body>
 <div class="container">
 <div class="back-buttons">
-    <a class="back-btn" href="/">← Back to Overview</a>
     <a class="back-btn" href="/room/{climate_id}">← Back to {room["name"]}</a>
+    <a class="back-btn" href="/">← Back to Overview</a>
 </div>
 <h1>{room["icon"]} Room Climate · {room["name"]}</h1>
 
@@ -1458,7 +1449,7 @@ new Chart(document.getElementById('chart-temp-avg'), {{
     data: {{
         labels: tempAvgLabels,
         datasets: [{{
-            label: 'Average Temperature',
+            label: 'Ø Temperature',
             data: tempAvgValues,
             borderColor: '#fb923c',
             borderWidth: 2,
@@ -1482,7 +1473,7 @@ new Chart(document.getElementById('chart-temp-avg'), {{
                     {tooltip_date_logic_temp}
                     label: (context) => {{
                         const value = (Math.round(context.parsed.y * 10) / 10).toFixed(1);
-                        return `Average Temperature: ${{value}} °C`;
+                        return `Ø Temperature: ${{value}} °C`;
                     }}
                 }}
             }}
@@ -1640,7 +1631,7 @@ def _render_device_detail(
     status = _device_status(batches, device_key, device_type)
     status_text = _status_text(status)
 
-    # Statistik
+    # Statistik - KORREKT: temp_series als ersten, hum_series als zweiten Parameter
     stats = _calculate_stats(temp_series, hum_series)
 
     # Letzte Aktualisierung
@@ -1697,7 +1688,7 @@ def _render_device_detail(
     temp_values_json = json.dumps([point["value"] for point in temp_series])
     hum_values_json = json.dumps([point["value"] for point in hum_series])
 
-    # Große aktuelle Werte-Header
+    # Große aktuelle Werte-Header (kleiner Stil wie auf Raumübersicht)
     has_humidity = len(hum_series) > 0
 
     if has_humidity:
@@ -1709,7 +1700,7 @@ def _render_device_detail(
     </div>
     <div class="current-value-box">
         <span class="current-value-label">💧 Relative Humidity</span>
-        <span class="current-value">{device_current["hum"]:.0f} <small>%</small></span>
+        <span class="current-value">{device_current["hum"]:.1f} <small>%</small></span>
     </div>
 </div>
 """
@@ -1760,7 +1751,7 @@ h1 {{ text-align: center; margin-top: 0; }}
 
 .back-buttons {{
     display: flex;
-    justify-content: space-between;
+    gap: 10px;
     margin-bottom: 20px;
 }}
 
@@ -1816,37 +1807,38 @@ h1 {{ text-align: center; margin-top: 0; }}
 .status-off {{ color: #6b7280; background: #6b7280; box-shadow: none; }}
 
 .current-values-header {{
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
     gap: 20px;
     margin-top: 20px;
+    flex-wrap: wrap;
 }}
 
 .current-value-box {{
-    min-width: 0;
+    min-width: 200px;
+    flex: 1;
     background: rgba(31,41,55,.78);
     border: 1px solid rgba(255,255,255,.08);
-    border-radius: 18px;
-    padding: 24px;
-    text-align: center;
+    border-radius: 12px;
+    padding: 16px 20px;
+    text-align: left;
 }}
 
 .current-value-label {{
     display: block;
     color: #d1d5db;
-    font-size: .9rem;
-    margin-bottom: 8px;
+    font-size: .85rem;
+    margin-bottom: 4px;
 }}
 
 .current-value {{
     display: block;
-    font-size: 2.5rem;
+    font-size: 1.6rem;
     font-weight: 600;
     color: white;
 }}
 
 .current-value small {{
-    font-size: 1.2rem;
+    font-size: 1rem;
     color: #9ca3af;
 }}
 
@@ -2001,15 +1993,15 @@ h1 {{ text-align: center; margin-top: 0; }}
     .stat-grid {{ grid-template-columns: 1fr; }}
     .info-line {{ grid-template-columns: 140px 1fr; }}
     .custom-date-form {{ margin-left: 0; margin-top: 10px; }}
-    .current-values-header {{ grid-template-columns: 1fr; }}
+    .current-values-header {{ flex-direction: column; }}
 }}
 </style>
 </head>
 <body>
 <div class="container">
 <div class="back-buttons">
-    <a class="back-btn" href="/">← Back to Overview</a>
     <a class="back-btn" href="/room/{room_id}">← Back to {room["name"]}</a>
+    <a class="back-btn" href="/">← Back to Overview</a>
 </div>
 <h1>{device_info["name"]}</h1>
 
@@ -2099,7 +2091,6 @@ const datasets = [
         borderWidth: 1.5,
         pointRadius: 2,
         pointHoverRadius: 4,
-        yAxisID: 'temperature',
         tension: 0.3
     }}
 ];
@@ -2112,7 +2103,6 @@ if (hasHumidity) {{
         borderWidth: 1.5,
         pointRadius: 2,
         pointHoverRadius: 4,
-        yAxisID: 'humidity',
         tension: 0.3
     }});
 }}
@@ -2123,8 +2113,11 @@ const scales = {{
             color: '#9ca3af',
             callback: (value) => tempLabels[value]
         }}
-    }},
-    temperature: {{
+    }}
+}};
+
+if (hasHumidity) {{
+    scales.temperature = {{
         type: 'linear',
         position: 'left',
         ticks: {{
@@ -2134,10 +2127,7 @@ const scales = {{
                 return rounded + ' °C';
             }}
         }}
-    }}
-}};
-
-if (hasHumidity) {{
+    }};
     scales.humidity = {{
         type: 'linear',
         position: 'right',
@@ -2149,6 +2139,17 @@ if (hasHumidity) {{
             }}
         }},
         grid: {{ drawOnChartArea: false }}
+    }};
+}} else {{
+    scales.y = {{
+        type: 'linear',
+        ticks: {{
+            color: '#fb923c',
+            callback: (value) => {{
+                const rounded = Math.round(value * 10) / 10;
+                return rounded + ' °C';
+            }}
+        }}
     }};
 }}
 
@@ -2515,7 +2516,6 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                 borderWidth: 1.5,
                 pointRadius: 2,
                 pointHoverRadius: 4,
-                yAxisID: 'temperature',
                 tension: 0.3
             }},
             {{
@@ -2525,7 +2525,6 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                 borderWidth: 1.5,
                 pointRadius: 2,
                 pointHoverRadius: 4,
-                yAxisID: 'humidity',
                 tension: 0.3
             }}
         ]
