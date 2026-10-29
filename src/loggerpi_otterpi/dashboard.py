@@ -9,7 +9,7 @@ from dashboard_config import ROOMS
 from otterpi_store import BatchStore
 
 BERLIN = ZoneInfo("Europe/Berlin")
-VERSION = "v1.7.4"
+VERSION = "v1.7.5"
 
 # Zeitraum-Optionen für die Detailseiten (in Stunden)
 TIME_RANGES = {
@@ -2126,7 +2126,7 @@ if (hasHumidity) {{
         pointHoverRadius: 4,
         yAxisID: 'humidity',
         tension: 0.3
-    }}));
+    }});
     scales.humidity = {{
         type: 'linear',
         position: 'right',
