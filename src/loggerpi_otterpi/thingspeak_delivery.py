@@ -108,6 +108,7 @@ def _build_thingspeak_payload(
         "field3": _measurement_value(measurements, "atmoweb_102.temperature_1"),
         "field4": _measurement_value(measurements, "atmoweb_102.humidity"),
         "field7": _freezer_value(measurements),
+        "field8": _led_value(batch),
     }
 
     # System-Werte aus dem Batch
@@ -158,3 +159,13 @@ def _format_number(value: float) -> str:
     if value == int(value):
         return str(int(value))
     return f"{value:.2f}"
+
+
+def _led_value(batch) -> Optional[str]:
+    states = batch.states or {}
+    atmoweb_102 = states.get("atmoweb_102", {})
+    lights = atmoweb_102.get("lights", {})
+    led = lights.get("led")
+    if led is None:
+        return None
+    return _format_number(led)

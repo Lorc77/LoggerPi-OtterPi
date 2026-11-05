@@ -332,7 +332,7 @@ def _usb_ids(port: str) -> dict:
         return {}
     iface = Path("/sys/class/tty") / tty_name / "device"
     try:
-        usb = iface.resolve().parent
+        usb = iface.resolve().parent.parent
         return {
             "usb_vid": (usb / "idVendor").read_text().strip(),
             "usb_pid": (usb / "idProduct").read_text().strip(),

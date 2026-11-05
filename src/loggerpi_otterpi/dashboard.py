@@ -97,11 +97,12 @@ def _render_led_svg(value: Optional[float]) -> str:
     css = "led-on" if value > 0 else "led-off"
     return f"""
     <span class="led-indicator {css}" title="LED {value:.0f}%">
-        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M9 21h6v-1H9v1zm3-19a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"
-                  fill="currentColor"/>
+        <svg width="32" height="32" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="9" r="7" fill="currentColor"/>
+            <rect x="9" y="16" width="6" height="4" rx="1" fill="currentColor"/>
+            <text x="12" y="11" text-anchor="middle" font-size="6" font-weight="bold"
+                  fill="#1f2937">{value:.0f}%</text>
         </svg>
-        <span class="led-value">{value:.0f}%</span>
     </span>
     """
 
@@ -162,6 +163,8 @@ def _render_overview(store: BatchStore) -> str:
             )
 
         room_cards += card
+        current = _current_values(batches)
+        last_update = current["last_batch"]
 
     return f"""<!DOCTYPE html>
 <html lang="de">
@@ -295,7 +298,7 @@ h1 {{ text-align: center; margin-top: 0; }}
 <body>
 <div class="container">
 <h1>📡 ZOOLOGY-Observer Dashboard</h1>
-<div class="subtitle">Rooms & Devices · Last Update</div>
+<div class="subtitle">Rooms & Devices · Last update: {last_update}</div>
 
 <div class="rooms-grid">
 {room_cards}
@@ -576,13 +579,12 @@ h1 {{ text-align: center; margin-top: 0; }}
 .led-indicator {{
     display: inline-flex;
     align-items: center;
-    gap: 2px;
-    font-size: .8rem;
-    white-space: nowrap;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
 }}
 .led-on {{ color: #fbbf24; }}
 .led-off {{ color: #6b7280; }}
-.led-value {{ font-size: .7rem; font-weight: 600; }}
 
 .metric-grid {{
     display: grid;
@@ -1717,10 +1719,21 @@ def _render_device_detail(
         ("Gateway Timestamp", "gateway_timestamp"),
     ):
         if field in device_meta and device_meta[field] is not None:
+            value = device_meta[field]
+            if field == "resolution":
+                value = "0.1 °C" if value == 0 else "1 °C"
+            elif field == "sensor_type":
+                value = f"ID{value:02X}"
+            elif field == "gateway_timestamp":
+                value = (
+                    datetime.fromtimestamp(value, tz=timezone.utc)
+                    .astimezone(BERLIN)
+                    .strftime("%d.%m.%Y %H:%M:%S Uhr")
+                )
             device_meta_html += f"""
         <div class="info-line">
             <span class="info-label">{label}:</span>
-            <span class="info-value">{device_meta[field]}</span>
+            <span class="info-value">{value}</span>
         </div>
 """
 
@@ -1844,13 +1857,12 @@ h1 {{ text-align: center; margin-top: 0; }}
 .led-indicator {{
     display: inline-flex;
     align-items: center;
-    gap: 2px;
-    font-size: .8rem;
-    white-space: nowrap;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
 }}
 .led-on {{ color: #fbbf24; }}
 .led-off {{ color: #6b7280; }}
-.led-value {{ font-size: .7rem; font-weight: 600; }}
 
 .current-values-header {{
     display: flex;
