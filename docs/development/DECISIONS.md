@@ -920,8 +920,7 @@ Die gesammelten Batches waren nur in SQLite sichtbar.
 
 ### Entscheidung
 
-Seit `v1.2.0` stellt der OtterPi ein Dashboard unter
-`https://zoology.makki.route64.de` bereit.
+Seit `v1.2.0` stellt der OtterPi ein Dashboard unter `https://observer.makki.route64.de` und eine Einstiegsseite unter `https://zoology.makki.route64.de` bereit.
 
 Das Dashboard zeigt:
 - aktuelle Werte (Temp/Feuchte der MEMMERT HPP260)
@@ -1391,7 +1390,9 @@ Der Handler (`otterpi.py`) macht **keine** IP-Prüfung und bleibt auth-agnostisc
 
 ### Konsequenz
 
+- Admin-URL: https://observer.makki.route64.de/admin
 - Admin-Routen: `GET /admin`, `GET /api/admin/config`, `PUT /api/admin/*`.
+- nginx erlaubt IPv4 (192.168.178.0/24) und IPv6 (2a02:908:1a66:ecc0::/64, fdb7:145b:1d9f:0::/64).
 - nginx-Konfiguration ist separater Deployment-Schritt.
 
 ---
@@ -1514,4 +1515,3 @@ Folgende Punkte sind derzeit bewusst noch offen:
 - endgültige WeatherHub-Adapterimplementierung
 - Zeitpunkt der Ablösung des Legacy-Observers
 - Integration von States/Events (Change Detection)
-- Dashboard auf dem OtterPi (geplant: `zoology.makki.route64.de`)

@@ -666,11 +666,14 @@ Authentication:
     Bearer Token (seit v1.1.0)
 
 Dashboard:
-    https://zoology.makki.route64.de (seit v1.2.0)
+    https://observer.makki.route64.de (seit v1.2.0)
+
+Einstiegsseite:
+    https://zoology.makki.route64.de
 
 nginx:
     Reverse-Proxy für loggerpi.makki.route64.de eingerichtet und verifiziert
-    Reverse-Proxy für zoology.makki.route64.de eingerichtet und verifiziert
+    Reverse-Proxy für observer.makki.route64.de eingerichtet und verifiziert
 
 TLS:
     Zertifikate auf OtterPi vorhanden
@@ -682,7 +685,7 @@ End-to-End-Produktion:
     OtterPi speichert in SQLite
 
 Dashboard:
-    https://zoology.makki.route64.de (seit v1.2.0)
+    https://observer.makki.route64.de (seit v1.2.0)
     Raumdetailseiten: /room/<id>
     Gerätedetailseiten: /device/<sensor_id>
     Raumklima-Detailseiten: /climate/<room_id>

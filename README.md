@@ -143,7 +143,8 @@ PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
 
 Der E2E-Datenpfad (LoggerPi → nginx → OtterPi → SQLite) ist verifiziert.
 
-Dashboard: `https://zoology.makki.route64.de`
+Einstiegsseite: `https://zoology.makki.route64.de`
+Dashboard: `https://observer.makki.route64.de`
 Authentication: Bearer Token (seit v1.1.0)
 
 Datenquellen:
@@ -153,7 +154,7 @@ Datenquellen:
 - ThingSpeak-Injektion (field1–7) ✅
 - WeatherHub Sensoren (Gateway Proxy, 17 Sensoren) ✅
 
-Admin (LAN-only): `https://zoology.makki.route64.de/admin`
+Admin (LAN-only): `https://observer.makki.route64.de/admin`
 - Config-Editor für Rooms, Alarm Limits, Mail, Notifications
 - JSON-Validierung, `.bak`, atomares Schreiben
 

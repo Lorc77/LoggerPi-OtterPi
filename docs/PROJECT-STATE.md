@@ -23,6 +23,8 @@ LoggerPi und OtterPi laufen produktiv auf Version `v1.8.0`.
 
 ## Phase A – Config-Admin (abgeschlossen, v1.8.0)
 
+Admin (LAN-only): https://observer.makki.route64.de/admin
+
 **Stand:** 2026-11-04
 
 ### Umgesetzt
@@ -96,8 +98,7 @@ Das Dashboard zeigt seit `v1.3.1` eine Freezer-Kachel in R1304
 Zeitstempel-Konvertierung (UTC→Berlin nur bei UTC-Zeitstempeln).
 
 Seit `v1.1.0` ist die Übertragung durch Bearer-Token-Authentication
-geschützt. Seit `v1.2.0` stellt der OtterPi ein Dashboard unter
-`https://zoology.makki.route64.de` bereit. Seit `v1.2.3` ist das
+geschützt. Seit `v1.2.0` stellt der OtterPi ein Dashboard unter `https://observer.makki.route64.de` und eine Einstiegsseite unter `https://zoology.makki.route64.de` bereit. Seit `v1.2.3` ist das
 Dashboard raum-basiert (Übersicht + Detailseiten).
 
 Der zentrale Deployment-Wrapper befindet sich unter:
@@ -1936,8 +1937,7 @@ geschützt.
 
 ### P0 – Dashboard implementiert ✅
 
-Seit `v1.2.0` stellt der OtterPi ein Dashboard unter
-`https://zoology.makki.route64.de` bereit (Charts, 48h, Ortszeit).
+Seit `v1.2.0` stellt der OtterPi ein Dashboard unter `https://observer.makki.route64.de` und eine Einstiegsseite unter `https://zoology.makki.route64.de` bereit (Charts, 48h, Ortszeit).
 
 Der Application-Deploymentmechanismus ist implementiert und auf
 LoggerPi und OtterPi praktisch ausgerollt (Stand 2026-09-20).
