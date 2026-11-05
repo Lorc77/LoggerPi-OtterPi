@@ -98,12 +98,17 @@ def _render_led_svg(value: Optional[float]) -> str:
     return f"""
     <span class="led-indicator {css}" title="LED {value:.0f}%">
         <svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="9" r="7" fill="currentColor"/>
-            <path d="M9.5 14.5 L14.5 14.5 L13.5 17 L10.5 17 Z" fill="currentColor"/>
-            <rect x="10" y="17" width="4" height="4" rx="0.8" fill="currentColor"/>
-            <line x1="10" y1="18.2" x2="14" y2="18.2" stroke="#1f2937" stroke-width="0.4"/>
-            <line x1="10" y1="19.2" x2="14" y2="19.2" stroke="#1f2937" stroke-width="0.4"/>
-            <text x="12" y="11" text-anchor="middle" font-size="6" font-weight="bold"
+            <path d="M12 2 C9 2 6 5 6 9
+                     C6 12 8 14 9 15.5
+                     L15 15.5
+                     C16 14 18 12 18 9
+                     C18 5 15 2 12 2 Z"
+                  fill="currentColor"/>
+            <rect x="8.5" y="15.5" width="7" height="5" rx="0.8" fill="currentColor"/>
+            <line x1="8.5" y1="17" x2="15.5" y2="17" stroke="#1f2937" stroke-width="0.4"/>
+            <line x1="8.5" y1="18.5" x2="15.5" y2="18.5" stroke="#1f2937" stroke-width="0.4"/>
+            <line x1="8.5" y1="20" x2="15.5" y2="20" stroke="#1f2937" stroke-width="0.4"/>
+            <text x="12" y="10.5" text-anchor="middle" font-size="6" font-weight="bold"
                   fill="#1f2937">{value:.0f}%</text>
         </svg>
     </span>
