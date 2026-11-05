@@ -33,6 +33,11 @@ from dashboard_data import (
 )
 from otterpi_store import BatchStore
 
+_USB_NAMES = {
+    ("0403", "6001"): "FTDI FT232R",
+    ("067b", "2303"): "Prolific PL2303",
+}
+
 
 def render_dashboard(
     store: BatchStore,
@@ -98,11 +103,11 @@ def _render_led_svg(value: Optional[float]) -> str:
     return f"""
     <span class="led-indicator {css}" title="LED {value:.0f}%">
         <svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 2 C9 2 6 5 6 9
-                     C6 12 8 14 9 15.5
+            <path d="M12 2 C9 2 5 5 5 9
+                     C5 12 8 14 9 15.5
                      L15 15.5
-                     C16 14 18 12 18 9
-                     C18 5 15 2 12 2 Z"
+                     C16 14 19 12 19 9
+                     C19 5 15 2 12 2 Z"
                   fill="currentColor"/>
             <rect x="8.5" y="15.5" width="7" height="5" rx="0.8" fill="currentColor"/>
             <line x1="8.5" y1="17" x2="15.5" y2="17" stroke="#1f2937" stroke-width="0.4"/>
@@ -1719,8 +1724,6 @@ def _render_device_detail(
         ("Port", "port"),
         ("Resolution", "resolution"),
         ("USB Serial", "usb_serial"),
-        ("USB VID", "usb_vid"),
-        ("USB PID", "usb_pid"),
         ("Sensor ID", "sensor_id"),
         ("Sensor Type", "sensor_type"),
         ("Gateway IP", "gateway_ip"),
@@ -1742,6 +1745,18 @@ def _render_device_detail(
         <div class="info-line">
             <span class="info-label">{label}:</span>
             <span class="info-value">{value}</span>
+        </div>
+"""
+
+    usb_vid = device_meta.get("usb_vid")
+    usb_pid = device_meta.get("usb_pid")
+    if usb_vid and usb_pid:
+        usb_name = _USB_NAMES.get((usb_vid, usb_pid))
+        usb_label = f"{usb_name} ({usb_vid}:{usb_pid})" if usb_name else f"{usb_vid}:{usb_pid}"
+        device_meta_html += f"""
+        <div class="info-line">
+            <span class="info-label">USB:</span>
+            <span class="info-value">{usb_label}</span>
         </div>
 """
 
