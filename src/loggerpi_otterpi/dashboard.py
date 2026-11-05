@@ -97,9 +97,12 @@ def _render_led_svg(value: Optional[float]) -> str:
     css = "led-on" if value > 0 else "led-off"
     return f"""
     <span class="led-indicator {css}" title="LED {value:.0f}%">
-        <svg width="32" height="32" viewBox="0 0 24 24" aria-hidden="true">
+        <svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="12" cy="9" r="7" fill="currentColor"/>
-            <rect x="9" y="16" width="6" height="4" rx="1" fill="currentColor"/>
+            <path d="M9.5 14.5 L14.5 14.5 L13.5 17 L10.5 17 Z" fill="currentColor"/>
+            <rect x="10" y="17" width="4" height="4" rx="0.8" fill="currentColor"/>
+            <line x1="10" y1="18.2" x2="14" y2="18.2" stroke="#1f2937" stroke-width="0.4"/>
+            <line x1="10" y1="19.2" x2="14" y2="19.2" stroke="#1f2937" stroke-width="0.4"/>
             <text x="12" y="11" text-anchor="middle" font-size="6" font-weight="bold"
                   fill="#1f2937">{value:.0f}%</text>
         </svg>
@@ -580,8 +583,8 @@ h1 {{ text-align: center; margin-top: 0; }}
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
 }}
 .led-on {{ color: #fbbf24; }}
 .led-off {{ color: #6b7280; }}
@@ -1858,8 +1861,8 @@ h1 {{ text-align: center; margin-top: 0; }}
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
 }}
 .led-on {{ color: #fbbf24; }}
 .led-off {{ color: #6b7280; }}
