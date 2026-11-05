@@ -289,13 +289,7 @@ class TestReadState:
     """Testet read_state mit gemockter Seriell-Schnittstelle."""
 
     def test_state_values(self, reader, monkeypatch):
-        responses = iter(
-            [
-                b"OK\r\n0\r\n",  # IN_MODE_10 → operation_mode
-                b"OK\r\n0\r\n",  # IN_PAR_11 → resolution
-                b"OK\r\n14.7\r\n",  # IN_SP_11 → temperature_setpoint
-            ]
-        )
+        responses = iter([b"OK\r\n0\r\n"])  # IN_MODE_10
 
         class FakeSerial:
             def __init__(self):
@@ -322,18 +316,84 @@ class TestReadState:
             def __exit__(self, *args):
                 return False
 
-        monkeypatch.setattr(
-            reader,
-            "_open_serial",
-            lambda: FakeSerial(),
-        )
+        monkeypatch.setattr(reader, "_open_serial", lambda: FakeSerial())
 
         states, operation = reader.read_state()
 
-        assert states["operation_mode"] == 0
-        assert states["resolution"] == 0
-        assert states["temperature_setpoint"] == 14.7
+        assert states == {"operation_mode": 0}
         assert operation == {}
+
+    def test_read_setpoints(self, reader, monkeypatch):
+        class FakeSerial:
+            def __init__(self):
+                self.in_waiting = 0
+
+            def reset_input_buffer(self):
+                pass
+
+            def write(self, data):
+                pass
+
+            def flush(self):
+                pass
+
+            def read_until(self, terminator):
+                return b"OK\r\n14.7\r\n"
+
+            def read(self, n):
+                return b""
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+        monkeypatch.setattr(reader, "_open_serial", lambda: FakeSerial())
+
+        setpoints = reader.read_setpoints()
+
+        assert setpoints == {"temperature": 14.7}
+
+    def test_read_device_info(self, reader, monkeypatch):
+        class FakeSerial:
+            def __init__(self):
+                self.in_waiting = 0
+
+            def reset_input_buffer(self):
+                pass
+
+            def write(self, data):
+                pass
+
+            def flush(self):
+                pass
+
+            def read_until(self, terminator):
+                return b"OK\r\n0\r\n"
+
+            def read(self, n):
+                return b""
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+        monkeypatch.setattr(reader, "_open_serial", lambda: FakeSerial())
+        monkeypatch.setattr(
+            "memmert._usb_ids",
+            lambda port: {"usb_vid": "067b", "usb_pid": "2303"},
+        )
+
+        info = reader.read_device_info()
+
+        assert info["address"] == "1"
+        assert info["port"] == "/dev/test/memmert"
+        assert info["resolution"] == 0
+        assert info["usb_vid"] == "067b"
+        assert info["usb_pid"] == "2303"
 
     def test_state_error_returns_empty(self, reader, monkeypatch):
         class FakeSerial:
@@ -400,13 +460,10 @@ class TestCommandConfiguration:
         assert IPP300_MEASUREMENT_COMMANDS == (("IN_PV_{addr}1", "temperature", "celsius"),)
 
     def test_ipp300_state_commands(self):
-        assert IPP300_STATE_COMMANDS == (
-            ("IN_MODE_{addr}0", "operation_mode"),
-            ("IN_PAR_{addr}1", "resolution"),
-        )
+        assert IPP300_STATE_COMMANDS == (("IN_MODE_{addr}0", "operation_mode"),)
 
     def test_ipp300_setpoint_commands(self):
-        assert IPP300_SETPOINT_COMMANDS == (("IN_SP_{addr}1", "temperature_setpoint"),)
+        assert IPP300_SETPOINT_COMMANDS == (("IN_SP_{addr}1", "temperature"),)
 
     def test_all_measurement_commands_complete(self):
         names = [name for _, name, _ in ALL_MEASUREMENT_COMMANDS]

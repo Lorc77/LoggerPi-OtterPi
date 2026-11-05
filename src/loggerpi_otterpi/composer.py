@@ -10,6 +10,11 @@ def compose_batch(
     logger_id: str,
     sequence_store: SequenceStore,
     measurements: Optional[dict[str, Measurement]] = None,
+    states: Optional[dict] = None,
+    operation: Optional[dict] = None,
+    serial: Optional[dict] = None,
+    setpoints: Optional[dict] = None,
+    device: Optional[dict] = None,
 ) -> Batch:
     system_info = get_system_info()
 
@@ -25,4 +30,9 @@ def compose_batch(
         measurements=measurements,
         system=system,
         memory=system_info["memory"],
+        states=states,
+        operation=operation,
+        serial=serial,
+        setpoints=setpoints,
+        device=device,
     )

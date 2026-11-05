@@ -1,0 +1,278 @@
+
+========================================================================
+MEMMERT IPP300 – COMPLETE READ-ONLY INVENTUR
+========================================================================
+
+Zeitpunkt : 2026-11-05T16:33:51
+Ports     : /dev/ttyUSB1, /dev/ttyUSB2
+Baudrate  : 2400
+Format    : 8N1
+Flow Ctrl : none
+Adressen  : 0 ... F
+
+SICHERHEIT:
+  Es werden ausschließlich IN_* Befehle gesendet.
+  Keine OUT_* Befehle.
+  Kein REMOTE.
+  Keine Sollwertänderung.
+  Keine Konfigurationsänderung.
+
+========================================================================
+PHASE 1 – ADRESS-SCAN
+========================================================================
+
+------------------------------------------------------------------------
+ADRESS-SCAN: /dev/ttyUSB1
+------------------------------------------------------------------------
+Serielle Schnittstelle geöffnet.
+
+  Teste Adresse 0: IN_PV_01 ... keine Antwort
+  Teste Adresse 1: IN_PV_11 ... ANTWORT: ['OK', '9.7']
+  Teste Adresse 2: IN_PV_21 ... keine Antwort
+  Teste Adresse 3: IN_PV_31 ... keine Antwort
+  Teste Adresse 4: IN_PV_41 ... keine Antwort
+  Teste Adresse 5: IN_PV_51 ... keine Antwort
+  Teste Adresse 6: IN_PV_61 ... keine Antwort
+  Teste Adresse 7: IN_PV_71 ... keine Antwort
+  Teste Adresse 8: IN_PV_81 ... keine Antwort
+  Teste Adresse 9: IN_PV_91 ... keine Antwort
+  Teste Adresse A: IN_PV_A1 ... keine Antwort
+  Teste Adresse B: IN_PV_B1 ... keine Antwort
+  Teste Adresse C: IN_PV_C1 ... keine Antwort
+  Teste Adresse D: IN_PV_D1 ... keine Antwort
+  Teste Adresse E: IN_PV_E1 ... keine Antwort
+  Teste Adresse F: IN_PV_F1 ... keine Antwort
+
+Gefundene MEMMERT-Adresse(n) auf /dev/ttyUSB1:
+  Adresse 1 -> IN_PV = 9.7 °C
+
+------------------------------------------------------------------------
+ADRESS-SCAN: /dev/ttyUSB2
+------------------------------------------------------------------------
+FEHLER bei /dev/ttyUSB2: [Errno 2] could not open port /dev/ttyUSB2: [Errno 2] No such file or directory: '/dev/ttyUSB2'
+
+Keine antwortenden MEMMERT-Geräte auf /dev/ttyUSB2.
+
+========================================================================
+PHASE 2 – VOLLSTÄNDIGE IN_* INVENTUR
+========================================================================
+
+
+========================================================================
+VOLLSTÄNDIGE DETAILINVENTUR: /dev/ttyUSB1 / Adresse 1
+========================================================================
+
+Serielle Schnittstelle geöffnet.
+
+  -> Sende: IN_MODE_10
+     Beschreibung: Betriebsart
+     Rohdaten    : b'OK\r\n0\r\n'
+     Rohdaten HEX: 4f 4b 0d 0a 30 0d 0a
+     Antwort     : ['OK', '0']
+     Ergebnis    : LOCAL / manueller Betrieb
+
+  -> Sende: IN_PAR_11
+     Beschreibung: Reglerauflösung
+     Rohdaten    : b'OK\r\n0\r\n'
+     Rohdaten HEX: 4f 4b 0d 0a 30 0d 0a
+     Antwort     : ['OK', '0']
+     Ergebnis    : Auflösung 0,1 °C
+
+  -> Sende: IN_PAR_14
+     Beschreibung: Luftklappensteuerung
+     Rohdaten    : b'OK\r\n0\r\n'
+     Rohdaten HEX: 4f 4b 0d 0a 30 0d 0a
+     Antwort     : ['OK', '0']
+     Ergebnis    : Luftklappensteuerung: nicht vorhanden
+
+  -> Sende: IN_PAR_15
+     Beschreibung: Luftturbine
+     Rohdaten    : b'OK\r\n0\r\n'
+     Rohdaten HEX: 4f 4b 0d 0a 30 0d 0a
+     Antwort     : ['OK', '0']
+     Ergebnis    : Luftturbine: nicht vorhanden
+
+  -> Sende: IN_PAR_16
+     Beschreibung: Schaltkontakt 1
+     Rohdaten    : b'OK\r\n0\r\n'
+     Rohdaten HEX: 4f 4b 0d 0a 30 0d 0a
+     Antwort     : ['OK', '0']
+     Ergebnis    : Schaltkontakt 1: nicht vorhanden
+
+  -> Sende: IN_PAR_17
+     Beschreibung: Schaltkontakt 2
+     Rohdaten    : b'OK\r\n0\r\n'
+     Rohdaten HEX: 4f 4b 0d 0a 30 0d 0a
+     Antwort     : ['OK', '0']
+     Ergebnis    : Schaltkontakt 2: nicht vorhanden
+
+  -> Sende: IN_PAR_18
+     Beschreibung: Schaltkontakt 3
+     Rohdaten    : b'OK\r\n0\r\n'
+     Rohdaten HEX: 4f 4b 0d 0a 30 0d 0a
+     Antwort     : ['OK', '0']
+     Ergebnis    : Schaltkontakt 3: nicht vorhanden
+
+  -> Sende: IN_PAR_19
+     Beschreibung: 2. Temperatur vorhanden
+     Rohdaten    : b'OK\r\n0\r\n'
+     Rohdaten HEX: 4f 4b 0d 0a 30 0d 0a
+     Antwort     : ['OK', '0']
+     Ergebnis    : 2. Temperatur: nicht vorhanden
+
+  -> Sende: IN_PAR_1A
+     Beschreibung: Druck/Vakuum vorhanden
+     Rohdaten    : b'OK\r\n0\r\n'
+     Rohdaten HEX: 4f 4b 0d 0a 30 0d 0a
+     Antwort     : ['OK', '0']
+     Ergebnis    : Druck/Vakuum: nicht vorhanden
+
+  -> Sende: IN_PV_11
+     Beschreibung: Ist-Temperatur
+     Rohdaten    : b'OK\r\n9.7\r\n'
+     Rohdaten HEX: 4f 4b 0d 0a 39 2e 37 0d 0a
+     Antwort     : ['OK', '9.7']
+     Ergebnis    : 9.7
+
+  -> Sende: IN_PV_12
+     Beschreibung: CO2-Istwert
+     Rohdaten    : b'OK\r\n0.0\r\n'
+     Rohdaten HEX: 4f 4b 0d 0a 30 2e 30 0d 0a
+     Antwort     : ['OK', '0.0']
+     Ergebnis    : 0.0
+
+  -> Sende: IN_PV_13
+     Beschreibung: rh-Istwert
+     Rohdaten    : b'OK\r\n0.0\r\n'
+     Rohdaten HEX: 4f 4b 0d 0a 30 2e 30 0d 0a
+     Antwort     : ['OK', '0.0']
+     Ergebnis    : 0.0
+
+  -> Sende: IN_PV_15
+     Beschreibung: 2. Ist-Temperatur
+     Rohdaten    : b'OK\r\n0.0\r\n'
+     Rohdaten HEX: 4f 4b 0d 0a 30 2e 30 0d 0a
+     Antwort     : ['OK', '0.0']
+     Ergebnis    : 0.0
+
+  -> Sende: IN_PV_1A
+     Beschreibung: Druck/Vakuum-Istwert
+     Rohdaten    : b'OK\r\n0\r\n'
+     Rohdaten HEX: 4f 4b 0d 0a 30 0d 0a
+     Antwort     : ['OK', '0']
+     Ergebnis    : 0
+
+  -> Sende: IN_PV_1B
+     Beschreibung: 3. Ist-Temperatur
+     Rohdaten    : b'OK\r\n819.1\r\n'
+     Rohdaten HEX: 4f 4b 0d 0a 38 31 39 2e 31 0d 0a
+     Antwort     : ['OK', '819.1']
+     Ergebnis    : 819.1
+
+  -> Sende: IN_PV_1C
+     Beschreibung: 4. Ist-Temperatur
+     Rohdaten    : b'OK\r\n819.1\r\n'
+     Rohdaten HEX: 4f 4b 0d 0a 38 31 39 2e 31 0d 0a
+     Antwort     : ['OK', '819.1']
+     Ergebnis    : 819.1
+
+  -> Sende: IN_PV_1D
+     Beschreibung: O2-Istwert
+     Rohdaten    : b'OK\r\n0.0\r\n'
+     Rohdaten HEX: 4f 4b 0d 0a 30 2e 30 0d 0a
+     Antwort     : ['OK', '0.0']
+     Ergebnis    : 0.0
+
+  -> Sende: IN_SP_11
+     Beschreibung: Temperatur-Sollwert
+     Rohdaten    : b'OK\r\n9.7\r\n'
+     Rohdaten HEX: 4f 4b 0d 0a 39 2e 37 0d 0a
+     Antwort     : ['OK', '9.7']
+     Ergebnis    : 9.7
+
+  -> Sende: IN_SP_12
+     Beschreibung: CO2-Sollwert
+     Rohdaten    : b'OK\r\n0.0\r\n'
+     Rohdaten HEX: 4f 4b 0d 0a 30 2e 30 0d 0a
+     Antwort     : ['OK', '0.0']
+     Ergebnis    : 0.0
+
+  -> Sende: IN_SP_13
+     Beschreibung: rh-Sollwert
+     Rohdaten    : b'OK\r\n0.0\r\n'
+     Rohdaten HEX: 4f 4b 0d 0a 30 2e 30 0d 0a
+     Antwort     : ['OK', '0.0']
+     Ergebnis    : 0.0
+
+  -> Sende: IN_SP_14
+     Beschreibung: Luftklappen-Sollwert
+     Rohdaten    : b'OK\r\n0\r\n'
+     Rohdaten HEX: 4f 4b 0d 0a 30 0d 0a
+     Antwort     : ['OK', '0']
+     Ergebnis    : 0
+
+  -> Sende: IN_SP_15
+     Beschreibung: Luftturbinen-Sollwert
+     Rohdaten    : b'OK\r\nA\r\n'
+     Rohdaten HEX: 4f 4b 0d 0a 41 0d 0a
+     Antwort     : ['OK', 'A']
+     Ergebnis    : A
+
+  -> Sende: IN_SP_1A
+     Beschreibung: Druck/Vakuum-Sollwert
+     Rohdaten    : b'OK\r\n1100\r\n'
+     Rohdaten HEX: 4f 4b 0d 0a 31 31 30 30 0d 0a
+     Antwort     : ['OK', '1100']
+     Ergebnis    : 1100
+
+  -> Sende: IN_SP_1D
+     Beschreibung: O2-Sollwert
+     Rohdaten    : b'OK\r\n0.0\r\n'
+     Rohdaten HEX: 4f 4b 0d 0a 30 2e 30 0d 0a
+     Antwort     : ['OK', '0.0']
+     Ergebnis    : 0.0
+
+
+------------------------------------------------------------------------
+ZUSAMMENFASSUNG: /dev/ttyUSB1 / Adresse 1
+------------------------------------------------------------------------
+
+OK           IN_MODE_10       Betriebsart                    => LOCAL / manueller Betrieb
+OK           IN_PAR_11        Reglerauflösung                => Auflösung 0,1 °C
+OK           IN_PAR_14        Luftklappensteuerung           => Luftklappensteuerung: nicht vorhanden
+OK           IN_PAR_15        Luftturbine                    => Luftturbine: nicht vorhanden
+OK           IN_PAR_16        Schaltkontakt 1                => Schaltkontakt 1: nicht vorhanden
+OK           IN_PAR_17        Schaltkontakt 2                => Schaltkontakt 2: nicht vorhanden
+OK           IN_PAR_18        Schaltkontakt 3                => Schaltkontakt 3: nicht vorhanden
+OK           IN_PAR_19        2. Temperatur vorhanden        => 2. Temperatur: nicht vorhanden
+OK           IN_PAR_1A        Druck/Vakuum vorhanden         => Druck/Vakuum: nicht vorhanden
+OK           IN_PV_11         Ist-Temperatur                 => 9.7
+OK           IN_PV_12         CO2-Istwert                    => 0.0
+OK           IN_PV_13         rh-Istwert                     => 0.0
+OK           IN_PV_15         2. Ist-Temperatur              => 0.0
+OK           IN_PV_1A         Druck/Vakuum-Istwert           => 0
+OK           IN_PV_1B         3. Ist-Temperatur              => 819.1
+OK           IN_PV_1C         4. Ist-Temperatur              => 819.1
+OK           IN_PV_1D         O2-Istwert                     => 0.0
+OK           IN_SP_11         Temperatur-Sollwert            => 9.7
+OK           IN_SP_12         CO2-Sollwert                   => 0.0
+OK           IN_SP_13         rh-Sollwert                    => 0.0
+OK           IN_SP_14         Luftklappen-Sollwert           => 0
+OK           IN_SP_15         Luftturbinen-Sollwert          => A
+OK           IN_SP_1A         Druck/Vakuum-Sollwert          => 1100
+OK           IN_SP_1D         O2-Sollwert                    => 0.0
+
+
+========================================================================
+GESAMTÜBERSICHT
+========================================================================
+
+/dev/ttyUSB1 / MEMMERT-Adresse 1
+  Erfolgreiche Antworten : 24
+  ERR-Antworten           : 0
+  Keine Antwort           : 0
+
+========================================================================
+INVENTUR ABGESCHLOSSEN
+========================================================================
+

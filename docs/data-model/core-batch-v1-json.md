@@ -988,7 +988,8 @@ measurement
 ├── unit
 ├── measured_at
 ├── validity
-└── source
+├── source
+└── validity_reason (optional)
 ```
 
 Alle fünf Felder sind Bestandteil eines Measurement-Objekts.
@@ -1000,6 +1001,7 @@ Alle fünf Felder sind Bestandteil eines Measurement-Objekts.
 | `measured_at` | string datetime \| null | ja | ja |
 | `validity` | string | ja | nein |
 | `source` | string | ja | nein |
+| `validity_reason` | string \| null | nein | ja |
 
 Ein Measurement darf daher nicht durch einen nackten numerischen Wert
 repräsentiert werden.
@@ -1021,6 +1023,19 @@ Zulässig:
   "source": "atmoweb"
 }
 ```
+
+`validity_reason` ist optional und dient der Diagnose. Zulässige Werte:
+
+```text
+overflow
+sensor_error
+parse_error
+null
+```
+
+Es ergänzt `validity`, ersetzt es nicht. Beispiel: `validity = "invalid"` +
+`validity_reason = "overflow"` bedeutet „Wert außerhalb des Messbereichs",
+während `validity_reason = "sensor_error"` auf einen Sensorfehler hinweist.
 
 ---
 
@@ -1075,6 +1090,9 @@ unavailable
 unknown
 stale
 ```
+
+`validity_reason` (optional) gibt die Ursache an, z. B. `overflow` oder
+`sensor_error`. Es ist kein Ersatz für `validity`.
 
 ## 17.1 `valid`
 

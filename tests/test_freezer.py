@@ -251,19 +251,20 @@ class TestReadMeasurements:
 
 
 class TestReadState:
-    """Testet read_state analog zu AtmoWebReader.read_state()."""
+    """Testet read_state und die serial-Property."""
 
-    def test_state_no_data(self, reader):
+    def test_state_no_data(self, reader, monkeypatch):
+        monkeypatch.setattr(reader, "_serial_present", lambda: False)
         reader._latest = None
 
         states, operation = reader.read_state()
 
-        assert states["serial"]["device"] == "/dev/test/freezer"
-        assert states["serial"]["state"] == "disconnected"
-        assert "alarms" not in states
+        assert states == {}
         assert operation == {}
+        assert reader.serial == {"device": "/dev/test/freezer", "state": "disconnected"}
 
-    def test_state_connected_no_alarm(self, reader):
+    def test_state_connected_no_alarm(self, reader, monkeypatch):
+        monkeypatch.setattr(reader, "_serial_present", lambda: True)
         reader._latest = FreezerReading(
             temperature=-82.0,
             has_temp_error=False,
@@ -273,11 +274,12 @@ class TestReadState:
 
         states, operation = reader.read_state()
 
-        assert states["serial"]["state"] == "connected"
-        assert "alarms" not in states
+        assert states == {}
         assert operation == {}
+        assert reader.serial["state"] == "connected"
 
-    def test_state_with_alarm(self, reader):
+    def test_state_with_alarm(self, reader, monkeypatch):
+        monkeypatch.setattr(reader, "_serial_present", lambda: True)
         reader._latest = FreezerReading(
             temperature=None,
             has_temp_error=True,
@@ -287,9 +289,29 @@ class TestReadState:
 
         states, operation = reader.read_state()
 
-        assert states["serial"]["state"] == "connected"
-        assert "alarms" in states
-        assert "ac_power_failure" in states["alarms"]
+        assert states == {"alarms": ["ac_power_failure"]}
+        assert operation == {}
+        assert reader.serial["state"] == "connected"
+
+    def test_state_unknown(self, reader, monkeypatch):
+        monkeypatch.setattr(reader, "_serial_present", lambda: True)
+        reader._latest = None
+
+        assert reader.serial["state"] == "unknown"
+
+    def test_state_degraded(self, reader, monkeypatch):
+        from datetime import timedelta
+
+        monkeypatch.setattr(reader, "_serial_present", lambda: True)
+        old_time = datetime.now(timezone.utc) - timedelta(hours=2)
+        reader._latest = FreezerReading(
+            temperature=-82.0,
+            has_temp_error=False,
+            alarms=(),
+            measured_at=old_time.isoformat(),
+        )
+
+        assert reader.serial["state"] == "degraded"
 
 
 # ---------------------------------------------------------------------------
@@ -340,3 +362,19 @@ class TestAlarmMapping:
         }
 
         assert set(FREEZER_ALARMS.values()) == expected
+
+
+class TestReadDeviceInfo:
+    def test_device_info(self, reader, monkeypatch):
+        monkeypatch.setattr(
+            "freezer._usb_ids",
+            lambda port: {"usb_vid": "0403", "usb_pid": "6001"},
+        )
+        reader.port = "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A9NX8YRE-if00-port0"
+
+        info = reader.read_device_info()
+
+        assert info["port"] == reader.port
+        assert info["usb_serial"] == "A9NX8YRE"
+        assert info["usb_vid"] == "0403"
+        assert info["usb_pid"] == "6001"

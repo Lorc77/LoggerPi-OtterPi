@@ -5,7 +5,7 @@ into Core Measurement objects.
 """
 
 from datetime import datetime, timezone
-from typing import Union
+from typing import Optional, Union
 
 from model.measurement import Measurement
 from weatherhub_gateway_decoder import BootPacket, GatewayPacket
@@ -18,8 +18,13 @@ class WeatherHubReader:
         self.stale_after_seconds = stale_after_seconds
         self._latest_packets: dict[str, GatewayPacket] = {}
         self._reception_times: dict[str, str] = {}
+        self._gateway_ips: dict[str, str] = {}
 
-    def update_from_packets(self, packets: list[Union[BootPacket, GatewayPacket]]) -> None:
+    def update_from_packets(
+        self,
+        packets: list[Union[BootPacket, GatewayPacket]],
+        client_ip: Optional[str] = None,
+    ) -> None:
         """Process new decoded packets and update the internal state."""
         received_at = datetime.now(timezone.utc).isoformat()
 
@@ -32,6 +37,8 @@ class WeatherHubReader:
 
             self._latest_packets[packet.sensor_id] = packet
             self._reception_times[packet.sensor_id] = received_at
+            if client_ip is not None:
+                self._gateway_ips[packet.sensor_id] = client_ip
 
     def _is_stale(self, sensor_id: str) -> bool:
         """True, wenn der letzte Empfang für diesen Sensor zu lange her ist."""
@@ -122,27 +129,49 @@ class WeatherHubReader:
                 if not isinstance(value_dict, dict):
                     continue
 
+                value = value_dict.get("value")
                 validity = "valid"
-                # If the sensor reported an error or overflow,
-                # it forms a factual basis for invalidity
-                if value_dict.get("error") or value_dict.get("overflow"):
-                    validity = "invalid"
+                validity_reason = None
 
-                # Stale-Logik: Wenn der Sensor zu lange nicht gesendet hat,
-                # wird der letzte bekannte Wert als "stale" markiert.
-                if self._is_stale(sensor_id):
+                if value_dict.get("error"):
+                    validity = "invalid"
+                    validity_reason = "sensor_error"
+                elif value_dict.get("overflow"):
+                    validity = "invalid"
+                    validity_reason = "overflow"
+                elif self._is_stale(sensor_id):
                     validity = "stale"
 
-                value = value_dict.get("value")
-
                 measurement = Measurement(
-                    value=value if validity == "valid" or validity == "stale" else None,
+                    value=value if validity in ("valid", "stale") else None,
                     unit=unit,
                     measured_at=received_at,
                     validity=validity,
                     source="weatherhub",
+                    validity_reason=validity_reason,
                 )
 
                 measurements[f"{prefix}.{field_name}"] = measurement
 
         return measurements
+
+    def read_state(self) -> tuple[dict[str, object], dict[str, str]]:
+        states: dict[str, object] = {}
+        for sensor_id, packet in self._latest_packets.items():
+            prefix = f"weatherhub_{sensor_id.lower()}"
+            status = packet.decoded_values.get("status")
+            if isinstance(status, dict) and "battery_low" in status:
+                states[prefix] = {"battery_low": status["battery_low"]}
+        return states, {}
+
+    def read_device_info(self) -> dict[str, object]:
+        info: dict[str, object] = {}
+        for sensor_id, packet in self._latest_packets.items():
+            prefix = f"weatherhub_{sensor_id.lower()}"
+            info[prefix] = {
+                "sensor_id": sensor_id,
+                "sensor_type": packet.sensor_type,
+                "gateway_ip": self._gateway_ips.get(sensor_id),
+                "gateway_timestamp": packet.gateway_timestamp,
+            }
+        return info

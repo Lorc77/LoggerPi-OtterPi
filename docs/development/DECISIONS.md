@@ -1500,6 +1500,47 @@ Kanäle sind separat über `notifications.json` ein-/ausschaltbar. Dedup/Quiet H
 
 ---
 
+## DEC-047 — States/Setpoints/Device im Core Batch (B0)
+
+**Status:** Accepted
+**Datum:** 2026-11-05
+
+`states`, `operation`, `serial`, `setpoints`, `device` sind optionale Top-Level-Bereiche. `Measurement` trägt optional `validity_reason` (`overflow`/`sensor_error`).
+
+- AtmoWEB: Lights day/uv bool, led percent; Flap percent.
+- Freezer: `serial.state` (disconnected/unknown/connected/degraded).
+- MEMMERT: `operation_mode` Rohwert.
+- WeatherHub: `battery_low`, `gateway_ip`.
+
+## DEC-048 — Device-Infos in jedem Batch (vorerst)
+
+**Status:** Accepted
+**Datum:** 2026-11-05
+
+`device` und `setpoints` werden vorerst in jedem Batch mitgeschickt (~25 % Overhead). „Send on change" (Metadata-Change) ist als späteres Komfort-Update vorgemerkt.
+
+---
+
+## DEC-049 — States/Setpoints/Device im Core Batch (B0)
+
+**Status:** Accepted
+**Datum:** 2026-11-05
+
+`states`, `operation`, `serial`, `setpoints`, `device` sind optionale Top-Level-Bereiche. `Measurement` trägt optional `validity_reason` (`overflow`/`sensor_error`).
+
+- AtmoWEB: Lights day/uv bool, led percent; Flap percent.
+- Freezer: `serial.state` (disconnected/unknown/connected/degraded).
+- MEMMERT: `operation_mode` Rohwert.
+- WeatherHub: `battery_low`, `gateway_ip`.
+
+## DEC-050 — Dashboard: Status-Chips + LED-SVG
+
+**Status:** Accepted
+**Datum:** 2026-11-05
+
+Die Gerätedetailseite und die Raumdetail-Kacheln zeigen Status-Chips (erklärend: `⚠ No data for X min`, `⛔ Sensor error`, `🚨 Alarm: …`, `⚠ Battery low`, `OK`, `Offline`) statt des bisherigen Status-Texts. Die Statuslampe zeigt den schlechtesten Zustand (Alarm/Invalid rot, Stale/Battery gelb). Ein Inline-SVG-LED-Indikator (dynamisch aus `states.<key>.lights.led`) sitzt links neben der Lampe. Die Übersicht nutzt weiterhin nur die Lampen (via `_device_status`).
+
+---
 
 # Offene Entscheidungen
 

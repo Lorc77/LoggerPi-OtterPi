@@ -35,7 +35,7 @@ class WeatherHubGatewayListener(threading.Thread):
         host: str,
         port: int,
         allowlist: set[str],
-        on_packets_received: Callable[[list[Union[BootPacket, GatewayPacket]]], None],
+        on_packets_received: Callable[[list[Union[BootPacket, GatewayPacket]], str], None],
         cloud_forward_enabled: bool = False,
     ) -> None:
         super().__init__(name="WeatherHubGatewayListener")
@@ -156,7 +156,7 @@ class WeatherHubGatewayListener(threading.Thread):
         # Pass decoded packets to callback
         if packets:
             try:
-                self.on_packets_received(packets)
+                self.on_packets_received(packets, client_ip)
             except Exception as exc:
                 LOGGER.error("Error in on_packets_received callback: %s", exc)
 

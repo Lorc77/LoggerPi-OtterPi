@@ -14,6 +14,7 @@ class Measurement:
     measured_at: Optional[str]
     validity: str
     source: str
+    validity_reason: Optional[str] = None
 
     def __post_init__(self) -> None:
         if self.validity == "valid" and self.value is None:
@@ -41,11 +42,17 @@ class Measurement:
             if timestamp.tzinfo is None:
                 raise BatchValidationError("measured_at muss eine Zeitzoneninformation enthalten.")
 
+        if self.validity_reason is not None and not isinstance(self.validity_reason, str):
+            raise BatchValidationError("validity_reason muss ein String oder None sein.")
+
     def to_dict(self) -> dict:
-        return {
+        result = {
             "value": self.value,
             "unit": self.unit,
             "measured_at": self.measured_at,
             "validity": self.validity,
             "source": self.source,
         }
+        if self.validity_reason is not None:
+            result["validity_reason"] = self.validity_reason
+        return result

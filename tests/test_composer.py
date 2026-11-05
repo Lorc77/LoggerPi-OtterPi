@@ -50,3 +50,39 @@ def test_compose_batch_maps_system_info_to_batch(tmp_path: Path, monkeypatch) ->
     }
     assert batch.memory == system_info["memory"]
     assert batch.measurements == {}
+
+
+def test_compose_batch_passes_new_sections(tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        "composer.get_system_info",
+        lambda: {
+            "time": {
+                "current": "2026-11-05T12:00:00+00:00",
+                "timezone": "UTC",
+                "clock_state": "unknown",
+            },
+            "boot": {"last_boot_at": "2026-11-05T08:00:00+00:00", "uptime_seconds": 14400},
+            "cpu": {
+                "usage_percent": 10.0,
+                "load": {"load_1m": 0.1, "load_5m": 0.1, "load_15m": 0.1},
+                "temperature_celsius": 45.0,
+            },
+            "memory": {"total_bytes": 100, "available_bytes": 50, "used_bytes": 50},
+        },
+    )
+
+    batch = compose_batch(
+        logger_id="logger-001",
+        sequence_store=SequenceStore(tmp_path / "sequence"),
+        states={"freezer": {"alarms": []}},
+        operation={"atmoweb_101": {"mode": "program"}},
+        serial={"device": "/dev/ttyUSB0", "state": "connected"},
+        setpoints={"memmert_ipp300_links": {"temperature": 9.7}},
+        device={"freezer": {"usb_serial": "A9NX8YRE"}},
+    )
+
+    assert batch.states == {"freezer": {"alarms": []}}
+    assert batch.operation == {"atmoweb_101": {"mode": "program"}}
+    assert batch.serial == {"device": "/dev/ttyUSB0", "state": "connected"}
+    assert batch.setpoints == {"memmert_ipp300_links": {"temperature": 9.7}}
+    assert batch.device == {"freezer": {"usb_serial": "A9NX8YRE"}}

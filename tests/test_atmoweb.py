@@ -139,7 +139,7 @@ def test_read_state_maps_atmoweb_states(monkeypatch) -> None:
         "lights": {
             "day": True,
             "uv": False,
-            "led": True,
+            "led": 1,
         },
         "switches": {
             "a": False,
@@ -147,7 +147,7 @@ def test_read_state_maps_atmoweb_states(monkeypatch) -> None:
             "c": False,
             "d": True,
         },
-        "flap": False,
+        "flap": 0,
         "defrost": False,
     }
 
@@ -166,3 +166,61 @@ def test_invalid_json_raises_atmoweb_error(monkeypatch) -> None:
 
     with pytest.raises(AtmoWebError):
         AtmoWebReader("192.168.100.101").identify()
+
+
+def test_read_setpoints(monkeypatch) -> None:
+    def fake_urlopen(request, timeout):
+        return FakeResponse(
+            {
+                "TempSet": 24.0,
+                "HumSet": 60.0,
+                "VacSet": "N/A",
+                "CO2Set": "N/A",
+                "O2Set": "N/A",
+                "FanSet": "N/A",
+            }
+        )
+
+    monkeypatch.setattr("atmoweb.urlopen", fake_urlopen)
+
+    setpoints = AtmoWebReader("192.168.100.101").read_setpoints()
+
+    assert setpoints == {"temperature": 24.0, "humidity": 60.0}
+
+
+def test_read_device_info(monkeypatch) -> None:
+    def fake_urlopen(request, timeout):
+        return FakeResponse(
+            {
+                "SN": "W616.0154",
+                "DevType": "HPP260",
+                "SWRev": "02.04.23",
+            }
+        )
+
+    monkeypatch.setattr("atmoweb.urlopen", fake_urlopen)
+
+    info = AtmoWebReader("192.168.100.101").read_device_info()
+
+    assert info == {
+        "host": "192.168.100.101",
+        "serial_number": "W616.0154",
+        "device_type": "HPP260",
+        "software_revision": "02.04.23",
+    }
+
+
+def test_optional_percent() -> None:
+    from atmoweb import _optional_percent
+
+    assert _optional_percent(0) == 0
+    assert _optional_percent(50) == 50
+    assert _optional_percent(100) == 100
+    assert _optional_percent("N/A") is None
+    assert _optional_percent("N/D") is None
+
+    with pytest.raises(AtmoWebError):
+        _optional_percent(101)
+
+    with pytest.raises(AtmoWebError):
+        _optional_percent("abc")

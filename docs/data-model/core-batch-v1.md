@@ -782,6 +782,72 @@ Es gibt bewusst kein:
 states.misc
 ```
 
+## States (Erweiterung B0)
+
+`states` ist ein Objekt mit dynamischen Device-Keys:
+
+```json
+"states": {
+  "atmoweb_102": { "lights": { "day": false, "led": 2 } },
+  "freezer": { "alarms": ["temperature_below_low_alarm"] },
+  "weatherhub_015f9410f3eb": { "battery_low": true }
+}
+```
+
+- AtmoWEB: `door_open`, `door_locked`, `flap` (0–100), `defrost`, `lights.day`/`lights.uv` (bool), `lights.led` (0–100), `switches`.
+- Freezer: `alarms[]`.
+- MEMMERT: `operation_mode` (Rohwert 0/1).
+- WeatherHub: `battery_low`.
+
+## Operation (Erweiterung B0)
+
+```json
+"operation": {
+  "atmoweb_101": { "mode": "program" }
+}
+```
+
+`mode`: `program` / `idle` / `timer` / `manual`.
+
+## Serial (Erweiterung B0)
+
+```json
+"serial": {
+  "device": "/dev/serial/by-id/...",
+  "state": "connected"
+}
+```
+
+`state`: `disconnected` / `unknown` / `connected` / `degraded`.
+
+## Setpoints (Erweiterung B0)
+
+```json
+"setpoints": {
+  "memmert_ipp300_links": { "temperature": 9.7 },
+  "atmoweb_101": { "temperature": 24.0, "humidity": 60.0 }
+}
+```
+
+## Device (Erweiterung B0)
+
+```json
+"device": {
+  "atmoweb_101": {
+    "host": "141.51.190.101",
+    "serial_number": "W616.0154",
+    "device_type": "HPP260",
+    "software_revision": "02.04.23"
+  },
+  "freezer": {
+    "port": "/dev/serial/by-id/...",
+    "usb_serial": "A9NX8YRE",
+    "usb_vid": "0403",
+    "usb_pid": "6001"
+  }
+}
+```
+
 ---
 
 # 18. Operation

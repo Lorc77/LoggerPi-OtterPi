@@ -528,3 +528,34 @@ class TestRenderDeviceDetail:
         store = _store_batches(tmp_path, sample_batches)
         html = _render_device_detail(store, "unknown")
         assert "Not Found" in html
+
+
+def test_render_led_svg_on():
+    from dashboard import _render_led_svg
+
+    html = _render_led_svg(2)
+    assert "led-on" in html
+    assert "2%" in html
+
+
+def test_render_led_svg_off():
+    from dashboard import _render_led_svg
+
+    html = _render_led_svg(0)
+    assert "led-off" in html
+    assert "0%" in html
+
+
+def test_render_led_svg_none():
+    from dashboard import _render_led_svg
+
+    assert _render_led_svg(None) == ""
+
+
+def test_render_chips():
+    from dashboard import _render_chips
+
+    html = _render_chips([("OK", "chip-ok"), ("Door open", "chip-info")])
+    assert 'class="chip chip-ok"' in html
+    assert "OK" in html
+    assert "Door open" in html

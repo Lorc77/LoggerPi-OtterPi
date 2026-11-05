@@ -15,6 +15,11 @@ class Batch:
     system: Optional[dict] = None
     memory: Optional[dict] = None
     measurements: dict[str, Measurement] = field(default_factory=dict)
+    states: Optional[dict] = None
+    operation: Optional[dict] = None
+    serial: Optional[dict] = None
+    setpoints: Optional[dict] = None
+    device: Optional[dict] = None
 
     def __post_init__(self) -> None:
         if not self.batch_id:
@@ -55,5 +60,20 @@ class Batch:
             result["measurements"] = {
                 name: measurement.to_dict() for name, measurement in self.measurements.items()
             }
+
+        if self.states is not None:
+            result["states"] = self.states
+
+        if self.operation is not None:
+            result["operation"] = self.operation
+
+        if self.serial is not None:
+            result["serial"] = self.serial
+
+        if self.setpoints is not None:
+            result["setpoints"] = self.setpoints
+
+        if self.device is not None:
+            result["device"] = self.device
 
         return result

@@ -64,3 +64,23 @@ def test_create_batch_includes_system_and_memory(tmp_path: Path) -> None:
 
     assert batch.system == system
     assert batch.memory == memory
+
+
+def test_create_batch_includes_new_sections(tmp_path):
+    store = SequenceStore(tmp_path / "sequence")
+
+    batch = create_batch(
+        "logger-001",
+        store,
+        states={"freezer": {"alarms": ["ac_power_failure"]}},
+        operation={"atmoweb_101": {"mode": "idle"}},
+        serial={"device": "/dev/ttyUSB0", "state": "connected"},
+        setpoints={"memmert_ipp300_links": {"temperature": 9.7}},
+        device={"freezer": {"usb_serial": "A9NX8YRE"}},
+    )
+
+    assert batch.states == {"freezer": {"alarms": ["ac_power_failure"]}}
+    assert batch.operation == {"atmoweb_101": {"mode": "idle"}}
+    assert batch.serial == {"device": "/dev/ttyUSB0", "state": "connected"}
+    assert batch.setpoints == {"memmert_ipp300_links": {"temperature": 9.7}}
+    assert batch.device == {"freezer": {"usb_serial": "A9NX8YRE"}}

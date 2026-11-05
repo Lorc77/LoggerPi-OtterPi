@@ -34,9 +34,10 @@ Zeitmodell:
 import re
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Optional
 
-import serial
+import serial as pyserial
 from model.measurement import Measurement
 
 
@@ -109,7 +110,7 @@ class FreezerReader:
         self.timeout = timeout
         self.stale_after_seconds = stale_after_seconds
 
-        self._ser: Optional[serial.Serial] = None
+        self._ser: Optional[pyserial.Serial] = None
         self._latest: Optional[FreezerReading] = None
 
     def read_measurements(self) -> dict[str, Measurement]:
@@ -125,36 +126,43 @@ class FreezerReader:
         return {"freezer.temperature": measurement}
 
     def read_state(self) -> tuple[dict[str, object], dict[str, str]]:
-        """Liefert den aktuellen Freezer-Gerätezustand.
+        """Liefert die Freezer-Alarme als States.
 
-        Analog zu `AtmoWebReader.read_state()`.
-
-        Gibt ein Tupel (states, operation) zurück.
-        Die `operation` ist beim Freezer immer leer (kein Betriebsmodus).
+        `serial` wird separat über die `serial`-Property geliefert.
         """
-        if self._latest is None:
-            states: dict[str, object] = {
-                "serial": {
-                    "device": self.port,
-                    "state": "disconnected",
-                }
-            }
-        else:
-            states = {
-                "serial": {
-                    "device": self.port,
-                    "state": "connected",
-                }
-            }
+        states: dict[str, object] = {}
 
-        # Alarm-Zustände (falls vorhanden)
         if self._latest is not None and self._latest.alarms:
             states["alarms"] = list(self._latest.alarms)
 
-        # Freezer hat keinen Betriebsmodus
         operation: dict[str, str] = {}
 
         return states, operation
+
+    def _serial_present(self) -> bool:
+        return Path(self.port).exists()
+
+    @property
+    def serial(self) -> dict[str, str]:
+        if not self._serial_present():
+            state = "disconnected"
+        elif self._latest is None:
+            state = "unknown"
+        elif self._is_stale():
+            state = "degraded"
+        else:
+            state = "connected"
+        return {"device": self.port, "state": state}
+
+    def read_device_info(self) -> dict[str, object]:
+        info: dict[str, object] = {"port": self.port}
+        name = Path(self.port).name
+        if name.startswith("usb-"):
+            serial_part = name.split("_")[-1].split("-")[0]
+            if serial_part:
+                info["usb_serial"] = serial_part
+        info.update(_usb_ids(self.port))
+        return info
 
     def close(self) -> None:
         """Schließt die Seriell-Verbindung."""
@@ -185,17 +193,17 @@ class FreezerReader:
                     if reading is not None:
                         self._latest = reading
 
-        except (serial.SerialException, OSError, FreezerError):
+        except (pyserial.SerialException, OSError, FreezerError):
             # Kommunikationsfehler → Verbindung beim nächsten Mal neu aufbauen
             self.close()
 
-    def _open_serial(self) -> serial.Serial:
+    def _open_serial(self) -> pyserial.Serial:
         """Öffnet die serielle Verbindung mit Freezer-Parametern."""
-        return serial.Serial(
+        return pyserial.Serial(
             port=self.port,
             baudrate=self.baudrate,
-            bytesize=serial.EIGHTBITS,
-            parity=serial.PARITY_NONE,
+            bytesize=pyserial.EIGHTBITS,
+            parity=pyserial.PARITY_NONE,
             stopbits=self.stopbits,
             timeout=self.timeout,
             xonxoff=False,
@@ -315,3 +323,19 @@ def _parse_frame(raw: bytes) -> Optional[FreezerReading]:
         alarms=alarms,
         measured_at=measured_at,
     )
+
+
+def _usb_ids(port: str) -> dict:
+    try:
+        tty_name = Path(port).resolve().name
+    except OSError:
+        return {}
+    iface = Path("/sys/class/tty") / tty_name / "device"
+    try:
+        usb = iface.resolve().parent
+        return {
+            "usb_vid": (usb / "idVendor").read_text().strip(),
+            "usb_pid": (usb / "idProduct").read_text().strip(),
+        }
+    except OSError:
+        return {}

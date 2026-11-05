@@ -58,28 +58,86 @@ class LoggerRuntime:
             else:
                 break
 
-        # 2. Measurements sammeln
+        # 2. Measurements + States + Setpoints + Device-Info sammeln
         measurements = {}
+        states = {}
+        operation = {}
+        setpoints = {}
+        device = {}
+        serial = None
 
         for source, reader in self.readers.items():
             for name, measurement in reader.read_measurements().items():
                 measurements[f"{source}.{name}"] = measurement
 
+            reader_states, reader_operation = reader.read_state()
+            if reader_states:
+                states[source] = reader_states
+            if reader_operation:
+                operation[source] = reader_operation
+
+            reader_setpoints = reader.read_setpoints()
+            if reader_setpoints:
+                setpoints[source] = reader_setpoints
+
+            reader_device = reader.read_device_info()
+            if reader_device:
+                device[source] = reader_device
+
         if self.freezer_reader is not None:
             measurements.update(self.freezer_reader.read_measurements())
+
+            freezer_states, freezer_operation = self.freezer_reader.read_state()
+            if freezer_states:
+                states["freezer"] = freezer_states
+            if freezer_operation:
+                operation["freezer"] = freezer_operation
+
+            serial = self.freezer_reader.serial
+
+            freezer_device = self.freezer_reader.read_device_info()
+            if freezer_device:
+                device["freezer"] = freezer_device
 
         for source, reader in self.memmert_readers.items():
             for name, measurement in reader.read_measurements().items():
                 measurements[f"{source}.{name}"] = measurement
 
+            reader_states, reader_operation = reader.read_state()
+            if reader_states:
+                states[source] = reader_states
+            if reader_operation:
+                operation[source] = reader_operation
+
+            reader_setpoints = reader.read_setpoints()
+            if reader_setpoints:
+                setpoints[source] = reader_setpoints
+
+            reader_device = reader.read_device_info()
+            if reader_device:
+                device[source] = reader_device
+
         if self.weatherhub_reader is not None:
             measurements.update(self.weatherhub_reader.read_measurements())
+
+            wh_states, wh_operation = self.weatherhub_reader.read_state()
+            states.update(wh_states)
+            if wh_operation:
+                operation.update(wh_operation)
+
+            wh_device = self.weatherhub_reader.read_device_info()
+            device.update(wh_device)
 
         # 3. Batch erzeugen
         batch = compose_batch(
             logger_id=self.logger_id,
             sequence_store=self.sequence_store,
             measurements=measurements,
+            states=states or None,
+            operation=operation or None,
+            serial=serial,
+            setpoints=setpoints or None,
+            device=device or None,
         )
 
         # 4. OtterPi-Delivery (oder Queue)

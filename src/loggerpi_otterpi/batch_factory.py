@@ -25,6 +25,11 @@ def create_batch(
     measurements: Optional[dict[str, Measurement]] = None,
     system: Optional[dict] = None,
     memory: Optional[dict] = None,
+    states: Optional[dict] = None,
+    operation: Optional[dict] = None,
+    serial: Optional[dict] = None,
+    setpoints: Optional[dict] = None,
+    device: Optional[dict] = None,
 ) -> Batch:
     return Batch(
         batch_id=str(uuid4()),
@@ -34,4 +39,9 @@ def create_batch(
         measurements=measurements or {},
         system=system,
         memory=memory,
+        states=states,
+        operation=operation,
+        serial=serial,
+        setpoints=setpoints,
+        device=device,
     )

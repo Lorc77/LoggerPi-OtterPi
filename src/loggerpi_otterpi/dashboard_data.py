@@ -286,7 +286,12 @@ def _device_status(batches: list[dict], key: str, device_type: str = "atmoweb") 
     if device_type == "placeholder":
         return "status-off"
 
-    measurements = batches[-1].get("measurements", {})
+    latest = batches[-1]
+    measurements = latest.get("measurements", {})
+    states = latest.get("states", {}).get(key, {})
+
+    if states.get("alarms"):
+        return "status-critical"
 
     if device_type in ("freezer", "memmert", "weatherhub_id01", "weatherhub_id0e"):
         if device_type in ("freezer", "memmert"):
@@ -301,10 +306,12 @@ def _device_status(batches: list[dict], key: str, device_type: str = "atmoweb") 
 
         if validity == "invalid":
             return "status-critical"
-        if validity == "valid":
-            return "status-ok"
         if validity == "stale":
             return "status-warn"
+        if validity == "valid":
+            if states.get("battery_low"):
+                return "status-warn"
+            return "status-ok"
         return "status-off"
 
     temp = measurements.get(f"{key}.temperature_1", {})
@@ -314,7 +321,11 @@ def _device_status(batches: list[dict], key: str, device_type: str = "atmoweb") 
     if "invalid" in validities:
         return "status-critical"
     if validities <= {"valid", "stale"} and len(validities) == 1:
-        return "status-warn" if "stale" in validities else "status-ok"
+        if "stale" in validities:
+            return "status-warn"
+        if states.get("battery_low"):
+            return "status-warn"
+        return "status-ok"
     if temp.get("value") is not None or hum.get("value") is not None:
         return "status-warn"
     return "status-off"
@@ -341,3 +352,134 @@ def _series(batches: list[dict], key: str) -> list[dict]:
             series.append({"label": label, "date": date, "value": value})
 
     return series
+
+
+def _latest_batch(batches: list[dict]) -> dict:
+    return batches[-1] if batches else {}
+
+
+def _latest_states(batches: list[dict], device_key: str) -> dict:
+    latest = _latest_batch(batches)
+    return latest.get("states", {}).get(device_key, {})
+
+
+def _latest_setpoints(batches: list[dict], device_key: str) -> dict:
+    latest = _latest_batch(batches)
+    return latest.get("setpoints", {}).get(device_key, {})
+
+
+def _latest_device(batches: list[dict], device_key: str) -> dict:
+    latest = _latest_batch(batches)
+    return latest.get("device", {}).get(device_key, {})
+
+
+def _latest_serial(batches: list[dict]) -> dict:
+    latest = _latest_batch(batches)
+    return latest.get("serial", {})
+
+
+_ALARM_LABELS = {
+    "temperature_below_low_alarm": "Undertemperature",
+    "temperature_above_high_alarm": "Overtemperature",
+    "ac_power_failure": "Power failure",
+    "control_probe_fault": "Control probe fault",
+    "microprocessor_fault": "Microprocessor fault",
+    "heat_exchanger_fault": "Heat exchanger fault",
+    "hot_condenser": "Hot condenser",
+}
+
+
+def _primary_measurement(measurements: dict, key: str, device_type: str) -> dict:
+    if device_type in ("freezer", "memmert"):
+        return measurements.get(f"{key}.temperature", {})
+    if device_type == "weatherhub_id01":
+        return measurements.get(f"{key}.temperature_2", {})
+    if device_type == "weatherhub_id0e":
+        return measurements.get(f"{key}.temperature", {})
+    return measurements.get(f"{key}.temperature_1", {})
+
+
+def _invalid_reason(measurements: dict, key: str, device_type: str) -> Optional[str]:
+    return _primary_measurement(measurements, key, device_type).get("validity_reason")
+
+
+def _stale_age(measurements: dict, key: str, device_type: str) -> Optional[str]:
+    measured_at = _primary_measurement(measurements, key, device_type).get("measured_at")
+    if not measured_at:
+        return None
+    dt = datetime.fromisoformat(measured_at)
+    age_seconds = (datetime.now(timezone.utc) - dt).total_seconds()
+    minutes = int(age_seconds // 60)
+    if minutes < 60:
+        return f"{minutes} min"
+    hours = minutes // 60
+    return f"{hours} h"
+
+
+def _device_chips(
+    batches: list[dict], key: str, device_type: str = "atmoweb"
+) -> list[tuple[str, str]]:
+    """Liefert die Chips (Text, CSS-Klasse) für ein Gerät."""
+    if not batches or device_type == "placeholder":
+        return []
+
+    latest = batches[-1]
+    measurements = latest.get("measurements", {})
+    states = latest.get("states", {}).get(key, {})
+    operation = latest.get("operation", {}).get(key, {})
+    chips: list[tuple[str, str]] = []
+
+    alarms = states.get("alarms") or []
+    for alarm in alarms:
+        label = _ALARM_LABELS.get(alarm, alarm)
+        chips.append((f"🚨 Alarm: {label}", "chip-critical"))
+
+    status = _device_status(batches, key, device_type)
+
+    if status == "status-critical" and not alarms:
+        reason = _invalid_reason(measurements, key, device_type)
+        if reason == "overflow":
+            chips.append(("⛔ Sensor overflow", "chip-critical"))
+        elif reason == "sensor_error":
+            chips.append(("⛔ Sensor error", "chip-critical"))
+        else:
+            chips.append(("⛔ Invalid", "chip-critical"))
+    elif status == "status-warn":
+        if states.get("battery_low"):
+            chips.append(("⚠ Battery low", "chip-warn"))
+        else:
+            age = _stale_age(measurements, key, device_type)
+            if age is not None:
+                chips.append((f"⚠ No data for {age}", "chip-warn"))
+            else:
+                chips.append(("⚠ Stale", "chip-warn"))
+    elif status == "status-ok":
+        chips.append(("OK", "chip-ok"))
+    elif status == "status-off":
+        chips.append(("Offline", "chip-off"))
+
+    if states.get("door_open"):
+        chips.append(("Door open", "chip-info"))
+    if states.get("door_locked"):
+        chips.append(("Door locked", "chip-info"))
+    if states.get("defrost"):
+        chips.append(("Defrost", "chip-info"))
+    if "flap" in states:
+        chips.append((f"Flap {states['flap']:.0f}%", "chip-info"))
+    if "mode" in operation:
+        chips.append((f"Mode: {operation['mode']}", "chip-info"))
+    if "operation_mode" in states:
+        mode = "local" if states["operation_mode"] == 0 else "remote"
+        chips.append((f"Mode: {mode}", "chip-info"))
+
+    return chips
+
+
+def _led_value(batches: list[dict], key: str) -> Optional[float]:
+    if not batches:
+        return None
+    states = batches[-1].get("states", {}).get(key, {})
+    lights = states.get("lights", {})
+    if isinstance(lights, dict) and "led" in lights:
+        return lights["led"]
+    return None

@@ -187,3 +187,70 @@ def test_batch_serializes_system_and_memory() -> None:
     assert result["system"]["cpu"]["usage_percent"] == 15.0
     assert result["system"]["cpu"]["load"]["1m"] == 0.42
     assert result["memory"]["total_bytes"] == 104857600
+
+
+def test_measurement_serializes_validity_reason():
+    measurement = Measurement(
+        value=None,
+        unit="celsius",
+        measured_at="2026-11-05T12:00:00+00:00",
+        validity="invalid",
+        source="weatherhub",
+        validity_reason="overflow",
+    )
+
+    result = measurement.to_dict()
+
+    assert result["validity"] == "invalid"
+    assert result["validity_reason"] == "overflow"
+
+
+def test_measurement_omits_validity_reason_when_none():
+    measurement = Measurement(
+        value=21.5,
+        unit="celsius",
+        measured_at="2026-11-05T12:00:00+00:00",
+        validity="valid",
+        source="atmoweb",
+    )
+
+    assert "validity_reason" not in measurement.to_dict()
+
+
+def test_batch_serializes_new_sections():
+    batch = Batch(
+        batch_id="batch-001",
+        logger_id="logger-001",
+        sequence=1,
+        created_at="2026-11-05T12:00:00+00:00",
+        states={"atmoweb_102": {"lights": {"day": False, "led": 2}}},
+        operation={"atmoweb_102": {"mode": "program"}},
+        serial={"device": "/dev/ttyUSB0", "state": "connected"},
+        setpoints={"memmert_ipp300_links": {"temperature": 9.7}},
+        device={"freezer": {"usb_serial": "A9NX8YRE"}},
+    )
+
+    result = batch.to_dict()
+
+    assert result["states"]["atmoweb_102"]["lights"]["led"] == 2
+    assert result["operation"]["atmoweb_102"]["mode"] == "program"
+    assert result["serial"]["state"] == "connected"
+    assert result["setpoints"]["memmert_ipp300_links"]["temperature"] == 9.7
+    assert result["device"]["freezer"]["usb_serial"] == "A9NX8YRE"
+
+
+def test_batch_omits_empty_new_sections():
+    batch = Batch(
+        batch_id="batch-001",
+        logger_id="logger-001",
+        sequence=1,
+        created_at="2026-11-05T12:00:00+00:00",
+    )
+
+    result = batch.to_dict()
+
+    assert "states" not in result
+    assert "operation" not in result
+    assert "serial" not in result
+    assert "setpoints" not in result
+    assert "device" not in result

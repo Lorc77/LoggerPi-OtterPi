@@ -2,6 +2,7 @@
 
 import json
 from datetime import datetime, timezone
+from typing import Optional
 
 from dashboard_charts import (
     _render_device_script,
@@ -21,8 +22,11 @@ from dashboard_data import (
     _calculate_average_series,
     _calculate_stats,
     _current_values,
+    _device_chips,
     _device_current,
     _device_status,
+    _latest_device,
+    _led_value,
     _recent_batches,
     _room_climate,
     _series,
@@ -85,6 +89,27 @@ def _climate_display_text(climate: dict) -> str:
         text += f" · 💧 Relative Humidity: {climate['hum']:.1f} %"
 
     return text
+
+
+def _render_led_svg(value: Optional[float]) -> str:
+    if value is None:
+        return ""
+    css = "led-on" if value > 0 else "led-off"
+    return f"""
+    <span class="led-indicator {css}" title="LED {value:.0f}%">
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 21h6v-1H9v1zm3-19a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"
+                  fill="currentColor"/>
+        </svg>
+        <span class="led-value">{value:.0f}%</span>
+    </span>
+    """
+
+
+def _render_chips(chips: list[tuple[str, str]]) -> str:
+    if not chips:
+        return ""
+    return "".join(f'<span class="chip {css}">{text}</span>' for text, css in chips)
 
 
 def _render_overview(store: BatchStore) -> str:
@@ -357,6 +382,8 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
                 "dates_json": json.dumps([point["date"] for point in temp_series or hum_series]),
                 "temp_values_json": json.dumps([point["value"] for point in temp_series]),
                 "hum_values_json": json.dumps([point["value"] for point in hum_series]),
+                "chips_html": _render_chips(_device_chips(batches, device["key"], device_type)),
+                "led_html": _render_led_svg(_led_value(batches, device["key"])),
             }
         )
 
@@ -520,6 +547,42 @@ h1 {{ text-align: center; margin-top: 0; }}
 .status-warn {{ color: #eab308; background: #eab308; }}
 .status-critical {{ color: #ef4444; background: #ef4444; }}
 .status-off {{ color: #6b7280; background: #6b7280; box-shadow: none; }}
+
+.chip-row {{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}}
+.chip {{
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: .75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}}
+.chip-ok {{ background: rgba(34,197,94,.2); color: #86efac; }}
+.chip-warn {{ background: rgba(234,179,8,.2); color: #fde047; }}
+.chip-critical {{ background: rgba(239,68,68,.2); color: #fca5a5; }}
+.chip-off {{ background: rgba(107,114,128,.2); color: #d1d5db; }}
+.chip-info {{ background: rgba(147,197,253,.15); color: #bfdbfe; }}
+
+.status-right {{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}}
+.led-indicator {{
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: .8rem;
+    white-space: nowrap;
+}}
+.led-on {{ color: #fbbf24; }}
+.led-off {{ color: #6b7280; }}
+.led-value {{ font-size: .7rem; font-weight: 600; }}
 
 .metric-grid {{
     display: grid;
@@ -1632,6 +1695,35 @@ def _render_device_detail(
 </div>
 """
 
+    chips_html = _render_chips(_device_chips(batches, device_key, device_type))
+    led_html = _render_led_svg(_led_value(batches, device_key))
+
+    device_meta = _latest_device(batches, device_key)
+    device_meta_html = ""
+    for label, field in (
+        ("Serial Number", "serial_number"),
+        ("Device Type", "device_type"),
+        ("Software Revision", "software_revision"),
+        ("Host", "host"),
+        ("Address", "address"),
+        ("Port", "port"),
+        ("Resolution", "resolution"),
+        ("USB Serial", "usb_serial"),
+        ("USB VID", "usb_vid"),
+        ("USB PID", "usb_pid"),
+        ("Sensor ID", "sensor_id"),
+        ("Sensor Type", "sensor_type"),
+        ("Gateway IP", "gateway_ip"),
+        ("Gateway Timestamp", "gateway_timestamp"),
+    ):
+        if field in device_meta and device_meta[field] is not None:
+            device_meta_html += f"""
+        <div class="info-line">
+            <span class="info-label">{label}:</span>
+            <span class="info-value">{device_meta[field]}</span>
+        </div>
+"""
+
     return f"""<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -1723,6 +1815,42 @@ h1 {{ text-align: center; margin-top: 0; }}
 .status-warn {{ color: #eab308; background: #eab308; }}
 .status-critical {{ color: #ef4444; background: #ef4444; }}
 .status-off {{ color: #6b7280; background: #6b7280; box-shadow: none; }}
+
+.chip-row {{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}}
+.chip {{
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: .75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}}
+.chip-ok {{ background: rgba(34,197,94,.2); color: #86efac; }}
+.chip-warn {{ background: rgba(234,179,8,.2); color: #fde047; }}
+.chip-critical {{ background: rgba(239,68,68,.2); color: #fca5a5; }}
+.chip-off {{ background: rgba(107,114,128,.2); color: #d1d5db; }}
+.chip-info {{ background: rgba(147,197,253,.15); color: #bfdbfe; }}
+
+.status-right {{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}}
+.led-indicator {{
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: .8rem;
+    white-space: nowrap;
+}}
+.led-on {{ color: #fbbf24; }}
+.led-off {{ color: #6b7280; }}
+.led-value {{ font-size: .7rem; font-weight: 600; }}
 
 .current-values-header {{
     display: flex;
@@ -1926,9 +2054,12 @@ h1 {{ text-align: center; margin-top: 0; }}
 <div class="device-header">
     <div>
         <h2>Current Status</h2>
-        <span class="device-status-label">{status_text}</span>
+        <div class="chip-row">{chips_html}</div>
     </div>
-    <span class="status-light {status}" aria-label="Device Status"></span>
+    <div class="status-right">
+        {led_html}
+        <span class="status-light {status}" aria-label="Device Status"></span>
+    </div>
 </div>
 
 {current_values_header}
@@ -1988,6 +2119,7 @@ h1 {{ text-align: center; margin-top: 0; }}
             <span class="info-label">Status:</span>
             <span class="info-value">{status_text}</span>
         </div>
+        {device_meta_html}
     </div>
 </div>
 
@@ -2243,9 +2375,12 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
         <div class="device-header">
             <div>
                 <h2>{device["name"]}</h2>
-                <span class="device-status-label">{device["status_text"]}</span>
+                <div class="chip-row">{device["chips_html"]}</div>
             </div>
-            <span class="status-light {device["status"]}" aria-label="Device Status"></span>
+            <div class="status-right">
+                {device["led_html"]}
+                <span class="status-light {device["status"]}" aria-label="Device Status"></span>
+            </div>
         </div>
         <div class="metric-full">
             <span>🌡️ Temperature</span>
@@ -2263,11 +2398,12 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
         <div class="device-header">
             <div>
                 <h2>{device["name"]}</h2>
-                <span class="device-status-label">
-                    {device["status_text"]}
-                </span>
+                <div class="chip-row">{device["chips_html"]}</div>
             </div>
-            <span class="status-light {device["status"]}" aria-label="Device Status"></span>
+            <div class="status-right">
+                {device["led_html"]}
+                <span class="status-light {device["status"]}" aria-label="Device Status"></span>
+            </div>
         </div>
         <div class="metric-grid">
             <div class="metric">

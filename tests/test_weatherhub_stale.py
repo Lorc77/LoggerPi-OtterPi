@@ -151,3 +151,53 @@ class TestWeatherHubStaleLogic:
         assert measurements["weatherhub_03469858af14.humidity"].validity == "stale"
         assert measurements["weatherhub_03469858af14.temperature"].value == 23.4
         assert measurements["weatherhub_03469858af14.humidity"].value == 42.0
+
+    def test_read_state_battery_low(self) -> None:
+        reader = WeatherHubReader(stale_after_seconds=1800)
+        packet = self._make_id01_packet("017A5CD3FC1C", 23.4, -25.1)
+        packet = GatewayPacket(
+            gateway_timestamp=packet.gateway_timestamp,
+            sensor_id=packet.sensor_id,
+            sensor_type=packet.sensor_type,
+            decoded_values={
+                **packet.decoded_values,
+                "status": {"battery_low": True, "event_transmission": False, "counter": 1},
+            },
+            raw_data=packet.raw_data,
+        )
+
+        reader.update_from_packets([packet], client_ip="141.51.190.121")
+        states, operation = reader.read_state()
+
+        assert states["weatherhub_017a5cd3fc1c"]["battery_low"] is True
+        assert operation == {}
+
+    def test_read_device_info(self) -> None:
+        reader = WeatherHubReader(stale_after_seconds=1800)
+        packet = self._make_id01_packet("017A5CD3FC1C", 23.4, -25.1)
+
+        reader.update_from_packets([packet], client_ip="141.51.190.121")
+        info = reader.read_device_info()
+
+        assert info["weatherhub_017a5cd3fc1c"]["sensor_id"] == "017A5CD3FC1C"
+        assert info["weatherhub_017a5cd3fc1c"]["sensor_type"] == 1
+        assert info["weatherhub_017a5cd3fc1c"]["gateway_ip"] == "141.51.190.121"
+        assert info["weatherhub_017a5cd3fc1c"]["gateway_timestamp"] == 1000
+
+    def test_overflow_sets_validity_reason(self) -> None:
+        reader = WeatherHubReader(stale_after_seconds=1800)
+        packet = self._make_gateway_packet(
+            sensor_id="017A5CD3FC1C",
+            sensor_type=0x01,
+            decoded_values={
+                "temperature_1": {"value": 23.4, "error": False, "overflow": True},
+                "temperature_2": {"value": -25.1, "error": False, "overflow": False},
+            },
+        )
+
+        reader.update_from_packets([packet])
+        measurements = reader.read_measurements()
+
+        m = measurements["weatherhub_017a5cd3fc1c.temperature_1"]
+        assert m.validity == "invalid"
+        assert m.validity_reason == "overflow"

@@ -43,7 +43,29 @@ Admin (LAN-only): https://observer.makki.route64.de/admin
 
 ### Nächster Schritt
 
-Phase B0 – States in den Core Batch (AtmoWEB, Freezer, MEMMERT, WeatherHub inkl. `battery_low`).
+## Phase B0 – States/Setpoints/Device + Dashboard (abgeschlossen, v1.9.0)
+
+**Stand:** 2026-11-05
+
+### Umgesetzt
+
+- `Batch`: `states`, `operation`, `serial`, `setpoints`, `device`.
+- `Measurement`: `validity_reason` (`overflow`/`sensor_error`).
+- AtmoWEB: Lights (day/uv bool, led percent), Flap percent, Setpoints, Device-Info.
+- Freezer: `serial.state` (disconnected/unknown/connected/degraded), Alarme, USB-IDs.
+- MEMMERT: `operation_mode`, Setpoint, Device-Info (address, port, resolution, USB-IDs).
+- WeatherHub: `battery_low`, Device-Info (sensor_id, sensor_type, gateway_ip, gateway_timestamp), `validity_reason`.
+- Runtime: merged alle Bereiche.
+- Dashboard: Status-Chips (erklärend), LED-SVG, Device-Info auf Detailseite; Chips + LED auf Raumdetail-Kacheln; Lampen auf Übersicht.
+- Freezer-Anzeigename: „Thermo Scientific HFC · -80 °C".
+
+### Teststand
+
+272 Tests, alle grün.
+
+### Nächster Schritt
+
+Phase B – Alert-Engine (Regeln, Dedup, Quiet Hours, Routing, Mail/Notifier).
 
 ---
 

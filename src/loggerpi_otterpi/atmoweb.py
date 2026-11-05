@@ -171,22 +171,28 @@ class AtmoWebReader:
         for key, name in (
             ("DoorOpen", "door_open"),
             ("DoorLock", "door_locked"),
-            ("FlapSet", "flap"),
             ("Defrost", "defrost"),
         ):
             value = _optional_bool(data.get(key))
             if value is not None:
                 states[name] = value
 
-        lights: dict[str, bool] = {}
+        flap = _optional_percent(data.get("FlapSet"))
+        if flap is not None:
+            states["flap"] = flap
+
+        lights: dict[str, object] = {}
         for key, name in (
             ("LightDay", "day"),
             ("LightUV", "uv"),
-            ("LightLED", "led"),
         ):
             value = _optional_bool(data.get(key))
             if value is not None:
                 lights[name] = value
+
+        led = _optional_percent(data.get("LightLED"))
+        if led is not None:
+            lights["led"] = led
 
         if lights:
             states["lights"] = lights
@@ -217,6 +223,42 @@ class AtmoWebReader:
             operation["mode"] = mode
 
         return states, operation
+
+    def read_setpoints(self) -> dict[str, float]:
+        data = self._request(
+            "TempSet",
+            "HumSet",
+            "VacSet",
+            "CO2Set",
+            "O2Set",
+            "FanSet",
+        )
+
+        setpoints: dict[str, float] = {}
+        for key, name in (
+            ("TempSet", "temperature"),
+            ("HumSet", "humidity"),
+            ("VacSet", "vacuum"),
+            ("CO2Set", "co2"),
+            ("O2Set", "o2"),
+            ("FanSet", "fan_speed"),
+        ):
+            value = _optional_number(data.get(key))
+            if value is not None:
+                setpoints[name] = value
+
+        return setpoints
+
+    def read_device_info(self) -> dict[str, object]:
+        info: dict[str, object] = {"host": self.host}
+        try:
+            device = self.identify()
+        except AtmoWebError:
+            return info
+        info["serial_number"] = device.serial_number
+        info["device_type"] = device.device_type
+        info["software_revision"] = device.software_revision
+        return info
 
 
 def _parse_timestamp(value: object) -> Optional[str]:
@@ -277,3 +319,26 @@ def _optional_bool(value: object) -> Optional[bool]:
         return True
 
     raise AtmoWebError(f"Ungültiger AtmoWEB-State-Wert: {value!r}")
+
+
+def _optional_percent(value: object) -> Optional[float]:
+    if value in {"N/A", "N/D", None, "PermissionDenied"}:
+        return None
+
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise AtmoWebError(f"Ungültiger AtmoWEB-Prozentwert: {value!r}")
+
+    if not (0 <= value <= 100):
+        raise AtmoWebError(f"AtmoWEB-Prozentwert außerhalb 0-100: {value!r}")
+
+    return value
+
+
+def _optional_number(value: object) -> Optional[float]:
+    if value in {"N/A", "N/D", None, "PermissionDenied"}:
+        return None
+
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise AtmoWebError(f"Ungültiger AtmoWEB-Zahlenwert: {value!r}")
+
+    return value

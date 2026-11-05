@@ -18,7 +18,7 @@ _DEFAULT_ROOMS = {
         "name": "R1304 · Culture Room I",
         "icon": "🦗",
         "devices": [
-            {"name": "Freezer · -80 °C", "key": "freezer", "type": "freezer"},
+            {"name": "Thermo Scientific HFC · -80 °C", "key": "freezer", "type": "freezer"},
             {"name": "DryAger", "key": "weatherhub_0e74a4597b54", "type": "weatherhub_id0e"},
             {"name": "Memmert HPP260 · left", "key": "atmoweb_101", "type": "atmoweb"},
             {"name": "Memmert HPP260 · right", "key": "atmoweb_102", "type": "atmoweb"},

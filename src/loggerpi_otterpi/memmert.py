@@ -19,6 +19,7 @@ gesetzt (siehe DEC-032).
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Optional
 
 import serial
@@ -80,12 +81,9 @@ ALL_SETPOINT_COMMANDS = (
 
 IPP300_MEASUREMENT_COMMANDS = (("IN_PV_{addr}1", "temperature", "celsius"),)
 
-IPP300_STATE_COMMANDS = (
-    ("IN_MODE_{addr}0", "operation_mode"),
-    ("IN_PAR_{addr}1", "resolution"),
-)
+IPP300_STATE_COMMANDS = (("IN_MODE_{addr}0", "operation_mode"),)
 
-IPP300_SETPOINT_COMMANDS = (("IN_SP_{addr}1", "temperature_setpoint"),)
+IPP300_SETPOINT_COMMANDS = (("IN_SP_{addr}1", "temperature"),)
 
 
 @dataclass(frozen=True)
@@ -155,7 +153,7 @@ class MemmertReader:
         return measurements
 
     def read_state(self) -> tuple[dict[str, object], dict[str, str]]:
-        """Liefert Zustände (Betriebsart, Reglerauflösung, Sollwerte)."""
+        """Liefert die Betriebsart als State."""
         states: dict[str, object] = {}
         operation: dict[str, str] = {}
 
@@ -164,20 +162,41 @@ class MemmertReader:
                 for command_template, name in self.state_commands:
                     command = command_template.format(addr=self.address)
                     value = _query_value(ser, command)
-
-                    if value is not None:
-                        states[name] = value
-
-                for command_template, name in self.setpoint_commands:
-                    command = command_template.format(addr=self.address)
-                    value = _query_value(ser, command)
-
                     if value is not None:
                         states[name] = value
         except (serial.SerialException, OSError, MemmertError):
             pass
 
         return states, operation
+
+    def read_setpoints(self) -> dict[str, float]:
+        setpoints: dict[str, float] = {}
+        try:
+            with self._open_serial() as ser:
+                for command_template, name in self.setpoint_commands:
+                    command = command_template.format(addr=self.address)
+                    value = _query_value(ser, command)
+                    if value is not None:
+                        setpoints[name] = value
+        except (serial.SerialException, OSError, MemmertError):
+            pass
+        return setpoints
+
+    def read_device_info(self) -> dict[str, object]:
+        info: dict[str, object] = {
+            "address": self.address,
+            "port": self.port,
+        }
+        try:
+            with self._open_serial() as ser:
+                command = f"IN_PAR_{self.address}1"
+                value = _query_value(ser, command)
+                if value is not None:
+                    info["resolution"] = value
+        except (serial.SerialException, OSError, MemmertError):
+            pass
+        info.update(_usb_ids(self.port))
+        return info
 
     def identify(self) -> MemmertDevice:
         """Liefert die Geräteidentität (port + adresse)."""
@@ -265,3 +284,19 @@ def _parse_response_lines(raw: bytes) -> list[str]:
         for line in text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
         if line.strip()
     ]
+
+
+def _usb_ids(port: str) -> dict:
+    try:
+        tty_name = Path(port).resolve().name
+    except OSError:
+        return {}
+    iface = Path("/sys/class/tty") / tty_name / "device"
+    try:
+        usb = iface.resolve().parent
+        return {
+            "usb_vid": (usb / "idVendor").read_text().strip(),
+            "usb_pid": (usb / "idProduct").read_text().strip(),
+        }
+    except OSError:
+        return {}

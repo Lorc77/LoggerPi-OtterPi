@@ -13,6 +13,15 @@ class FakeReader:
         self.calls += 1
         return self.measurements
 
+    def read_state(self):
+        return {}, {}
+
+    def read_setpoints(self):
+        return {}
+
+    def read_device_info(self):
+        return {}
+
 
 class FakeDelivery:
     def __init__(self, result):
@@ -252,8 +261,6 @@ def test_runtime_replays_queued_batch_before_new_batch(tmp_path, monkeypatch):
 
 
 class FakeFreezerReader:
-    """Fake für FreezerReader (liefert bereits den Key 'freezer.temperature')."""
-
     def __init__(self, measurements):
         self.measurements = measurements
         self.calls = 0
@@ -261,6 +268,58 @@ class FakeFreezerReader:
     def read_measurements(self):
         self.calls += 1
         return self.measurements
+
+    def read_state(self):
+        return {}, {}
+
+    def read_device_info(self):
+        return {}
+
+    @property
+    def serial(self):
+        return {"device": "/dev/test/freezer", "state": "connected"}
+
+
+class FakeReaderWithState:
+    def __init__(self, measurements, states, operation, setpoints, device):
+        self.measurements = measurements
+        self.states = states
+        self.operation = operation
+        self.setpoints = setpoints
+        self.device = device
+
+    def read_measurements(self):
+        return self.measurements
+
+    def read_state(self):
+        return self.states, self.operation
+
+    def read_setpoints(self):
+        return self.setpoints
+
+    def read_device_info(self):
+        return self.device
+
+
+class FakeFreezerReaderWithState:
+    def __init__(self, measurements, states, device, serial):
+        self.measurements = measurements
+        self.states = states
+        self.device = device
+        self._serial = serial
+
+    def read_measurements(self):
+        return self.measurements
+
+    def read_state(self):
+        return self.states, {}
+
+    def read_device_info(self):
+        return self.device
+
+    @property
+    def serial(self):
+        return self._serial
 
 
 def test_runtime_with_freezer_reader(tmp_path, monkeypatch):
@@ -391,3 +450,63 @@ def test_runtime_with_freezer_queued_when_delivery_fails(tmp_path, monkeypatch):
     assert len(pending) == 1
     assert pending[0].to_dict() == batch.to_dict()
     assert "freezer.temperature" in pending[0].measurements
+
+
+def test_runtime_merges_states_operation_setpoints_device(tmp_path, monkeypatch):
+    _patch_system_info(monkeypatch)
+
+    reader = FakeReaderWithState(
+        measurements={},
+        states={"door_open": True},
+        operation={"mode": "program"},
+        setpoints={"temperature": 24.0},
+        device={"host": "141.51.190.101"},
+    )
+
+    delivery = FakeDelivery(True)
+    queue = BatchQueue(tmp_path / "queue.jsonl")
+
+    runtime = LoggerRuntime(
+        logger_id="logger-001",
+        readers={"atmoweb_101": reader},
+        sequence_store=SequenceStore(tmp_path / "sequence"),
+        delivery=delivery,
+        queue=queue,
+    )
+
+    batch = runtime.run_once()
+
+    assert batch.states == {"atmoweb_101": {"door_open": True}}
+    assert batch.operation == {"atmoweb_101": {"mode": "program"}}
+    assert batch.setpoints == {"atmoweb_101": {"temperature": 24.0}}
+    assert batch.device == {"atmoweb_101": {"host": "141.51.190.101"}}
+
+
+def test_runtime_merges_freezer_serial_and_alarms(tmp_path, monkeypatch):
+    _patch_system_info(monkeypatch)
+
+    reader = FakeReader({})
+    freezer = FakeFreezerReaderWithState(
+        measurements={},
+        states={"alarms": ["ac_power_failure"]},
+        device={"port": "/dev/test/freezer"},
+        serial={"device": "/dev/test/freezer", "state": "connected"},
+    )
+
+    delivery = FakeDelivery(True)
+    queue = BatchQueue(tmp_path / "queue.jsonl")
+
+    runtime = LoggerRuntime(
+        logger_id="logger-001",
+        readers={"atmoweb_101": reader},
+        sequence_store=SequenceStore(tmp_path / "sequence"),
+        delivery=delivery,
+        queue=queue,
+        freezer_reader=freezer,
+    )
+
+    batch = runtime.run_once()
+
+    assert batch.states["freezer"] == {"alarms": ["ac_power_failure"]}
+    assert batch.serial == {"device": "/dev/test/freezer", "state": "connected"}
+    assert batch.device["freezer"] == {"port": "/dev/test/freezer"}
