@@ -1,0 +1,216 @@
+"""Tests für die Admin-Routen."""
+
+import json
+from threading import Thread
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
+
+import pytest
+from config_store import load_alarm_limits, load_mail, load_notifications, load_rooms
+from otterpi import create_server
+from otterpi_store import BatchStore
+
+TEST_TOKEN = "lp-test-token-1234567890abcdef"
+
+
+@pytest.fixture(autouse=True)
+def _config_dir(tmp_path, monkeypatch):
+    monkeypatch.setenv("OTTERPI_CONFIG_DIR", str(tmp_path / "config"))
+    return tmp_path / "config"
+
+
+def _server(store):
+    return create_server("127.0.0.1", 0, store, token=TEST_TOKEN)
+
+
+def _put(url, data):
+    return Request(
+        url,
+        data=json.dumps(data).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="PUT",
+    )
+
+
+def _valid_rooms():
+    return {
+        "rooms": {
+            "r1304": {
+                "name": "R1304 · Culture Room I",
+                "icon": "🦗",
+                "devices": [
+                    {"name": "Freezer", "key": "freezer", "type": "freezer"},
+                ],
+                "weatherhub_climate": [],
+            }
+        }
+    }
+
+
+def test_admin_page_renders(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    server = _server(store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        with urlopen(f"http://127.0.0.1:{server.server_port}/admin") as resp:
+            assert resp.status == 200
+            html = resp.read().decode("utf-8")
+        assert "OtterPi Admin" in html
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_admin_config_returns_json(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    server = _server(store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        with urlopen(f"http://127.0.0.1:{server.server_port}/api/admin/config") as resp:
+            assert resp.status == 200
+            data = json.loads(resp.read().decode("utf-8"))
+        assert set(data) == {"rooms", "alarm_limits", "mail", "notifications"}
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_put_rooms_saves(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    server = _server(store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        req = _put(
+            f"http://127.0.0.1:{server.server_port}/api/admin/rooms",
+            _valid_rooms(),
+        )
+        with urlopen(req) as resp:
+            assert resp.status == 200
+            assert json.loads(resp.read().decode("utf-8")) == {"status": "saved"}
+        assert load_rooms() == _valid_rooms()["rooms"]
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_put_rooms_invalid_returns_400(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    server = _server(store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        req = _put(
+            f"http://127.0.0.1:{server.server_port}/api/admin/rooms",
+            {"rooms": {"R1304": {"name": "X", "devices": []}}},
+        )
+        try:
+            urlopen(req)
+        except HTTPError as error:
+            assert error.code == 400
+            try:
+                body = json.loads(error.read().decode("utf-8"))
+            except (ConnectionResetError, ConnectionAbortedError):
+                return
+            assert body["error"]["code"] == "validation_error"
+        else:
+            raise AssertionError("Expected HTTP 400")
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_put_unknown_returns_404(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    server = _server(store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        req = _put(
+            f"http://127.0.0.1:{server.server_port}/api/admin/unknown",
+            {},
+        )
+        try:
+            urlopen(req)
+        except HTTPError as error:
+            assert error.code == 404
+        else:
+            raise AssertionError("Expected HTTP 404")
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_put_alarm_limits_saves(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    server = _server(store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        payload = {"sensors": {"atmoweb_101.temperature_1": {"warning_max": 26.0}}}
+        req = _put(
+            f"http://127.0.0.1:{server.server_port}/api/admin/alarm-limits",
+            payload,
+        )
+        with urlopen(req) as resp:
+            assert resp.status == 200
+        assert load_alarm_limits() == payload["sensors"]
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_put_mail_saves(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    server = _server(store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        payload = {
+            "smtp_host": "smtp.gmail.com",
+            "smtp_port": 587,
+            "smtp_user": "u@example.com",
+            "from": "f@example.com",
+            "recipients": ["a@example.com"],
+        }
+        req = _put(
+            f"http://127.0.0.1:{server.server_port}/api/admin/mail",
+            payload,
+        )
+        with urlopen(req) as resp:
+            assert resp.status == 200
+        assert load_mail() == payload
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_put_notifications_saves(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    server = _server(store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        payload = {
+            "channels": [{"type": "ntfy", "enabled": True, "url": "https://ntfy.sh", "topic": "t"}]
+        }
+        req = _put(
+            f"http://127.0.0.1:{server.server_port}/api/admin/notifications",
+            payload,
+        )
+        with urlopen(req) as resp:
+            assert resp.status == 200
+        assert load_notifications() == payload
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()

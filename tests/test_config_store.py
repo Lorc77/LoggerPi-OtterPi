@@ -1,0 +1,166 @@
+"""Tests für config_store."""
+
+import pytest
+from config_store import (
+    ConfigValidationError,
+    load_alarm_limits,
+    load_mail,
+    load_notifications,
+    load_rooms,
+    save_alarm_limits,
+    save_mail,
+    save_notifications,
+    save_rooms,
+)
+
+
+@pytest.fixture(autouse=True)
+def _config_dir(tmp_path, monkeypatch):
+    monkeypatch.setenv("OTTERPI_CONFIG_DIR", str(tmp_path))
+    return tmp_path
+
+
+def _valid_rooms():
+    return {
+        "r1304": {
+            "name": "R1304 · Culture Room I",
+            "icon": "🦗",
+            "devices": [
+                {"name": "Freezer", "key": "freezer", "type": "freezer"},
+            ],
+            "weatherhub_climate": ["weatherhub_03469858af14"],
+        }
+    }
+
+
+class TestRooms:
+    def test_roundtrip(self):
+        save_rooms(_valid_rooms())
+        assert load_rooms() == _valid_rooms()
+
+    def test_missing_name(self):
+        rooms = _valid_rooms()
+        del rooms["r1304"]["name"]
+        with pytest.raises(ConfigValidationError):
+            save_rooms(rooms)
+
+    def test_duplicate_key(self):
+        rooms = _valid_rooms()
+        rooms["r1304"]["devices"].append({"name": "Dup", "key": "freezer", "type": "freezer"})
+        with pytest.raises(ConfigValidationError):
+            save_rooms(rooms)
+
+    def test_invalid_room_id(self):
+        rooms = {"R1304": {"name": "X", "devices": []}}
+        with pytest.raises(ConfigValidationError):
+            save_rooms(rooms)
+
+    def test_backup_created(self, _config_dir):
+        save_rooms(_valid_rooms())
+        save_rooms(_valid_rooms())
+        assert (_config_dir / "rooms.json.bak").exists()
+
+
+class TestAlarmLimits:
+    def test_roundtrip(self):
+        sensors = {
+            "atmoweb_101.temperature_1": {
+                "warning_min": 20.0,
+                "warning_max": 26.0,
+                "critical_min": 18.0,
+                "critical_max": 28.0,
+                "enabled": True,
+            }
+        }
+        save_alarm_limits(sensors)
+        assert load_alarm_limits() == sensors
+
+    def test_consistency_error(self):
+        sensors = {"atmoweb_101.temperature_1": {"warning_min": 30.0, "warning_max": 20.0}}
+        with pytest.raises(ConfigValidationError):
+            save_alarm_limits(sensors)
+
+    def test_unknown_field(self):
+        sensors = {"atmoweb_101.temperature_1": {"foo": 1}}
+        with pytest.raises(ConfigValidationError):
+            save_alarm_limits(sensors)
+
+    def test_invalid_stale(self):
+        sensors = {"atmoweb_101.temperature_1": {"stale_after_seconds": 0}}
+        with pytest.raises(ConfigValidationError):
+            save_alarm_limits(sensors)
+
+
+class TestMail:
+    def _valid_mail(self):
+        return {
+            "smtp_host": "smtp.gmail.com",
+            "smtp_port": 587,
+            "smtp_user": "zoology.kassel@gmail.com",
+            "from": "zoology.kassel@gmail.com",
+            "recipients": ["a@example.com", "b@example.com"],
+            "routing": {"critical": ["a@example.com"], "warning": ["b@example.com"]},
+            "dedup_seconds": 3600,
+            "quiet_hours": {"start": "22:00", "end": "07:00", "critical_always": True},
+        }
+
+    def test_roundtrip(self):
+        save_mail(self._valid_mail())
+        assert load_mail() == self._valid_mail()
+
+    def test_invalid_email(self):
+        mail = self._valid_mail()
+        mail["from"] = "not-an-email"
+        with pytest.raises(ConfigValidationError):
+            save_mail(mail)
+
+    def test_invalid_port(self):
+        mail = self._valid_mail()
+        mail["smtp_port"] = 70000
+        with pytest.raises(ConfigValidationError):
+            save_mail(mail)
+
+    def test_routing_subset(self):
+        mail = self._valid_mail()
+        mail["routing"]["critical"] = ["c@example.com"]
+        with pytest.raises(ConfigValidationError):
+            save_mail(mail)
+
+    def test_invalid_quiet_hours(self):
+        mail = self._valid_mail()
+        mail["quiet_hours"]["start"] = "25:00"
+        with pytest.raises(ConfigValidationError):
+            save_mail(mail)
+
+    def test_enabled_flag(self):
+        mail = self._valid_mail()
+        mail["enabled"] = True
+        save_mail(mail)
+        assert load_mail()["enabled"] is True
+
+
+class TestNotifications:
+    def test_roundtrip(self):
+        data = {
+            "channels": [
+                {"type": "ntfy", "enabled": True, "url": "https://ntfy.sh", "topic": "t"},
+                {"type": "webhook", "enabled": False, "url": "https://x", "format": "discord"},
+            ]
+        }
+        save_notifications(data)
+        assert load_notifications() == data
+
+    def test_invalid_type(self):
+        data = {"channels": [{"type": "sms", "enabled": True}]}
+        with pytest.raises(ConfigValidationError):
+            save_notifications(data)
+
+    def test_missing_enabled(self):
+        data = {"channels": [{"type": "ntfy", "url": "https://ntfy.sh", "topic": "t"}]}
+        with pytest.raises(ConfigValidationError):
+            save_notifications(data)
+
+    def test_ntfy_requires_topic(self):
+        data = {"channels": [{"type": "ntfy", "enabled": True, "url": "https://ntfy.sh"}]}
+        with pytest.raises(ConfigValidationError):
+            save_notifications(data)

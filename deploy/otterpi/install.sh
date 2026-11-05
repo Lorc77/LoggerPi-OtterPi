@@ -17,6 +17,12 @@ OTTERPI_FILES=(
     otterpi_store.py
     dashboard.py
     dashboard_config.py
+    dashboard_constants.py
+    dashboard_data.py
+    dashboard_charts.py
+    admin.py
+    config_store.py
+    notifier.py
     archive_batches.py
     otter2.png
 )

@@ -12,14 +12,38 @@
 
 ## Deployment-Stand
 
-**Stand:** 2026-10-28
+**Stand:** 2026-11-05
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.7.0` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.7.0` | Empfängt Batches, speichert in SQLite |
+| LoggerPi | `v1.8.0` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.8.0` | Empfängt Batches, speichert in SQLite, Admin aktiv |
 
-LoggerPi und OtterPi laufen produktiv auf Version `v1.7.0`.
+LoggerPi und OtterPi laufen produktiv auf Version `v1.8.0`.
+
+## Phase A – Config-Admin (abgeschlossen, v1.8.0)
+
+**Stand:** 2026-11-04
+
+### Umgesetzt
+
+- `dashboard_config.py` → `get_rooms()` mit mtime-Cache, Lock, Fallback auf `_DEFAULT_ROOMS`.
+- `dashboard_constants.py`, `dashboard_data.py`, `dashboard_charts.py` aus `dashboard.py` herausgezogen.
+- `config_store.py`: JSON-Validierung, `.bak`, atomares Schreiben für `rooms.json`, `alarm_limits.json`, `mail.json`, `notifications.json`.
+- `notifier.py`: E-Mail (smtplib), ntfy, Webhook (Discord/Slack/generic), stdlib only.
+- `admin.py`: Admin-UI unter `/admin` (JSON-Editor pro Tab).
+- `otterpi.py`: Routen `GET /admin`, `GET /api/admin/config`, `PUT /api/admin/*`.
+- LAN-only via nginx (`/admin`, `/api/admin/`).
+
+### Teststand
+
+240 Tests, alle grün.
+
+### Nächster Schritt
+
+Phase B0 – States in den Core Batch (AtmoWEB, Freezer, MEMMERT, WeatherHub inkl. `battery_low`).
+
+---
 
 Seit `v1.6.3` sind folgende Features implementiert:
 
@@ -361,7 +385,7 @@ Der OtterPi bewertet deren fachliche Bedeutung, Health und Zustand.
 | Dashboard | ✅ Raumklima (Temperatur + Feuchte) berechnet |
 | Dashboard | ✅ Englische UI-Texte |
 | Batch | ✅ AtmoWEB: Nur Measurements mit Wert im Batch |
-| Tests | ✅ 189 Tests bestanden |
+| Tests | ✅ 240 Tests bestanden |
 | Stale-Logik WeatherHub | ✅ Implementiert (WEATHERHUB_STALE_AFTER_SECONDS) |
 | Gerätedetailseite | ✅ Implementiert (/device/<sensor_id>) |
 | Raumklima-Detailseite | ✅ Implementiert (/climate/<room_id>) |

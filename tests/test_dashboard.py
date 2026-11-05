@@ -6,15 +6,21 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 from dashboard import (
-    ROOMS,
-    _device_current,
-    _device_status,
+    _render_climate_detail,
+    _render_device_detail,
     _render_overview,
     _render_room_detail,
-    _room_climate,
-    _series,
 )
+from dashboard_config import get_rooms
+from dashboard_data import _device_current, _device_status, _room_climate, _series
 from otterpi_store import BatchStore
+
+
+@pytest.fixture(autouse=True)
+def _isolate_config(tmp_path, monkeypatch):
+    """Sorgt dafür, dass get_rooms() im Test auf _DEFAULT_ROOMS fällt."""
+    monkeypatch.setenv("OTTERPI_CONFIG_DIR", str(tmp_path / "config"))
+
 
 # ---------------------------------------------------------------------------
 # Fixtures & Helper
@@ -38,7 +44,7 @@ def _make_batch(measurements=None, created_at=None):
         "batch_id": "test-batch",
         "logger_id": "loggerpi-001",
         "sequence": 0,
-        "created_at": created_at or "2026-10-27T12:00:00+00:00",
+        "created_at": created_at or datetime.now(timezone.utc).isoformat(),
         "measurements": measurements or {},
         "system": {
             "cpu": {"temperature_celsius": 45.0},
@@ -83,7 +89,6 @@ def sample_batches():
         # Memmert
         "memmert_ipp300_links.temperature": _make_measurement(10.0),
         "memmert_ipp300_rechts.temperature": _make_measurement(None, validity="unavailable"),
-        # WeatherHub ID01 - R1304 (keine - nur ID03 Klima)
         # WeatherHub ID03 - R1304 (Raumklima)
         "weatherhub_03469858af14.temperature": _make_measurement(21.3),
         "weatherhub_03469858af14.humidity": _make_measurement(48.0, unit="percent"),
@@ -151,12 +156,12 @@ class TestRooms:
             "r1311",
             "r1313",
         }
-        assert set(ROOMS.keys()) == expected_rooms
+        assert set(get_rooms().keys()) == expected_rooms
 
     def test_all_weatherhub_sensors_are_configured(self):
         """Alle 17 WeatherHub-Sensoren müssen in ROOMS konfiguriert sein."""
         all_devices = []
-        for room in ROOMS.values():
+        for room in get_rooms().values():
             all_devices.extend(room["devices"])
             all_devices.extend(
                 {"key": k, "type": "weatherhub_climate"} for k in room.get("weatherhub_climate", [])
@@ -188,14 +193,15 @@ class TestRooms:
 
     def test_room_names_in_english(self):
         """Raumnamen müssen englisch sein."""
-        assert ROOMS["r1304"]["name"] == "R1304 · Culture Room I"
-        assert ROOMS["r1306"]["name"] == "R1306 · Molecular Lab"
-        assert ROOMS["r1307"]["name"] == "R1307 · Cold Room Vestibule"
-        assert ROOMS["r1308"]["name"] == "R1308 · Culture Room II"
-        assert ROOMS["r1309"]["name"] == "R1309 · RNA Lab"
-        assert ROOMS["r1310"]["name"] == "R1310 · Histology Lab"
-        assert ROOMS["r1311"]["name"] == "R1311 · Immunology Lab"
-        assert ROOMS["r1313"]["name"] == "R1313 · Teaching Lab"
+        rooms = get_rooms()
+        assert rooms["r1304"]["name"] == "R1304 · Culture Room I"
+        assert rooms["r1306"]["name"] == "R1306 · Molecular Lab"
+        assert rooms["r1307"]["name"] == "R1307 · Cold Room Vestibule"
+        assert rooms["r1308"]["name"] == "R1308 · Culture Room II"
+        assert rooms["r1309"]["name"] == "R1309 · RNA Lab"
+        assert rooms["r1310"]["name"] == "R1310 · Histology Lab"
+        assert rooms["r1311"]["name"] == "R1311 · Immunology Lab"
+        assert rooms["r1313"]["name"] == "R1313 · Teaching Lab"
 
 
 # ---------------------------------------------------------------------------
@@ -208,34 +214,30 @@ class TestRoomClimate:
 
     def test_room_climate_r1304_only_id03(self, sample_batches):
         """R1304 hat nur ID03 (keine ID01) → Raumtemp = ID03-Temp."""
-        room = ROOMS["r1304"]
+        room = get_rooms()["r1304"]
         climate = _room_climate(sample_batches, room)
 
-        # Nur ID03 (21.3°C) - keine ID01-Sensoren in R1304
         assert climate["temp"] == pytest.approx(21.3, abs=0.01)
         assert climate["hum"] == pytest.approx(48.0, abs=0.01)
 
     def test_room_climate_r1306_with_id01(self, sample_batches):
         """R1306 hat nur ID01-Sensoren → Raumtemp = Mittelwert."""
-        room = ROOMS["r1306"]
+        room = get_rooms()["r1306"]
         climate = _room_climate(sample_batches, room)
 
-        # ID01: 21.8 + 22.0 + 21.5 = 65.3 / 3 = 21.77
         assert climate["temp"] == pytest.approx(21.77, abs=0.01)
-        # Kein ID03 → keine Feuchte
         assert climate["hum"] is None
 
     def test_room_climate_ignores_id0e(self, sample_batches):
         """ID0E (DryAger) darf nicht in die Raumtemperatur einfließen."""
-        room = ROOMS["r1304"]
+        room = get_rooms()["r1304"]
         climate = _room_climate(sample_batches, room)
 
-        # 16.4 (ID0E) darf nicht im Mittelwert sein
         assert climate["temp"] == pytest.approx(21.3, abs=0.01)
 
     def test_room_climate_empty_batches(self):
         """Ohne Batches gibt es kein Raumklima."""
-        room = ROOMS["r1304"]
+        room = get_rooms()["r1304"]
         climate = _room_climate([], room)
 
         assert climate["temp"] is None
@@ -248,11 +250,10 @@ class TestRoomClimate:
             "weatherhub_0101f89974e0.temperature_2": _make_measurement(4.5),
         }
         batches = [_make_batch(measurements)]
-        room = ROOMS["r1311"]
+        room = get_rooms()["r1311"]
 
         climate = _room_climate(batches, room)
 
-        # Nur 21.5 wird berücksichtigt (der andere Sensor fehlt)
         assert climate["temp"] == pytest.approx(21.5, abs=0.01)
 
 
@@ -390,7 +391,7 @@ class TestSeries:
 
         assert len(series) == 1
         assert series[0]["value"] == 4.5
-        assert series[0]["label"] == "13:00"  # UTC+1 → Berlin
+        assert series[0]["label"] == "13:00"
         assert series[0]["date"] == "2026-10-27"
 
     def test_series_skips_missing_values(self):
@@ -444,7 +445,6 @@ class TestRenderOverview:
 
         html = _render_overview(store)
 
-        # Raumklima in R1304 (nur ID03: 21.3°C, 48%)
         assert "🌡️ 21.3 °C" in html
         assert "💧 48 %" in html
 
@@ -471,7 +471,6 @@ class TestRenderRoomDetail:
 
         html = _render_room_detail(store, "r1304")
 
-        # Raumklima im Subtitle (ersetzt "Letzte 48 Stunden")
         assert "🌡️ Room temperature: 21.3 °C" in html
         assert "💧 Relative Humidity: 48.0 %" in html
         assert "Letzte 48 Stunden" not in html
@@ -488,7 +487,6 @@ class TestRenderRoomDetail:
         """Letzte Kachel bei ungerader Anzahl auf voller Breite."""
         store = _store_batches(tmp_path, sample_batches)
 
-        # R1307 hat nur 1 Gerät (ungerade)
         html = _render_room_detail(store, "r1307")
 
         assert "device-card device-card-full" in html
@@ -497,7 +495,36 @@ class TestRenderRoomDetail:
         """Bei gerader Anzahl keine volle Breite."""
         store = _store_batches(tmp_path, sample_batches)
 
-        # R1311 hat 2 Geräte (gerade)
         html = _render_room_detail(store, "r1311")
 
         assert "device-card device-card-full" not in html
+
+
+class TestRenderClimateDetail:
+    """Smoke-Tests für die Raumklima-Detailseite."""
+
+    def test_climate_detail_renders(self, sample_batches, tmp_path):
+        store = _store_batches(tmp_path, sample_batches)
+        html = _render_climate_detail(store, "r1304")
+        assert "Room Climate" in html
+        assert "Average Temperature" in html
+
+    def test_climate_detail_not_found(self, sample_batches, tmp_path):
+        store = _store_batches(tmp_path, sample_batches)
+        html = _render_climate_detail(store, "unknown")
+        assert "Not Found" in html
+
+
+class TestRenderDeviceDetail:
+    """Smoke-Tests für die Geräte-Detailseite."""
+
+    def test_device_detail_renders(self, sample_batches, tmp_path):
+        store = _store_batches(tmp_path, sample_batches)
+        html = _render_device_detail(store, "atmoweb_101")
+        assert "Statistics" in html
+        assert "atmoweb_101" in html
+
+    def test_device_detail_not_found(self, sample_batches, tmp_path):
+        store = _store_batches(tmp_path, sample_batches)
+        html = _render_device_detail(store, "unknown")
+        assert "Not Found" in html

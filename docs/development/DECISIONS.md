@@ -1363,6 +1363,143 @@ python3 /opt/loggerpi-otterpi/archive_batches.py --dry-run
 
 ---
 
+## DEC-041 — Admin im OtterPi-Service, LAN-only via nginx
+
+**Status:** Accepted
+**Datum:** 2026-11-04
+
+### Kontext
+
+Der OtterPi benötigt eine Verwaltungsschicht für Konfiguration (Rooms, Alarm Limits, Mail, Notifications). Sie soll Teil des bestehenden `otterpi.observer.service` sein (ein Prozess, ein Deployment).
+
+### Entscheidung
+
+Der Admin ist Teil des OtterPi-Service. Die Zugriffskontrolle erfolgt ausschließlich über nginx:
+
+```nginx
+location /admin { allow 192.168.178.0/24; deny all; ... }
+location /api/admin/ { allow 192.168.178.0/24; deny all; ... }
+```
+
+Der Handler (`otterpi.py`) macht **keine** IP-Prüfung und bleibt auth-agnostisch.
+
+### Begründung
+
+- Ein Prozess, ein Deployment.
+- LAN-only ohne Code-Kopplung.
+- Öffentlich-Öffnen später = nginx + Auth, kein Code-Umbau.
+
+### Konsequenz
+
+- Admin-Routen: `GET /admin`, `GET /api/admin/config`, `PUT /api/admin/*`.
+- nginx-Konfiguration ist separater Deployment-Schritt.
+
+---
+
+## DEC-042 — Config-Zugriff über `get_rooms()` (Variante B)
+
+**Status:** Accepted
+**Datum:** 2026-11-04
+
+### Kontext
+
+`dashboard.py` importierte `ROOMS` modul-level aus `dashboard_config.py`. Änderungen an `rooms.json` wären erst nach Service-Restart wirksam geworden.
+
+### Entscheidung
+
+`dashboard_config.py` bietet `get_rooms()` mit mtime-Cache, Lock und Fallback auf `_DEFAULT_ROOMS`. `dashboard.py` ruft `get_rooms()` pro Render auf.
+
+### Begründung
+
+- Kein Restart-on-Save, keine Privilegien (`makki` → root entfällt).
+- Keine Downtime, kein Alert-Engine-Reset.
+- Ressourcenschonend: ein `stat()` pro Request, JSON-Parsing nur bei Änderung.
+
+### Konsequenz
+
+- `ROOMS` als Modulkonstante entfällt.
+- `test_dashboard.py` nutzt `get_rooms()`.
+
+---
+
+## DEC-043 — JSON-Config mit Validierung, `.bak`, atomarem Schreiben
+
+**Status:** Accepted
+**Datum:** 2026-11-04
+
+### Entscheidung
+
+`config_store.py` verwaltet `rooms.json`, `alarm_limits.json`, `mail.json`, `notifications.json`:
+
+- Validierung vor dem Schreiben.
+- `.bak` vor jedem Überschreiben.
+- Atomar: temp + `os.replace`.
+
+Secrets (SMTP-Passwort) bleiben in `otterpi.env`.
+
+### Konsequenz
+
+- Admin schreibt nur JSON, nie env.
+- SMTP-Passwort-Änderung bleibt manuell auf dem OtterPi.
+
+---
+
+## DEC-044 — Notifier: E-Mail, ntfy, Webhook (stdlib only)
+
+**Status:** Accepted
+**Datum:** 2026-11-04
+
+### Entscheidung
+
+`notifier.py` implementiert `EmailNotifier`, `NtfyNotifier`, `WebhookNotifier` (generic/discord/slack). Alle nutzen ausschließlich Standardbibliothek (`smtplib`, `urllib.request`, `json`).
+
+Kanäle sind separat über `notifications.json` ein-/ausschaltbar. Dedup/Quiet Hours bleiben global in der Alert-Engine.
+
+### Konsequenz
+
+- Keine neuen Runtime-Dependencies.
+- Phase B verdrahtet die Notifier nur noch.
+
+---
+
+## DEC-045 — `dashboard.py` aufgeteilt
+
+**Status:** Accepted
+**Datum:** 2026-11-04
+
+### Entscheidung
+
+`dashboard.py` wurde entlastet:
+
+- `dashboard_constants.py` – Konstanten (`BERLIN`, `VERSION`, Zeiträume, Farben).
+- `dashboard_data.py` – Queries/Berechnungen (`_recent_batches`, `_series`, `_room_climate`, …).
+- `dashboard_charts.py` – JS-/Chart-Helfer.
+- `dashboard.py` – nur noch Seiten-Renderer.
+
+### Konsequenz
+
+- Datenfunktionen sind für die Alert-Engine wiederverwendbar.
+- Kein Verhaltensunterschied.
+
+---
+
+## DEC-046 — Battery-Low als State (B0), Alert-Regel in Phase B
+
+**Status:** Accepted
+**Datum:** 2026-11-04
+
+### Entscheidung
+
+`battery_low` wird als State in den Core Batch aufgenommen (B0) und im Dashboard angezeigt. Eine Boolean-Alert-Regel folgt in Phase B (kleine Schema-Erweiterung in `alarm_limits.json`).
+
+### Konsequenz
+
+- State jetzt erfassbar/anzeigbar.
+- Alert-Regel später, kein Blocker.
+
+---
+
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:

@@ -148,6 +148,12 @@ Die Installation kopiert die Anwendungsdateien **flach** nach
 ├── composer.py
 ├── dashboard.py (nur OtterPi)
 ├── dashboard_config.py (nur OtterPi)
+├── dashboard_constants.py (nur OtterPi)
+├── dashboard_data.py (nur OtterPi)
+├── dashboard_charts.py (nur OtterPi)
+├── admin.py (nur OtterPi)
+├── config_store.py (nur OtterPi)
+├── notifier.py (nur OtterPi)
 ├── delivery.py
 ├── freezer.py
 ├── freezer_config.py
@@ -234,6 +240,16 @@ SQLite:
 ```text
 /var/lib/loggerpi-otterpi/batches.sqlite3
 ```
+
+Config:
+
+```text
+/var/lib/loggerpi-otterpi/config
+```
+
+Die Config wird über `OTTERPI_CONFIG_DIR` gesetzt (Default:
+`/var/lib/loggerpi-otterpi/config`). Sie enthält `rooms.json`,
+`alarm_limits.json`, `mail.json`, `notifications.json`.
 
 Die Datei `dashboard_config.py` (Raum- und Sensor-Zuordnung) wird
 automatisch mit deployt und liegt danach unter:
@@ -402,6 +418,41 @@ location /api/v1/batches {
 
 Die Konfiguration wurde mit `sudo nginx -t` geprüft und funktioniert
 im produktiven Betrieb.
+
+---
+
+### Admin (LAN-only)
+
+Der Admin ist Teil des OtterPi-Service und wird über nginx auf das LAN
+beschränkt:
+
+```nginx
+location /admin {
+    allow 192.168.178.0/24;
+    deny all;
+    proxy_pass http://127.0.0.1:8090;
+    proxy_set_header Host \$host;
+    proxy_set_header X-Real-IP \$remote_addr;
+}
+
+location /api/admin/ {
+    allow 192.168.178.0/24;
+    deny all;
+    proxy_pass http://127.0.0.1:8090;
+    proxy_set_header Host \$host;
+    proxy_set_header X-Real-IP \$remote_addr;
+}
+```
+
+Nach Änderung:
+
+```bash
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+Der Handler macht keine IP-Prüfung. Öffnen nach öffentlich = nginx + Auth,
+kein Code-Umbau.
 
 ---
 

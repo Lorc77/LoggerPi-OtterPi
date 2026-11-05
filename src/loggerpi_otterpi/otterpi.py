@@ -2,8 +2,45 @@ import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Optional
 
+from config_store import (
+    ConfigValidationError,
+    load_alarm_limits,
+    load_mail,
+    load_notifications,
+    load_rooms,
+    save_alarm_limits,
+    save_mail,
+    save_notifications,
+    save_rooms,
+)
+from dashboard_config import get_rooms
 from model.batch import Batch
 from otterpi_store import BatchStore
+
+
+def _load_admin_config() -> dict:
+    try:
+        rooms = load_rooms()
+    except ConfigValidationError:
+        rooms = get_rooms()
+    try:
+        alarm_limits = load_alarm_limits()
+    except ConfigValidationError:
+        alarm_limits = {}
+    try:
+        mail = load_mail()
+    except ConfigValidationError:
+        mail = {}
+    try:
+        notifications = load_notifications()
+    except ConfigValidationError:
+        notifications = {"channels": []}
+    return {
+        "rooms": {"rooms": rooms},
+        "alarm_limits": {"sensors": alarm_limits},
+        "mail": mail,
+        "notifications": notifications,
+    }
 
 
 class OtterPiHandler(BaseHTTPRequestHandler):
@@ -87,7 +124,49 @@ class OtterPiHandler(BaseHTTPRequestHandler):
             },
         )
 
+    def do_PUT(self) -> None:
+        routes = {
+            "/api/admin/rooms": ("rooms", save_rooms),
+            "/api/admin/alarm-limits": ("sensors", save_alarm_limits),
+            "/api/admin/mail": (None, save_mail),
+            "/api/admin/notifications": (None, save_notifications),
+        }
+        if self.path not in routes:
+            self.send_error(404)
+            return
+
+        key, save_fn = routes[self.path]
+        try:
+            data = self._read_json_body()
+            if key is not None:
+                data = data[key]
+            save_fn(data)
+        except ConfigValidationError as exc:
+            self._send_json(
+                400,
+                {"status": "error", "error": {"code": "validation_error", "message": str(exc)}},
+            )
+            return
+        except (KeyError, TypeError, ValueError, json.JSONDecodeError) as exc:
+            self._send_json(
+                400,
+                {"status": "error", "error": {"code": "invalid_config", "message": str(exc)}},
+            )
+            return
+
+        self._send_json(200, {"status": "saved"})
+
     def do_GET(self) -> None:
+        if self.path == "/admin":
+            from admin import render_admin
+
+            self._send_html(200, render_admin(_load_admin_config()))
+            return
+
+        if self.path == "/api/admin/config":
+            self._send_json(200, _load_admin_config())
+            return
+
         # Neue Routen: /room/, /device/, /climate/ + Redirect von /raum/
         if (
             self.path == "/"
@@ -180,11 +259,25 @@ class OtterPiHandler(BaseHTTPRequestHandler):
 
         self.send_error(404)
 
+    def _read_json_body(self) -> dict:
+        length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(length)
+        return json.loads(body.decode("utf-8"))
+
     def _send_json(self, status: int, data: dict) -> None:
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")
 
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _send_html(self, status: int, html: str) -> None:
+        body = html.encode("utf-8")
+
+        self.send_response(status)
+        self.send_header("Content-Type", "text/html; charset=UTF-8")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
