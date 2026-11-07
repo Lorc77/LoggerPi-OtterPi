@@ -1,11 +1,18 @@
 """Admin-UI für den OtterPi."""
 
 import json
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+from dashboard_constants import VERSION
+
+BERLIN = ZoneInfo("Europe/Berlin")
 
 
 def render_admin(config: dict) -> str:
     from sensor_schemas import SENSOR_SCHEMAS
 
+    last_update = datetime.now(BERLIN).strftime("%d.%m.%Y %H:%M Uhr")
     rooms_json = json.dumps(config["rooms"], ensure_ascii=False, indent=2)
     alarm_json = json.dumps(config["alarm_limits"], ensure_ascii=False, indent=2)
     mail_json = json.dumps(config["mail"], ensure_ascii=False, indent=2)
@@ -40,18 +47,40 @@ body {{
     padding: 30px;
     box-shadow: 0 20px 50px rgba(0,0,0,.4);
 }}
-h1 {{ margin-top: 0; }}
-.tabs {{ display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }}
+h1 {{ text-align: center; margin-top: 0; }}
+.subtitle {{ text-align: center; color: #d1d5db; margin-bottom: 20px; }}
+.tabs {{
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}}
 .tab-btn {{
-    padding: 8px 16px;
-    border-radius: 20px;
-    background: rgba(147,197,253,.15);
-    border: 1px solid rgba(147,197,253,.4);
-    color: #bfdbfe;
+    padding: 10px 20px;
+    border-radius: 10px;
+    background: rgba(31,41,55,.78);
+    border: 1px solid rgba(255,255,255,.15);
+    color: #d1d5db;
     cursor: pointer;
+    font-size: .95rem;
+    transition: .2s;
+}}
+.tab-btn:hover {{
+    background: rgba(147,197,253,.15);
+    border-color: rgba(147,197,253,.5);
+}}
+.tab-btn.active {{
+    background: rgba(147,197,253,.25);
+    border-color: rgba(147,197,253,.6);
+    color: #bfdbfe;
+}}
+.footer {{
+    text-align: center;
+    margin-top: 30px;
+    color: #d1d5db;
+    opacity: .85;
     font-size: .9rem;
 }}
-.tab-btn.active {{ background: rgba(147,197,253,.5); color: white; }}
 .tab-panel {{ display: none; }}
 .tab-panel.active {{ display: block; }}
 textarea {{
@@ -166,13 +195,14 @@ textarea {{
 </head>
 <body>
 <div class="container">
-<h1>🦦 OtterPi Admin</h1>
+<h1>🛠 ZOOLOGY-Observer Admin</h1>
+<div class="subtitle">Last update: {last_update}</div>
 <div class="tabs">
-    <button class="tab-btn active" onclick="showTab('rooms', this)">Rooms</button>
-    <button class="tab-btn" onclick="showTab('alarm', this)">Alarm Limits</button>
-    <button class="tab-btn" onclick="showTab('mail', this)">Mail</button>
-    <button class="tab-btn" onclick="showTab('notifications', this)">Notifications</button>
-    <button class="tab-btn" onclick="showTab('alerts', this)">Alerts</button>
+    <button class="tab-btn active" onclick="showTab('rooms', this)">🏠 Rooms</button>
+    <button class="tab-btn" onclick="showTab('alarm', this)">⚠️ Alarm Limits</button>
+    <button class="tab-btn" onclick="showTab('mail', this)">📧 Mail</button>
+    <button class="tab-btn" onclick="showTab('notifications', this)">🔔 Notifications</button>
+    <button class="tab-btn" onclick="showTab('alerts', this)">🚨 Alerts</button>
 </div>
 
 <div id="tab-rooms" class="tab-panel active">
@@ -297,6 +327,7 @@ textarea {{
         <tbody id="alerts-tbody"></tbody>
     </table>
 </div>
+<div class="footer">🦦 otterpi · ZOOLOGY-Observer Admin {VERSION}</div>
 </div>
 
 <script>
