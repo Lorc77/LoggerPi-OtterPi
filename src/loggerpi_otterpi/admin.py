@@ -9,10 +9,15 @@ from dashboard_constants import VERSION
 BERLIN = ZoneInfo("Europe/Berlin")
 
 
-def render_admin(config: dict) -> str:
+def render_admin(config: dict, last_batch_at: str = "") -> str:
     from sensor_schemas import SENSOR_SCHEMAS
 
-    last_update = datetime.now(BERLIN).strftime("%d.%m.%Y %H:%M Uhr")
+    if last_batch_at:
+        last_update = (
+            datetime.fromisoformat(last_batch_at).astimezone(BERLIN).strftime("%d.%m.%Y %H:%M Uhr")
+        )
+    else:
+        last_update = "–"
     rooms_json = json.dumps(config["rooms"], ensure_ascii=False, indent=2)
     alarm_json = json.dumps(config["alarm_limits"], ensure_ascii=False, indent=2)
     mail_json = json.dumps(config["mail"], ensure_ascii=False, indent=2)
@@ -39,12 +44,12 @@ body {{
     padding: 30px;
 }}
 .container {{
-    width: min(1100px, 95%);
+    width: min(1200px, 95%);
     margin: auto;
     background: rgba(20,35,50,.58);
     backdrop-filter: blur(6px);
     border-radius: 25px;
-    padding: 30px;
+    padding: 40px;
     box-shadow: 0 20px 50px rgba(0,0,0,.4);
 }}
 h1 {{ text-align: center; margin-top: 0; }}
@@ -96,7 +101,7 @@ textarea {{
 }}
 .rooms-list {{
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: 1fr;
     gap: 16px;
     margin-bottom: 16px;
 }}
@@ -129,6 +134,43 @@ textarea {{
 .devices-table th {{
     color: #9ca3af;
     font-weight: normal;
+}}
+.config-group {{
+    margin-bottom: 20px;
+}}
+.config-group h4 {{
+    color: #bfdbfe;
+    margin: 0 0 10px 0;
+    font-size: 1rem;
+}}
+.config-grid {{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}}
+.config-item {{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}}
+.config-item label {{
+    color: #9ca3af;
+    font-size: .85rem;
+    min-width: 200px;
+    max-width: 200px;
+    white-space: nowrap;
+}}
+.config-item input {{
+    flex: 1;
+    padding: 8px 10px;
+    font-size: .9rem;
+    min-width: 0;
+}}
+.config-item-full {{
+    grid-column: 1 / -1;
+}}
+.config-item-full input {{
+    max-width: none;
 }}
 .inline-form {{
     margin-top: 12px;
@@ -690,33 +732,86 @@ async function loadMailForm() {{
         const result = await resp.json();
         const mail = result.mail;
         form.innerHTML = `
-            <label>SMTP Host: <input type="text" id="mail-smtp-host"
-                    value="${{mail.smtp_host || ''}}"></label>
-            <label>SMTP Port: <input type="number" id="mail-smtp-port"
-                    value="${{mail.smtp_port || 587}}"></label>
-            <label>SMTP User: <input type="text" id="mail-smtp-user"
-                    value="${{mail.smtp_user || ''}}"></label>
-            <label>From: <input type="text" id="mail-from"
-                    value="${{mail.from || ''}}"></label>
-            <label>Recipients (comma-separated):
-                <input type="text" id="mail-recipients"
-                        value="${{(mail.recipients || []).join(', ')}}"></label>
-            <label>Routing Critical (comma-separated):
-                <input type="text" id="mail-routing-critical"
-                        value="${{(mail.routing?.critical || []).join(', ')}}"></label>
-            <label>Routing Warning (comma-separated):
-                <input type="text" id="mail-routing-warning"
-                        value="${{(mail.routing?.warning || []).join(', ')}}"></label>
-            <label>Dedup Seconds: <input type="number" id="mail-dedup-seconds"
-                    value="${{mail.dedup_seconds || 3600}}"></label>
-            <label>Quiet Hours Start: <input type="text" id="mail-quiet-start"
-                    value="${{mail.quiet_hours?.start || '22:00'}}"></label>
-            <label>Quiet Hours End: <input type="text" id="mail-quiet-end"
-                    value="${{mail.quiet_hours?.end || '07:00'}}"></label>
-            <label>Critical Always: <input type="checkbox" id="mail-quiet-critical"
-                    ${{mail.quiet_hours?.critical_always !== false ? 'checked' : ''}}></label>
-            <label>Enabled: <input type="checkbox" id="mail-enabled"
-                    ${{mail.enabled !== false ? 'checked' : ''}}></label>
+            <div class="config-group">
+                <h4>SMTP</h4>
+                <div class="config-grid">
+                    <div class="config-item">
+                        <label>SMTP Host:</label>
+                        <input type="text" id="mail-smtp-host"
+                                value="${{mail.smtp_host || ''}}">
+                    </div>
+                    <div class="config-item">
+                        <label>SMTP Port:</label>
+                        <input type="number" id="mail-smtp-port"
+                                value="${{mail.smtp_port || 587}}">
+                    </div>
+                    <div class="config-item">
+                        <label>SMTP User:</label>
+                        <input type="text" id="mail-smtp-user"
+                                value="${{mail.smtp_user || ''}}">
+                    </div>
+                    <div class="config-item">
+                        <label>From:</label>
+                        <input type="text" id="mail-from"
+                                value="${{mail.from || ''}}">
+                    </div>
+                </div>
+            </div>
+            <div class="config-group">
+                <h4>Recipients</h4>
+                <div class="config-grid">
+                    <div class="config-item config-item-full">
+                        <label>Recipients (comma-separated):</label>
+                        <input type="text" id="mail-recipients"
+                                value="${{(mail.recipients || []).join(', ')}}">
+                    </div>
+                    <div class="config-item config-item-full">
+                        <label>Routing Critical (comma-separated):</label>
+                        <input type="text" id="mail-routing-critical"
+                                value="${{(mail.routing?.critical || []).join(', ')}}">
+                    </div>
+                    <div class="config-item config-item-full">
+                        <label>Routing Warning (comma-separated):</label>
+                        <input type="text" id="mail-routing-warning"
+                                value="${{(mail.routing?.warning || []).join(', ')}}">
+                    </div>
+                </div>
+            </div>
+            <div class="config-group">
+                <h4>Quiet Hours</h4>
+                <div class="config-grid">
+                    <div class="config-item">
+                        <label>Start:</label>
+                        <input type="text" id="mail-quiet-start"
+                                value="${{mail.quiet_hours?.start || '22:00'}}">
+                    </div>
+                    <div class="config-item">
+                        <label>End:</label>
+                        <input type="text" id="mail-quiet-end"
+                                value="${{mail.quiet_hours?.end || '07:00'}}">
+                    </div>
+                    <div class="config-item">
+                        <label>Critical Always:</label>
+                        <input type="checkbox" id="mail-quiet-critical"
+                                ${{mail.quiet_hours?.critical_always !== false ? 'checked' : ''}}>
+                    </div>
+                </div>
+            </div>
+            <div class="config-group">
+                <h4>General</h4>
+                <div class="config-grid">
+                    <div class="config-item">
+                        <label>Dedup Seconds:</label>
+                        <input type="number" id="mail-dedup-seconds"
+                                value="${{mail.dedup_seconds || 3600}}">
+                    </div>
+                    <div class="config-item">
+                        <label>Enabled:</label>
+                        <input type="checkbox" id="mail-enabled"
+                                ${{mail.enabled !== false ? 'checked' : ''}}>
+                    </div>
+                </div>
+            </div>
         `;
         status.textContent = 'Loaded.';
     }} catch (e) {{
@@ -1461,6 +1556,9 @@ async function acknowledgeAlert(id) {{
         document.getElementById('alerts-status').textContent = 'Request failed: ' + e.message;
     }}
 }}
+
+loadRooms();
+
 </script>
 </body>
 </html>
