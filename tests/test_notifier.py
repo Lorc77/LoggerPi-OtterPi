@@ -151,3 +151,45 @@ class TestCreateNotifiers:
         notifiers = create_notifiers({"channels": []}, mail=mail, smtp_password="pw")
         assert len(notifiers) == 1
         assert isinstance(notifiers[0], EmailNotifier)
+
+
+def test_email_routing(monkeypatch):
+    captured = {}
+
+    class FakeSMTP:
+        def __init__(self, host, port, timeout):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def starttls(self):
+            pass
+
+        def login(self, user, password):
+            pass
+
+        def send_message(self, msg):
+            captured["msg"] = msg
+
+    monkeypatch.setattr("notifier.smtplib.SMTP", FakeSMTP)
+    n = EmailNotifier(
+        {
+            "smtp_host": "smtp.gmail.com",
+            "smtp_port": 587,
+            "smtp_user": "u@example.com",
+            "from": "f@example.com",
+            "recipients": ["a@example.com", "b@example.com"],
+            "routing": {
+                "critical": ["a@example.com", "b@example.com"],
+                "warning": ["a@example.com"],
+            },
+        },
+        password="pw",
+    )
+    alert = Alert(sensor="x", severity="warning", message="m")
+    assert n.send(alert) is True
+    assert captured["msg"]["To"] == "a@example.com"

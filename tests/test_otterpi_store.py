@@ -96,3 +96,24 @@ def test_batch_store_latest_returns_newest(tmp_path):
 def test_batch_store_latest_empty(tmp_path):
     store = BatchStore(tmp_path / "otter.db")
     assert store.latest() is None
+
+
+def test_batch_store_recent_returns_batches_in_window(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    sequence_store = SequenceStore(tmp_path / "sequence")
+
+    first = create_batch("logger-001", sequence_store)
+    second = create_batch("logger-001", sequence_store)
+
+    store.store(first)
+    store.store(second)
+
+    recent = store.recent(hours=24)
+    assert len(recent) == 2
+    assert recent[0].to_dict() == first.to_dict()
+    assert recent[1].to_dict() == second.to_dict()
+
+
+def test_batch_store_recent_empty(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    assert store.recent(hours=24) == []

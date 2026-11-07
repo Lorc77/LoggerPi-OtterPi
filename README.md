@@ -147,8 +147,8 @@ PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.10.0` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.10.0` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
+| LoggerPi | `v1.11.0` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.11.0` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
 
 Der E2E-Datenpfad (LoggerPi → nginx → OtterPi → SQLite) ist verifiziert.
 
@@ -164,9 +164,13 @@ Datenquellen:
 - WeatherHub Sensoren (Gateway Proxy, 17 Sensoren) ✅
 
 Admin (LAN-only): `https://observer.makki.route64.de/admin`
-- Config-Editor für Rooms, Alarm Limits, Mail, Notifications
-- Alert History (Tab „Alerts") mit Acknowledge-Button
+- Rooms-Tab: Formular-UI (Raum-/Geräte-Verwaltung, Raumwechsel, Inline-Formulare)
+- Alarm Limits-Tab: Formular-UI (Measurements + States pro Gerät, Edit Limits)
+- Mail-Tab: Formular-UI (SMTP, Empfänger, Routing, Dedup, Quiet Hours)
+- Notifications-Tab: Formular-UI (ntfy, webhook)
+- Alerts-Tab: Alert History mit Acknowledge-Button
 - Test-Mail-Button im Mail-Tab
+- JSON-Editor als „Advanced"-Toggle (alle Tabs)
 - JSON-Validierung, `.bak`, atomares Schreiben
 
 ## Alert-Engine
@@ -174,15 +178,16 @@ Admin (LAN-only): `https://observer.makki.route64.de/admin`
 Die Alert-Engine läuft als Thread im `otterpi.observer.service` und prüft
 nach jedem Batch (und alle 300 s) die konfigurierten Regeln:
 
-- **Measurements:** `warning_min/max`, `critical_min/max`, `stale`, `invalid`
-- **States:** `freezer.alarms`, `battery_low`, `door_open`
+- **Measurements:** `warning_min/max`, `critical_min/max`, `rate_of_change`, `stale`, `invalid`
+- **States:** `freezer.alarms`, `battery_low`, `door_open`, `contact_open`
 
 Alerts werden dedupliziert (`dedup_seconds`), unterliegen Quiet Hours
 (`quiet_hours`) und werden über die konfigurierten Notifier (E-Mail, ntfy,
 Webhook) versendet. Die Alert History ist im Admin unter „Alerts" sichtbar.
 
-**Bewusst offen (Phase C):** Rate-of-Change, Door-Open-Dauer, Routing,
-Defrost, Flap.
+**Bewusst offen:** Door-Open-Dauer (HPP260 unterstützt es nicht), Defrost,
+Flap (HPP260 unterstützt es nicht). CSV-Export, Statuspage, Dry-Run, Config-Backup/Restore auf „irgendwann"
+verschoben.
 
 ---
 
@@ -212,18 +217,18 @@ pytest
 git diff --check
 ```
 
-Aktueller Stand: **318 Tests**, alle bestehen.
+Aktueller Stand: **323 Tests**, alle bestehen.
 
 ---
 
-Aktuelle Version: **v1.10.0**
+Aktuelle Version: **v1.11.0**
 
 Die Version wird geführt über:
 
-- `pyproject.toml` → `version = "1.10.0"`
-- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.10.0"`
-- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.10.0"`
-- Git-Tag `v1.10.0`
+- `pyproject.toml` → `version = "1.11.0"`
+- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.11.0"`
+- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.11.0"`
+- Git-Tag `v1.11.0`
 
 ---
 

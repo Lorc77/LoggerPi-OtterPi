@@ -16,8 +16,8 @@
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.10.0` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.10.0` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
+| LoggerPi | `v1.11.0` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.11.0` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
 
 LoggerPi und OtterPi laufen produktiv auf Version `v1.8.0`.
 
@@ -61,7 +61,7 @@ Admin (LAN-only): https://observer.makki.route64.de/admin
 
 ### Teststand
 
-318 Tests, alle grün.
+323 Tests, alle grün.
 
 ### Nächster Schritt
 
@@ -91,6 +91,45 @@ Phase B – Alert-Engine (abgeschlossen, v1.10.0).
 ### Nächster Schritt
 
 Deploy + Test (B6). Danach Phase C (Komfort).
+
+## Phase C – Komfort (abgeschlossen, v1.11.0)
+
+**Stand:** 2026-11-07
+
+### Umgesetzt
+
+- **Rooms-Tab:** Formular-UI (Raum-/Geräte-Verwaltung, Raumwechsel per Pull-down, Inline-Formulare für Add/Edit/Delete, How-to für neue WeatherHub-Sensoren).
+- **Alarm Limits-Tab:** Formular-UI (Measurements + States pro Gerät, Edit Limits mit Inline-Formular, How-to).
+- **Mail-Tab:** Formular-UI (SMTP, Empfänger, Routing, Dedup, Quiet Hours, Enabled, Test-Mail-Button).
+- **Notifications-Tab:** Formular-UI (ntfy, webhook, Add/Edit/Delete Channel).
+- **Rate-of-Change:** `rate_of_change_max_per_hour` in `alert_engine.py` implementiert (nutzt `BatchStore.recent()`).
+- **Routing:** `EmailNotifier` nutzt `routing[severity]` statt `recipients`.
+- **`contact_open`:** In `alert_engine.py` `_check_states` ergänzt (für zukünftige `weatherhub_id10`-Sensoren).
+- **JSON-Editor als „Advanced"-Toggle:** In allen Tabs (Rooms, Alarm Limits, Mail, Notifications).
+
+### Bewusst nicht umgesetzt
+
+- **Door-Open-Dauer:** HPP260 unterstützt `door_open` nicht (liefert `N/A`). Geparkt für evtl. zukünftige AtmoWEB-Geräte.
+- **Service-Restart:** Nicht nötig, weil JSON-Configs automatisch gelesen werden (mtime-Cache, `load_*()` bei jedem `_check`).
+
+### Auf „irgendwann" verschoben
+
+- CSV-Export
+- Statuspage
+- Dry-Run / Test-Mode
+- Config-Backup/Restore
+
+### Auf „später" verschoben (wenn Admin öffentlich mit Login)
+
+- Audit-Log
+
+### Teststand
+
+323 Tests, alle grün.
+
+### Nächster Schritt
+
+Deploy + Test (v1.11.0). Danach: Private Observer (separates Projekt), Admin öffentlich mit Login (Audit-Log), weitere Sensoren (ID10, ID04).
 
 ---
 

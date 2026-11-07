@@ -1,6 +1,6 @@
 """Tests für die AlertEngine."""
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from alert_engine import AlertEngine
 from alert_store import AlertStore
@@ -157,3 +157,41 @@ class TestQuietHours:
     def test_no_quiet_hours(self, tmp_path):
         engine = _engine(tmp_path)
         assert engine._in_quiet_hours({}, "warning") is False
+
+    def test_contact_open(self, tmp_path):
+        engine = _engine(tmp_path)
+        _store_batch(
+            engine._store,
+            states={"weatherhub_010203040506": {"contact_open": True}},
+        )
+        states = {"weatherhub_010203040506.contact_open": {"enabled": True}}
+        alerts = engine._check_states(engine._store.latest().to_dict(), states)
+        assert len(alerts) == 1
+        assert alerts[0].rule == "contact_open"
+
+    def test_rate_of_change(self, tmp_path):
+        engine = _engine(tmp_path)
+        seq = SequenceStore(engine._store.path.parent / "sequence")
+        now = datetime.now(timezone.utc)
+        for i, value in enumerate([20.0, 25.0]):
+            batch = create_batch(
+                "logger-001",
+                seq,
+                measurements={"atmoweb_101.temperature_1": _measurement(value)},
+            )
+            batch = batch.__class__(
+                batch_id=batch.batch_id,
+                logger_id=batch.logger_id,
+                sequence=batch.sequence,
+                created_at=(now - timedelta(minutes=30 * (1 - i))).isoformat(),
+                measurements=batch.measurements,
+            )
+            engine._store.store(batch)
+        sensors = {
+            "atmoweb_101.temperature_1": {
+                "rate_of_change_max_per_hour": 2.0,
+                "enabled": True,
+            }
+        }
+        alerts = engine._check_sensors(engine._store.latest().to_dict(), sensors)
+        assert any(a.rule == "rate_of_change" for a in alerts)

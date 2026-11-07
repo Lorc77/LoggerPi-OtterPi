@@ -1,5 +1,6 @@
 import json
 import sqlite3
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional, Union
 
@@ -124,3 +125,21 @@ class BatchStore:
             **data,
             measurements=measurements,
         )
+
+    def recent(self, hours: int = 24) -> list:
+        cutoff = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT payload FROM batches ORDER BY rowid DESC LIMIT 1000"
+            ).fetchall()
+        batches = []
+        for (payload,) in rows:
+            data = json.loads(payload)
+            if data.get("created_at", "") >= cutoff:
+                measurements = {
+                    name: Measurement(**measurement)
+                    for name, measurement in data.pop("measurements", {}).items()
+                }
+                batches.append(Batch(**data, measurements=measurements))
+        batches.reverse()
+        return batches

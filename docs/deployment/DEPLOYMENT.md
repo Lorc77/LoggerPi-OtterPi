@@ -341,6 +341,15 @@ Konfiguration:
 - `notifications.json` (ntfy, webhook)
 - `SMTP_PASSWORD` in `otterpi.env`
 
+### Phase C – Komfort (v1.11.0)
+
+- **Admin-UI:** Formular-UI in allen Tabs (Rooms, Alarm Limits, Mail, Notifications), JSON-Editor als „Advanced"-Toggle.
+- **Rate-of-Change:** `rate_of_change_max_per_hour` in der Alert-Engine.
+- **Routing:** `EmailNotifier` nutzt `routing[severity]`.
+- **`contact_open`:** In der Alert-Engine (für zukünftige `weatherhub_id10`-Sensoren).
+- **Door-Open-Dauer:** geparkt (HPP260 unterstützt `door_open` nicht).
+- **Service-Restart:** nicht nötig (JSON-Configs automatisch gelesen).
+
 ---
 
 ## 5. OtterPi HTTP Listener
@@ -445,7 +454,8 @@ im produktiven Betrieb.
 ### Admin (LAN-only)
 
 Der Admin ist Teil des OtterPi-Service und wird über nginx auf das LAN
-beschränkt:
+beschränkt. Die Admin-UI bietet Formular-UI in allen Tabs (Rooms, Alarm
+Limits, Mail, Notifications) mit JSON-Editor als „Advanced"-Toggle.
 
 ```nginx
 location /admin {
@@ -660,7 +670,7 @@ Repository:
     main
 
 Version:
-    v1.10.0
+    v1.11.0
 
 Letzter bekannter Release-Commit:
     61cd803

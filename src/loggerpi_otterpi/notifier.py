@@ -29,13 +29,17 @@ class EmailNotifier:
         self.user = config["smtp_user"]
         self.from_addr = config["from"]
         self.recipients = config["recipients"]
+        self.routing = config.get("routing", {})
         self.password = password
 
     def send(self, alert: Alert) -> bool:
+        recipients = self.routing.get(alert.severity, self.recipients)
+        if not recipients:
+            return False
         msg = EmailMessage()
         msg["Subject"] = f"[{alert.severity.upper()}] {alert.sensor}"
         msg["From"] = self.from_addr
-        msg["To"] = ", ".join(self.recipients)
+        msg["To"] = ", ".join(recipients)
         msg.set_content(alert.message)
         try:
             if self.port == 465:

@@ -88,6 +88,7 @@ class AlertEngine(threading.Thread):
     def _check_sensors(self, batch: dict, sensors: dict) -> list:
         alerts = []
         measurements = batch.get("measurements", {})
+        recent_batches = self._store.recent(hours=1)
         for sensor_key, limits in sensors.items():
             if not limits.get("enabled", True):
                 continue
@@ -155,7 +156,38 @@ class AlertEngine(threading.Thread):
                         )
                     )
 
+            rate_limit = limits.get("rate_of_change_max_per_hour")
+            if rate_limit is not None and value is not None:
+                rate = self._calculate_rate_of_change(sensor_key, recent_batches)
+                if rate is not None and abs(rate) > rate_limit:
+                    alerts.append(
+                        self._make_alert(
+                            sensor=sensor_key,
+                            rule="rate_of_change",
+                            severity="warning",
+                            message=f"{sensor_key}: rate {rate:.2f}/h > {rate_limit}",
+                            value=rate,
+                            threshold=rate_limit,
+                        )
+                    )
+
         return alerts
+
+    def _calculate_rate_of_change(self, sensor_key: str, recent_batches: list) -> Optional[float]:
+        values = []
+        for batch in recent_batches:
+            measurement = batch.measurements.get(sensor_key)
+            if measurement is not None and measurement.value is not None:
+                values.append((batch.created_at, measurement.value))
+        if len(values) < 2:
+            return None
+        first_time, first_value = values[0]
+        last_time, last_value = values[-1]
+        dt = datetime.fromisoformat(last_time) - datetime.fromisoformat(first_time)
+        hours = dt.total_seconds() / 3600
+        if hours <= 0:
+            return None
+        return (last_value - first_value) / hours
 
     def _check_states(self, batch: dict, states: dict) -> list:
         alerts = []
@@ -193,6 +225,15 @@ class AlertEngine(threading.Thread):
                         rule="door_open",
                         severity="warning",
                         message=f"{device_key}: door open",
+                    )
+                )
+            elif state_name == "contact_open" and value is True:
+                alerts.append(
+                    self._make_alert(
+                        sensor=state_key,
+                        rule="contact_open",
+                        severity="warning",
+                        message=f"{device_key}: contact open",
                     )
                 )
 

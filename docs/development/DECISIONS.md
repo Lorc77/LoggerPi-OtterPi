@@ -1751,6 +1751,187 @@ Die vier SMTP-Variablen in `otterpi.env.example` fliegen raus.
 
 ---
 
+## DEC-057 — Formular-UI statt JSON-Editor (Phase C)
+
+**Status:** Accepted
+**Datum:** 2026-11-07
+
+### Kontext
+
+Die Admin-Tabs waren bisher JSON-Editoren. Das war für Phase A (MVP) ausreichend, aber nicht benutzerfreundlich. Raumwechsel, Geräte-Umbenennung und Limit-Bearbeitung erforderten manuelles JSON-Editieren.
+
+### Entscheidung
+
+Alle Admin-Tabs (Rooms, Alarm Limits, Mail, Notifications) werden auf Formular-UI umgestellt:
+
+- **Rooms:** Raum-Kacheln, Geräte-Tabelle, Pull-down für Raumwechsel, Inline-Formulare für Add/Edit/Delete.
+- **Alarm Limits:** Measurements- und States-Tabellen pro Gerät, Edit-Limits-Inline-Formular.
+- **Mail:** Formular mit SMTP-Feldern, Recipients, Routing, Dedup, Quiet Hours.
+- **Notifications:** Channel-Liste mit Add/Edit/Delete.
+
+Der JSON-Editor bleibt als „Advanced"-Toggle in jedem Tab erhalten.
+
+### Begründung
+
+- Benutzerfreundlicher (kein manuelles JSON-Editieren).
+- Weniger Fehler (Validierung im Formular).
+- Raumwechsel per Pull-down statt JSON-Editieren.
+
+### Konsequenz
+
+- `admin.py` umfangreich erweitert (Inline-Formulare, `loadRooms`, `loadAlarmLimits`, `loadMailForm`, `loadNotifications`).
+- `SENSOR_SCHEMAS` wird in `admin.py` eingebettet (für Typ-Auswahl und Measurements/States-Anzeige).
+
+---
+
+## DEC-058 — Rate-of-Change in Alert-Engine
+
+**Status:** Accepted
+**Datum:** 2026-11-07
+
+### Kontext
+
+`alarm_limits.json` enthält `rate_of_change_max_per_hour`, aber die Alert-Engine hat es bisher ignoriert.
+
+### Entscheidung
+
+`alert_engine.py` `_check_sensors` prüft `rate_of_change_max_per_hour`:
+
+- `BatchStore.recent(hours=1)` liefert die letzten Batches.
+- `_calculate_rate_of_change()` berechnet die Rate aus erstem und letztem Wert.
+- Wenn `abs(rate) > rate_limit`, wird ein Alert mit `rule="rate_of_change"` erzeugt.
+
+### Begründung
+
+- Frühwarnung, bevor ein Grenzwert erreicht wird.
+- Nutzt vorhandene `rate_of_change_max_per_hour`-Konfiguration.
+
+### Konsequenz
+
+- `otterpi_store.py` um `recent(hours)` erweitert.
+- `alert_engine.py` um `_calculate_rate_of_change()` erweitert.
+
+---
+
+## DEC-059 — Routing in EmailNotifier
+
+**Status:** Accepted
+**Datum:** 2026-11-07
+
+### Kontext
+
+`mail.json` enthält `routing.critical` und `routing.warning`, aber `EmailNotifier` hat bisher `recipients` für alle Severities genutzt.
+
+### Entscheidung
+
+`EmailNotifier.send()` nutzt `routing[alert.severity]` statt `recipients`:
+
+```python
+recipients = self.routing.get(alert.severity, self.recipients)
+```
+
+### Begründung
+
+- Unterschiedliche Empfänger je nach Severity (z.B. nur Bereitschaftsdienst bei critical).
+- Fallback auf `recipients`, wenn `routing` fehlt.
+
+### Konsequenz
+
+- `notifier.py` `EmailNotifier` erweitert.
+- `test_notifier.py` um `test_email_routing` erweitert.
+
+---
+
+## DEC-060 — `contact_open` in Alert-Engine
+
+**Status:** Accepted
+**Datum:** 2026-11-07
+
+### Kontext
+
+`weatherhub_id10` (Tür/Fensterkontakt) liefert `contact_open` (bool). Die Alert-Engine hat es bisher ignoriert.
+
+### Entscheidung
+
+`alert_engine.py` `_check_states` prüft `contact_open`:
+
+```python
+elif state_name == "contact_open" and value is True:
+    alerts.append(self._make_alert(...))
+```
+
+### Begründung
+
+- Für zukünftige `weatherhub_id10`-Sensoren (Private Observer).
+- Kein akuter Bedarf (aktuell kein `weatherhub_id10` in `rooms.json`).
+
+### Konsequenz
+
+- `alert_engine.py` `_check_states` erweitert.
+- `test_alert_engine.py` um `test_contact_open` erweitert.
+
+---
+
+## DEC-061 — Door-Open-Dauer geparkt
+
+**Status:** Accepted
+**Datum:** 2026-11-07
+
+### Kontext
+
+`alarm_limits.json` `states` enthält `door_open` mit `max_open_seconds`. Die Alert-Engine hat es bisher ignoriert.
+
+### Entscheidung
+
+Door-Open-Dauer wird **nicht** implementiert, weil:
+
+- HPP260 liefert `door_open` nicht (liefert `N/A`).
+- Aktuell kein Gerät in `rooms.json` unterstützt `door_open`.
+
+Geparkt für evtl. zukünftige AtmoWEB-Geräte (unwahrscheinlich).
+
+### Begründung
+
+- Kein akuter Bedarf.
+- Kein Gerät unterstützt es.
+
+### Konsequenz
+
+- `alert_engine.py` `_check_states` prüft `door_open` (einfach, ohne `max_open_seconds`).
+- `max_open_seconds` bleibt in `alarm_limits.json` (für später).
+
+---
+
+## DEC-062 — Service-Restart nicht nötig
+
+**Status:** Accepted
+**Datum:** 2026-11-07
+
+### Kontext
+
+Die Admin-UI hat keinen Service-Restart-Button. Änderungen an JSON-Configs werden automatisch gelesen.
+
+### Entscheidung
+
+Kein Service-Restart-Button. JSON-Configs werden automatisch gelesen:
+
+- `rooms.json`: `get_rooms()` mit mtime-Cache (sofort).
+- `alarm_limits.json`, `mail.json`, `notifications.json`: `load_*()` bei jedem `_check` (alle 300 s).
+
+Nur `otterpi.env` und Code-Änderungen brauchen einen Restart.
+
+### Begründung
+
+- Kein manueller Restart nötig für JSON-Configs.
+- `sudo systemctl restart` reicht für `otterpi.env` und Code-Änderungen.
+
+### Konsequenz
+
+- Kein Service-Restart-Button in der Admin-UI.
+- Dokumentation: JSON-Configs automatisch, `otterpi.env` + Code manuell.
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:
