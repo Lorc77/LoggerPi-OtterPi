@@ -24,6 +24,9 @@ OTTERPI_FILES=(
     config_store.py
     notifier.py
     archive_batches.py
+    sensor_schemas.py
+    alert_store.py
+    alert_engine.py
     otter2.png
 )
 

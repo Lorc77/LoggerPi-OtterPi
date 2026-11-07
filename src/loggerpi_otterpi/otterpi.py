@@ -1,7 +1,10 @@
 import json
+import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Optional
 
+from alert_engine import AlertEngine
+from alert_store import AlertStore
 from config_store import (
     ConfigValidationError,
     load_alarm_limits,
@@ -15,6 +18,7 @@ from config_store import (
 )
 from dashboard_config import get_rooms
 from model.batch import Batch
+from notifier import Alert, create_notifiers
 from otterpi_store import BatchStore
 
 
@@ -26,7 +30,7 @@ def _load_admin_config() -> dict:
     try:
         alarm_limits = load_alarm_limits()
     except ConfigValidationError:
-        alarm_limits = {}
+        alarm_limits = {"sensors": {}, "states": {}}
     try:
         mail = load_mail()
     except ConfigValidationError:
@@ -37,7 +41,7 @@ def _load_admin_config() -> dict:
         notifications = {"channels": []}
     return {
         "rooms": {"rooms": rooms},
-        "alarm_limits": {"sensors": alarm_limits},
+        "alarm_limits": alarm_limits,
         "mail": mail,
         "notifications": notifications,
     }
@@ -46,8 +50,108 @@ def _load_admin_config() -> dict:
 class OtterPiHandler(BaseHTTPRequestHandler):
     store: Optional[BatchStore] = None
     token: Optional[str] = None
+    alert_engine: Optional[AlertEngine] = None
+    alert_store: Optional[AlertStore] = None
 
     def do_POST(self) -> None:
+        if self.path.startswith("/api/admin/alerts/") and self.path.endswith("/acknowledge"):
+            parts = self.path.split("/")
+            if len(parts) != 6:
+                self.send_error(404)
+                return
+            try:
+                alert_id = int(parts[4])
+            except ValueError:
+                self.send_error(400)
+                return
+            try:
+                data = self._read_json_body()
+                acknowledged_by = data.get("acknowledged_by", "unknown")
+            except (KeyError, TypeError, ValueError, json.JSONDecodeError):
+                self._send_json(
+                    400,
+                    {
+                        "status": "error",
+                        "error": {
+                            "code": "invalid_payload",
+                            "message": "Invalid JSON body.",
+                        },
+                    },
+                )
+                return
+            if self.alert_store is None:
+                self._send_json(
+                    404,
+                    {
+                        "status": "error",
+                        "error": {
+                            "code": "not_found",
+                            "message": "Alert store not configured.",
+                        },
+                    },
+                )
+                return
+            success = self.alert_store.acknowledge(alert_id, acknowledged_by)
+            if not success:
+                self._send_json(
+                    404,
+                    {
+                        "status": "error",
+                        "error": {
+                            "code": "not_found",
+                            "message": "Alert not found or already acknowledged.",
+                        },
+                    },
+                )
+                return
+            self._send_json(200, {"status": "acknowledged"})
+            return
+
+        if self.path == "/api/admin/test-mail":
+            try:
+                mail = load_mail()
+            except ConfigValidationError as exc:
+                self._send_json(
+                    400,
+                    {
+                        "status": "error",
+                        "error": {"code": "invalid_config", "message": str(exc)},
+                    },
+                )
+                return
+            try:
+                notifications = load_notifications()
+            except ConfigValidationError:
+                notifications = {"channels": []}
+            smtp_password = os.environ.get("SMTP_PASSWORD")
+            notifiers = create_notifiers(notifications, mail, smtp_password)
+            if not notifiers:
+                self._send_json(
+                    400,
+                    {
+                        "status": "error",
+                        "error": {
+                            "code": "no_notifiers",
+                            "message": "No notifiers configured.",
+                        },
+                    },
+                )
+                return
+            test_alert = Alert(
+                sensor="test",
+                severity="warning",
+                message="This is a test alert from OtterPi Admin.",
+            )
+            sent = 0
+            for notifier in notifiers:
+                try:
+                    if notifier.send(test_alert):
+                        sent += 1
+                except Exception:
+                    pass
+            self._send_json(200, {"status": "sent", "count": sent})
+            return
+
         if self.path != "/api/v1/batches":
             self.send_error(404)
             return
@@ -115,6 +219,9 @@ class OtterPiHandler(BaseHTTPRequestHandler):
             )
             return
 
+        if self.alert_engine is not None:
+            self.alert_engine.notify_batch()
+
         self._send_json(
             202,
             {
@@ -127,7 +234,7 @@ class OtterPiHandler(BaseHTTPRequestHandler):
     def do_PUT(self) -> None:
         routes = {
             "/api/admin/rooms": ("rooms", save_rooms),
-            "/api/admin/alarm-limits": ("sensors", save_alarm_limits),
+            "/api/admin/alarm-limits": (None, save_alarm_limits),
             "/api/admin/mail": (None, save_mail),
             "/api/admin/notifications": (None, save_notifications),
         }
@@ -165,6 +272,29 @@ class OtterPiHandler(BaseHTTPRequestHandler):
 
         if self.path == "/api/admin/config":
             self._send_json(200, _load_admin_config())
+            return
+
+        if self.path.startswith("/api/admin/alerts"):
+            limit = 100
+            only_unacknowledged = False
+            if "?" in self.path:
+                _, query = self.path.split("?", 1)
+                for param in query.split("&"):
+                    if param.startswith("limit="):
+                        try:
+                            limit = int(param.split("=", 1)[1])
+                        except ValueError:
+                            pass
+                    elif param.startswith("only_unacknowledged="):
+                        only_unacknowledged = param.split("=", 1)[1] == "1"
+            if self.alert_store is None:
+                self._send_json(200, {"alerts": []})
+                return
+            alerts = self.alert_store.list_alerts(
+                limit=limit,
+                only_unacknowledged=only_unacknowledged,
+            )
+            self._send_json(200, {"alerts": alerts})
             return
 
         # Neue Routen: /room/, /device/, /climate/ + Redirect von /raum/
@@ -311,11 +441,17 @@ def create_server(
     port: int,
     store: BatchStore,
     token: Optional[str] = None,
+    alert_engine: Optional[AlertEngine] = None,
+    alert_store: Optional[AlertStore] = None,
 ) -> HTTPServer:
     handler = type(
         "OtterPiRequestHandler",
         (OtterPiHandler,),
-        {"store": store, "token": token},
+        {
+            "store": store,
+            "token": token,
+            "alert_engine": alert_engine,
+            "alert_store": alert_store,
+        },
     )
-
     return HTTPServer((host, port), handler)

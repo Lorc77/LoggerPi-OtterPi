@@ -103,3 +103,24 @@ class BatchStore:
             **data,
             measurements=measurements,
         )
+
+    def latest(self) -> Optional[Batch]:
+        with self._connect() as connection:
+            row = connection.execute(
+                "SELECT payload FROM batches ORDER BY rowid DESC LIMIT 1"
+            ).fetchone()
+
+        if row is None:
+            return None
+
+        data = json.loads(row[0])
+
+        measurements = {
+            name: Measurement(**measurement)
+            for name, measurement in data.pop("measurements", {}).items()
+        }
+
+        return Batch(
+            **data,
+            measurements=measurements,
+        )

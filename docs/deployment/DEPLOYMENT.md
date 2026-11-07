@@ -122,6 +122,14 @@ Konfiguration:
 | `MEMMERT_IPP300_RECHTS_PORT` | Seriell-Pfad MEMMERT rechts | – |
 | `MEMMERT_IPP300_RECHTS_ADDRESS` | MEMMERT-Adresse rechts | – |
 
+### Neue Umgebungsvariablen (seit v1.10.0)
+
+| Variable | Bedeutung | Default |
+|----------|-----------|---------|
+| `OTTERPI_ALERT_DB` | SQLite-Pfad für Alerts | `/var/lib/loggerpi-otterpi/alerts.sqlite3` |
+| `OTTERPI_ALERT_INTERVAL_SECONDS` | Prüfintervall der Alert-Engine | `300` |
+| `SMTP_PASSWORD` | SMTP-Passwort (nur Secret) | – |
+
 Installationsverzeichnis:
 
 ```text
@@ -319,6 +327,19 @@ systemctl status archive-batches.timer --no-pager
 
 **Retention:** 12 Monate in der Live-Datenbank. Ältere Batches werden
 nach erfolgreichem Export gelöscht.
+
+### Alert-Engine
+
+Die Alert-Engine läuft als Thread im `otterpi.observer.service`. Sie prüft
+nach jedem Batch (und alle 300 s) die Regeln aus `alarm_limits.json`
+(`sensors` + `states`). Alerts werden in `alerts.sqlite3` gespeichert und
+über die konfigurierten Notifier versendet.
+
+Konfiguration:
+- `alarm_limits.json` (sensors + states)
+- `mail.json` (SMTP, Empfänger, Routing, Dedup, Quiet Hours)
+- `notifications.json` (ntfy, webhook)
+- `SMTP_PASSWORD` in `otterpi.env`
 
 ---
 
@@ -639,7 +660,7 @@ Repository:
     main
 
 Version:
-    v1.7.0
+    v1.10.0
 
 Letzter bekannter Release-Commit:
     61cd803

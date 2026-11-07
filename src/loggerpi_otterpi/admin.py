@@ -82,6 +82,7 @@ textarea {{
     <button class="tab-btn" onclick="showTab('alarm', this)">Alarm Limits</button>
     <button class="tab-btn" onclick="showTab('mail', this)">Mail</button>
     <button class="tab-btn" onclick="showTab('notifications', this)">Notifications</button>
+    <button class="tab-btn" onclick="showTab('alerts', this)">Alerts</button>
 </div>
 
 <div id="tab-rooms" class="tab-panel active">
@@ -116,6 +117,8 @@ textarea {{
                 data-textarea="mail-text"
                 data-status="mail-status"
                 onclick="saveConfig(this)">Save</button>
+        <button class="save-btn"
+                onclick="sendTestMail(this)">Send Test Mail</button>
         <span id="mail-status" class="status"></span>
     </div>
 </div>
@@ -131,6 +134,33 @@ textarea {{
         <span id="notifications-status" class="status"></span>
     </div>
 </div>
+
+<div id="tab-alerts" class="tab-panel">
+    <div class="save-row">
+        <button class="save-btn" onclick="loadAlerts()">Refresh</button>
+        <label>
+            <input type="checkbox" id="alerts-only-unack" onchange="loadAlerts()">
+            Only unacknowledged
+        </label>
+        <span id="alerts-status" class="status"></span>
+    </div>
+    <table id="alerts-table" style="width: 100%; margin-top: 12px; border-collapse: collapse;">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Sensor</th>
+                <th>Rule</th>
+                <th>Severity</th>
+                <th>Value</th>
+                <th>Threshold</th>
+                <th>Message</th>
+                <th>Ack</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="alerts-tbody"></tbody>
+    </table>
+</div>
 </div>
 
 <script>
@@ -139,6 +169,9 @@ function showTab(name, btn) {{
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
     btn.classList.add('active');
+    if (name === 'alerts') {{
+        loadAlerts();
+    }}
 }}
 
 async function saveConfig(btn) {{
@@ -168,6 +201,83 @@ async function saveConfig(btn) {{
         }}
     }} catch (e) {{
         status.textContent = 'Request failed: ' + e.message;
+    }}
+}}
+
+async function sendTestMail(btn) {{
+    const status = document.getElementById('mail-status');
+    status.textContent = 'Sending...';
+    try {{
+        const resp = await fetch('/api/admin/test-mail', {{
+            method: 'POST',
+            headers: {{'Content-Type': 'application/json'}},
+            body: '{{}}'
+        }});
+        const result = await resp.json();
+        if (resp.ok) {{
+            status.textContent = 'Sent to ' + result.count + ' notifier(s).';
+        }} else {{
+            status.textContent = 'Error: ' + (result.error?.message || resp.status);
+        }}
+    }} catch (e) {{
+        status.textContent = 'Request failed: ' + e.message;
+    }}
+}}
+
+async function loadAlerts() {{
+    const status = document.getElementById('alerts-status');
+    const tbody = document.getElementById('alerts-tbody');
+    const onlyUnack = document.getElementById('alerts-only-unack').checked;
+    status.textContent = 'Loading...';
+    try {{
+        const url = '/api/admin/alerts?limit=100&only_unacknowledged=' + (onlyUnack ? '1' : '0');
+        const resp = await fetch(url);
+        const result = await resp.json();
+        if (!resp.ok) {{
+            status.textContent = 'Error: ' + (result.error?.message || resp.status);
+            return;
+        }}
+        tbody.innerHTML = '';
+        for (const alert of result.alerts) {{
+            const ackButton = alert.acknowledged
+                ? ''
+                : `<button class="save-btn" onclick="acknowledgeAlert(${{alert.id}})">Ack</button>`;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${{alert.created_at}}</td>
+                <td>${{alert.sensor}}</td>
+                <td>${{alert.rule}}</td>
+                <td>${{alert.severity}}</td>
+                <td>${{alert.value ?? '–'}}</td>
+                <td>${{alert.threshold ?? '–'}}</td>
+                <td>${{alert.message}}</td>
+                <td>${{alert.acknowledged ? '✓' : '–'}}</td>
+                <td>${{ackButton}}</td>
+            `;
+            tbody.appendChild(tr);
+        }}
+        status.textContent = result.alerts.length + ' alert(s).';
+    }} catch (e) {{
+        status.textContent = 'Request failed: ' + e.message;
+    }}
+}}
+
+async function acknowledgeAlert(id) {{
+    try {{
+        const resp = await fetch('/api/admin/alerts/' + id + '/acknowledge', {{
+            method: 'POST',
+            headers: {{'Content-Type': 'application/json'}},
+            body: JSON.stringify({{acknowledged_by: 'admin'}})
+        }});
+        if (resp.ok) {{
+            loadAlerts();
+        }} else {{
+            const result = await resp.json();
+            const msg = result.error?.message || resp.status;
+            document.getElementById('alerts-status').textContent = 'Error: ' + msg;
+        }}
+    }} catch (e) {{
+        document.getElementById('alerts-status').textContent = 'Request failed: ' + e.message;
     }}
 }}
 </script>

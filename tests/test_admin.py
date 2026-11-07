@@ -161,7 +161,7 @@ def test_put_alarm_limits_saves(tmp_path):
         )
         with urlopen(req) as resp:
             assert resp.status == 200
-        assert load_alarm_limits() == payload["sensors"]
+        assert load_alarm_limits() == payload
     finally:
         server.shutdown()
         thread.join()
@@ -210,6 +210,89 @@ def test_put_notifications_saves(tmp_path):
         with urlopen(req) as resp:
             assert resp.status == 200
         assert load_notifications() == payload
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_get_alerts_returns_json(tmp_path):
+    from alert_store import AlertStore
+
+    store = BatchStore(tmp_path / "otter.db")
+    alert_store = AlertStore(tmp_path / "alerts.db")
+    server = create_server("127.0.0.1", 0, store, token=TEST_TOKEN, alert_store=alert_store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        with urlopen(f"http://127.0.0.1:{server.server_port}/api/admin/alerts") as resp:
+            assert resp.status == 200
+            data = json.loads(resp.read().decode("utf-8"))
+        assert data == {"alerts": []}
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_post_acknowledge_alert(tmp_path):
+    from alert_store import AlertStore
+    from notifier import Alert
+
+    store = BatchStore(tmp_path / "otter.db")
+    alert_store = AlertStore(tmp_path / "alerts.db")
+    alert_id = alert_store.store(
+        Alert(
+            sensor="test.sensor",
+            severity="critical",
+            message="test",
+            rule="test_rule",
+            dedup_key="test.sensor:test_rule:critical",
+        )
+    )
+    server = create_server("127.0.0.1", 0, store, token=TEST_TOKEN, alert_store=alert_store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        req = Request(
+            f"http://127.0.0.1:{server.server_port}/api/admin/alerts/{alert_id}/acknowledge",
+            data=json.dumps({"acknowledged_by": "makki"}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urlopen(req) as resp:
+            assert resp.status == 200
+            data = json.loads(resp.read().decode("utf-8"))
+        assert data == {"status": "acknowledged"}
+        alerts = alert_store.list_alerts()
+        assert alerts[0]["acknowledged"] == 1
+        assert alerts[0]["acknowledged_by"] == "makki"
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_post_test_mail_no_config(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    server = create_server("127.0.0.1", 0, store, token=TEST_TOKEN)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        req = Request(
+            f"http://127.0.0.1:{server.server_port}/api/admin/test-mail",
+            data=b"{}",
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            urlopen(req)
+        except HTTPError as error:
+            assert error.code == 400
+            body = json.loads(error.read().decode("utf-8"))
+            assert body["error"]["code"] == "invalid_config"
+        else:
+            raise AssertionError("Expected HTTP 400")
     finally:
         server.shutdown()
         thread.join()

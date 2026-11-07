@@ -1512,6 +1512,8 @@ Kanäle sind separat über `notifications.json` ein-/ausschaltbar. Dedup/Quiet H
 - MEMMERT: `operation_mode` Rohwert.
 - WeatherHub: `battery_low`, `gateway_ip`.
 
+---
+
 ## DEC-048 — Device-Infos in jedem Batch (vorerst)
 
 **Status:** Accepted
@@ -1533,12 +1535,219 @@ Kanäle sind separat über `notifications.json` ein-/ausschaltbar. Dedup/Quiet H
 - MEMMERT: `operation_mode` Rohwert.
 - WeatherHub: `battery_low`, `gateway_ip`.
 
+---
+
 ## DEC-050 — Dashboard: Status-Chips + LED-SVG
 
 **Status:** Accepted
 **Datum:** 2026-11-05
 
 Die Gerätedetailseite und die Raumdetail-Kacheln zeigen Status-Chips (erklärend: `⚠ No data for X min`, `⛔ Sensor error`, `🚨 Alarm: …`, `⚠ Battery low`, `OK`, `Offline`) statt des bisherigen Status-Texts. Die Statuslampe zeigt den schlechtesten Zustand (Alarm/Invalid rot, Stale/Battery gelb). Ein Inline-SVG-LED-Indikator (dynamisch aus `states.<key>.lights.led`) sitzt links neben der Lampe. Die Übersicht nutzt weiterhin nur die Lampen (via `_device_status`).
+
+---
+
+## DEC-051 — Alert-Engine als Thread in `otterpi_observer.py`
+
+**Status:** Accepted
+**Datum:** 2026-11-05
+
+### Kontext
+
+Die Alert-Engine muss regelmäßig (nach jedem Batch und per Timer) die
+konfigurierten Regeln prüfen. Ein separater systemd-Service würde einen
+zweiten Prozess, IPC und mehr Deployment-Aufwand bedeuten.
+
+### Entscheidung
+
+Die Alert-Engine läuft als Thread im bestehenden `otterpi.observer.service`.
+`Event.wait(timeout)` blockiert ressourcenschonend. `otterpi.py` ruft
+`alert_engine.notify_batch()` nach jedem `store.store(batch)` auf.
+
+### Begründung
+
+- Ein Prozess, ein Deployment (DEC-041).
+- `Event.wait(timeout)` ist ressourcenschonend (DEC-024).
+- Batch-Trigger für schnelle Reaktion, Timer für No-Data-Erkennung.
+
+### Konsequenz
+
+- `otterpi_observer.py` startet den Thread, `otterpi.py` triggert ihn.
+- `create_server` bekommt `alert_engine` als optionalen Parameter.
+
+---
+
+## DEC-052 — `alarm_limits.json` mit `states`-Sektion
+
+**Status:** Accepted
+**Datum:** 2026-11-05
+
+### Kontext
+
+`alarm_limits.json` enthielt bisher nur `sensors` (Measurement-Grenzwerte).
+Die Alert-Engine muss aber auch State-basierte Regeln prüfen
+(`freezer.alarms`, `battery_low`, `door_open`).
+
+### Entscheidung
+
+`alarm_limits.json` wird um eine `states`-Sektion erweitert:
+
+```json
+{
+  "sensors": { ... },
+  "states": {
+    "freezer.alarms": {"enabled": true},
+    "weatherhub_015f9410f3eb.battery_low": {"enabled": true},
+    "atmoweb_101.door_open": {"enabled": true, "max_open_seconds": 300}
+  }
+}
+```
+
+### Begründung
+
+- Ein Config-File, ein Admin-Tab.
+- `sensors` bleibt semantisch korrekt (Measurement-Grenzwerte).
+- `states` ist eine klar abgegrenzte neue Sektion.
+- Rückwärtskompatibel: bestehende `alarm_limits.json` (nur `sensors`) funktioniert weiter.
+
+### Konsequenz
+
+- `config_store._validate_alarm_limits` prüft `states`.
+- `load_alarm_limits()` gibt das ganze Objekt zurück (DEC-054).
+
+---
+
+## DEC-053 — `Alert`-Dataclass erweitert um `rule` und `dedup_key`
+
+**Status:** Accepted
+**Datum:** 2026-11-05
+
+### Kontext
+
+Die `Alert`-Dataclass in `notifier.py` hatte `sensor`, `severity`, `message`,
+`value`, `threshold`. Für die Speicherung in `alerts.sqlite3` und das
+Dedup-Lookup braucht sie zusätzlich `rule` und `dedup_key`.
+
+### Entscheidung
+
+`Alert` wird um zwei optionale Felder erweitert:
+
+```python
+@dataclass(frozen=True)
+class Alert:
+    sensor: str
+    severity: str
+    message: str
+    value: Optional[float] = None
+    threshold: Optional[float] = None
+    rule: Optional[str] = None
+    dedup_key: Optional[str] = None
+```
+
+### Begründung
+
+- `Alert` hat dann alle Informationen für Speicherung und Benachrichtigung.
+- Bestehende Tests funktionieren weiter, weil die Felder optional sind.
+- `alert_store.store()` prüft, dass `rule` und `dedup_key` gesetzt sind.
+
+### Konsequenz
+
+- `notifier.py` erweitert.
+- `alert_store.py` nutzt `rule` und `dedup_key`.
+
+---
+
+## DEC-054 — `load_alarm_limits()` gibt das ganze Objekt zurück
+
+**Status:** Accepted
+**Datum:** 2026-11-05
+
+### Kontext
+
+`load_alarm_limits()` gab bisher nur `data["sensors"]` zurück. Mit der
+neuen `states`-Sektion (DEC-052) reicht das nicht mehr.
+
+### Entscheidung
+
+`load_alarm_limits()` gibt das ganze Objekt zurück (`{"sensors": ..., "states": ...}`).
+`save_alarm_limits(data)` erwartet das ganze Objekt.
+
+### Begründung
+
+- Semantisch sauberer: eine Funktion, ein Objekt.
+- `otterpi.py` (`_load_admin_config`, `do_PUT`) wird angepasst.
+- `test_config_store.py` und `test_admin.py` werden angepasst.
+
+### Konsequenz
+
+- `config_store.py` angepasst.
+- `otterpi.py` angepasst.
+- Tests angepasst.
+
+---
+
+## DEC-055 — `sensor_schemas.py` als zentrale Schema-Definition
+
+**Status:** Accepted
+**Datum:** 2026-11-05
+
+### Kontext
+
+Der OtterPi kennt die LoggerPi-Reader nicht. Er sieht nur, was tatsächlich
+im Batch ankommt. Für den Admin (Limits/States-Anzeige) und die Alert-Engine
+(Regel-Prüfung) braucht er aber Wissen darüber, welche Measurements und
+States ein Sensor-Typ grundsätzlich liefern kann.
+
+### Entscheidung
+
+`sensor_schemas.py` definiert pro Sensor-Typ, welche Measurements und States
+grundsätzlich möglich sind. Enthält auch Sensor-Typen, die im Decoder
+vorbereitet, aber noch nicht in `rooms.json` eingebunden sind
+(z.B. `weatherhub_id02`, `id04`, `id07`, `id10`).
+
+### Begründung
+
+- Eine Quelle der Wahrheit für Sensor-Typen.
+- Admin und Alert-Engine nutzen dieselbe Definition.
+- Vorbereitete Sensoren sind schon da, auch wenn sie noch nicht in `rooms.json` sind.
+- Test (`test_sensor_schemas.py`) prüft gegen den Reader-Code.
+
+### Konsequenz
+
+- Neue Datei `sensor_schemas.py`.
+- Neue Datei `test_sensor_schemas.py`.
+- Admin nutzt `SENSOR_SCHEMAS` für die Limits/States-Anzeige.
+
+---
+
+## DEC-056 — SMTP-Variablen nur in `mail.json`, `SMTP_PASSWORD` in `otterpi.env`
+
+**Status:** Accepted
+**Datum:** 2026-11-05
+
+### Kontext
+
+`otterpi.env.example` listete `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`,
+`SMTP_FROM` als Env-Variablen. Das widerspricht DEC-043 (dort stehen diese
+Werte in `mail.json`, nur `SMTP_PASSWORD` in `otterpi.env`).
+
+### Entscheidung
+
+`mail.json` bleibt die Quelle für `smtp_host`, `smtp_port`, `smtp_user`,
+`from`, `recipients`, `routing`, `dedup_seconds`, `quiet_hours`, `enabled`.
+`otterpi.env` enthält **nur** `SMTP_PASSWORD`.
+
+Die vier SMTP-Variablen in `otterpi.env.example` fliegen raus.
+
+### Begründung
+
+- Eine Quelle der Wahrheit.
+- Admin-Editor lügt nicht.
+- Secret (`SMTP_PASSWORD`) bleibt in `otterpi.env`.
+
+### Konsequenz
+
+- `otterpi.env.example` angepasst.
+- `mail.json` bleibt unverändert.
 
 ---
 

@@ -18,6 +18,8 @@ class Alert:
     message: str
     value: Optional[float] = None
     threshold: Optional[float] = None
+    rule: Optional[str] = None
+    dedup_key: Optional[str] = None
 
 
 class EmailNotifier:

@@ -172,6 +172,24 @@ def _validate_alarm_limits(data: Any) -> None:
         if wmax is not None and cmax is not None and wmax > cmax:
             raise ConfigValidationError(f"Sensor {sensor_key!r}: warning_max > critical_max.")
 
+    states = data.get("states")
+    if states is not None:
+        if not isinstance(states, dict):
+            raise ConfigValidationError("alarm_limits.json 'states' must be an object.")
+        for state_key, rule in states.items():
+            if not isinstance(state_key, str) or not _SENSOR_KEY_RE.match(state_key):
+                raise ConfigValidationError(f"Invalid state key: {state_key!r}")
+            if not isinstance(rule, dict):
+                raise ConfigValidationError(f"State {state_key!r} must be an object.")
+            if not isinstance(rule.get("enabled"), bool):
+                raise ConfigValidationError(f"State {state_key!r} requires boolean 'enabled'.")
+            if "max_open_seconds" in rule:
+                v = rule["max_open_seconds"]
+                if not isinstance(v, int) or isinstance(v, bool) or v <= 0:
+                    raise ConfigValidationError(
+                        f"State {state_key!r} 'max_open_seconds' must be a positive integer."
+                    )
+
 
 def _validate_mail(data: Any) -> None:
     if not isinstance(data, dict):
@@ -278,11 +296,10 @@ def save_rooms(rooms: dict) -> None:
 def load_alarm_limits() -> dict:
     data = _read_json(_path("alarm_limits.json"))
     _validate_alarm_limits(data)
-    return data["sensors"]
+    return data
 
 
-def save_alarm_limits(sensors: dict) -> None:
-    data = {"sensors": sensors}
+def save_alarm_limits(data: dict) -> None:
     _validate_alarm_limits(data)
     _write_json_atomic(_path("alarm_limits.json"), data)
 

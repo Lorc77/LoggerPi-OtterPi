@@ -78,3 +78,21 @@ def test_batch_store_uses_wal(tmp_path):
 
     assert journal_mode.lower() == "wal"
     assert synchronous == 1
+
+
+def test_batch_store_latest_returns_newest(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    sequence_store = SequenceStore(tmp_path / "sequence")
+
+    first = create_batch("logger-001", sequence_store)
+    second = create_batch("logger-001", sequence_store)
+
+    store.store(first)
+    store.store(second)
+
+    assert store.latest().to_dict() == second.to_dict()
+
+
+def test_batch_store_latest_empty(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    assert store.latest() is None

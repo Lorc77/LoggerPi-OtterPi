@@ -16,8 +16,8 @@
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.8.0` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.8.0` | Empfängt Batches, speichert in SQLite, Admin aktiv |
+| LoggerPi | `v1.10.0` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.10.0` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
 
 LoggerPi und OtterPi laufen produktiv auf Version `v1.8.0`.
 
@@ -61,11 +61,36 @@ Admin (LAN-only): https://observer.makki.route64.de/admin
 
 ### Teststand
 
-272 Tests, alle grün.
+318 Tests, alle grün.
 
 ### Nächster Schritt
 
-Phase B – Alert-Engine (Regeln, Dedup, Quiet Hours, Routing, Mail/Notifier).
+Phase B – Alert-Engine (abgeschlossen, v1.10.0).
+
+## Phase B – Alert-Engine (abgeschlossen, v1.10.0)
+
+**Stand:** 2026-11-05
+
+### Umgesetzt
+
+- `alert_store.py`: SQLite-Speicher für Alerts (Tabelle `alerts`, Indizes auf `created_at`, `dedup_key`, `acknowledged`).
+- `alert_engine.py`: Thread im `otterpi.observer.service`, prüft nach jedem Batch und alle 300 s.
+- `sensor_schemas.py`: Zentrale Schema-Definition pro Sensor-Typ (Measurements + States).
+- `alarm_limits.json` um `states`-Sektion erweitert (State-basierte Regeln).
+- `Alert`-Dataclass um `rule` und `dedup_key` erweitert.
+- `load_alarm_limits()` gibt das ganze Objekt zurück (`sensors` + `states`).
+- Admin: Tab „Alerts" (Alert History mit Acknowledge-Button), Test-Mail-Button im Mail-Tab.
+- Neue Routen: `GET /api/admin/alerts`, `POST /api/admin/alerts/<id>/acknowledge`, `POST /api/admin/test-mail`.
+- Neue Env-Variablen: `OTTERPI_ALERT_DB`, `OTTERPI_ALERT_INTERVAL_SECONDS`, `SMTP_PASSWORD`.
+- SMTP-Variablen (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_FROM`) aus `otterpi.env.example` entfernt – bleiben in `mail.json`.
+
+### Teststand
+
+318 Tests, alle grün.
+
+### Nächster Schritt
+
+Deploy + Test (B6). Danach Phase C (Komfort).
 
 ---
 

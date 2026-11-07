@@ -88,8 +88,17 @@ in das gemeinsame Modell integriert.
 | `src/loggerpi_otterpi/weatherhub.py` | WeatherHub-Adapter (Reader) |
 | `src/loggerpi_otterpi/weatherhub_gateway_decoder.py` | WeatherHub-Gateway-Decoder |
 | `src/loggerpi_otterpi/weatherhub_gateway_listener.py` | WeatherHub-Gateway-Listener (TCP) |
-| `src/loggerpi_otterpi/dashboard.py` | Dashboard (Charts, 48h) |
 | `src/loggerpi_otterpi/dashboard_config.py` | Dashboard-Konfiguration (Raum- und Sensor-Zuordnung) |
+| `src/loggerpi_otterpi/admin.py` | Admin-UI (Tabs, JSON-Editor, Alert History) |
+| `src/loggerpi_otterpi/archive_batches.py` | Batch-Archivierung (monatlich, 12 Monate) |
+| `src/loggerpi_otterpi/config_store.py` | JSON-Config-Verwaltung (Validierung, `.bak`, atomar) |
+| `src/loggerpi_otterpi/dashboard_charts.py` | Chart-/JS-Helfer für das Dashboard |
+| `src/loggerpi_otterpi/dashboard_constants.py` | Dashboard-Konstanten (Zeiträume, Farben, Version) |
+| `src/loggerpi_otterpi/dashboard_data.py` | Dashboard-Datenfunktionen (Queries, Berechnungen) |
+| `src/loggerpi_otterpi/notifier.py` | Notifier (E-Mail, ntfy, Webhook) |
+| `src/loggerpi_otterpi/alert_store.py` | SQLite-Speicher für Alerts |
+| `src/loggerpi_otterpi/alert_engine.py` | Alert-Engine (Regeln, Dedup, Quiet Hours) |
+| `src/loggerpi_otterpi/sensor_schemas.py` | Zentrale Schema-Definition pro Sensor-Typ |
 
 ---
 
@@ -138,8 +147,8 @@ PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.7.0` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.7.0` | Empfängt Batches, speichert in SQLite |
+| LoggerPi | `v1.10.0` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.10.0` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
 
 Der E2E-Datenpfad (LoggerPi → nginx → OtterPi → SQLite) ist verifiziert.
 
@@ -156,7 +165,24 @@ Datenquellen:
 
 Admin (LAN-only): `https://observer.makki.route64.de/admin`
 - Config-Editor für Rooms, Alarm Limits, Mail, Notifications
+- Alert History (Tab „Alerts") mit Acknowledge-Button
+- Test-Mail-Button im Mail-Tab
 - JSON-Validierung, `.bak`, atomares Schreiben
+
+## Alert-Engine
+
+Die Alert-Engine läuft als Thread im `otterpi.observer.service` und prüft
+nach jedem Batch (und alle 300 s) die konfigurierten Regeln:
+
+- **Measurements:** `warning_min/max`, `critical_min/max`, `stale`, `invalid`
+- **States:** `freezer.alarms`, `battery_low`, `door_open`
+
+Alerts werden dedupliziert (`dedup_seconds`), unterliegen Quiet Hours
+(`quiet_hours`) und werden über die konfigurierten Notifier (E-Mail, ntfy,
+Webhook) versendet. Die Alert History ist im Admin unter „Alerts" sichtbar.
+
+**Bewusst offen (Phase C):** Rate-of-Change, Door-Open-Dauer, Routing,
+Defrost, Flap.
 
 ---
 
@@ -186,18 +212,18 @@ pytest
 git diff --check
 ```
 
-Aktueller Stand: **189 Tests**, alle bestehen.
+Aktueller Stand: **318 Tests**, alle bestehen.
 
 ---
 
-Aktuelle Version: **v1.7.0**
+Aktuelle Version: **v1.10.0**
 
 Die Version wird geführt über:
 
-- `pyproject.toml` → `version = "1.7.0"`
-- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.7.0"`
-- `src/loggerpi_otterpi/dashboard.py` → `VERSION = "v1.7.0"`
-- Git-Tag `v1.7.0`
+- `pyproject.toml` → `version = "1.10.0"`
+- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.10.0"`
+- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.10.0"`
+- Git-Tag `v1.10.0`
 
 ---
 

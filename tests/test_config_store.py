@@ -63,32 +63,66 @@ class TestRooms:
 
 class TestAlarmLimits:
     def test_roundtrip(self):
-        sensors = {
-            "atmoweb_101.temperature_1": {
-                "warning_min": 20.0,
-                "warning_max": 26.0,
-                "critical_min": 18.0,
-                "critical_max": 28.0,
-                "enabled": True,
+        data = {
+            "sensors": {
+                "atmoweb_101.temperature_1": {
+                    "warning_min": 20.0,
+                    "warning_max": 26.0,
+                    "critical_min": 18.0,
+                    "critical_max": 28.0,
+                    "enabled": True,
+                }
             }
         }
-        save_alarm_limits(sensors)
-        assert load_alarm_limits() == sensors
+        save_alarm_limits(data)
+        assert load_alarm_limits() == data
+
+    def test_roundtrip_with_states(self):
+        data = {
+            "sensors": {},
+            "states": {
+                "freezer.alarms": {"enabled": True},
+                "weatherhub_015f9410f3eb.battery_low": {"enabled": True},
+                "atmoweb_101.door_open": {"enabled": True, "max_open_seconds": 300},
+            },
+        }
+        save_alarm_limits(data)
+        assert load_alarm_limits() == data
 
     def test_consistency_error(self):
-        sensors = {"atmoweb_101.temperature_1": {"warning_min": 30.0, "warning_max": 20.0}}
+        data = {
+            "sensors": {"atmoweb_101.temperature_1": {"warning_min": 30.0, "warning_max": 20.0}}
+        }
         with pytest.raises(ConfigValidationError):
-            save_alarm_limits(sensors)
+            save_alarm_limits(data)
 
     def test_unknown_field(self):
-        sensors = {"atmoweb_101.temperature_1": {"foo": 1}}
+        data = {"sensors": {"atmoweb_101.temperature_1": {"foo": 1}}}
         with pytest.raises(ConfigValidationError):
-            save_alarm_limits(sensors)
+            save_alarm_limits(data)
 
     def test_invalid_stale(self):
-        sensors = {"atmoweb_101.temperature_1": {"stale_after_seconds": 0}}
+        data = {"sensors": {"atmoweb_101.temperature_1": {"stale_after_seconds": 0}}}
         with pytest.raises(ConfigValidationError):
-            save_alarm_limits(sensors)
+            save_alarm_limits(data)
+
+    def test_states_invalid_key(self):
+        data = {"sensors": {}, "states": {"INVALID": {"enabled": True}}}
+        with pytest.raises(ConfigValidationError):
+            save_alarm_limits(data)
+
+    def test_states_missing_enabled(self):
+        data = {"sensors": {}, "states": {"freezer.alarms": {}}}
+        with pytest.raises(ConfigValidationError):
+            save_alarm_limits(data)
+
+    def test_states_invalid_max_open_seconds(self):
+        data = {
+            "sensors": {},
+            "states": {"atmoweb_101.door_open": {"enabled": True, "max_open_seconds": 0}},
+        }
+        with pytest.raises(ConfigValidationError):
+            save_alarm_limits(data)
 
 
 class TestMail:

@@ -16,12 +16,22 @@ def test_main_builds_store_and_starts_server(
 
     store = Mock()
     server = Mock()
+    alert_engine = Mock()
+    alert_store = Mock()
 
     with (
         patch(
             "otterpi_observer.BatchStore",
             return_value=store,
         ) as batch_store,
+        patch(
+            "otterpi_observer.AlertStore",
+            return_value=alert_store,
+        ),
+        patch(
+            "otterpi_observer.AlertEngine",
+            return_value=alert_engine,
+        ),
         patch(
             "otterpi_observer.create_server",
             return_value=server,
@@ -30,7 +40,14 @@ def test_main_builds_store_and_starts_server(
         otterpi_observer.main()
 
     batch_store.assert_called_once_with("/tmp/otterpi.sqlite3")
-    create_server.assert_called_once_with("127.0.0.1", 8080, store, token=TEST_TOKEN)
+    create_server.assert_called_once_with(
+        "127.0.0.1",
+        8080,
+        store,
+        token=TEST_TOKEN,
+        alert_engine=alert_engine,
+        alert_store=alert_store,
+    )
     server.serve_forever.assert_called_once_with()
 
 
