@@ -610,9 +610,8 @@ async function loadRooms() {{
             list.appendChild(card);
             const toTop = document.createElement('div');
             toTop.className = 'to-top';
-            toTop.innerHTML = '<button class="btn btn-secondary btn-small" '
-                + "onclick=\"window.scrollTo({{top: 0, behavior: 'smooth'}})\">"
-                + '↑ Top</button>';
+            toTop.innerHTML = `<button class="btn btn-secondary btn-small"
+                onclick="window.scrollTo({{top: 0, behavior: 'smooth'}})">↑ Top</button>`;
             list.appendChild(toTop);
         }}
         status.textContent = Object.keys(rooms).length + ' room(s).';
@@ -713,9 +712,8 @@ async function loadAlarmLimits() {{
                 list.appendChild(card);
                 const toTop = document.createElement('div');
                 toTop.className = 'to-top';
-                toTop.innerHTML = '<button class="btn btn-secondary btn-small" '
-                    + "onclick=\"window.scrollTo({{top: 0, behavior: 'smooth'}})\">"
-                    + '↑ Top</button>';
+                toTop.innerHTML = `<button class="btn btn-secondary btn-small"
+                    onclick="window.scrollTo({{top: 0, behavior: 'smooth'}})">↑ Top</button>`;
                 list.appendChild(toTop);
             }}
         }}
