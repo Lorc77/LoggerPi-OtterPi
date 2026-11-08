@@ -670,7 +670,7 @@ async function loadAlarmLimits() {{
                             <td>${{limits.warning_max ?? '–'}}</td>
                             <td>${{limits.critical_min ?? '–'}}</td>
                             <td>${{limits.critical_max ?? '–'}}</td>
-                            <td>${{limits.enabled !== false ? '✓' : '–'}}</td>
+                            <td>${{limits.enabled === true ? '✓' : '–'}}</td>
                         </tr>
                     `;
                 }}
@@ -752,9 +752,11 @@ async function showEditLimitsForm(deviceKey, deviceType) {{
     for (const [name, unit] of schema.measurements) {{
         const key = deviceKey + '.' + name;
         const limits = sensors[key] || {{}};
+        const enabled = limits.enabled === true ? 'checked' : '';
         measurementsHtml += `
             <tr>
                 <td>${{name}}</td>
+                <td><input type="checkbox" id="meas-enabled-${{name}}" ${{enabled}}></td>
                 <td><input type="number" step="0.1" id="warn-min-${{name}}"
                         value="${{limits.warning_min ?? ''}}"></td>
                 <td><input type="number" step="0.1" id="warn-max-${{name}}"
@@ -787,6 +789,7 @@ async function showEditLimitsForm(deviceKey, deviceType) {{
             <thead>
                 <tr>
                     <th>Measurement</th>
+                    <th>Enabled</th>
                     <th>Warn Min</th>
                     <th>Warn Max</th>
                     <th>Crit Min</th>
@@ -828,13 +831,14 @@ async function submitEditLimits(deviceKey, deviceType) {{
             const warnMax = document.getElementById('warn-max-' + name).value;
             const critMin = document.getElementById('crit-min-' + name).value;
             const critMax = document.getElementById('crit-max-' + name).value;
+            const enabled = document.getElementById('meas-enabled-' + name).checked;
             const limits = {{}};
             if (warnMin) limits.warning_min = parseFloat(warnMin);
             if (warnMax) limits.warning_max = parseFloat(warnMax);
             if (critMin) limits.critical_min = parseFloat(critMin);
             if (critMax) limits.critical_max = parseFloat(critMax);
-            if (Object.keys(limits).length > 0) {{
-                limits.enabled = true;
+            if (enabled || Object.keys(limits).length > 0) {{
+                limits.enabled = enabled;
                 alarmLimits.sensors[key] = limits;
             }} else {{
                 delete alarmLimits.sensors[key];
