@@ -110,6 +110,10 @@ textarea {{
     font-family: ui-monospace, monospace;
     font-size: .85rem;
 }}
+.to-top {{
+    text-align: center;
+    margin: 8px 0;
+}}
 .rooms-list {{
     display: grid;
     grid-template-columns: 1fr;
@@ -295,6 +299,10 @@ textarea {{
     font-size: .75rem;
     border-radius: 6px;
 }}
+.enabled-yes {{
+    color: #22c55e;
+    font-weight: 600;
+}}
 .alerts-list {{
     display: flex;
     flex-direction: column;
@@ -326,6 +334,14 @@ textarea {{
     text-transform: uppercase;
     background: rgba(147,197,253,.15);
     color: #bfdbfe;
+}}
+.alert-severity-critical {{
+    background: rgba(239,68,68,.2);
+    color: #fca5a5;
+}}
+.alert-severity-warn {{
+    background: rgba(234,179,8,.2);
+    color: #fde047;
 }}
 .alert-meta {{
     color: #9ca3af;
@@ -372,18 +388,20 @@ textarea {{
     </details>
     <div id="rooms-list" class="rooms-list"></div>
     <div class="save-row">
-        <button class="save-btn" onclick="showAddRoomForm()">+ Add Room</button>
-        <button class="save-btn" onclick="toggleRoomsJson()">Advanced (JSON)</button>
+        <button class="btn btn-primary btn-small"
+                onclick="showAddRoomForm()">➕ Add Room</button>
+        <button class="btn btn-secondary btn-small"
+                onclick="toggleRoomsJson()">⚙️ Advanced (JSON)</button>
         <span id="rooms-status" class="status"></span>
     </div>
     <div id="rooms-json-editor" style="display: none; margin-top: 12px;">
         <textarea id="rooms-text">{rooms_json}</textarea>
         <div class="save-row">
-            <button class="save-btn"
+            <button class="btn btn-primary btn-small"
                     data-endpoint="/api/admin/rooms"
                     data-textarea="rooms-text"
                     data-status="rooms-status"
-                    onclick="saveConfig(this)">Save JSON</button>
+                    onclick="saveConfig(this)">💾 Save JSON</button>
         </div>
     </div>
 </div>
@@ -402,17 +420,18 @@ textarea {{
     </details>
     <div id="alarm-list" class="rooms-list"></div>
     <div class="save-row">
-        <button class="save-btn" onclick="toggleAlarmJson()">Advanced (JSON)</button>
+        <button class="btn btn-secondary btn-small"
+                onclick="toggleAlarmJson()">⚙️ Advanced (JSON)</button>
         <span id="alarm-status" class="status"></span>
     </div>
     <div id="alarm-json-editor" style="display: none; margin-top: 12px;">
         <textarea id="alarm-text">{alarm_json}</textarea>
         <div class="save-row">
-            <button class="save-btn"
+            <button class="btn btn-primary btn-small"
                     data-endpoint="/api/admin/alarm-limits"
                     data-textarea="alarm-text"
                     data-status="alarm-status"
-                    onclick="saveConfig(this)">Save JSON</button>
+                    onclick="saveConfig(this)">💾 Save JSON</button>
         </div>
     </div>
 </div>
@@ -420,19 +439,22 @@ textarea {{
 <div id="tab-mail" class="tab-panel">
     <div id="mail-form"></div>
     <div class="save-row">
-        <button class="save-btn" onclick="saveMailForm()">Save</button>
-        <button class="save-btn" onclick="sendTestMail(this)">Send Test Mail</button>
-        <button class="save-btn" onclick="toggleMailJson()">Advanced (JSON)</button>
+        <button class="btn btn-primary btn-small"
+                onclick="saveMailForm()">💾 Save</button>
+        <button class="btn btn-secondary btn-small"
+                onclick="sendTestMail(this)">📧 Send Test Mail</button>
+        <button class="btn btn-secondary btn-small"
+                onclick="toggleMailJson()">⚙️ Advanced (JSON)</button>
         <span id="mail-status" class="status"></span>
     </div>
     <div id="mail-json-editor" style="display: none; margin-top: 12px;">
         <textarea id="mail-text">{mail_json}</textarea>
         <div class="save-row">
-            <button class="save-btn"
+            <button class="btn btn-primary btn-small"
                     data-endpoint="/api/admin/mail"
                     data-textarea="mail-text"
                     data-status="mail-status"
-                    onclick="saveConfig(this)">Save JSON</button>
+                    onclick="saveConfig(this)">💾 Save JSON</button>
         </div>
     </div>
 </div>
@@ -440,25 +462,28 @@ textarea {{
 <div id="tab-notifications" class="tab-panel">
     <div id="notifications-list" class="rooms-list"></div>
     <div class="save-row">
-        <button class="save-btn" onclick="showAddChannelForm()">+ Add Channel</button>
-        <button class="save-btn" onclick="toggleNotificationsJson()">Advanced (JSON)</button>
+        <button class="btn btn-primary btn-small"
+                onclick="showAddChannelForm()">➕ Add Channel</button>
+        <button class="btn btn-secondary btn-small"
+                onclick="toggleNotificationsJson()">⚙️ Advanced (JSON)</button>
         <span id="notifications-status" class="status"></span>
     </div>
     <div id="notifications-json-editor" style="display: none; margin-top: 12px;">
         <textarea id="notifications-text">{notifications_json}</textarea>
         <div class="save-row">
-            <button class="save-btn"
+            <button class="btn btn-primary btn-small"
                     data-endpoint="/api/admin/notifications"
                     data-textarea="notifications-text"
                     data-status="notifications-status"
-                    onclick="saveConfig(this)">Save JSON</button>
+                    onclick="saveConfig(this)">💾 Save JSON</button>
         </div>
     </div>
 </div>
 
 <div id="tab-alerts" class="tab-panel">
     <div class="save-row">
-        <button class="save-btn" onclick="loadAlerts()">Refresh</button>
+        <button class="btn btn-secondary btn-small"
+                onclick="loadAlerts()">🔄 Refresh</button>
         <label>
             <input type="checkbox" id="alerts-only-unack" onchange="loadAlerts()">
             Only unacknowledged
@@ -574,15 +599,21 @@ async function loadRooms() {{
                     <tbody>${{devicesHtml}}</tbody>
                 </table>
                 <div class="save-row">
-                    <button class="btn btn-primary"
+                    <button class="btn btn-primary btn-small"
                             onclick="showAddDeviceForm('${{roomId}}')">➕ Add Device</button>
-                    <button class="btn btn-secondary"
+                    <button class="btn btn-secondary btn-small"
                             onclick="editRoom('${{roomId}}')">✏️ Edit Room</button>
-                    <button class="btn btn-danger"
+                    <button class="btn btn-danger btn-small"
                             onclick="deleteRoom('${{roomId}}')">🗑 Delete Room</button>
                 </div>
             `;
             list.appendChild(card);
+            const toTop = document.createElement('div');
+            toTop.className = 'to-top';
+            toTop.innerHTML = '<button class="btn btn-secondary btn-small" '
+                + 'onclick="window.scrollTo({{top: 0, behavior: \'smooth\'}})">'
+                + '↑ Top</button>';
+            list.appendChild(toTop);
         }}
         status.textContent = Object.keys(rooms).length + ' room(s).';
     }} catch (e) {{
@@ -680,6 +711,12 @@ async function loadAlarmLimits() {{
                     </div>
                 `;
                 list.appendChild(card);
+                const toTop = document.createElement('div');
+                toTop.className = 'to-top';
+                toTop.innerHTML = '<button class="btn btn-secondary btn-small" '
+                    + 'onclick="window.scrollTo({{top: 0, behavior: \'smooth\'}})">'
+                    + '↑ Top</button>';
+                list.appendChild(toTop);
             }}
         }}
         status.textContent = 'Loaded.';
@@ -753,9 +790,9 @@ async function showEditLimitsForm(deviceKey, deviceType) {{
             <tbody>${{statesHtml}}</tbody>
         </table>
         <div class="save-row">
-            <button class="btn btn-primary"
+            <button class="btn btn-primary btn-small"
                     onclick="submitEditLimits('${{deviceKey}}', '${{deviceType}}')">💾 Save</button>
-            <button class="btn btn-secondary"
+            <button class="btn btn-secondary btn-small"
                     onclick="this.closest('.inline-form').remove()">✖ Cancel</button>
         </div>
     `;
@@ -982,7 +1019,9 @@ async function loadNotifications() {{
             card.className = 'room-card';
             card.innerHTML = `
                 <h3>${{channel.type}}</h3>
-                <p>Enabled: ${{channel.enabled ? '✓' : '–'}}</p>
+                <p>Enabled: ${{channel.enabled
+                    ? '<span class="enabled-yes">✓</span>'
+                    : '–'}}</p>
                 <p>URL: ${{channel.url || '–'}}</p>
                 ${{channel.type === 'ntfy' ? `<p>Topic: ${{channel.topic || '–'}}</p>` : ''}}
                 ${{
@@ -1031,8 +1070,9 @@ function showAddChannelForm() {{
         </select></label>
         <label>Enabled: <input type="checkbox" id="new-channel-enabled" checked></label>
         <div class="save-row">
-            <button class="btn btn-primary" onclick="submitAddChannel()">💾 Save</button>
-            <button class="btn btn-secondary"
+            <button class="btn btn-primary btn-small"
+                    onclick="submitAddChannel()">💾 Save</button>
+            <button class="btn btn-secondary btn-small"
                     onclick="this.closest('.inline-form').remove()">✖ Cancel</button>
         </div>
     `;
@@ -1149,9 +1189,9 @@ async function editChannel(index) {{
         <label>Enabled: <input type="checkbox" id="edit-channel-enabled"
                 ${{channel.enabled ? 'checked' : ''}}></label>
         <div class="save-row">
-            <button class="btn btn-primary"
+            <button class="btn btn-primary btn-small"
                     onclick="submitEditChannel(${{index}})">💾 Save</button>
-            <button class="btn btn-secondary"
+            <button class="btn btn-secondary btn-small"
                     onclick="this.closest('.inline-form').remove()">✖ Cancel</button>
         </div>
     `;
@@ -1266,9 +1306,9 @@ function showAddDeviceForm(roomId) {{
             (battery_low state).
         </p>
         <div class="save-row">
-            <button class="btn btn-primary"
+            <button class="btn btn-primary btn-small"
                     onclick="submitAddDevice('${{roomId}}')">💾 Save</button>
-            <button class="btn btn-secondary"
+            <button class="btn btn-secondary btn-small"
                     onclick="this.closest('.inline-form').remove()">✖ Cancel</button>
         </div>
     `;
@@ -1399,9 +1439,9 @@ async function editDevice(deviceKey) {{
         <h4>Edit Device</h4>
         <label>Name: <input type="text" id="edit-device-name" value="${{device.name}}"></label>
         <div class="save-row">
-            <button class="btn btn-primary"
+            <button class="btn btn-primary btn-small"
                     onclick="submitEditDevice('${{deviceKey}}')">💾 Save</button>
-            <button class="btn btn-secondary"
+            <button class="btn btn-secondary btn-small"
                     onclick="this.closest('.inline-form').remove()">✖ Cancel</button>
         </div>
     `;
@@ -1455,8 +1495,9 @@ function showAddRoomForm() {{
         <label>Name: <input type="text" id="new-room-name" placeholder="R1314 · New Lab"></label>
         <label>Icon: <input type="text" id="new-room-icon" placeholder="🧪"></label>
         <div class="save-row">
-            <button class="btn btn-primary" onclick="submitAddRoom()">💾 Save</button>
-            <button class="btn btn-secondary"
+            <button class="btn btn-primary btn-small"
+                    onclick="submitAddRoom()">💾 Save</button>
+            <button class="btn btn-secondary btn-small"
                     onclick="this.closest('.inline-form').remove()">✖ Cancel</button>
         </div>
     `;
@@ -1545,9 +1586,9 @@ async function editRoom(roomId) {{
         <label>Name: <input type="text" id="edit-room-name" value="${{room.name}}"></label>
         <label>Icon: <input type="text" id="edit-room-icon" value="${{room.icon || ''}}"></label>
         <div class="save-row">
-            <button class="btn btn-primary"
+            <button class="btn btn-primary btn-small"
                     onclick="submitEditRoom('${{roomId}}')">💾 Save</button>
-            <button class="btn btn-secondary"
+            <button class="btn btn-secondary btn-small"
                     onclick="this.closest('.inline-form').remove()">✖ Cancel</button>
         </div>
     `;
@@ -1612,7 +1653,21 @@ async function loadAlerts() {{
     const onlyUnack = document.getElementById('alerts-only-unack').checked;
     status.textContent = 'Loading...';
     try {{
-        const url = '/api/admin/alerts?limit=100&only_unacknowledged=' + (onlyUnack ? '1' : '0');
+        const configResp = await fetch('/api/admin/config');
+        const config = await configResp.json();
+        const rooms = config.rooms.rooms;
+        const deviceMap = {{}};
+        for (const [roomId, room] of Object.entries(rooms)) {{
+            for (const device of room.devices) {{
+                deviceMap[device.key] = {{
+                    roomName: room.name,
+                    roomIcon: room.icon || '',
+                    deviceName: device.name,
+                }};
+            }}
+        }}
+        const url = '/api/admin/alerts?limit=100&only_unacknowledged='
+            + (onlyUnack ? '1' : '0');
         const resp = await fetch(url);
         const result = await resp.json();
         if (!resp.ok) {{
@@ -1624,6 +1679,17 @@ async function loadAlerts() {{
             const severityClass = alert.severity === 'critical'
                 ? 'status-critical'
                 : 'status-warn';
+            const severityLabel = alert.severity === 'critical'
+                ? 'alert-severity-critical'
+                : 'alert-severity-warn';
+            const parts = alert.sensor.split('.');
+            const deviceKey = parts[0];
+            const measurement = parts.slice(1).join('.');
+            const info = deviceMap[deviceKey] || {{}};
+            const sensorLabel = info.deviceName
+                ? `${{info.roomIcon}} ${{info.roomName}} · ${{info.deviceName}} · ${{measurement}}`
+                : alert.sensor;
+            const timeLabel = new Date(alert.created_at).toLocaleString('de-DE');
             const ackButton = alert.acknowledged
                 ? '<span class="alert-ack">✓ Acknowledged</span>'
                 : `<button class="btn btn-primary btn-small"
@@ -1633,11 +1699,11 @@ async function loadAlerts() {{
             card.innerHTML = `
                 <div class="alert-header">
                     <span class="lamp ${{severityClass}}"></span>
-                    <strong>${{alert.sensor}}</strong>
-                    <span class="alert-severity">${{alert.severity}}</span>
+                    <strong>${{sensorLabel}}</strong>
+                    <span class="alert-severity ${{severityLabel}}">${{alert.severity}}</span>
                 </div>
                 <div class="alert-meta">
-                    ${{alert.rule}} · ${{alert.created_at}}
+                    ${{alert.rule}} · ${{timeLabel}}
                 </div>
                 <div class="alert-message">${{alert.message}}</div>
                 <div class="alert-actions">
