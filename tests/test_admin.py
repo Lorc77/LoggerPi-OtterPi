@@ -364,3 +364,75 @@ def test_render_admin_shows_warning_status():
     html = render_admin(config, last_batch_at="", last_received_at=old)
     assert "Last batch" in html
     assert "status-warn" in html
+
+
+def test_get_alerts_only_active(tmp_path):
+    from alert_store import AlertStore
+    from notifier import Alert
+
+    store = BatchStore(tmp_path / "otter.db")
+    alert_store = AlertStore(tmp_path / "alerts.db")
+    alert_store.store(
+        Alert(
+            sensor="test.sensor",
+            severity="critical",
+            message="test",
+            rule="test_rule",
+            dedup_key="test.sensor:test_rule:critical",
+        )
+    )
+    alert_store.store(
+        Alert(
+            sensor="test.sensor2",
+            severity="warning",
+            message="test2",
+            rule="test_rule2",
+            dedup_key="test.sensor2:test_rule2:warning",
+        )
+    )
+    alert_store.resolve("test.sensor:test_rule:critical")
+
+    server = create_server("127.0.0.1", 0, store, token=TEST_TOKEN, alert_store=alert_store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        with urlopen(
+            f"http://127.0.0.1:{server.server_port}/api/admin/alerts?only_active=1"
+        ) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        assert len(data["alerts"]) == 1
+        assert data["alerts"][0]["dedup_key"] == "test.sensor2:test_rule2:warning"
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_get_alerts_includes_resolved_at(tmp_path):
+    from alert_store import AlertStore
+    from notifier import Alert
+
+    store = BatchStore(tmp_path / "otter.db")
+    alert_store = AlertStore(tmp_path / "alerts.db")
+    alert_store.store(
+        Alert(
+            sensor="test.sensor",
+            severity="critical",
+            message="test",
+            rule="test_rule",
+            dedup_key="test.sensor:test_rule:critical",
+        )
+    )
+    alert_store.resolve("test.sensor:test_rule:critical")
+
+    server = create_server("127.0.0.1", 0, store, token=TEST_TOKEN, alert_store=alert_store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        with urlopen(f"http://127.0.0.1:{server.server_port}/api/admin/alerts") as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        assert data["alerts"][0]["resolved_at"] is not None
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()

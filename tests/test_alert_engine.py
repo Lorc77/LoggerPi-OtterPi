@@ -311,3 +311,187 @@ class TestCheckSuppression:
         alerts = engine._alert_store.list_alerts()
         assert len(alerts) == 1
         assert alerts[0]["rule"] == "critical_max"
+
+
+class TestAcknowledgeSuppression:
+    def test_acknowledged_alert_not_redispatched(self, tmp_path, monkeypatch):
+        engine = _engine(tmp_path)
+        _store_batch(
+            engine._store,
+            measurements={"atmoweb_101.temperature_1": _measurement(30.0)},
+        )
+        monkeypatch.setattr(
+            "alert_engine.load_alarm_limits",
+            lambda: {
+                "system": {},
+                "sensors": {
+                    "atmoweb_101.temperature_1": {
+                        "critical_max": 28.0,
+                        "enabled": True,
+                    }
+                },
+                "states": {},
+            },
+        )
+        monkeypatch.setattr("alert_engine.load_mail", lambda: {})
+        monkeypatch.setattr("alert_engine.load_notifications", lambda: {"channels": []})
+
+        engine._check()
+        alerts = engine._alert_store.list_alerts()
+        assert len(alerts) == 1
+        alert_id = alerts[0]["id"]
+        engine._alert_store.acknowledge(alert_id, "makki")
+
+        # Zweiter Check: acknowledged → kein neuer Alert
+        engine._check()
+        alerts = engine._alert_store.list_alerts()
+        assert len(alerts) == 1
+
+    def test_reset_on_valid(self, tmp_path, monkeypatch):
+        engine = _engine(tmp_path)
+        _store_batch(
+            engine._store,
+            measurements={"atmoweb_101.temperature_1": _measurement(30.0)},
+        )
+        monkeypatch.setattr(
+            "alert_engine.load_alarm_limits",
+            lambda: {
+                "system": {},
+                "sensors": {
+                    "atmoweb_101.temperature_1": {
+                        "critical_max": 28.0,
+                        "enabled": True,
+                    }
+                },
+                "states": {},
+            },
+        )
+        monkeypatch.setattr("alert_engine.load_mail", lambda: {})
+        monkeypatch.setattr("alert_engine.load_notifications", lambda: {"channels": []})
+
+        engine._check()
+        alerts = engine._alert_store.list_alerts()
+        alert_id = alerts[0]["id"]
+        engine._alert_store.acknowledge(alert_id, "makki")
+
+        # Neuer Batch mit normalem Wert → reset
+        _store_batch(
+            engine._store,
+            measurements={"atmoweb_101.temperature_1": _measurement(23.0)},
+        )
+        engine._check()
+
+        assert (
+            engine._alert_store.is_acknowledged("atmoweb_101.temperature_1:critical_max:critical")
+            is False
+        )
+
+
+class TestResolve:
+    def _mock_config(self, monkeypatch, sensors=None, states=None):
+        monkeypatch.setattr(
+            "alert_engine.load_alarm_limits",
+            lambda: {
+                "system": {},
+                "sensors": sensors or {},
+                "states": states or {},
+            },
+        )
+        monkeypatch.setattr("alert_engine.load_mail", lambda: {})
+        monkeypatch.setattr("alert_engine.load_notifications", lambda: {"channels": []})
+
+    def test_resolve_on_normal_value(self, tmp_path, monkeypatch):
+        engine = _engine(tmp_path)
+        _store_batch(
+            engine._store,
+            measurements={"atmoweb_101.temperature_1": _measurement(30.0)},
+        )
+        self._mock_config(
+            monkeypatch,
+            sensors={
+                "atmoweb_101.temperature_1": {
+                    "critical_max": 28.0,
+                    "enabled": True,
+                }
+            },
+        )
+
+        engine._check()
+        assert (
+            engine._alert_store.is_active("atmoweb_101.temperature_1:critical_max:critical") is True
+        )
+
+        _store_batch(
+            engine._store,
+            measurements={"atmoweb_101.temperature_1": _measurement(23.0)},
+        )
+        engine._check()
+
+        assert (
+            engine._alert_store.is_active("atmoweb_101.temperature_1:critical_max:critical")
+            is False
+        )
+
+    def test_no_resolve_when_still_critical(self, tmp_path, monkeypatch):
+        engine = _engine(tmp_path)
+        _store_batch(
+            engine._store,
+            measurements={"atmoweb_101.temperature_1": _measurement(30.0)},
+        )
+        self._mock_config(
+            monkeypatch,
+            sensors={
+                "atmoweb_101.temperature_1": {
+                    "critical_max": 28.0,
+                    "enabled": True,
+                }
+            },
+        )
+
+        engine._check()
+        alerts = engine._alert_store.list_alerts()
+        alert_id = alerts[0]["id"]
+        engine._alert_store.acknowledge(alert_id, "makki")
+
+        # Immer noch kritisch (29.0 > 28.0) → kein Reset, kein Resolve
+        _store_batch(
+            engine._store,
+            measurements={"atmoweb_101.temperature_1": _measurement(29.0)},
+        )
+        engine._check()
+
+        assert (
+            engine._alert_store.is_acknowledged("atmoweb_101.temperature_1:critical_max:critical")
+            is True
+        )
+        assert (
+            engine._alert_store.is_active("atmoweb_101.temperature_1:critical_max:critical") is True
+        )
+
+    def test_resolve_on_battery_low_false(self, tmp_path, monkeypatch):
+        engine = _engine(tmp_path)
+        _store_batch(
+            engine._store,
+            states={"weatherhub_015f9410f3eb": {"battery_low": True}},
+        )
+        self._mock_config(
+            monkeypatch,
+            states={"weatherhub_015f9410f3eb.battery_low": {"enabled": True}},
+        )
+
+        engine._check()
+        assert (
+            engine._alert_store.is_active("weatherhub_015f9410f3eb.battery_low:battery_low:warning")
+            is True
+        )
+
+        _store_batch(
+            engine._store,
+            states={"weatherhub_015f9410f3eb": {"battery_low": False}},
+        )
+        engine._check()
+
+        assert (
+            engine._alert_store.is_active("weatherhub_015f9410f3eb.battery_low:battery_low:warning")
+            is False
+        )

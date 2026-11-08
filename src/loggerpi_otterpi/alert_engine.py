@@ -196,6 +196,7 @@ class AlertEngine(threading.Thread):
             ):
                 if threshold is None:
                     continue
+                dedup_key = f"{sensor_key}:{rule}:{severity}"
                 if rule.endswith("_min") and value < threshold:
                     alerts.append(
                         self._make_alert(
@@ -218,6 +219,10 @@ class AlertEngine(threading.Thread):
                             threshold=threshold,
                         )
                     )
+                else:
+                    # Wert wieder innerhalb der Grenzen → Alert resolven
+                    self._alert_store.reset_acknowledged(dedup_key)
+                    self._alert_store.resolve(dedup_key)
 
             rate_limit = limits.get("rate_of_change_max_per_hour")
             if rate_limit is not None and value is not None:
@@ -261,6 +266,24 @@ class AlertEngine(threading.Thread):
             device_key, _, state_name = state_key.partition(".")
             device_states = batch_states.get(device_key, {})
             value = device_states.get(state_name)
+
+            # State ist wieder normal → Alert resolven
+            if state_name == "alarms" and isinstance(value, list) and not value:
+                dedup_key = f"{state_key}:alarm:critical"
+                self._alert_store.reset_acknowledged(dedup_key)
+                self._alert_store.resolve(dedup_key)
+            elif state_name == "battery_low" and value is False:
+                dedup_key = f"{state_key}:battery_low:warning"
+                self._alert_store.reset_acknowledged(dedup_key)
+                self._alert_store.resolve(dedup_key)
+            elif state_name == "door_open" and value is False:
+                dedup_key = f"{state_key}:door_open:warning"
+                self._alert_store.reset_acknowledged(dedup_key)
+                self._alert_store.resolve(dedup_key)
+            elif state_name == "contact_open" and value is False:
+                dedup_key = f"{state_key}:contact_open:warning"
+                self._alert_store.reset_acknowledged(dedup_key)
+                self._alert_store.resolve(dedup_key)
 
             if state_name == "alarms" and isinstance(value, list):
                 for alarm in value:
@@ -326,6 +349,8 @@ class AlertEngine(threading.Thread):
         dedup_seconds = mail.get("dedup_seconds", 3600)
         since = (datetime.now(timezone.utc) - timedelta(seconds=dedup_seconds)).isoformat()
         if self._alert_store.recent_dedup_keys(alert.dedup_key, since):
+            return
+        if self._alert_store.is_acknowledged(alert.dedup_key):
             return
 
         self._alert_store.store(alert)

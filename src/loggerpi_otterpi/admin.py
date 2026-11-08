@@ -386,6 +386,14 @@ textarea.json-editor {{
     color: #22c55e;
     font-size: .85rem;
 }}
+.alert-resolved {{
+    color: #22c55e;
+    font-size: .85rem;
+}}
+.alert-active {{
+    color: #ef4444;
+    font-size: .85rem;
+}}
 .lamp {{
     display: inline-block;
     width: 12px;
@@ -393,6 +401,10 @@ textarea.json-editor {{
     border-radius: 50%;
     box-shadow: 0 0 9px currentColor;
 }}
+.lamp.status-ok {{ color: #22c55e; background: #22c55e; }}
+.lamp.status-warn {{ color: #eab308; background: #eab308; }}
+.lamp.status-critical {{ color: #ef4444; background: #ef4444; }}
+.lamp.status-off {{ color: #6b7280; background: #6b7280; box-shadow: none; }}
 .status {{ color: #d1d5db; font-size: .9rem; }}
 </style>
 </head>
@@ -522,6 +534,10 @@ textarea.json-editor {{
         <label>
             <input type="checkbox" id="alerts-only-unack" onchange="loadAlerts()">
             Only unacknowledged
+        </label>
+        <label>
+            <input type="checkbox" id="alerts-only-active" onchange="loadAlerts()">
+            Only active
         </label>
         <span id="alerts-status" class="status"></span>
     </div>
@@ -682,7 +698,7 @@ async function loadAlarmLimits() {{
         systemCard.className = 'room-card';
         systemCard.innerHTML = `
             <h3>⚙️ System</h3>
-            <p>LoggerPi-Offline-Erkennung</p>
+            <p>LoggerPi offline detection</p>
             <div class="config-grid">
                 <div class="config-item">
                     <label>Warning threshold (minutes):</label>
@@ -1767,6 +1783,7 @@ async function loadAlerts() {{
     const status = document.getElementById('alerts-status');
     const list = document.getElementById('alerts-list');
     const onlyUnack = document.getElementById('alerts-only-unack').checked;
+    const onlyActive = document.getElementById('alerts-only-active').checked;
     status.textContent = 'Loading...';
     try {{
         const configResp = await fetch('/api/admin/config');
@@ -1783,7 +1800,8 @@ async function loadAlerts() {{
             }}
         }}
         const url = '/api/admin/alerts?limit=100&only_unacknowledged='
-            + (onlyUnack ? '1' : '0');
+            + (onlyUnack ? '1' : '0')
+            + '&only_active=' + (onlyActive ? '1' : '0');
         const resp = await fetch(url);
         const result = await resp.json();
         if (!resp.ok) {{
@@ -1806,6 +1824,9 @@ async function loadAlerts() {{
                 ? `${{info.roomIcon}} ${{info.roomName}} · ${{info.deviceName}} · ${{measurement}}`
                 : alert.sensor;
             const timeLabel = new Date(alert.created_at).toLocaleString('de-DE');
+            const resolvedLabel = alert.resolved_at
+                ? '<span class="alert-resolved">✓ Resolved</span>'
+                : '<span class="alert-active">● Active</span>';
             const ackButton = alert.acknowledged
                 ? '<span class="alert-ack">✓ Acknowledged</span>'
                 : `<button class="btn btn-primary btn-small"
@@ -1819,7 +1840,7 @@ async function loadAlerts() {{
                     <span class="alert-severity ${{severityLabel}}">${{alert.severity}}</span>
                 </div>
                 <div class="alert-meta">
-                    ${{alert.rule}} · ${{timeLabel}}
+                    ${{alert.rule}} · ${{timeLabel}} · ${{resolvedLabel}}
                 </div>
                 <div class="alert-message">${{alert.message}}</div>
                 <div class="alert-actions">

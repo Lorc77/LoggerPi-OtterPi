@@ -148,8 +148,8 @@ PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.11.11` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.11.11` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
+| LoggerPi | `v1.11.12` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.11.12` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
 
 Der E2E-Datenpfad (LoggerPi → nginx → OtterPi → SQLite) ist verifiziert.
 
@@ -170,7 +170,8 @@ Admin (LAN-only): `https://observer.makki.route64.de/admin`
   System-Karte für LoggerPi-Offline-Erkennung)
 - Mail-Tab: Formular-UI (SMTP, Empfänger, Routing, Dedup, Quiet Hours)
 - Notifications-Tab: Formular-UI (ntfy, webhook)
-- Alerts-Tab: Alert History mit Acknowledge-Button
+- Alerts-Tab: Alert History mit Acknowledge-Button, Status-Chip
+  („Active" / „Resolved"), Filter „Only unacknowledged" / „Only active"
 - Test-Mail-Button im Mail-Tab
 - JSON-Editor als „Advanced"-Toggle (alle Tabs)
 - JSON-Validierung, `.bak`, atomares Schreiben
@@ -224,6 +225,23 @@ Die Statusleuchte erscheint im Header von Admin und Dashboard. Im Dashboard
 wird zusätzlich die Messzeit („Last measurement") angezeigt – das ist die
 LoggerPi-Zeit (`created_at`), nicht die Empfangszeit.
 
+### Acknowledge und Resolve
+
+Ein Alert kann zwei unabhängige Zustände haben:
+
+- **Acknowledged:** Der Nutzer hat den Alert gesehen und quittiert. Solange
+  der Zustand kritisch bleibt, wird kein weiterer Alert mit demselben
+  `dedup_key` gesendet. Erst wenn der Zustand wieder normal wird, wird der
+  Alert „entsperrt".
+- **Resolved:** Der Zustand, der den Alert ausgelöst hat, ist wieder normal.
+  Der Alert bleibt in der History, wird aber als „Resolved" markiert.
+
+Beide Zustände werden in der Alert-Engine automatisch gepflegt:
+`reset_acknowledged()` und `resolve()` werden aufgerufen, sobald der Wert
+wieder innerhalb der Grenzen ist (bzw. der State wieder normal ist). Der
+Admin-Alerts-Tab zeigt den Status als Chip („Active" / „Resolved") und
+bietet einen Filter „Only active".
+
 **Bewusst offen:** Door-Open-Dauer (HPP260 unterstützt es nicht), Defrost,
 Flap (HPP260 unterstützt es nicht). CSV-Export, Statuspage, Dry-Run, Config-Backup/Restore auf „irgendwann"
 verschoben. Alert-Resolve (Active vs. Resolved) und Hysterese sind für einen
@@ -257,18 +275,18 @@ pytest
 git diff --check
 ```
 
-Aktueller Stand: **356 Tests**, alle bestehen.
+Aktueller Stand: **375 Tests**, alle bestehen.
 
 ---
 
-Aktuelle Version: **v1.11.11**
+Aktuelle Version: **v1.11.12**
 
 Die Version wird geführt über:
 
-- `pyproject.toml` → `version = "1.11.11"`
-- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.11.11"`
-- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.11.11"`
-- Git-Tag `v1.11.11`
+- `pyproject.toml` → `version = "1.11.12"`
+- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.11.12"`
+- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.11.12"`
+- Git-Tag `v1.11.12`
 
 ---
 

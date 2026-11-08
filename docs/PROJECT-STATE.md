@@ -16,10 +16,10 @@
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.11.11` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.11.11` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
+| LoggerPi | `v1.11.12` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.11.12` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
 
-LoggerPi und OtterPi laufen produktiv auf Version `v1.11.11`.
+LoggerPi und OtterPi laufen produktiv auf Version `v1.11.12`.
 
 ## Phase A – Config-Admin (abgeschlossen, v1.8.0)
 
@@ -165,6 +165,40 @@ Rate-of-Change im Admin (3.7).
 Deploy + Test (v1.11.11). Danach: Acknowledge-Verhalten (3.3), Resolve (3.8),
 Message-Templates (3.4), UI-Umbau Alarm Limits (3.2), Dashboard-Limits (3.6),
 Rate-of-Change im Admin (3.7).
+
+## Phase C – Acknowledge + Resolve (abgeschlossen, v1.11.12)
+
+**Stand:** 2026-11-08
+
+### Umgesetzt
+
+- **Acknowledge-Verhalten:** Ein acknowledged Alert wird nicht erneut
+  gesendet, solange der Zustand kritisch bleibt. `AlertStore.is_acknowledged()`
+  prüft den letzten Alert mit demselben `dedup_key`. `_dispatch()` überspringt
+  acknowledged Alerts.
+- **Reset bei Normalisierung:** Sobald der Wert wieder innerhalb der Grenzen
+  ist (bzw. der State wieder normal ist), ruft die Alert-Engine
+  `reset_acknowledged()` auf. Der Alert wird für die Zukunft „entsperrt".
+- **Alert-Resolve:** Neue Spalte `resolved_at` in `alerts.sqlite3`.
+  `AlertStore.resolve()` setzt `resolved_at` für **alle offenen** Alerts mit
+  demselben `dedup_key` (Variante 2). `AlertStore.is_active()` prüft, ob der
+  letzte Alert noch nicht resolved ist.
+- **Bugfix:** `reset_acknowledged()` und `resolve()` werden nur aufgerufen,
+  wenn der Wert tatsächlich wieder innerhalb der Grenzen ist – nicht schon
+  bei `validity == "valid"`. Das verhindert, dass ein acknowledged Alert
+  resettet wird, obwohl der Zustand noch kritisch ist.
+- **Admin:** Alerts-Tab mit Status-Chip („Active" / „Resolved"), Filter
+  „Only active", `resolved_at` im JSON.
+- **`otterpi.py`:** Query-Parameter `only_active` für `/api/admin/alerts`.
+
+### Teststand
+
+375 Tests, alle grün.
+
+### Nächster Schritt
+
+Deploy + Test (v1.11.12). Danach: Message-Templates (3.4), UI-Umbau
+Alarm Limits (3.2), Dashboard-Limits (3.6), Rate-of-Change im Admin (3.7).
 
 ---
 

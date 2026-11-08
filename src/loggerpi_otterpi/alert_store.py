@@ -36,10 +36,14 @@ class AlertStore:
                     dedup_key TEXT NOT NULL,
                     acknowledged INTEGER NOT NULL DEFAULT 0,
                     acknowledged_at TEXT,
-                    acknowledged_by TEXT
+                    acknowledged_by TEXT,
+                    resolved_at TEXT
                 )
                 """
             )
+            columns = {row[1] for row in connection.execute("PRAGMA table_info(alerts)")}
+            if "resolved_at" not in columns:
+                connection.execute("ALTER TABLE alerts ADD COLUMN resolved_at TEXT")
             connection.execute(
                 "CREATE INDEX IF NOT EXISTS idx_alerts_created_at ON alerts(created_at)"
             )
@@ -84,15 +88,61 @@ class AlertStore:
             ).fetchone()
         return row is not None
 
+    def is_acknowledged(self, dedup_key: str) -> bool:
+        """True, wenn der letzte Alert mit diesem dedup_key acknowledged ist."""
+        with self._connect() as connection:
+            row = connection.execute(
+                "SELECT acknowledged FROM alerts WHERE dedup_key = ? ORDER BY id DESC LIMIT 1",
+                (dedup_key,),
+            ).fetchone()
+        if row is None:
+            return False
+        return bool(row[0])
+
+    def reset_acknowledged(self, dedup_key: str) -> None:
+        """Setzt acknowledged=0 für alle Alerts mit diesem dedup_key."""
+        with self._connect() as connection:
+            connection.execute(
+                "UPDATE alerts SET acknowledged = 0, acknowledged_at = NULL, "
+                "acknowledged_by = NULL WHERE dedup_key = ? AND acknowledged = 1",
+                (dedup_key,),
+            )
+
+    def resolve(self, dedup_key: str) -> None:
+        """Setzt resolved_at für alle offenen Alerts mit diesem dedup_key."""
+        resolved_at = datetime.now(timezone.utc).isoformat()
+        with self._connect() as connection:
+            connection.execute(
+                "UPDATE alerts SET resolved_at = ? WHERE dedup_key = ? AND resolved_at IS NULL",
+                (resolved_at, dedup_key),
+            )
+
+    def is_active(self, dedup_key: str) -> bool:
+        """True, wenn der letzte Alert mit diesem dedup_key noch nicht resolved ist."""
+        with self._connect() as connection:
+            row = connection.execute(
+                "SELECT resolved_at FROM alerts WHERE dedup_key = ? ORDER BY id DESC LIMIT 1",
+                (dedup_key,),
+            ).fetchone()
+        if row is None:
+            return False
+        return row[0] is None
+
     def list_alerts(
         self,
         limit: int = 100,
         only_unacknowledged: bool = False,
+        only_active: bool = False,
     ) -> list:
         query = "SELECT * FROM alerts"
+        conditions = []
         params: list = []
         if only_unacknowledged:
-            query += " WHERE acknowledged = 0"
+            conditions.append("acknowledged = 0")
+        if only_active:
+            conditions.append("resolved_at IS NULL")
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
         query += " ORDER BY created_at DESC LIMIT ?"
         params.append(limit)
         with self._connect() as connection:

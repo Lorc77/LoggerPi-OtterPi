@@ -106,3 +106,86 @@ class TestAcknowledge:
     def test_acknowledge_unknown_returns_false(self, tmp_path):
         store = AlertStore(tmp_path / "alerts.db")
         assert store.acknowledge(999, "makki") is False
+
+
+class TestIsAcknowledged:
+    def test_not_acknowledged(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        store.store(_alert())
+        assert store.is_acknowledged("freezer.temperature:critical_min:critical") is False
+
+    def test_acknowledged(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        alert_id = store.store(_alert())
+        store.acknowledge(alert_id, "makki")
+        assert store.is_acknowledged("freezer.temperature:critical_min:critical") is True
+
+    def test_unknown_key(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        assert store.is_acknowledged("unknown") is False
+
+
+class TestResetAcknowledged:
+    def test_reset(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        alert_id = store.store(_alert())
+        store.acknowledge(alert_id, "makki")
+        assert store.is_acknowledged("freezer.temperature:critical_min:critical") is True
+        store.reset_acknowledged("freezer.temperature:critical_min:critical")
+        assert store.is_acknowledged("freezer.temperature:critical_min:critical") is False
+
+    def test_reset_unknown_key(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        store.reset_acknowledged("unknown")
+
+
+class TestResolve:
+    def test_resolve_sets_resolved_at(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        store.store(_alert())
+        assert store.is_active("freezer.temperature:critical_min:critical") is True
+        store.resolve("freezer.temperature:critical_min:critical")
+        assert store.is_active("freezer.temperature:critical_min:critical") is False
+
+    def test_resolve_all_open_alerts(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        store.store(_alert())
+        store.store(_alert())
+        store.store(_alert())
+        store.resolve("freezer.temperature:critical_min:critical")
+        alerts = store.list_alerts()
+        assert all(a["resolved_at"] is not None for a in alerts)
+
+    def test_resolve_unknown_key(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        store.resolve("unknown")
+
+    def test_is_active_unknown_key(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        assert store.is_active("unknown") is False
+
+
+class TestListAlertsOnlyActive:
+    def test_only_active(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        store.store(_alert(dedup_key="key-1"))
+        store.store(_alert(dedup_key="key-2"))
+        store.resolve("key-1")
+        active = store.list_alerts(only_active=True)
+        assert len(active) == 1
+        assert active[0]["dedup_key"] == "key-2"
+
+    def test_only_active_and_unacknowledged(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        id1 = store.store(_alert(dedup_key="key-1"))
+        store.store(_alert(dedup_key="key-2"))
+        store.acknowledge(id1, "makki")
+        active = store.list_alerts(only_active=True, only_unacknowledged=True)
+        assert len(active) == 1
+        assert active[0]["dedup_key"] == "key-2"
+
+    def test_only_active_empty(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        store.store(_alert(dedup_key="key-1"))
+        store.resolve("key-1")
+        assert store.list_alerts(only_active=True) == []

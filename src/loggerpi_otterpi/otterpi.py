@@ -287,6 +287,7 @@ class OtterPiHandler(BaseHTTPRequestHandler):
         if self.path.startswith("/api/admin/alerts"):
             limit = 100
             only_unacknowledged = False
+            only_active = False
             if "?" in self.path:
                 _, query = self.path.split("?", 1)
                 for param in query.split("&"):
@@ -297,12 +298,15 @@ class OtterPiHandler(BaseHTTPRequestHandler):
                             pass
                     elif param.startswith("only_unacknowledged="):
                         only_unacknowledged = param.split("=", 1)[1] == "1"
+                    elif param.startswith("only_active="):
+                        only_active = param.split("=", 1)[1] == "1"
             if self.alert_store is None:
                 self._send_json(200, {"alerts": []})
                 return
             alerts = self.alert_store.list_alerts(
                 limit=limit,
                 only_unacknowledged=only_unacknowledged,
+                only_active=only_active,
             )
             self._send_json(200, {"alerts": alerts})
             return

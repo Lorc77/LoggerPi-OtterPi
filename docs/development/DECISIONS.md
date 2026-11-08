@@ -2083,6 +2083,118 @@ Eine Quelle der Wahrheit für Alarm-Regeln. `system` ist semantisch klar von
 
 ---
 
+## DEC-067 — Acknowledge-Verhalten (Option B)
+
+**Status:** Accepted
+**Datum:** 2026-11-08
+
+### Kontext
+
+Ein Alert wurde bisher bei jedem Check erneut gesendet, solange der Zustand
+kritisch war – dedupliziert nur durch `dedup_seconds` (1 h). Der Nutzer
+konnte einen Alert zwar acknowledged, aber das hatte keine Auswirkung auf
+weitere Sendungen.
+
+### Entscheidung
+
+Ein acknowledged Alert wird nicht erneut gesendet, solange der Zustand
+kritisch bleibt. `AlertStore.is_acknowledged(dedup_key)` prüft den letzten
+Alert mit demselben `dedup_key`. `_dispatch()` überspringt acknowledged
+Alerts. Sobald der Wert wieder innerhalb der Grenzen ist, ruft die
+Alert-Engine `reset_acknowledged(dedup_key)` auf – der Alert wird für die
+Zukunft „entsperrt".
+
+Das Verhalten ist immer aktiv, nicht konfigurierbar. Eine zusätzliche
+Aktivierungs-Checkbox wäre Overengineering.
+
+### Begründung
+
+Der Sinn von Acknowledge ist, dass der Nutzer den Alert gesehen hat und
+nicht bei jedem Check erneut belästigt wird. Erst wenn der Zustand sich
+ändert (wieder normal, dann wieder kritisch), soll ein neuer Alert kommen.
+
+### Konsequenz
+
+`AlertStore` um `is_acknowledged()` und `reset_acknowledged()` erweitert.
+`_dispatch()` prüft `is_acknowledged()` nach `recent_dedup_keys()`.
+`_check_sensors()`/`_check_states()` rufen `reset_acknowledged()` auf, wenn
+der Zustand normal ist.
+
+---
+
+## DEC-068 — Alert-Resolve (Active vs. Resolved)
+
+**Status:** Accepted
+**Datum:** 2026-11-08
+
+### Kontext
+
+Alerts blieben bisher für immer in der History, ohne Unterscheidung zwischen
+„aktiv" und „erledigt". Der Nutzer konnte nicht sehen, ob ein Alarm
+zwischenzeitlich mal aktiv war, sich aber erledigt hat (z. B. Kühlschranktür
+kurz offen).
+
+### Entscheidung
+
+Die Tabelle `alerts` erhält eine Spalte `resolved_at` (TEXT, nullable).
+`AlertStore.resolve(dedup_key)` setzt `resolved_at` für **alle offenen**
+Alerts mit demselben `dedup_key` (Variante 2). `AlertStore.is_active(dedup_key)`
+prüft, ob der letzte Alert noch nicht resolved ist.
+
+Die Alert-Engine ruft `resolve()` auf, sobald der Wert wieder innerhalb der
+Grenzen ist (bzw. der State wieder normal ist) – analog zu
+`reset_acknowledged()`.
+
+### Begründung
+
+Variante 2 (alle offenen Alerts resolven) ist semantisch sauberer als
+Variante 1 (nur den letzten). Der `dedup_key` repräsentiert denselben
+Zustand. Wenn der Zustand normal wird, sind alle Alerts, die diesen Zustand
+repräsentieren, resolved – nicht nur der letzte. Variante 1 führt zu
+„Zombie-Alerts", die für immer „Active" bleiben, und macht `is_active()`
+inkonsistent.
+
+### Konsequenz
+
+Schema-Migration via `ALTER TABLE` für bestehende DBs. Admin-Alerts-Tab
+zeigt Status-Chip („Active" / „Resolved") und Filter „Only active".
+`otterpi.py` unterstützt den Query-Parameter `only_active`.
+
+---
+
+## DEC-069 — Bugfix: Reset/Resolve nur bei normalem Wert
+
+**Status:** Accepted
+**Datum:** 2026-11-08
+
+### Kontext
+
+Der erste Entwurf von DEC-067 rief `reset_acknowledged()` auf, sobald
+`validity == "valid"` und `value is not None`. Das war zu früh: Wenn der
+Wert immer noch außerhalb der Grenzen war (z. B. `30.0 > critical_max 28.0`),
+wurde der Alert resettet, obwohl er noch aktiv war. Beim nächsten Check
+wurde er wieder ausgelöst – aber weil er resettet wurde, wurde er erneut
+gesendet.
+
+### Entscheidung
+
+`reset_acknowledged()` und `resolve()` werden nur im `else`-Zweig der
+Grenzwert-Prüfung aufgerufen – also nur, wenn der Wert tatsächlich wieder
+innerhalb der Grenzen ist. Für States analog: nur wenn der State wieder
+normal ist.
+
+### Begründung
+
+Ein Alert soll acknowledged bleiben, solange der Zustand kritisch ist. Erst
+wenn der Zustand normal wird, soll er „entsperrt" und resolved werden.
+
+### Konsequenz
+
+`_check_sensors()` und `_check_states()` entsprechend korrigiert. Neue Tests
+(`test_no_resolve_when_still_critical`) sichern das Verhalten ab.
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:

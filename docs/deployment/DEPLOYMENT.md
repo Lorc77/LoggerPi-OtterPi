@@ -388,6 +388,19 @@ Bei Offline (Warnschwelle erreicht) werden Sensor-/State-Checks ausgesetzt.
 unter `system`. Die Admin-UI bietet dafür eine System-Karte im Alarm
 Limits-Tab (Schwellenwerte in Minuten, Checkbox für Warn-Alert).
 
+### Phase C – Acknowledge + Resolve (v1.11.12)
+
+- **Acknowledge-Verhalten:** Acknowledged Alerts werden nicht erneut gesendet,
+  solange der Zustand kritisch bleibt. Reset bei Normalisierung.
+- **Alert-Resolve:** Neue Spalte `resolved_at` in `alerts.sqlite3`. Alle
+  offenen Alerts mit demselben `dedup_key` werden resolved, wenn der Zustand
+  normal wird.
+- **Bugfix:** Reset/Resolve nur bei tatsächlich normalem Wert (nicht schon
+  bei `validity == "valid"`).
+- **Admin:** Alerts-Tab mit Status-Chip („Active" / „Resolved"), Filter
+  „Only active".
+- **`otterpi.py`:** Query-Parameter `only_active` für `/api/admin/alerts`.
+
 ---
 
 ## 5. OtterPi HTTP Listener
@@ -708,7 +721,7 @@ Repository:
     main
 
 Version:
-    v1.11.11
+    v1.11.12
 
 Letzter bekannter Release-Commit:
     (wird beim Deploy gesetzt)
