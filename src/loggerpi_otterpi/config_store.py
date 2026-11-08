@@ -37,6 +37,7 @@ _ALLOWED_MAIL_KEYS = {
     "smtp_port",
     "smtp_user",
     "from",
+    "from_name",
     "recipients",
     "routing",
     "dedup_seconds",
@@ -207,6 +208,8 @@ def _validate_mail(data: Any) -> None:
             raise ConfigValidationError(f"mail.json requires a non-empty '{field}'.")
     if not _EMAIL_RE.match(data["from"]):
         raise ConfigValidationError("mail.json 'from' is not a valid email address.")
+    if "from_name" in data and not isinstance(data["from_name"], str):
+        raise ConfigValidationError("mail.json 'from_name' must be a string.")
     port = data.get("smtp_port")
     if not isinstance(port, int) or isinstance(port, bool) or not (1 <= port <= 65535):
         raise ConfigValidationError("mail.json 'smtp_port' must be an integer 1-65535.")

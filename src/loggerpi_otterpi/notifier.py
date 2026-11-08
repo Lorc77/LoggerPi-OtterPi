@@ -28,6 +28,7 @@ class EmailNotifier:
         self.port = config["smtp_port"]
         self.user = config["smtp_user"]
         self.from_addr = config["from"]
+        self.from_name = config.get("from_name", "")
         self.recipients = config["recipients"]
         self.routing = config.get("routing", {})
         self.password = password
@@ -38,7 +39,10 @@ class EmailNotifier:
             return False
         msg = EmailMessage()
         msg["Subject"] = f"[{alert.severity.upper()}] {alert.sensor}"
-        msg["From"] = self.from_addr
+        if self.from_name:
+            msg["From"] = f"{self.from_name} <{self.from_addr}>"
+        else:
+            msg["From"] = self.from_addr
         msg["To"] = ", ".join(recipients)
         msg.set_content(alert.message)
         try:

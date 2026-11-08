@@ -120,6 +120,9 @@ textarea {{
     gap: 16px;
     margin-bottom: 16px;
 }}
+#notifications-list {{
+    grid-template-columns: repeat(2, 1fr);
+}}
 .room-card {{
     background: rgba(31,41,55,.78);
     border: 1px solid rgba(255,255,255,.08);
@@ -171,9 +174,11 @@ textarea {{
 .config-item label {{
     color: #9ca3af;
     font-size: .85rem;
-    min-width: 200px;
-    max-width: 200px;
+    min-width: 260px;
+    max-width: 260px;
     white-space: nowrap;
+    text-align: right;
+    padding-right: 10px;
 }}
 .config-item input {{
     flex: 1;
@@ -186,6 +191,13 @@ textarea {{
 }}
 .config-item-full input {{
     max-width: none;
+}}
+.config-item-checkbox {{
+    justify-content: flex-start;
+}}
+.config-item-checkbox input[type="checkbox"] {{
+    flex: 0 0 auto;
+    margin-left: 0;
 }}
 .inline-form {{
     margin-top: 12px;
@@ -390,7 +402,7 @@ textarea {{
     <div class="save-row">
         <button class="btn btn-primary"
                 onclick="showAddRoomForm()">➕ Add Room</button>
-        <button class="btn btn-secondary"
+        <button class="btn btn-secondary btn-small"
                 onclick="toggleRoomsJson()">⚙️ Advanced (JSON)</button>
         <span id="rooms-status" class="status"></span>
     </div>
@@ -420,7 +432,7 @@ textarea {{
     </details>
     <div id="alarm-list" class="rooms-list"></div>
     <div class="save-row">
-        <button class="btn btn-secondary"
+        <button class="btn btn-secondary btn-small"
                 onclick="toggleAlarmJson()">⚙️ Advanced (JSON)</button>
         <span id="alarm-status" class="status"></span>
     </div>
@@ -443,7 +455,7 @@ textarea {{
                 onclick="saveMailForm()">💾 Save</button>
         <button class="btn btn-secondary"
                 onclick="sendTestMail(this)">📧 Send Test Mail</button>
-        <button class="btn btn-secondary"
+        <button class="btn btn-secondary btn-small"
                 onclick="toggleMailJson()">⚙️ Advanced (JSON)</button>
         <span id="mail-status" class="status"></span>
     </div>
@@ -464,7 +476,7 @@ textarea {{
     <div class="save-row">
         <button class="btn btn-primary"
                 onclick="showAddChannelForm()">➕ Add Channel</button>
-        <button class="btn btn-secondary"
+        <button class="btn btn-secondary btn-small"
                 onclick="toggleNotificationsJson()">⚙️ Advanced (JSON)</button>
         <span id="notifications-status" class="status"></span>
     </div>
@@ -888,6 +900,11 @@ async function loadMailForm() {{
                         <input type="text" id="mail-from"
                                 value="${{mail.from || ''}}">
                     </div>
+                    <div class="config-item">
+                        <label>From Name:</label>
+                        <input type="text" id="mail-from-name"
+                                value="${{mail.from_name || ''}}">
+                    </div>
                 </div>
             </div>
             <div class="config-group">
@@ -895,18 +912,21 @@ async function loadMailForm() {{
                 <div class="config-grid">
                     <div class="config-item config-item-full">
                         <label>Recipients (comma-separated):</label>
-                        <input type="text" id="mail-recipients"
-                                value="${{(mail.recipients || []).join(', ')}}">
+                        <textarea id="mail-recipients" rows="2">${{
+                            (mail.recipients || []).join(', ')
+                        }}</textarea>
                     </div>
                     <div class="config-item config-item-full">
                         <label>Routing Critical (comma-separated):</label>
-                        <input type="text" id="mail-routing-critical"
-                                value="${{(mail.routing?.critical || []).join(', ')}}">
+                        <textarea id="mail-routing-critical" rows="2">${{
+                            (mail.routing?.critical || []).join(', ')
+                        }}</textarea>
                     </div>
                     <div class="config-item config-item-full">
                         <label>Routing Warning (comma-separated):</label>
-                        <input type="text" id="mail-routing-warning"
-                                value="${{(mail.routing?.warning || []).join(', ')}}">
+                        <textarea id="mail-routing-warning" rows="2">${{
+                            (mail.routing?.warning || []).join(', ')
+                        }}</textarea>
                     </div>
                 </div>
             </div>
@@ -923,7 +943,7 @@ async function loadMailForm() {{
                         <input type="text" id="mail-quiet-end"
                                 value="${{mail.quiet_hours?.end || '07:00'}}">
                     </div>
-                    <div class="config-item">
+                    <div class="config-item config-item-checkbox">
                         <label>Critical Always:</label>
                         <input type="checkbox" id="mail-quiet-critical"
                                 ${{mail.quiet_hours?.critical_always !== false ? 'checked' : ''}}>
@@ -938,7 +958,7 @@ async function loadMailForm() {{
                         <input type="number" id="mail-dedup-seconds"
                                 value="${{mail.dedup_seconds || 3600}}">
                     </div>
-                    <div class="config-item">
+                    <div class="config-item config-item-checkbox">
                         <label>Enabled:</label>
                         <input type="checkbox" id="mail-enabled"
                                 ${{mail.enabled !== false ? 'checked' : ''}}>
@@ -963,6 +983,7 @@ async function saveMailForm() {{
         mail.smtp_port = parseInt(document.getElementById('mail-smtp-port').value);
         mail.smtp_user = document.getElementById('mail-smtp-user').value.trim();
         mail.from = document.getElementById('mail-from').value.trim();
+        mail.from_name = document.getElementById('mail-from-name').value.trim();
         mail.recipients = document.getElementById('mail-recipients').value
             .split(',').map(s => s.trim()).filter(s => s);
         mail.routing = {{
