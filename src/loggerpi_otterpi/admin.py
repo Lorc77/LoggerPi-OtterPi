@@ -106,9 +106,12 @@ input[type="checkbox"] {{
     accent-color: #93c5fd;
 }}
 textarea {{
-    min-height: 400px;
+    min-height: 60px;
     font-family: ui-monospace, monospace;
     font-size: .85rem;
+}}
+textarea.json-editor {{
+    min-height: 400px;
 }}
 .to-top {{
     text-align: center;
@@ -407,7 +410,7 @@ textarea {{
         <span id="rooms-status" class="status"></span>
     </div>
     <div id="rooms-json-editor" style="display: none; margin-top: 12px;">
-        <textarea id="rooms-text">{rooms_json}</textarea>
+        <textarea id="rooms-text" class="json-editor">{rooms_json}</textarea>
         <div class="save-row">
             <button class="btn btn-primary btn-small"
                     data-endpoint="/api/admin/rooms"
@@ -437,7 +440,7 @@ textarea {{
         <span id="alarm-status" class="status"></span>
     </div>
     <div id="alarm-json-editor" style="display: none; margin-top: 12px;">
-        <textarea id="alarm-text">{alarm_json}</textarea>
+        <textarea id="alarm-text" class="json-editor">{alarm_json}</textarea>
         <div class="save-row">
             <button class="btn btn-primary btn-small"
                     data-endpoint="/api/admin/alarm-limits"
@@ -460,7 +463,7 @@ textarea {{
         <span id="mail-status" class="status"></span>
     </div>
     <div id="mail-json-editor" style="display: none; margin-top: 12px;">
-        <textarea id="mail-text">{mail_json}</textarea>
+        <textarea id="mail-text" class="json-editor">{mail_json}</textarea>
         <div class="save-row">
             <button class="btn btn-primary btn-small"
                     data-endpoint="/api/admin/mail"
@@ -481,7 +484,7 @@ textarea {{
         <span id="notifications-status" class="status"></span>
     </div>
     <div id="notifications-json-editor" style="display: none; margin-top: 12px;">
-        <textarea id="notifications-text">{notifications_json}</textarea>
+        <textarea id="notifications-text" class="json-editor">{notifications_json}</textarea>
         <div class="save-row">
             <button class="btn btn-primary btn-small"
                     data-endpoint="/api/admin/notifications"
@@ -623,7 +626,7 @@ async function loadRooms() {{
             const toTop = document.createElement('div');
             toTop.className = 'to-top';
             toTop.innerHTML = `<button class="btn btn-primary btn-small"
-                onclick="window.scrollTo({{top: 0, behavior: 'smooth'}})">↑ Top</button>`;
+                onclick="window.scrollTo({{top: 0, behavior: 'smooth'}})">↑ To Top</button>`;
             list.appendChild(toTop);
         }}
         status.textContent = Object.keys(rooms).length + ' room(s).';
@@ -725,7 +728,7 @@ async function loadAlarmLimits() {{
                 const toTop = document.createElement('div');
                 toTop.className = 'to-top';
                 toTop.innerHTML = `<button class="btn btn-primary btn-small"
-                    onclick="window.scrollTo({{top: 0, behavior: 'smooth'}})">↑ Top</button>`;
+                    onclick="window.scrollTo({{top: 0, behavior: 'smooth'}})">↑ To Top</button>`;
                 list.appendChild(toTop);
             }}
         }}
