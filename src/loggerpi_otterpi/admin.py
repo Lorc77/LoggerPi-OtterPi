@@ -29,7 +29,7 @@ def render_admin(config: dict, last_batch_at: str = "") -> str:
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OtterPi Admin</title>
+<title>🛠 ZOOLOGY-Observer Admin</title>
 <style>
 * {{ box-sizing: border-box; }}
 body {{
@@ -88,16 +88,27 @@ h1 {{ text-align: center; margin-top: 0; }}
 }}
 .tab-panel {{ display: none; }}
 .tab-panel.active {{ display: block; }}
-textarea {{
+input[type="text"], input[type="number"], select, textarea {{
+    background: rgba(31,41,55,.78);
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 10px;
+    color: white;
+    padding: 10px 12px;
+    font-size: .95rem;
     width: 100%;
+}}
+input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus {{
+    outline: none;
+    border-color: rgba(147,197,253,.5);
+}}
+input[type="checkbox"] {{
+    width: auto;
+    accent-color: #93c5fd;
+}}
+textarea {{
     min-height: 400px;
     font-family: ui-monospace, monospace;
     font-size: .85rem;
-    background: rgba(31,41,55,.78);
-    color: white;
-    border: 1px solid rgba(255,255,255,.1);
-    border-radius: 10px;
-    padding: 12px;
 }}
 .rooms-list {{
     display: grid;
@@ -224,13 +235,115 @@ textarea {{
     font-style: italic;
 }}
 .save-row {{ display: flex; gap: 12px; align-items: center; margin-top: 12px; }}
-.save-btn {{
-    padding: 8px 20px;
-    border-radius: 20px;
-    background: rgba(34,197,94,.2);
-    border: 1px solid rgba(34,197,94,.5);
-    color: #bbf7d0;
+.btn {{
+    padding: 12px 24px;
+    border-radius: 12px;
+    border: none;
     cursor: pointer;
+    font-size: 1rem;
+    transition: .2s;
+}}
+.btn-primary {{
+    background: rgba(147,197,253,.25);
+    border: 1px solid rgba(147,197,253,.5);
+    color: #bfdbfe;
+}}
+.btn-primary:hover {{
+    background: rgba(147,197,253,.35);
+    transform: translateY(-2px);
+}}
+.btn-secondary {{
+    background: rgba(31,41,55,.78);
+    border: 1px solid rgba(255,255,255,.15);
+    color: #d1d5db;
+}}
+.btn-secondary:hover {{
+    background: rgba(147,197,253,.15);
+    border-color: rgba(147,197,253,.5);
+    color: #bfdbfe;
+}}
+.btn-danger {{
+    background: rgba(239,68,68,.15);
+    border: 1px solid rgba(239,68,68,.4);
+    color: #fca5a5;
+    padding: 6px 12px;
+    font-size: .85rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: .2s;
+}}
+.btn-danger:hover {{
+    background: rgba(239,68,68,.3);
+    border-color: rgba(239,68,68,.6);
+}}
+.btn-warning {{
+    background: rgba(245,158,11,.15);
+    border: 1px solid rgba(245,158,11,.4);
+    color: #fcd34d;
+    padding: 6px 12px;
+    font-size: .85rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: .2s;
+}}
+.btn-warning:hover {{
+    background: rgba(245,158,11,.3);
+    border-color: rgba(245,158,11,.6);
+}}
+.btn-small {{
+    padding: 4px 10px;
+    font-size: .75rem;
+    border-radius: 6px;
+}}
+.alerts-list {{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+}}
+.alert-card {{
+    padding: 12px 15px;
+    background: rgba(31,41,55,.5);
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,.1);
+}}
+.alert-header {{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}}
+.alert-header strong {{
+    color: #bfdbfe;
+    font-size: 1rem;
+}}
+.alert-severity {{
+    margin-left: auto;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: .75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    background: rgba(147,197,253,.15);
+    color: #bfdbfe;
+}}
+.alert-meta {{
+    color: #9ca3af;
+    font-size: .85rem;
+    margin-bottom: 6px;
+}}
+.alert-message {{
+    color: #d1d5db;
+    font-size: .9rem;
+    margin-bottom: 8px;
+}}
+.alert-actions {{
+    display: flex;
+    gap: 8px;
+}}
+.alert-ack {{
+    color: #22c55e;
+    font-size: .85rem;
 }}
 .status {{ color: #d1d5db; font-size: .9rem; }}
 </style>
@@ -352,22 +465,7 @@ textarea {{
         </label>
         <span id="alerts-status" class="status"></span>
     </div>
-    <table id="alerts-table" style="width: 100%; margin-top: 12px; border-collapse: collapse;">
-        <thead>
-            <tr>
-                <th>Time</th>
-                <th>Sensor</th>
-                <th>Rule</th>
-                <th>Severity</th>
-                <th>Value</th>
-                <th>Threshold</th>
-                <th>Message</th>
-                <th>Ack</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody id="alerts-tbody"></tbody>
-    </table>
+    <div id="alerts-list" class="alerts-list"></div>
 </div>
 <div class="footer">🦦 otterpi · ZOOLOGY-Observer Admin {VERSION}</div>
 </div>
@@ -458,10 +556,10 @@ async function loadRooms() {{
                             </select>
                         </td>
                         <td>
-                            <button class="save-btn"
-                                    onclick="editDevice('${{device.key}}')">Edit</button>
-                            <button class="save-btn"
-                                    onclick="deleteDevice('${{device.key}}')">Delete</button>
+                            <button class="btn btn-secondary btn-small"
+                                    onclick="editDevice('${{device.key}}')">✏️ Edit</button>
+                            <button class="btn btn-danger btn-small"
+                                    onclick="deleteDevice('${{device.key}}')">🗑 Delete</button>
                         </td>
                     </tr>
                 `;
@@ -476,12 +574,12 @@ async function loadRooms() {{
                     <tbody>${{devicesHtml}}</tbody>
                 </table>
                 <div class="save-row">
-                    <button class="save-btn"
-                            onclick="showAddDeviceForm('${{roomId}}')">+ Add Device</button>
-                    <button class="save-btn"
-                            onclick="editRoom('${{roomId}}')">Edit Room</button>
-                    <button class="save-btn"
-                            onclick="deleteRoom('${{roomId}}')">Delete Room</button>
+                    <button class="btn btn-primary"
+                            onclick="showAddDeviceForm('${{roomId}}')">➕ Add Device</button>
+                    <button class="btn btn-secondary"
+                            onclick="editRoom('${{roomId}}')">✏️ Edit Room</button>
+                    <button class="btn btn-danger"
+                            onclick="deleteRoom('${{roomId}}')">🗑 Delete Room</button>
                 </div>
             `;
             list.appendChild(card);
@@ -655,10 +753,10 @@ async function showEditLimitsForm(deviceKey, deviceType) {{
             <tbody>${{statesHtml}}</tbody>
         </table>
         <div class="save-row">
-            <button class="save-btn"
-                    onclick="submitEditLimits('${{deviceKey}}', '${{deviceType}}')">Save</button>
-            <button class="save-btn"
-                    onclick="this.closest('.inline-form').remove()">Cancel</button>
+            <button class="btn btn-primary"
+                    onclick="submitEditLimits('${{deviceKey}}', '${{deviceType}}')">💾 Save</button>
+            <button class="btn btn-secondary"
+                    onclick="this.closest('.inline-form').remove()">✖ Cancel</button>
         </div>
     `;
     card.appendChild(form);
@@ -933,9 +1031,9 @@ function showAddChannelForm() {{
         </select></label>
         <label>Enabled: <input type="checkbox" id="new-channel-enabled" checked></label>
         <div class="save-row">
-            <button class="save-btn" onclick="submitAddChannel()">Save</button>
-            <button class="save-btn"
-                    onclick="this.closest('.inline-form').remove()">Cancel</button>
+            <button class="btn btn-primary" onclick="submitAddChannel()">💾 Save</button>
+            <button class="btn btn-secondary"
+                    onclick="this.closest('.inline-form').remove()">✖ Cancel</button>
         </div>
     `;
     list.appendChild(form);
@@ -1051,9 +1149,10 @@ async function editChannel(index) {{
         <label>Enabled: <input type="checkbox" id="edit-channel-enabled"
                 ${{channel.enabled ? 'checked' : ''}}></label>
         <div class="save-row">
-            <button class="save-btn" onclick="submitEditChannel(${{index}})">Save</button>
-            <button class="save-btn"
-                    onclick="this.closest('.inline-form').remove()">Cancel</button>
+            <button class="btn btn-primary"
+                    onclick="submitEditChannel(${{index}})">💾 Save</button>
+            <button class="btn btn-secondary"
+                    onclick="this.closest('.inline-form').remove()">✖ Cancel</button>
         </div>
     `;
     list.appendChild(form);
@@ -1167,8 +1266,10 @@ function showAddDeviceForm(roomId) {{
             (battery_low state).
         </p>
         <div class="save-row">
-            <button class="save-btn" onclick="submitAddDevice('${{roomId}}')">Save</button>
-            <button class="save-btn" onclick="this.closest('.inline-form').remove()">Cancel</button>
+            <button class="btn btn-primary"
+                    onclick="submitAddDevice('${{roomId}}')">💾 Save</button>
+            <button class="btn btn-secondary"
+                    onclick="this.closest('.inline-form').remove()">✖ Cancel</button>
         </div>
     `;
     card.appendChild(form);
@@ -1298,8 +1399,10 @@ async function editDevice(deviceKey) {{
         <h4>Edit Device</h4>
         <label>Name: <input type="text" id="edit-device-name" value="${{device.name}}"></label>
         <div class="save-row">
-            <button class="save-btn" onclick="submitEditDevice('${{deviceKey}}')">Save</button>
-            <button class="save-btn" onclick="this.closest('.inline-form').remove()">Cancel</button>
+            <button class="btn btn-primary"
+                    onclick="submitEditDevice('${{deviceKey}}')">💾 Save</button>
+            <button class="btn btn-secondary"
+                    onclick="this.closest('.inline-form').remove()">✖ Cancel</button>
         </div>
     `;
     card.appendChild(form);
@@ -1352,8 +1455,9 @@ function showAddRoomForm() {{
         <label>Name: <input type="text" id="new-room-name" placeholder="R1314 · New Lab"></label>
         <label>Icon: <input type="text" id="new-room-icon" placeholder="🧪"></label>
         <div class="save-row">
-            <button class="save-btn" onclick="submitAddRoom()">Save</button>
-            <button class="save-btn" onclick="this.closest('.inline-form').remove()">Cancel</button>
+            <button class="btn btn-primary" onclick="submitAddRoom()">💾 Save</button>
+            <button class="btn btn-secondary"
+                    onclick="this.closest('.inline-form').remove()">✖ Cancel</button>
         </div>
     `;
     list.appendChild(form);
@@ -1441,8 +1545,10 @@ async function editRoom(roomId) {{
         <label>Name: <input type="text" id="edit-room-name" value="${{room.name}}"></label>
         <label>Icon: <input type="text" id="edit-room-icon" value="${{room.icon || ''}}"></label>
         <div class="save-row">
-            <button class="save-btn" onclick="submitEditRoom('${{roomId}}')">Save</button>
-            <button class="save-btn" onclick="this.closest('.inline-form').remove()">Cancel</button>
+            <button class="btn btn-primary"
+                    onclick="submitEditRoom('${{roomId}}')">💾 Save</button>
+            <button class="btn btn-secondary"
+                    onclick="this.closest('.inline-form').remove()">✖ Cancel</button>
         </div>
     `;
     card.appendChild(form);
@@ -1502,7 +1608,7 @@ async function sendTestMail(btn) {{
 
 async function loadAlerts() {{
     const status = document.getElementById('alerts-status');
-    const tbody = document.getElementById('alerts-tbody');
+    const list = document.getElementById('alerts-list');
     const onlyUnack = document.getElementById('alerts-only-unack').checked;
     status.textContent = 'Loading...';
     try {{
@@ -1513,24 +1619,32 @@ async function loadAlerts() {{
             status.textContent = 'Error: ' + (result.error?.message || resp.status);
             return;
         }}
-        tbody.innerHTML = '';
+        list.innerHTML = '';
         for (const alert of result.alerts) {{
+            const severityClass = alert.severity === 'critical'
+                ? 'status-critical'
+                : 'status-warn';
             const ackButton = alert.acknowledged
-                ? ''
-                : `<button class="save-btn" onclick="acknowledgeAlert(${{alert.id}})">Ack</button>`;
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${{alert.created_at}}</td>
-                <td>${{alert.sensor}}</td>
-                <td>${{alert.rule}}</td>
-                <td>${{alert.severity}}</td>
-                <td>${{alert.value ?? '–'}}</td>
-                <td>${{alert.threshold ?? '–'}}</td>
-                <td>${{alert.message}}</td>
-                <td>${{alert.acknowledged ? '✓' : '–'}}</td>
-                <td>${{ackButton}}</td>
+                ? '<span class="alert-ack">✓ Acknowledged</span>'
+                : `<button class="btn btn-primary btn-small"
+                        onclick="acknowledgeAlert(${{alert.id}})">✓ Acknowledge</button>`;
+            const card = document.createElement('div');
+            card.className = 'alert-card';
+            card.innerHTML = `
+                <div class="alert-header">
+                    <span class="lamp ${{severityClass}}"></span>
+                    <strong>${{alert.sensor}}</strong>
+                    <span class="alert-severity">${{alert.severity}}</span>
+                </div>
+                <div class="alert-meta">
+                    ${{alert.rule}} · ${{alert.created_at}}
+                </div>
+                <div class="alert-message">${{alert.message}}</div>
+                <div class="alert-actions">
+                    ${{ackButton}}
+                </div>
             `;
-            tbody.appendChild(tr);
+            list.appendChild(card);
         }}
         status.textContent = result.alerts.length + ' alert(s).';
     }} catch (e) {{
