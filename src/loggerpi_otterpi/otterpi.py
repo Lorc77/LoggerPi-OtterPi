@@ -269,7 +269,15 @@ class OtterPiHandler(BaseHTTPRequestHandler):
 
             latest = self.store.latest()
             last_batch_at = latest.created_at if latest else ""
-            self._send_html(200, render_admin(_load_admin_config(), last_batch_at))
+            last_received_at = self.store.latest_received_at() or ""
+            self._send_html(
+                200,
+                render_admin(
+                    _load_admin_config(),
+                    last_batch_at,
+                    last_received_at,
+                ),
+            )
             return
 
         if self.path == "/api/admin/config":

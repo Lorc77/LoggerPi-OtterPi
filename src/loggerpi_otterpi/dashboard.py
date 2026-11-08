@@ -4,6 +4,7 @@ import json
 from datetime import datetime, timezone
 from typing import Optional
 
+from config_store import ConfigValidationError, load_alarm_limits
 from dashboard_charts import (
     _render_device_script,
     _tooltip_date_logic,
@@ -31,12 +32,26 @@ from dashboard_data import (
     _room_climate,
     _series,
 )
+from heartbeat import offline_status
 from otterpi_store import BatchStore
 
 _USB_NAMES = {
     ("0403", "6001"): "FTDI FT232R",
     ("067b", "2303"): "Prolific PL2303",
 }
+
+
+def _offline_thresholds() -> tuple[int, int]:
+    """Liest die Offline-Schwellenwerte aus alarm_limits.json."""
+    try:
+        data = load_alarm_limits()
+    except ConfigValidationError:
+        return (1800, 3600)
+    system = data.get("system", {})
+    return (
+        system.get("loggerpi_offline_warning_seconds", 1800),
+        system.get("loggerpi_offline_critical_seconds", 3600),
+    )
 
 
 def render_dashboard(
@@ -132,6 +147,7 @@ def _render_overview(store: BatchStore) -> str:
 
     room_cards = ""
     rooms = get_rooms()
+    last_update = "–"
     for room_id, room in rooms.items():
         has_devices = bool(room["devices"])
 
@@ -178,6 +194,10 @@ def _render_overview(store: BatchStore) -> str:
         room_cards += card
         current = _current_values(batches)
         last_update = current["last_batch"]
+
+    last_received = batches[-1].get("_received_at") if batches else None
+    warning_seconds, critical_seconds = _offline_thresholds()
+    status_class, status_text = offline_status(last_received, warning_seconds, critical_seconds)
 
     return f"""<!DOCTYPE html>
 <html lang="de">
@@ -311,7 +331,10 @@ h1 {{ text-align: center; margin-top: 0; }}
 <body>
 <div class="container">
 <h1>📡 ZOOLOGY-Observer Dashboard</h1>
-<div class="subtitle">Rooms & Devices · Last update: {last_update}</div>
+<div class="subtitle">
+    <span class="lamp {status_class}"></span> {status_text}
+    · Last measurement: {last_update}
+</div>
 
 <div class="rooms-grid">
 {room_cards}

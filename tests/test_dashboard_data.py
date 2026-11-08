@@ -297,3 +297,52 @@ class TestLedValue:
     def test_no_led(self):
         batches = [_make_batch({"atmoweb_101.temperature_1": _make_measurement(23.5)})]
         assert _led_value(batches, "atmoweb_101") is None
+
+
+class TestRecentBatchesReceivedAt:
+    def test_received_at_is_set(self, tmp_path):
+        now = datetime.now(timezone.utc)
+        batches = [
+            _make_batch(
+                created_at=(now - timedelta(hours=1)).isoformat(),
+                batch_id="b1",
+                sequence=1,
+            ),
+        ]
+        store = _store_batches(tmp_path, batches)
+        result = _recent_batches(store, hours=48)
+        assert len(result) == 1
+        assert "_received_at" in result[0]
+        assert result[0]["_received_at"] is not None
+
+    def test_received_at_fallback_to_created_at(self, tmp_path):
+        now = datetime.now(timezone.utc)
+        created_at = (now - timedelta(hours=1)).isoformat()
+        batches = [
+            _make_batch(created_at=created_at, batch_id="b1", sequence=1),
+        ]
+        store = _store_batches(tmp_path, batches)
+        result = _recent_batches(store, hours=48)
+        assert result[0]["_received_at"] == created_at
+
+    def test_received_at_is_read_from_db(self, tmp_path):
+        now = datetime.now(timezone.utc)
+        created_at = (now - timedelta(hours=2)).isoformat()
+        received_at = (now - timedelta(minutes=5)).isoformat()
+        batch = _make_batch(created_at=created_at, batch_id="b1", sequence=1)
+        store = BatchStore(tmp_path / "otter.db")
+        with sqlite3.connect(store.path) as conn:
+            conn.execute(
+                "INSERT INTO batches "
+                "(batch_id, logger_id, sequence, payload, received_at) "
+                "VALUES (?, ?, ?, ?, ?)",
+                (
+                    batch["batch_id"],
+                    batch["logger_id"],
+                    batch["sequence"],
+                    json.dumps(batch),
+                    received_at,
+                ),
+            )
+        result = _recent_batches(store, hours=48)
+        assert result[0]["_received_at"] == received_at

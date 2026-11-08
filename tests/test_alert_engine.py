@@ -1,5 +1,6 @@
 """Tests für die AlertEngine."""
 
+import sqlite3
 from datetime import datetime, timedelta, timezone
 
 from alert_engine import AlertEngine
@@ -195,3 +196,118 @@ class TestQuietHours:
         }
         alerts = engine._check_sensors(engine._store.latest().to_dict(), sensors)
         assert any(a.rule == "rate_of_change" for a in alerts)
+
+
+class TestLoggerPiHeartbeat:
+    def test_no_batch_returns_not_offline(self, tmp_path):
+        engine = _engine(tmp_path)
+        alert, is_offline = engine._check_loggerpi_heartbeat({})
+        assert alert is None
+        assert is_offline is False
+
+    def test_fresh_batch_returns_not_offline(self, tmp_path):
+        engine = _engine(tmp_path)
+        _store_batch(engine._store)
+        alert, is_offline = engine._check_loggerpi_heartbeat({})
+        assert alert is None
+        assert is_offline is False
+
+    def test_warning_threshold_without_alert(self, tmp_path):
+        engine = _engine(tmp_path)
+        _store_batch(engine._store)
+        with sqlite3.connect(engine._store.path) as conn:
+            old = (datetime.now(timezone.utc) - timedelta(minutes=31)).isoformat()
+            conn.execute("UPDATE batches SET received_at = ?", (old,))
+        alert, is_offline = engine._check_loggerpi_heartbeat({})
+        assert alert is None
+        assert is_offline is True
+
+    def test_warning_threshold_with_alert(self, tmp_path):
+        engine = _engine(tmp_path)
+        _store_batch(engine._store)
+        with sqlite3.connect(engine._store.path) as conn:
+            old = (datetime.now(timezone.utc) - timedelta(minutes=31)).isoformat()
+            conn.execute("UPDATE batches SET received_at = ?", (old,))
+        alert, is_offline = engine._check_loggerpi_heartbeat(
+            {"loggerpi_offline_warning_alert_enabled": True}
+        )
+        assert alert is not None
+        assert alert.severity == "warning"
+        assert alert.rule == "loggerpi_offline"
+        assert is_offline is True
+
+    def test_critical_threshold(self, tmp_path):
+        engine = _engine(tmp_path)
+        _store_batch(engine._store)
+        with sqlite3.connect(engine._store.path) as conn:
+            old = (datetime.now(timezone.utc) - timedelta(minutes=61)).isoformat()
+            conn.execute("UPDATE batches SET received_at = ?", (old,))
+        alert, is_offline = engine._check_loggerpi_heartbeat({})
+        assert alert is not None
+        assert alert.severity == "critical"
+        assert alert.rule == "loggerpi_offline"
+        assert is_offline is True
+
+
+class TestCheckSuppression:
+    def _mock_config(self, monkeypatch, sensors=None, states=None, system=None):
+        monkeypatch.setattr(
+            "alert_engine.load_alarm_limits",
+            lambda: {
+                "system": system or {},
+                "sensors": sensors or {},
+                "states": states or {},
+            },
+        )
+        monkeypatch.setattr("alert_engine.load_mail", lambda: {})
+        monkeypatch.setattr("alert_engine.load_notifications", lambda: {"channels": []})
+
+    def test_offline_suppresses_sensor_alerts(self, tmp_path, monkeypatch):
+        engine = _engine(tmp_path)
+        _store_batch(
+            engine._store,
+            measurements={"atmoweb_101.temperature_1": _measurement(30.0)},
+        )
+        with sqlite3.connect(engine._store.path) as conn:
+            old = (datetime.now(timezone.utc) - timedelta(minutes=61)).isoformat()
+            conn.execute("UPDATE batches SET received_at = ?", (old,))
+
+        self._mock_config(
+            monkeypatch,
+            sensors={
+                "atmoweb_101.temperature_1": {
+                    "critical_max": 28.0,
+                    "enabled": True,
+                }
+            },
+        )
+
+        engine._check()
+
+        alerts = engine._alert_store.list_alerts()
+        assert len(alerts) == 1
+        assert alerts[0]["rule"] == "loggerpi_offline"
+        assert alerts[0]["severity"] == "critical"
+
+    def test_online_runs_sensor_alerts(self, tmp_path, monkeypatch):
+        engine = _engine(tmp_path)
+        _store_batch(
+            engine._store,
+            measurements={"atmoweb_101.temperature_1": _measurement(30.0)},
+        )
+
+        self._mock_config(
+            monkeypatch,
+            sensors={
+                "atmoweb_101.temperature_1": {
+                    "critical_max": 28.0,
+                    "enabled": True,
+                }
+            },
+        )
+
+        engine._check()
+
+        alerts = engine._alert_store.list_alerts()
+        assert len(alerts) == 1
+        assert alerts[0]["rule"] == "critical_max"

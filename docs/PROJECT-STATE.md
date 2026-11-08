@@ -6,20 +6,20 @@
 **Data Model:** v1  
 **Projektphase:** Implementierung / Core Batch v1  
 **Status:** In aktiver Entwicklung  
-**Stand:** 2026-09-17
+**Stand:** 2026-11-08
 
 ---
 
 ## Deployment-Stand
 
-**Stand:** 2026-11-05
+**Stand:** 2026-11-08
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.11.0` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.11.0` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
+| LoggerPi | `v1.11.11` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.11.11` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
 
-LoggerPi und OtterPi laufen produktiv auf Version `v1.8.0`.
+LoggerPi und OtterPi laufen produktiv auf Version `v1.11.11`.
 
 ## Phase A – Config-Admin (abgeschlossen, v1.8.0)
 
@@ -125,11 +125,46 @@ Deploy + Test (B6). Danach Phase C (Komfort).
 
 ### Teststand
 
-323 Tests, alle grün.
+356 Tests, alle grün.
 
 ### Nächster Schritt
 
-Deploy + Test (v1.11.0). Danach: Private Observer (separates Projekt), Admin öffentlich mit Login (Audit-Log), weitere Sensoren (ID10, ID04).
+Deploy + Test (v1.11.11). Danach: Acknowledge-Verhalten (3.3), Resolve (3.8),
+Message-Templates (3.4), UI-Umbau Alarm Limits (3.2), Dashboard-Limits (3.6),
+Rate-of-Change im Admin (3.7).
+
+## Phase C – Offline-Erkennung (abgeschlossen, v1.11.11)
+
+**Stand:** 2026-11-08
+
+### Umgesetzt
+
+- **`received_at` in der Batch-Tabelle:** OtterPi-seitiger Empfangszeitpunkt
+  wird jetzt persistiert (`BatchStore.latest_received_at()`). Fallback auf
+  `created_at` für bestehende Zeilen ohne `received_at`.
+- **`heartbeat.py`:** Gemeinsame Offline-Status-Logik für Admin und Dashboard
+  (`offline_status()`).
+- **`alarm_limits.json` → `system`-Sektion:** Konfigurierbare Schwellenwerte
+  (`loggerpi_offline_warning_seconds`, `loggerpi_offline_critical_seconds`)
+  und optionale Warnstufe (`loggerpi_offline_warning_alert_enabled`).
+- **Alert-Engine:** `_check_loggerpi_heartbeat()` prüft den Heartbeat vor den
+  Sensor-/State-Checks. Bei Offline werden Sensor-/State-Checks ausgesetzt
+  (Suppression). Der Offline-Alert hat einen eigenen `dedup_key`
+  (`system:loggerpi_offline:critical` bzw. `...:warning`).
+- **Admin:** Statusleuchte im Header, System-Karte im Alarm Limits-Tab
+  (Schwellenwerte in Minuten, Checkbox für Warn-Alert).
+- **Dashboard:** Statusleuchte im Header, „Last measurement" statt „Last update".
+- **`deploy/otterpi/install.sh`:** `heartbeat.py` in der Dateiliste.
+
+### Teststand
+
+356 Tests, alle grün.
+
+### Nächster Schritt
+
+Deploy + Test (v1.11.11). Danach: Acknowledge-Verhalten (3.3), Resolve (3.8),
+Message-Templates (3.4), UI-Umbau Alarm Limits (3.2), Dashboard-Limits (3.6),
+Rate-of-Change im Admin (3.7).
 
 ---
 

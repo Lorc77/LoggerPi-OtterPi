@@ -97,7 +97,8 @@ in das gemeinsame Modell integriert.
 | `src/loggerpi_otterpi/dashboard_data.py` | Dashboard-Datenfunktionen (Queries, Berechnungen) |
 | `src/loggerpi_otterpi/notifier.py` | Notifier (E-Mail, ntfy, Webhook) |
 | `src/loggerpi_otterpi/alert_store.py` | SQLite-Speicher für Alerts |
-| `src/loggerpi_otterpi/alert_engine.py` | Alert-Engine (Regeln, Dedup, Quiet Hours) |
+| `src/loggerpi_otterpi/alert_engine.py` | Alert-Engine (Regeln, Dedup, Quiet Hours, LoggerPi-Heartbeat) |
+| `src/loggerpi_otterpi/heartbeat.py` | Gemeinsame Offline-Status-Logik für Admin und Dashboard |
 | `src/loggerpi_otterpi/sensor_schemas.py` | Zentrale Schema-Definition pro Sensor-Typ |
 
 ---
@@ -143,12 +144,12 @@ Da `model/` ein Unterverzeichnis ist, wird `PYTHONPATH` gesetzt:
 PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
 ```
 
-### Aktueller Betriebsstand (2026-10-28)
+### Aktueller Betriebsstand (2026-11-08)
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.11.0` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.11.0` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
+| LoggerPi | `v1.11.11` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.11.11` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
 
 Der E2E-Datenpfad (LoggerPi → nginx → OtterPi → SQLite) ist verifiziert.
 
@@ -165,13 +166,15 @@ Datenquellen:
 
 Admin (LAN-only): `https://observer.makki.route64.de/admin`
 - Rooms-Tab: Formular-UI (Raum-/Geräte-Verwaltung, Raumwechsel, Inline-Formulare)
-- Alarm Limits-Tab: Formular-UI (Measurements + States pro Gerät, Edit Limits)
+- Alarm Limits-Tab: Formular-UI (Measurements + States pro Gerät, Edit Limits,
+  System-Karte für LoggerPi-Offline-Erkennung)
 - Mail-Tab: Formular-UI (SMTP, Empfänger, Routing, Dedup, Quiet Hours)
 - Notifications-Tab: Formular-UI (ntfy, webhook)
 - Alerts-Tab: Alert History mit Acknowledge-Button
 - Test-Mail-Button im Mail-Tab
 - JSON-Editor als „Advanced"-Toggle (alle Tabs)
 - JSON-Validierung, `.bak`, atomares Schreiben
+- Statusleuchte im Header (LoggerPi-Offline-Status)
 
 ## Alert-Engine
 
@@ -180,14 +183,51 @@ nach jedem Batch (und alle 300 s) die konfigurierten Regeln:
 
 - **Measurements:** `warning_min/max`, `critical_min/max`, `rate_of_change`, `stale`, `invalid`
 - **States:** `freezer.alarms`, `battery_low`, `door_open`, `contact_open`
+- **System:** LoggerPi-Heartbeat (2-stufig, siehe unten)
 
 Alerts werden dedupliziert (`dedup_seconds`), unterliegen Quiet Hours
 (`quiet_hours`) und werden über die konfigurierten Notifier (E-Mail, ntfy,
 Webhook) versendet. Die Alert History ist im Admin unter „Alerts" sichtbar.
 
+### LoggerPi-Offline-Erkennung
+
+Die Alert-Engine prüft, wann der letzte Batch auf dem OtterPi **empfangen**
+wurde (`received_at`, OtterPi-seitig). Daraus ergeben sich zwei Stufen:
+
+| Stufe | Schwelle | Anzeige | Alert |
+|---|---|---|---|
+| OK | < 30 min | grüne Lampe, „Last batch X min ago" | – |
+| Warnung | 30 min – 1 h | gelbe Lampe, „Last batch X min ago" | optional (`warning`) |
+| Kritisch | ≥ 1 h | rote Lampe, „LoggerPi offline for X min" | immer (`critical`) |
+
+Die Schwellenwerte und die optionale Warnstufe sind in `alarm_limits.json`
+unter `system` konfigurierbar:
+
+```json
+{
+  "system": {
+    "loggerpi_offline_warning_seconds": 1800,
+    "loggerpi_offline_critical_seconds": 3600,
+    "loggerpi_offline_warning_alert_enabled": false
+  },
+  "sensors": { ... },
+  "states": { ... }
+}
+```
+
+Solange der LoggerPi als offline gilt (Warnschwelle erreicht), werden die
+Sensor- und State-Checks ausgesetzt. Grund: Ohne neue Daten gibt es keine
+neuen Grenzwertverletzungen, und die alten Werte sind nicht mehr
+vertrauenswürdig. Der einzige Alert in dieser Phase ist der Offline-Alert.
+
+Die Statusleuchte erscheint im Header von Admin und Dashboard. Im Dashboard
+wird zusätzlich die Messzeit („Last measurement") angezeigt – das ist die
+LoggerPi-Zeit (`created_at`), nicht die Empfangszeit.
+
 **Bewusst offen:** Door-Open-Dauer (HPP260 unterstützt es nicht), Defrost,
 Flap (HPP260 unterstützt es nicht). CSV-Export, Statuspage, Dry-Run, Config-Backup/Restore auf „irgendwann"
-verschoben.
+verschoben. Alert-Resolve (Active vs. Resolved) und Hysterese sind für einen
+späteren Schritt vorgesehen.
 
 ---
 
@@ -217,18 +257,18 @@ pytest
 git diff --check
 ```
 
-Aktueller Stand: **323 Tests**, alle bestehen.
+Aktueller Stand: **356 Tests**, alle bestehen.
 
 ---
 
-Aktuelle Version: **v1.11.0**
+Aktuelle Version: **v1.11.11**
 
 Die Version wird geführt über:
 
-- `pyproject.toml` → `version = "1.11.0"`
-- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.11.0"`
-- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.11.0"`
-- Git-Tag `v1.11.0`
+- `pyproject.toml` → `version = "1.11.11"`
+- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.11.11"`
+- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.11.11"`
+- Git-Tag `v1.11.11`
 
 ---
 

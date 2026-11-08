@@ -276,7 +276,7 @@ muss bestätigen, dass die Dateien bereits korrekt formatiert sind.
 pytest
 ```
 
-Aktueller Stand: **323 Tests**, alle bestehen.
+Aktueller Stand: **356 Tests**, alle bestehen.
 
 Alle Tests müssen erfolgreich sein.
 
@@ -543,7 +543,7 @@ entsprechende Service-Instanz praktisch verifiziert werden.
 Ein erfolgreicher lokaler Testlauf unter Windows gilt nicht als
 Nachweis eines erfolgreichen Raspberry-Pi-Deployments.
 
-### Praktische Verifikation (2026-10-27)
+### Praktische Verifikation (2026-11-08)
 
 Der E2E-Datenpfad (LoggerPi → OtterPi → SQLite) ist praktisch verifiziert:
 
@@ -558,7 +558,12 @@ Der E2E-Datenpfad (LoggerPi → OtterPi → SQLite) ist praktisch verifiziert:
 - Gerätedetailseite (/device/<sensor_id>) ist implementiert
 - Raumklima-Detailseite (/climate/<room_id>) ist implementiert
 - Batch-Archivierung (archive_batches.py) ist implementiert und getestet
-- Alle 323 Tests bestehen (Stand 2026-11-07)
+- Alle 356 Tests bestehen (Stand 2026-11-08)
 - Alert-Engine implementiert (Thread in `otterpi.observer.service`)
 - Admin: 5 Tabs (Rooms, Alarm Limits, Mail, Notifications, Alerts) mit Formular-UI
 - Rate-of-Change, Routing, `contact_open` in der Alert-Engine
+- LoggerPi-Offline-Erkennung (2-stufiger Heartbeat) implementiert und getestet
+- `received_at` in der Batch-Tabelle (OtterPi-seitiger Empfangszeitpunkt)
+- Suppression der Sensor-/State-Checks bei Offline
+- Statusleuchte im Header von Admin und Dashboard
+- System-Karte im Alarm Limits-Tab (Schwellenwerte in Minuten)

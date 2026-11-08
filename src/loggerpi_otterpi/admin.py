@@ -5,11 +5,16 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from dashboard_constants import VERSION
+from heartbeat import offline_status
 
 BERLIN = ZoneInfo("Europe/Berlin")
 
 
-def render_admin(config: dict, last_batch_at: str = "") -> str:
+def render_admin(
+    config: dict,
+    last_batch_at: str = "",
+    last_received_at: str = "",
+) -> str:
     from sensor_schemas import SENSOR_SCHEMAS
 
     if last_batch_at:
@@ -18,6 +23,11 @@ def render_admin(config: dict, last_batch_at: str = "") -> str:
         )
     else:
         last_update = "–"
+
+    system_config = config.get("alarm_limits", {}).get("system", {})
+    warning_seconds = system_config.get("loggerpi_offline_warning_seconds", 1800)
+    critical_seconds = system_config.get("loggerpi_offline_critical_seconds", 3600)
+    status_class, status_text = offline_status(last_received_at, warning_seconds, critical_seconds)
     rooms_json = json.dumps(config["rooms"], ensure_ascii=False, indent=2)
     alarm_json = json.dumps(config["alarm_limits"], ensure_ascii=False, indent=2)
     mail_json = json.dumps(config["mail"], ensure_ascii=False, indent=2)
@@ -376,13 +386,23 @@ textarea.json-editor {{
     color: #22c55e;
     font-size: .85rem;
 }}
+.lamp {{
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    box-shadow: 0 0 9px currentColor;
+}}
 .status {{ color: #d1d5db; font-size: .9rem; }}
 </style>
 </head>
 <body>
 <div class="container">
 <h1>🛠 ZOOLOGY-Observer Admin</h1>
-<div class="subtitle">Last update: {last_update}</div>
+<div class="subtitle">
+    <span class="lamp {status_class}"></span> {status_text}
+    · Last measurement: {last_update}
+</div>
 <div class="tabs">
     <button class="tab-btn active" onclick="showTab('rooms', this)">🏠 Rooms</button>
     <button class="tab-btn" onclick="showTab('alarm', this)">⚠️ Alarm Limits</button>
@@ -652,6 +672,41 @@ async function loadAlarmLimits() {{
         const sensors = alarmLimits.sensors || {{}};
         const states = alarmLimits.states || {{}};
         list.innerHTML = '';
+
+        // System-Karte (LoggerPi-Offline-Erkennung)
+        const system = alarmLimits.system || {{}};
+        const warningSeconds = system.loggerpi_offline_warning_seconds ?? 1800;
+        const criticalSeconds = system.loggerpi_offline_critical_seconds ?? 3600;
+        const warningAlertEnabled = system.loggerpi_offline_warning_alert_enabled ?? false;
+        const systemCard = document.createElement('div');
+        systemCard.className = 'room-card';
+        systemCard.innerHTML = `
+            <h3>⚙️ System</h3>
+            <p>LoggerPi-Offline-Erkennung</p>
+            <div class="config-grid">
+                <div class="config-item">
+                    <label>Warning threshold (minutes):</label>
+                    <input type="number" id="system-warning-minutes"
+                            value="${{Math.round(warningSeconds / 60)}}" min="1">
+                </div>
+                <div class="config-item">
+                    <label>Critical threshold (minutes):</label>
+                    <input type="number" id="system-critical-minutes"
+                            value="${{Math.round(criticalSeconds / 60)}}" min="1">
+                </div>
+                <div class="config-item config-item-checkbox">
+                    <label>Send warning alert at warning threshold:</label>
+                    <input type="checkbox" id="system-warning-alert"
+                            ${{warningAlertEnabled ? 'checked' : ''}}>
+                </div>
+            </div>
+            <div class="save-row">
+                <button class="btn btn-primary btn-small"
+                        onclick="saveSystemConfig()">💾 Save System</button>
+            </div>
+        `;
+        list.appendChild(systemCard);
+
         for (const [roomId, room] of Object.entries(rooms)) {{
             for (const device of room.devices) {{
                 const card = document.createElement('div');
@@ -682,7 +737,7 @@ async function loadAlarmLimits() {{
                         <tr>
                             <td>${{name}}</td>
                             <td>${{type}}</td>
-                            <td>${{rule.enabled !== false ? '✓' : '–'}}</td>
+                            <td>${{rule.enabled === true ? '✓' : '–'}}</td>
                         </tr>
                     `;
                 }}
@@ -738,6 +793,41 @@ async function loadAlarmLimits() {{
     }}
 }}
 
+async function saveSystemConfig() {{
+    const status = document.getElementById('alarm-status');
+    status.textContent = 'Saving system config...';
+    try {{
+        const resp = await fetch('/api/admin/config');
+        const result = await resp.json();
+        const alarmLimits = result.alarm_limits;
+        if (!alarmLimits.system) alarmLimits.system = {{}};
+        const warningMinutes = parseInt(
+            document.getElementById('system-warning-minutes').value
+        );
+        const criticalMinutes = parseInt(
+            document.getElementById('system-critical-minutes').value
+        );
+        const warningAlert = document.getElementById('system-warning-alert').checked;
+        alarmLimits.system.loggerpi_offline_warning_seconds = warningMinutes * 60;
+        alarmLimits.system.loggerpi_offline_critical_seconds = criticalMinutes * 60;
+        alarmLimits.system.loggerpi_offline_warning_alert_enabled = warningAlert;
+        const putResp = await fetch('/api/admin/alarm-limits', {{
+            method: 'PUT',
+            headers: {{'Content-Type': 'application/json'}},
+            body: JSON.stringify(alarmLimits)
+        }});
+        if (putResp.ok) {{
+            status.textContent = 'System config saved.';
+            loadAlarmLimits();
+        }} else {{
+            const err = await putResp.json();
+            status.textContent = 'Error: ' + (err.error?.message || putResp.status);
+        }}
+    }} catch (e) {{
+        status.textContent = 'Request failed: ' + e.message;
+    }}
+}}
+
 async function showEditLimitsForm(deviceKey, deviceType) {{
     const card = document.querySelector(`[data-device-key="${{deviceKey}}"]`);
     if (!card) return;
@@ -772,7 +862,7 @@ async function showEditLimitsForm(deviceKey, deviceType) {{
     for (const [name, type] of schema.states) {{
         const key = deviceKey + '.' + name;
         const rule = states[key] || {{}};
-        const checked = rule.enabled !== false ? 'checked' : '';
+        const checked = rule.enabled === true ? 'checked' : '';
         statesHtml += `
             <tr>
                 <td>${{name}}</td>

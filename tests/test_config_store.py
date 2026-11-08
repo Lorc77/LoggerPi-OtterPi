@@ -198,3 +198,56 @@ class TestNotifications:
         data = {"channels": [{"type": "ntfy", "enabled": True, "url": "https://ntfy.sh"}]}
         with pytest.raises(ConfigValidationError):
             save_notifications(data)
+
+
+class TestAlarmLimitsSystem:
+    def test_roundtrip_with_system(self):
+        data = {
+            "system": {
+                "loggerpi_offline_warning_seconds": 1800,
+                "loggerpi_offline_critical_seconds": 3600,
+                "loggerpi_offline_warning_alert_enabled": False,
+            },
+            "sensors": {},
+        }
+        save_alarm_limits(data)
+        assert load_alarm_limits() == data
+
+    def test_system_optional(self):
+        data = {"sensors": {}}
+        save_alarm_limits(data)
+        assert load_alarm_limits() == data
+
+    def test_system_unknown_field(self):
+        data = {"system": {"foo": 1}, "sensors": {}}
+        with pytest.raises(ConfigValidationError):
+            save_alarm_limits(data)
+
+    def test_system_invalid_warning_seconds(self):
+        data = {"system": {"loggerpi_offline_warning_seconds": 0}, "sensors": {}}
+        with pytest.raises(ConfigValidationError):
+            save_alarm_limits(data)
+
+    def test_system_invalid_critical_seconds(self):
+        data = {"system": {"loggerpi_offline_critical_seconds": -1}, "sensors": {}}
+        with pytest.raises(ConfigValidationError):
+            save_alarm_limits(data)
+
+    def test_system_warning_must_be_less_than_critical(self):
+        data = {
+            "system": {
+                "loggerpi_offline_warning_seconds": 3600,
+                "loggerpi_offline_critical_seconds": 1800,
+            },
+            "sensors": {},
+        }
+        with pytest.raises(ConfigValidationError):
+            save_alarm_limits(data)
+
+    def test_system_warning_alert_enabled_must_be_bool(self):
+        data = {
+            "system": {"loggerpi_offline_warning_alert_enabled": "yes"},
+            "sensors": {},
+        }
+        with pytest.raises(ConfigValidationError):
+            save_alarm_limits(data)

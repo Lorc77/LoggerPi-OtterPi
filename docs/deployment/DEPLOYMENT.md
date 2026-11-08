@@ -162,6 +162,11 @@ Die Installation kopiert die Anwendungsdateien **flach** nach
 ├── admin.py (nur OtterPi)
 ├── config_store.py (nur OtterPi)
 ├── notifier.py (nur OtterPi)
+├── alert_store.py (nur OtterPi)
+├── alert_engine.py (nur OtterPi)
+├── heartbeat.py (nur OtterPi)
+├── sensor_schemas.py (nur OtterPi)
+├── archive_batches.py (nur OtterPi)
 ├── delivery.py
 ├── freezer.py
 ├── freezer_config.py
@@ -332,14 +337,28 @@ nach erfolgreichem Export gelöscht.
 
 Die Alert-Engine läuft als Thread im `otterpi.observer.service`. Sie prüft
 nach jedem Batch (und alle 300 s) die Regeln aus `alarm_limits.json`
-(`sensors` + `states`). Alerts werden in `alerts.sqlite3` gespeichert und
-über die konfigurierten Notifier versendet.
+(`system` + `sensors` + `states`). Alerts werden in `alerts.sqlite3`
+gespeichert und über die konfigurierten Notifier versendet.
 
 Konfiguration:
-- `alarm_limits.json` (sensors + states)
+- `alarm_limits.json` (system + sensors + states)
 - `mail.json` (SMTP, Empfänger, Routing, Dedup, Quiet Hours)
 - `notifications.json` (ntfy, webhook)
 - `SMTP_PASSWORD` in `otterpi.env`
+
+Die `system`-Sektion steuert die LoggerPi-Offline-Erkennung:
+
+```json
+{
+  "system": {
+    "loggerpi_offline_warning_seconds": 1800,
+    "loggerpi_offline_critical_seconds": 3600,
+    "loggerpi_offline_warning_alert_enabled": false
+  }
+}
+```
+
+Bei Offline (Warnschwelle erreicht) werden Sensor-/State-Checks ausgesetzt.
 
 ### Phase C – Komfort (v1.11.0)
 
@@ -349,6 +368,25 @@ Konfiguration:
 - **`contact_open`:** In der Alert-Engine (für zukünftige `weatherhub_id10`-Sensoren).
 - **Door-Open-Dauer:** geparkt (HPP260 unterstützt `door_open` nicht).
 - **Service-Restart:** nicht nötig (JSON-Configs automatisch gelesen).
+
+### Phase C – Offline-Erkennung (v1.11.11)
+
+- **`received_at` in der Batch-Tabelle:** OtterPi-seitiger Empfangszeitpunkt
+  wird persistiert (`BatchStore.latest_received_at()`). Fallback auf
+  `created_at` für bestehende Zeilen.
+- **`heartbeat.py`:** Gemeinsame Offline-Status-Logik für Admin und Dashboard.
+- **`alarm_limits.json` → `system`-Sektion:** Konfigurierbare Schwellenwerte
+  (`loggerpi_offline_warning_seconds`, `loggerpi_offline_critical_seconds`)
+  und optionale Warnstufe (`loggerpi_offline_warning_alert_enabled`).
+- **Alert-Engine:** Heartbeat-Prüfung vor den Sensor-/State-Checks. Bei
+  Offline werden Sensor-/State-Checks ausgesetzt (Suppression).
+- **Admin:** Statusleuchte im Header, System-Karte im Alarm Limits-Tab.
+- **Dashboard:** Statusleuchte im Header, „Last measurement" statt „Last update".
+- **`deploy/otterpi/install.sh`:** `heartbeat.py` in der Dateiliste.
+
+**Konfiguration:** Die Offline-Schwellenwerte liegen in `alarm_limits.json`
+unter `system`. Die Admin-UI bietet dafür eine System-Karte im Alarm
+Limits-Tab (Schwellenwerte in Minuten, Checkbox für Warn-Alert).
 
 ---
 
@@ -663,17 +701,17 @@ Dabei müssen insbesondere geprüft werden:
 
 ## 13. Aktueller Stand
 
-Stand 2026-10-28:
+Stand 2026-11-08:
 
 ```text
 Repository:
     main
 
 Version:
-    v1.11.0
+    v1.11.11
 
 Letzter bekannter Release-Commit:
-    61cd803
+    (wird beim Deploy gesetzt)
 
 Application Deployment:
     implementiert

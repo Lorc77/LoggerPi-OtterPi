@@ -27,6 +27,7 @@ OTTERPI_FILES=(
     sensor_schemas.py
     alert_store.py
     alert_engine.py
+    heartbeat.py
     otter2.png
 )
 

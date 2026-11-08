@@ -297,3 +297,70 @@ def test_post_test_mail_no_config(tmp_path):
         server.shutdown()
         thread.join()
         server.server_close()
+
+
+def test_admin_page_shows_status_lamp(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    server = _server(store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        with urlopen(f"http://127.0.0.1:{server.server_port}/admin") as resp:
+            html = resp.read().decode("utf-8")
+        assert 'class="lamp status-off"' in html
+        assert "No batch received yet" in html
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_admin_page_contains_system_config_js(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    server = _server(store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        with urlopen(f"http://127.0.0.1:{server.server_port}/admin") as resp:
+            html = resp.read().decode("utf-8")
+        assert "saveSystemConfig" in html
+        assert "system-warning-minutes" in html
+        assert "system-critical-minutes" in html
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_render_admin_shows_offline_status():
+    from datetime import datetime, timedelta, timezone
+
+    from admin import render_admin
+
+    old = (datetime.now(timezone.utc) - timedelta(minutes=61)).isoformat()
+    config = {
+        "rooms": {"rooms": {}},
+        "alarm_limits": {"sensors": {}, "states": {}, "system": {}},
+        "mail": {},
+        "notifications": {"channels": []},
+    }
+    html = render_admin(config, last_batch_at="", last_received_at=old)
+    assert "LoggerPi offline" in html
+    assert "status-critical" in html
+
+
+def test_render_admin_shows_warning_status():
+    from datetime import datetime, timedelta, timezone
+
+    from admin import render_admin
+
+    old = (datetime.now(timezone.utc) - timedelta(minutes=31)).isoformat()
+    config = {
+        "rooms": {"rooms": {}},
+        "alarm_limits": {"sensors": {}, "states": {}, "system": {}},
+        "mail": {},
+        "notifications": {"channels": []},
+    }
+    html = render_admin(config, last_batch_at="", last_received_at=old)
+    assert "Last batch" in html
+    assert "status-warn" in html

@@ -130,6 +130,45 @@ def _validate_rooms(data: Any) -> None:
 def _validate_alarm_limits(data: Any) -> None:
     if not isinstance(data, dict):
         raise ConfigValidationError("alarm_limits.json must be an object.")
+
+    system = data.get("system")
+    if system is not None:
+        if not isinstance(system, dict):
+            raise ConfigValidationError("alarm_limits.json 'system' must be an object.")
+        allowed = {
+            "loggerpi_offline_warning_seconds",
+            "loggerpi_offline_critical_seconds",
+            "loggerpi_offline_warning_alert_enabled",
+        }
+        unknown = set(system) - allowed
+        if unknown:
+            raise ConfigValidationError(
+                f"alarm_limits.json 'system' has unknown fields: {sorted(unknown)}"
+            )
+        for name in (
+            "loggerpi_offline_warning_seconds",
+            "loggerpi_offline_critical_seconds",
+        ):
+            if name in system:
+                value = system[name]
+                if not isinstance(value, int) or isinstance(value, bool) or value <= 0:
+                    raise ConfigValidationError(
+                        f"alarm_limits.json 'system.{name}' must be a positive integer."
+                    )
+        if "loggerpi_offline_warning_alert_enabled" in system:
+            if not isinstance(system["loggerpi_offline_warning_alert_enabled"], bool):
+                raise ConfigValidationError(
+                    "alarm_limits.json 'system.loggerpi_offline_warning_alert_enabled' "
+                    "must be a boolean."
+                )
+        warning = system.get("loggerpi_offline_warning_seconds")
+        critical = system.get("loggerpi_offline_critical_seconds")
+        if warning is not None and critical is not None and warning >= critical:
+            raise ConfigValidationError(
+                "alarm_limits.json 'system.loggerpi_offline_warning_seconds' "
+                "must be < 'system.loggerpi_offline_critical_seconds'."
+            )
+
     sensors = data.get("sensors")
     if not isinstance(sensors, dict):
         raise ConfigValidationError("alarm_limits.json must contain a 'sensors' object.")

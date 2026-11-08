@@ -1523,17 +1523,15 @@ Kanäle sind separat über `notifications.json` ein-/ausschaltbar. Dedup/Quiet H
 
 ---
 
-## DEC-049 — States/Setpoints/Device im Core Batch (B0)
+## DEC-049 — (nicht vergeben)
 
-**Status:** Accepted
+**Status:** Obsolet
 **Datum:** 2026-11-05
 
-`states`, `operation`, `serial`, `setpoints`, `device` sind optionale Top-Level-Bereiche. `Measurement` trägt optional `validity_reason` (`overflow`/`sensor_error`).
-
-- AtmoWEB: Lights day/uv bool, led percent; Flap percent.
-- Freezer: `serial.state` (disconnected/unknown/connected/degraded).
-- MEMMERT: `operation_mode` Rohwert.
-- WeatherHub: `battery_low`, `gateway_ip`.
+Diese Nummer wurde ursprünglich für eine Wiederholung von DEC-047 verwendet.
+Der Inhalt war identisch mit DEC-047 („States/Setpoints/Device im Core Batch
+(B0)"). Die Nummer bleibt zur Nachvollziehbarkeit der Historie erhalten, wird
+aber nicht mehr verwendet.
 
 ---
 
@@ -1929,6 +1927,159 @@ Nur `otterpi.env` und Code-Änderungen brauchen einen Restart.
 
 - Kein Service-Restart-Button in der Admin-UI.
 - Dokumentation: JSON-Configs automatisch, `otterpi.env` + Code manuell.
+
+---
+
+## DEC-063 — `received_at` in der Batch-Tabelle
+
+**Status:** Accepted
+**Datum:** 2026-11-08
+
+### Kontext
+
+Das Datenmodell definiert `received_at` als OtterPi-seitigen Empfangszeitpunkt,
+aber die Tabelle `batches` speicherte ihn bisher nicht. Dashboard, Alert-Engine
+und Archivierung nutzten `created_at` (LoggerPi-Zeit). Für die Offline-Erkennung
+ist `received_at` robuster, weil es unabhängig von der LoggerPi-Uhr ist und
+verspätet nachgelieferte Batches korrekt behandelt.
+
+### Entscheidung
+
+Die Tabelle `batches` erhält eine Spalte `received_at` (TEXT, nullable).
+`BatchStore.store()` setzt sie auf `datetime.now(timezone.utc).isoformat()`.
+`BatchStore.latest_received_at()` liefert den Wert des neuesten Batches; bei
+bestehenden Zeilen ohne `received_at` fällt sie auf `created_at` aus dem
+Payload zurück.
+
+### Begründung
+
+`created_at` ist LoggerPi-Zeit und kann bei falscher LoggerPi-Uhr oder
+verspäteter Queue-Zustellung zu falschen Offline-Alerts führen. `received_at`
+ist OtterPi-Zeit und immer „jetzt" beim Empfang.
+
+### Konsequenz
+
+Schema-Migration via `ALTER TABLE` für bestehende DBs. Dashboard und
+Archivierung nutzen weiterhin `created_at` (Messzeit). Nur die
+Offline-Erkennung nutzt `received_at`.
+
+---
+
+## DEC-064 — LoggerPi-Offline-Erkennung (2-stufiger Heartbeat)
+
+**Status:** Accepted
+**Datum:** 2026-11-08
+
+### Kontext
+
+Bisher gab es keine Erkennung, wenn der LoggerPi keine Batches mehr sendet.
+Die Alert-Engine prüfte den letzten Batch, sah `validity = "valid"` und löste
+keine Alerts aus. Der Offline-Zustand blieb unerkannt.
+
+### Entscheidung
+
+Die Alert-Engine prüft vor den Sensor-/State-Checks den LoggerPi-Heartbeat.
+Zwei Stufen:
+
+- **Warnung:** `loggerpi_offline_warning_seconds` (Default 1800 = 30 min).
+  Statusleuchte gelb. Optionaler `warning`-Alert, steuerbar über
+  `loggerpi_offline_warning_alert_enabled` (Default false).
+- **Kritisch:** `loggerpi_offline_critical_seconds` (Default 3600 = 1 h).
+  Statusleuchte rot. Immer `critical`-Alert.
+
+Konfiguration in `alarm_limits.json` unter `system`.
+
+### Begründung
+
+Ein einzelner verpasster Batch (15 min + Puffer) soll keine Mail auslösen.
+Aber nach 30 min soll man es im UI sehen. Nach 1 h (4 verpasste Batches) ist
+es ernst genug für einen Alert. Das verhindert Alert-Spam bei kurzen Hängern
+und gibt trotzdem rechtzeitig Bescheid.
+
+### Konsequenz
+
+Neue Datei `heartbeat.py` mit `offline_status()`. `alarm_limits.json` um
+`system`-Sektion erweitert. Admin und Dashboard zeigen Statusleuchte im
+Header. Admin hat System-Karte im Alarm Limits-Tab.
+
+---
+
+## DEC-065 — Suppression der Sensor-/State-Checks bei Offline
+
+**Status:** Accepted
+**Datum:** 2026-11-08
+
+### Kontext
+
+Wenn der LoggerPi offline ist, sind die Daten im letzten Batch veraltet.
+Würden die Sensor-/State-Checks weiterlaufen, könnten veraltete Zustände
+(z. B. `battery_low = true` aus dem letzten Batch) bei jedem 300s-Check
+erneut geprüft werden. Dedup verhindert nur die Wiederholung innerhalb von
+`dedup_seconds` (1 h), nicht die grundsätzliche Wiederholung.
+
+### Entscheidung
+
+Sobald die Warnschwelle erreicht ist (`is_offline = True`), werden
+`_check_sensors` und `_check_states` nicht aufgerufen. Der einzige Alert in
+dieser Phase ist der Offline-Alert. Sobald wieder ein Batch ankommt, laufen
+die Checks sofort wieder.
+
+### Begründung
+
+Ohne neue Daten gibt es keine neuen Grenzwertverletzungen. Die alten Werte
+sind nicht mehr vertrauenswürdig. Die wichtigste Information ist „LoggerPi
+offline", nicht „30 Sensoren sind kaputt".
+
+### Konsequenz
+
+`_check()` ruft zuerst `_check_loggerpi_heartbeat()` auf. Bei
+`is_offline = True` wird nach dem Offline-Alert `return` gemacht. Die
+Suppression greift auch, wenn die Warnstufe deaktiviert ist (kein Warn-Alert,
+aber trotzdem keine Sensor-Checks).
+
+---
+
+## DEC-066 — `system`-Sektion in `alarm_limits.json`
+
+**Status:** Accepted
+**Datum:** 2026-11-08
+
+### Kontext
+
+Die Offline-Schwellenwerte brauchen einen Konfigurationsort. `mail.json` ist
+Transport (SMTP, Routing, Dedup, Quiet Hours). `alarm_limits.json` ist
+fachlich eine Alarm-Regel.
+
+### Entscheidung
+
+`alarm_limits.json` erhält eine neue Top-Level-Sektion `system`:
+
+```json
+{
+  "system": {
+    "loggerpi_offline_warning_seconds": 1800,
+    "loggerpi_offline_critical_seconds": 3600,
+    "loggerpi_offline_warning_alert_enabled": false
+  },
+  "sensors": { ... },
+  "states": { ... }
+}
+```
+
+`config_store._validate_alarm_limits` validiert die Sektion: positive Integers
+für die Schwellenwerte, `warning < critical`, Boolean für
+`loggerpi_offline_warning_alert_enabled`, keine unbekannten Felder.
+
+### Begründung
+
+Eine Quelle der Wahrheit für Alarm-Regeln. `system` ist semantisch klar von
+`sensors` und `states` getrennt. Rückwärtskompatibel: bestehende
+`alarm_limits.json` ohne `system` funktioniert weiter (Defaults greifen).
+
+### Konsequenz
+
+`config_store.py` erweitert. Admin-UI hat System-Karte im Alarm Limits-Tab.
+`heartbeat.py` und `alert_engine.py` lesen die Sektion.
 
 ---
 

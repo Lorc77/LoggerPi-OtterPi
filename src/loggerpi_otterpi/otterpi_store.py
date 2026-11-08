@@ -29,10 +29,14 @@ class BatchStore:
                     logger_id TEXT NOT NULL,
                     sequence INTEGER NOT NULL,
                     payload TEXT NOT NULL,
+                    received_at TEXT,
                     UNIQUE(logger_id, sequence)
                 )
                 """
             )
+            columns = {row[1] for row in connection.execute("PRAGMA table_info(batches)")}
+            if "received_at" not in columns:
+                connection.execute("ALTER TABLE batches ADD COLUMN received_at TEXT")
 
     def store(self, batch: Batch) -> str:
         payload = json.dumps(
@@ -40,6 +44,7 @@ class BatchStore:
             ensure_ascii=False,
             sort_keys=True,
         )
+        received_at = datetime.now(timezone.utc).isoformat()
 
         with self._connect() as connection:
             existing = connection.execute(
@@ -69,15 +74,17 @@ class BatchStore:
                     batch_id,
                     logger_id,
                     sequence,
-                    payload
+                    payload,
+                    received_at
                 )
-                VALUES (?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?)
                 """,
                 (
                     batch.batch_id,
                     batch.logger_id,
                     batch.sequence,
                     payload,
+                    received_at,
                 ),
             )
 
@@ -125,6 +132,23 @@ class BatchStore:
             **data,
             measurements=measurements,
         )
+
+    def latest_received_at(self) -> Optional[str]:
+        with self._connect() as connection:
+            row = connection.execute(
+                "SELECT received_at, payload FROM batches ORDER BY rowid DESC LIMIT 1"
+            ).fetchone()
+
+        if row is None:
+            return None
+
+        received_at, payload = row
+        if received_at:
+            return received_at
+
+        # Fallback für bestehende Zeilen ohne received_at
+        data = json.loads(payload)
+        return data.get("created_at")
 
     def recent(self, hours: int = 24) -> list:
         cutoff = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()

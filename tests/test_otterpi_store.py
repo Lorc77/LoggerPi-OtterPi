@@ -1,3 +1,7 @@
+import json
+import sqlite3
+from datetime import datetime
+
 from batch_factory import SequenceStore, create_batch
 from otterpi_store import BatchStore
 
@@ -117,3 +121,40 @@ def test_batch_store_recent_returns_batches_in_window(tmp_path):
 def test_batch_store_recent_empty(tmp_path):
     store = BatchStore(tmp_path / "otter.db")
     assert store.recent(hours=24) == []
+
+
+def test_batch_store_sets_received_at(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    sequence_store = SequenceStore(tmp_path / "sequence")
+
+    batch = create_batch("logger-001", sequence_store)
+    store.store(batch)
+
+    received_at = store.latest_received_at()
+    assert received_at is not None
+    datetime.fromisoformat(received_at)
+
+
+def test_batch_store_latest_received_at_empty(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    assert store.latest_received_at() is None
+
+
+def test_batch_store_latest_received_at_fallback_to_created_at(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    sequence_store = SequenceStore(tmp_path / "sequence")
+    batch = create_batch("logger-001", sequence_store)
+
+    # Simuliere eine alte Zeile ohne received_at
+    with sqlite3.connect(store.path) as conn:
+        conn.execute(
+            "INSERT INTO batches (batch_id, logger_id, sequence, payload) VALUES (?, ?, ?, ?)",
+            (
+                batch.batch_id,
+                batch.logger_id,
+                batch.sequence,
+                json.dumps(batch.to_dict()),
+            ),
+        )
+
+    assert store.latest_received_at() == batch.created_at

@@ -57,10 +57,6 @@ class AlertEngine(threading.Thread):
         LOGGER.info("AlertEngine stopped")
 
     def _check(self) -> None:
-        batch = self._store.latest()
-        if batch is None:
-            return
-
         try:
             alarm_limits = load_alarm_limits()
         except ConfigValidationError:
@@ -78,12 +74,79 @@ class AlertEngine(threading.Thread):
 
         notifiers = create_notifiers(notifications, mail, self._smtp_password)
 
+        # Heartbeat zuerst prüfen (auch wenn noch kein Batch empfangen wurde)
+        system_config = alarm_limits.get("system", {})
+        offline_alert, is_offline = self._check_loggerpi_heartbeat(system_config)
+        if is_offline:
+            if offline_alert is not None:
+                self._dispatch(offline_alert, mail, notifiers)
+            # Sensor-/State-Checks aussetzen, solange der LoggerPi offline ist
+            return
+
+        batch = self._store.latest()
+        if batch is None:
+            return
+
         batch_dict = batch.to_dict()
         self._pending_alerts = self._check_sensors(batch_dict, alarm_limits.get("sensors", {}))
         self._pending_alerts.extend(self._check_states(batch_dict, alarm_limits.get("states", {})))
 
         for alert in self._pending_alerts:
             self._dispatch(alert, mail, notifiers)
+
+    def _check_loggerpi_heartbeat(self, system_config: dict) -> tuple[Optional[Alert], bool]:
+        """Prüft den LoggerPi-Heartbeat.
+
+        Liefert ``(alert, is_offline)``:
+
+        - ``is_offline`` ist True, sobald die Warnschwelle erreicht ist.
+          Dann werden Sensor-/State-Checks ausgesetzt.
+        - ``alert`` ist nur dann gesetzt, wenn tatsächlich ein Alert
+          versendet werden soll (Warnstufe optional, Kritischstufe immer).
+        """
+        warning_seconds = system_config.get("loggerpi_offline_warning_seconds", 1800)
+        critical_seconds = system_config.get("loggerpi_offline_critical_seconds", 3600)
+        warning_alert_enabled = system_config.get("loggerpi_offline_warning_alert_enabled", False)
+
+        last_received_at = self._store.latest_received_at()
+        if last_received_at is None:
+            return (None, False)
+
+        try:
+            last_dt = datetime.fromisoformat(last_received_at)
+        except ValueError:
+            return (None, False)
+
+        age_seconds = (datetime.now(timezone.utc) - last_dt).total_seconds()
+        minutes = int(age_seconds // 60)
+
+        if age_seconds >= critical_seconds:
+            return (
+                Alert(
+                    sensor="system.loggerpi",
+                    severity="critical",
+                    message=f"LoggerPi has not sent a batch for {minutes} minutes.",
+                    rule="loggerpi_offline",
+                    dedup_key="system:loggerpi_offline:critical",
+                ),
+                True,
+            )
+
+        if age_seconds >= warning_seconds:
+            if warning_alert_enabled:
+                return (
+                    Alert(
+                        sensor="system.loggerpi",
+                        severity="warning",
+                        message=f"LoggerPi has not sent a batch for {minutes} minutes.",
+                        rule="loggerpi_offline",
+                        dedup_key="system:loggerpi_offline:warning",
+                    ),
+                    True,
+                )
+            return (None, True)
+
+        return (None, False)
 
     def _check_sensors(self, batch: dict, sensors: dict) -> list:
         alerts = []

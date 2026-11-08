@@ -454,7 +454,7 @@ class TestRenderOverview:
 
         html = _render_overview(store)
 
-        assert "Rooms & Devices" in html
+        assert "Last measurement" in html
 
 
 # ---------------------------------------------------------------------------
@@ -559,3 +559,19 @@ def test_render_chips():
     assert 'class="chip chip-ok"' in html
     assert "OK" in html
     assert "Door open" in html
+
+
+class TestRenderOverviewStatus:
+    def test_overview_shows_status_lamp(self, sample_batches, tmp_path):
+        store = _store_batches(tmp_path, sample_batches)
+        html = _render_overview(store)
+        assert 'class="lamp status-ok"' in html
+        assert "Last batch" in html
+
+    def test_overview_shows_offline_status(self, tmp_path):
+        old = (datetime.now(timezone.utc) - timedelta(minutes=61)).isoformat()
+        batches = [_make_batch(created_at=old)]
+        store = _store_batches(tmp_path, batches)
+        html = _render_overview(store)
+        assert "LoggerPi offline" in html
+        assert "status-critical" in html

@@ -127,16 +127,17 @@ def _recent_batches(
 
     with sqlite3.connect(store.path) as conn:
         rows = conn.execute(
-            "SELECT payload FROM batches ORDER BY rowid DESC LIMIT ?",
+            "SELECT payload, received_at FROM batches ORDER BY rowid DESC LIMIT ?",
             (limit,),
         ).fetchall()
 
     batches = []
-    for (payload,) in rows:
+    for payload, received_at in rows:
         data = json.loads(payload)
         created_at = data.get("created_at", "")
 
         if created_at >= cutoff:
+            data["_received_at"] = received_at or created_at
             batches.append(data)
 
     batches.reverse()
