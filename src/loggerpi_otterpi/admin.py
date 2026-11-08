@@ -388,9 +388,9 @@ textarea {{
     </details>
     <div id="rooms-list" class="rooms-list"></div>
     <div class="save-row">
-        <button class="btn btn-primary btn-small"
+        <button class="btn btn-primary"
                 onclick="showAddRoomForm()">➕ Add Room</button>
-        <button class="btn btn-secondary btn-small"
+        <button class="btn btn-secondary"
                 onclick="toggleRoomsJson()">⚙️ Advanced (JSON)</button>
         <span id="rooms-status" class="status"></span>
     </div>
@@ -420,7 +420,7 @@ textarea {{
     </details>
     <div id="alarm-list" class="rooms-list"></div>
     <div class="save-row">
-        <button class="btn btn-secondary btn-small"
+        <button class="btn btn-secondary"
                 onclick="toggleAlarmJson()">⚙️ Advanced (JSON)</button>
         <span id="alarm-status" class="status"></span>
     </div>
@@ -439,11 +439,11 @@ textarea {{
 <div id="tab-mail" class="tab-panel">
     <div id="mail-form"></div>
     <div class="save-row">
-        <button class="btn btn-primary btn-small"
+        <button class="btn btn-primary"
                 onclick="saveMailForm()">💾 Save</button>
-        <button class="btn btn-secondary btn-small"
+        <button class="btn btn-secondary"
                 onclick="sendTestMail(this)">📧 Send Test Mail</button>
-        <button class="btn btn-secondary btn-small"
+        <button class="btn btn-secondary"
                 onclick="toggleMailJson()">⚙️ Advanced (JSON)</button>
         <span id="mail-status" class="status"></span>
     </div>
@@ -462,9 +462,9 @@ textarea {{
 <div id="tab-notifications" class="tab-panel">
     <div id="notifications-list" class="rooms-list"></div>
     <div class="save-row">
-        <button class="btn btn-primary btn-small"
+        <button class="btn btn-primary"
                 onclick="showAddChannelForm()">➕ Add Channel</button>
-        <button class="btn btn-secondary btn-small"
+        <button class="btn btn-secondary"
                 onclick="toggleNotificationsJson()">⚙️ Advanced (JSON)</button>
         <span id="notifications-status" class="status"></span>
     </div>
@@ -482,7 +482,7 @@ textarea {{
 
 <div id="tab-alerts" class="tab-panel">
     <div class="save-row">
-        <button class="btn btn-secondary btn-small"
+        <button class="btn btn-primary btn-small"
                 onclick="loadAlerts()">🔄 Refresh</button>
         <label>
             <input type="checkbox" id="alerts-only-unack" onchange="loadAlerts()">
@@ -610,7 +610,7 @@ async function loadRooms() {{
             list.appendChild(card);
             const toTop = document.createElement('div');
             toTop.className = 'to-top';
-            toTop.innerHTML = `<button class="btn btn-secondary btn-small"
+            toTop.innerHTML = `<button class="btn btn-primary btn-small"
                 onclick="window.scrollTo({{top: 0, behavior: 'smooth'}})">↑ Top</button>`;
             list.appendChild(toTop);
         }}
@@ -703,16 +703,16 @@ async function loadAlarmLimits() {{
                         <tbody>${{statesHtml}}</tbody>
                     </table>
                     <div class="save-row">
-                        <button class="save-btn"
+                        <button class="btn btn-primary btn-small"
                                 onclick="showEditLimitsForm('${{device.key}}', '${{device.type}}')">
-                            Edit Limits
+                            ✏️ Edit Limits
                         </button>
                     </div>
                 `;
                 list.appendChild(card);
                 const toTop = document.createElement('div');
                 toTop.className = 'to-top';
-                toTop.innerHTML = `<button class="btn btn-secondary btn-small"
+                toTop.innerHTML = `<button class="btn btn-primary btn-small"
                     onclick="window.scrollTo({{top: 0, behavior: 'smooth'}})">↑ Top</button>`;
                 list.appendChild(toTop);
             }}
@@ -1017,9 +1017,9 @@ async function loadNotifications() {{
             card.className = 'room-card';
             card.innerHTML = `
                 <h3>${{channel.type}}</h3>
-                <p>Enabled: ${{channel.enabled
-                    ? '<span class="enabled-yes">✓</span>'
-                    : '–'}}</p>
+                <p>${{channel.enabled
+                    ? '<span class="enabled-yes">Enabled: ✓</span>'
+                    : 'Enabled: –'}}</p>
                 <p>URL: ${{channel.url || '–'}}</p>
                 ${{channel.type === 'ntfy' ? `<p>Topic: ${{channel.topic || '–'}}</p>` : ''}}
                 ${{
@@ -1028,10 +1028,10 @@ async function loadNotifications() {{
                         : ''
                 }}
                 <div class="save-row">
-                    <button class="save-btn"
-                            onclick="editChannel(${{i}})">Edit</button>
-                    <button class="save-btn"
-                            onclick="deleteChannel(${{i}})">Delete</button>
+                    <button class="btn btn-secondary btn-small"
+                            onclick="editChannel(${{i}})">✏️ Edit</button>
+                    <button class="btn btn-danger btn-small"
+                            onclick="deleteChannel(${{i}})">🗑 Delete</button>
                 </div>
             `;
             list.appendChild(card);
