@@ -3,7 +3,7 @@
 from zoneinfo import ZoneInfo
 
 BERLIN = ZoneInfo("Europe/Berlin")
-VERSION = "v1.11.4"
+VERSION = "v1.11.5"
 
 TIME_RANGES = {
     "24h": 24,

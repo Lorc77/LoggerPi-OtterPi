@@ -611,7 +611,7 @@ async function loadRooms() {{
             const toTop = document.createElement('div');
             toTop.className = 'to-top';
             toTop.innerHTML = '<button class="btn btn-secondary btn-small" '
-                + 'onclick="window.scrollTo({{top: 0, behavior: \'smooth\'}})">'
+                + "onclick=\"window.scrollTo({{top: 0, behavior: 'smooth'}})\">"
                 + '↑ Top</button>';
             list.appendChild(toTop);
         }}
@@ -714,7 +714,7 @@ async function loadAlarmLimits() {{
                 const toTop = document.createElement('div');
                 toTop.className = 'to-top';
                 toTop.innerHTML = '<button class="btn btn-secondary btn-small" '
-                    + 'onclick="window.scrollTo({{top: 0, behavior: \'smooth\'}})">'
+                    + "onclick=\"window.scrollTo({{top: 0, behavior: 'smooth'}})\">"
                     + '↑ Top</button>';
                 list.appendChild(toTop);
             }}
