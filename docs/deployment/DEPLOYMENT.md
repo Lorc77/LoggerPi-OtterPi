@@ -401,6 +401,19 @@ Limits-Tab (Schwellenwerte in Minuten, Checkbox für Warn-Alert).
   „Only active".
 - **`otterpi.py`:** Query-Parameter `only_active` für `/api/admin/alerts`.
 
+### Phase C – Message-Templates (v1.11.13)
+
+- **`messages.json`:** Neue Config-Datei mit globalen Regel-Texten. Defaults
+  werden verwendet, wenn die Datei fehlt.
+- **`MEASUREMENT_DISPLAY_NAMES`:** Festes Mapping von Measurement-Key zu
+  Anzeigename.
+- **Alert-Engine:** Message und Subject mit Raum, Gerät, Measurement-Name
+  und Regel-Text.
+- **`Alert`-Dataclass:** Neues Feld `subject`. `EmailNotifier` und
+  `NtfyNotifier` nutzen es.
+- **Admin:** Neuer Messages-Tab mit Formular-UI.
+- **`otterpi.py`:** `GET /api/admin/messages`, `PUT /api/admin/messages`.
+
 ---
 
 ## 5. OtterPi HTTP Listener
@@ -721,7 +734,7 @@ Repository:
     main
 
 Version:
-    v1.11.12
+    v1.11.13
 
 Letzter bekannter Release-Commit:
     (wird beim Deploy gesetzt)

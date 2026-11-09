@@ -10,10 +10,13 @@ from config_store import (
     ConfigValidationError,
     load_alarm_limits,
     load_mail,
+    load_messages,
     load_notifications,
 )
+from dashboard_config import get_rooms
 from notifier import Alert, create_notifiers
 from otterpi_store import BatchStore
+from sensor_schemas import MEASUREMENT_DISPLAY_NAMES
 
 LOGGER = logging.getLogger(__name__)
 
@@ -71,30 +74,98 @@ class AlertEngine(threading.Thread):
             notifications = load_notifications()
         except ConfigValidationError:
             notifications = {"channels": []}
+        try:
+            messages = load_messages()
+        except ConfigValidationError:
+            messages = {}
 
         notifiers = create_notifiers(notifications, mail, self._smtp_password)
 
+        # Sensor-Map: sensor_key -> (room_name, device_name)
+        sensor_map = {}
+        for room in get_rooms().values():
+            for device in room["devices"]:
+                sensor_map[device["key"]] = (room["name"], device["name"])
+
         # Heartbeat zuerst prüfen (auch wenn noch kein Batch empfangen wurde)
         system_config = alarm_limits.get("system", {})
-        offline_alert, is_offline = self._check_loggerpi_heartbeat(system_config)
+        offline_alert, is_offline = self._check_loggerpi_heartbeat(system_config, messages)
         if is_offline:
             if offline_alert is not None:
                 self._dispatch(offline_alert, mail, notifiers)
             # Sensor-/State-Checks aussetzen, solange der LoggerPi offline ist
             return
 
+        # LoggerPi ist wieder online → Offline-Alerts resolven
+        for severity in ("critical", "warning"):
+            dedup_key = f"system:loggerpi_offline:{severity}"
+            self._alert_store.reset_acknowledged(dedup_key)
+            self._alert_store.resolve(dedup_key)
+
         batch = self._store.latest()
         if batch is None:
             return
 
         batch_dict = batch.to_dict()
-        self._pending_alerts = self._check_sensors(batch_dict, alarm_limits.get("sensors", {}))
-        self._pending_alerts.extend(self._check_states(batch_dict, alarm_limits.get("states", {})))
+        self._pending_alerts = self._check_sensors(
+            batch_dict, alarm_limits.get("sensors", {}), messages, sensor_map
+        )
+        self._pending_alerts.extend(
+            self._check_states(batch_dict, alarm_limits.get("states", {}), messages, sensor_map)
+        )
 
         for alert in self._pending_alerts:
             self._dispatch(alert, mail, notifiers)
 
-    def _check_loggerpi_heartbeat(self, system_config: dict) -> tuple[Optional[Alert], bool]:
+    def _sensor_display(self, sensor_key: str, sensor_map: dict) -> tuple[str, str]:
+        """Liefert (room_name, device_name) für einen sensor_key."""
+        device_key = sensor_key.split(".")[0]
+        return sensor_map.get(device_key, ("", device_key))
+
+    def _measurement_name(self, sensor_key: str) -> str:
+        """Liefert den Anzeigenamen des Measurements."""
+        parts = sensor_key.split(".", 1)
+        measurement = parts[1] if len(parts) == 2 else parts[0]
+        return MEASUREMENT_DISPLAY_NAMES.get(measurement, measurement)
+
+    def _build_message(
+        self,
+        sensor_key: str,
+        rule: str,
+        messages: dict,
+        sensor_map: dict,
+        value: Optional[float] = None,
+        threshold: Optional[float] = None,
+        unit: str = "",
+        validity_reason: Optional[str] = None,
+    ) -> str:
+        room, device = self._sensor_display(sensor_key, sensor_map)
+        measurement = self._measurement_name(sensor_key)
+        rule_text = messages.get(rule, rule)
+        prefix = f"{room} / {device}" if room else device
+
+        if rule == "invalid":
+            reason = f" ({validity_reason})" if validity_reason else ""
+            return f"{prefix} — {measurement} {rule_text}{reason}"
+        if rule == "stale":
+            return f"{prefix} — {measurement} {rule_text}"
+        if value is not None and threshold is not None:
+            operator = ">" if rule.endswith("_max") else "<"
+            return (
+                f"{prefix} — {measurement} {rule_text}: "
+                f"{value} {unit} {operator} {threshold} {unit}"
+            )
+        return f"{prefix} — {measurement} {rule_text}"
+
+    def _build_subject(self, sensor_key: str, rule: str, severity: str, sensor_map: dict) -> str:
+        room, device = self._sensor_display(sensor_key, sensor_map)
+        measurement = self._measurement_name(sensor_key)
+        prefix = f"{room} / {device}" if room else device
+        return f"[{severity.upper()}] {measurement} — {prefix}"
+
+    def _check_loggerpi_heartbeat(
+        self, system_config: dict, messages: Optional[dict] = None
+    ) -> tuple[Optional[Alert], bool]:
         """Prüft den LoggerPi-Heartbeat.
 
         Liefert ``(alert, is_offline)``:
@@ -104,9 +175,13 @@ class AlertEngine(threading.Thread):
         - ``alert`` ist nur dann gesetzt, wenn tatsächlich ein Alert
           versendet werden soll (Warnstufe optional, Kritischstufe immer).
         """
+        messages = messages or {}
         warning_seconds = system_config.get("loggerpi_offline_warning_seconds", 1800)
         critical_seconds = system_config.get("loggerpi_offline_critical_seconds", 3600)
         warning_alert_enabled = system_config.get("loggerpi_offline_warning_alert_enabled", False)
+
+        rule_text = messages.get("loggerpi_offline", "offline")
+        measurement_name = MEASUREMENT_DISPLAY_NAMES.get("loggerpi_offline", "LoggerPi")
 
         last_received_at = self._store.latest_received_at()
         if last_received_at is None:
@@ -125,9 +200,10 @@ class AlertEngine(threading.Thread):
                 Alert(
                     sensor="system.loggerpi",
                     severity="critical",
-                    message=f"LoggerPi has not sent a batch for {minutes} minutes.",
+                    message=f"LoggerPi {rule_text} for {minutes} minutes.",
                     rule="loggerpi_offline",
                     dedup_key="system:loggerpi_offline:critical",
+                    subject=f"[CRITICAL] {measurement_name}",
                 ),
                 True,
             )
@@ -138,9 +214,10 @@ class AlertEngine(threading.Thread):
                     Alert(
                         sensor="system.loggerpi",
                         severity="warning",
-                        message=f"LoggerPi has not sent a batch for {minutes} minutes.",
+                        message=f"LoggerPi {rule_text} for {minutes} minutes.",
                         rule="loggerpi_offline",
                         dedup_key="system:loggerpi_offline:warning",
+                        subject=f"[WARNING] {measurement_name}",
                     ),
                     True,
                 )
@@ -148,7 +225,15 @@ class AlertEngine(threading.Thread):
 
         return (None, False)
 
-    def _check_sensors(self, batch: dict, sensors: dict) -> list:
+    def _check_sensors(
+        self,
+        batch: dict,
+        sensors: dict,
+        messages: Optional[dict] = None,
+        sensor_map: Optional[dict] = None,
+    ) -> list:
+        messages = messages or {}
+        sensor_map = sensor_map or {}
         alerts = []
         measurements = batch.get("measurements", {})
         recent_batches = self._store.recent(hours=1)
@@ -168,7 +253,14 @@ class AlertEngine(threading.Thread):
                         sensor=sensor_key,
                         rule="invalid",
                         severity="critical",
-                        message=f"{sensor_key}: invalid ({validity_reason or 'unknown'})",
+                        message=self._build_message(
+                            sensor_key,
+                            "invalid",
+                            messages,
+                            sensor_map,
+                            validity_reason=validity_reason,
+                        ),
+                        subject=self._build_subject(sensor_key, "invalid", "critical", sensor_map),
                     )
                 )
                 continue
@@ -179,8 +271,9 @@ class AlertEngine(threading.Thread):
                         sensor=sensor_key,
                         rule="stale",
                         severity="warning",
-                        message=f"{sensor_key}: stale",
+                        message=self._build_message(sensor_key, "stale", messages, sensor_map),
                         value=value,
+                        subject=self._build_subject(sensor_key, "stale", "warning", sensor_map),
                     )
                 )
                 continue
@@ -203,9 +296,18 @@ class AlertEngine(threading.Thread):
                             sensor=sensor_key,
                             rule=rule,
                             severity=severity,
-                            message=f"{sensor_key}: {value} < {threshold}",
+                            message=self._build_message(
+                                sensor_key,
+                                rule,
+                                messages,
+                                sensor_map,
+                                value=value,
+                                threshold=threshold,
+                                unit=measurement.get("unit", ""),
+                            ),
                             value=value,
                             threshold=threshold,
+                            subject=self._build_subject(sensor_key, rule, severity, sensor_map),
                         )
                     )
                 elif rule.endswith("_max") and value > threshold:
@@ -214,9 +316,18 @@ class AlertEngine(threading.Thread):
                             sensor=sensor_key,
                             rule=rule,
                             severity=severity,
-                            message=f"{sensor_key}: {value} > {threshold}",
+                            message=self._build_message(
+                                sensor_key,
+                                rule,
+                                messages,
+                                sensor_map,
+                                value=value,
+                                threshold=threshold,
+                                unit=measurement.get("unit", ""),
+                            ),
                             value=value,
                             threshold=threshold,
+                            subject=self._build_subject(sensor_key, rule, severity, sensor_map),
                         )
                     )
                 else:
@@ -233,9 +344,20 @@ class AlertEngine(threading.Thread):
                             sensor=sensor_key,
                             rule="rate_of_change",
                             severity="warning",
-                            message=f"{sensor_key}: rate {rate:.2f}/h > {rate_limit}",
+                            message=self._build_message(
+                                sensor_key,
+                                "rate_of_change",
+                                messages,
+                                sensor_map,
+                                value=rate,
+                                threshold=rate_limit,
+                                unit="/h",
+                            ),
                             value=rate,
                             threshold=rate_limit,
+                            subject=self._build_subject(
+                                sensor_key, "rate_of_change", "warning", sensor_map
+                            ),
                         )
                     )
 
@@ -257,7 +379,15 @@ class AlertEngine(threading.Thread):
             return None
         return (last_value - first_value) / hours
 
-    def _check_states(self, batch: dict, states: dict) -> list:
+    def _check_states(
+        self,
+        batch: dict,
+        states: dict,
+        messages: Optional[dict] = None,
+        sensor_map: Optional[dict] = None,
+    ) -> list:
+        messages = messages or {}
+        sensor_map = sensor_map or {}
         alerts = []
         batch_states = batch.get("states", {})
         for state_key, rule in states.items():
@@ -292,7 +422,9 @@ class AlertEngine(threading.Thread):
                             sensor=state_key,
                             rule="alarm",
                             severity="critical",
-                            message=f"{device_key}: alarm {alarm}",
+                            message=self._build_message(state_key, "alarm", messages, sensor_map)
+                            + f": {alarm}",
+                            subject=self._build_subject(state_key, "alarm", "critical", sensor_map),
                         )
                     )
             elif state_name == "battery_low" and value is True:
@@ -301,7 +433,10 @@ class AlertEngine(threading.Thread):
                         sensor=state_key,
                         rule="battery_low",
                         severity="warning",
-                        message=f"{device_key}: battery low",
+                        message=self._build_message(state_key, "battery_low", messages, sensor_map),
+                        subject=self._build_subject(
+                            state_key, "battery_low", "warning", sensor_map
+                        ),
                     )
                 )
             elif state_name == "door_open" and value is True:
@@ -310,7 +445,8 @@ class AlertEngine(threading.Thread):
                         sensor=state_key,
                         rule="door_open",
                         severity="warning",
-                        message=f"{device_key}: door open",
+                        message=self._build_message(state_key, "door_open", messages, sensor_map),
+                        subject=self._build_subject(state_key, "door_open", "warning", sensor_map),
                     )
                 )
             elif state_name == "contact_open" and value is True:
@@ -319,7 +455,12 @@ class AlertEngine(threading.Thread):
                         sensor=state_key,
                         rule="contact_open",
                         severity="warning",
-                        message=f"{device_key}: contact open",
+                        message=self._build_message(
+                            state_key, "contact_open", messages, sensor_map
+                        ),
+                        subject=self._build_subject(
+                            state_key, "contact_open", "warning", sensor_map
+                        ),
                     )
                 )
 
@@ -334,6 +475,7 @@ class AlertEngine(threading.Thread):
         message: str,
         value: Optional[float] = None,
         threshold: Optional[float] = None,
+        subject: Optional[str] = None,
     ) -> Alert:
         return Alert(
             sensor=sensor,
@@ -343,6 +485,7 @@ class AlertEngine(threading.Thread):
             threshold=threshold,
             rule=rule,
             dedup_key=f"{sensor}:{rule}:{severity}",
+            subject=subject,
         )
 
     def _dispatch(self, alert: Alert, mail: dict, notifiers: list) -> None:

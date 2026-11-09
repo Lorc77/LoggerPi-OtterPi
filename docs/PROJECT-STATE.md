@@ -16,10 +16,10 @@
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.11.12` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.11.12` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
+| LoggerPi | `v1.11.13` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.11.13` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
 
-LoggerPi und OtterPi laufen produktiv auf Version `v1.11.12`.
+LoggerPi und OtterPi laufen produktiv auf Version `v1.11.13`.
 
 ## Phase A – Config-Admin (abgeschlossen, v1.8.0)
 
@@ -199,6 +199,35 @@ Rate-of-Change im Admin (3.7).
 
 Deploy + Test (v1.11.12). Danach: Message-Templates (3.4), UI-Umbau
 Alarm Limits (3.2), Dashboard-Limits (3.6), Rate-of-Change im Admin (3.7).
+
+## Phase C – Message-Templates (abgeschlossen, v1.11.13)
+
+**Stand:** 2026-11-08
+
+### Umgesetzt
+
+- **`messages.json`:** Neue Config-Datei mit globalen Regel-Texten
+  („too high", „too low", „invalid", „stale", „low", „open", „alarm",
+  „offline"). Defaults werden verwendet, wenn die Datei fehlt.
+- **`MEASUREMENT_DISPLAY_NAMES`:** Festes Mapping von Measurement-Key zu
+  Anzeigename („Temperature", „Humidity", „Vacuum", „CO₂", „Battery", „Door").
+- **Alert-Engine:** `_build_message()` und `_build_subject()` bauen die Texte
+  aus Raum, Gerät, Measurement-Name und Regel-Text. Raum/Gerät kommen aus
+  `rooms.json` (Fallback auf technischen `sensor_key`).
+- **`Alert`-Dataclass:** Neues Feld `subject`. `EmailNotifier` und
+  `NtfyNotifier` nutzen es mit Fallback auf den bisherigen Subject.
+- **Admin:** Neuer Messages-Tab mit Formular-UI (gruppiert in Measurements,
+  States, System), JSON-Editor als „Advanced"-Toggle.
+- **`otterpi.py`:** `GET /api/admin/messages`, `PUT /api/admin/messages`.
+
+### Teststand
+
+395 Tests, alle grün.
+
+### Nächster Schritt
+
+Deploy + Test (v1.11.13). Danach: UI-Umbau Alarm Limits (3.2),
+Dashboard-Limits (3.6), Rate-of-Change im Admin (3.7).
 
 ---
 

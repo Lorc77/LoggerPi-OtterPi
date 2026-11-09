@@ -142,3 +142,22 @@ def get_measurement_names(device_type: str) -> List[str]:
 def get_state_names(device_type: str) -> List[str]:
     """Liefert die State-Namen für einen Sensor-Typ."""
     return [name for name, _ in get_schema(device_type)["states"]]
+
+
+MEASUREMENT_DISPLAY_NAMES = {
+    "temperature_1": "Temperature",
+    "temperature_2": "Temperature",
+    "temperature_3": "Temperature",
+    "temperature_4": "Temperature",
+    "temperature": "Temperature",
+    "humidity": "Humidity",
+    "vacuum": "Vacuum",
+    "co2": "CO₂",
+    "o2": "O₂",
+    "fan_speed": "Fan speed",
+    "battery_low": "Battery",
+    "door_open": "Door",
+    "contact_open": "Contact",
+    "alarm": "Alarm",
+    "loggerpi_offline": "LoggerPi",
+}

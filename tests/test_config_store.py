@@ -2,13 +2,16 @@
 
 import pytest
 from config_store import (
+    _DEFAULT_MESSAGES,
     ConfigValidationError,
     load_alarm_limits,
     load_mail,
+    load_messages,
     load_notifications,
     load_rooms,
     save_alarm_limits,
     save_mail,
+    save_messages,
     save_notifications,
     save_rooms,
 )
@@ -251,3 +254,34 @@ class TestAlarmLimitsSystem:
         }
         with pytest.raises(ConfigValidationError):
             save_alarm_limits(data)
+
+
+class TestMessages:
+    def test_load_defaults_when_missing(self):
+        messages = load_messages()
+        assert messages["critical_max"] == "too high"
+        assert messages["loggerpi_offline"] == "offline"
+
+    def test_roundtrip(self):
+        data = dict(_DEFAULT_MESSAGES)
+        data["critical_max"] = "Too hot!"
+        save_messages(data)
+        assert load_messages()["critical_max"] == "Too hot!"
+
+    def test_missing_keys_filled_with_defaults(self):
+        save_messages({"critical_max": "Too hot!"})
+        messages = load_messages()
+        assert messages["critical_max"] == "Too hot!"
+        assert messages["critical_min"] == "too low"
+
+    def test_unknown_key(self):
+        with pytest.raises(ConfigValidationError):
+            save_messages({"unknown_key": "x"})
+
+    def test_non_string_value(self):
+        with pytest.raises(ConfigValidationError):
+            save_messages({"critical_max": 123})
+
+    def test_too_long_value(self):
+        with pytest.raises(ConfigValidationError):
+            save_messages({"critical_max": "x" * 201})

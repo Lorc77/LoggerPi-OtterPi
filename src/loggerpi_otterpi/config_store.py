@@ -47,6 +47,23 @@ _ALLOWED_MAIL_KEYS = {
 
 _ALLOWED_NOTIFICATION_TYPES = {"ntfy", "webhook"}
 
+_DEFAULT_MESSAGES = {
+    "critical_max": "too high",
+    "critical_min": "too low",
+    "warning_max": "too high",
+    "warning_min": "too low",
+    "rate_of_change": "rate of change too high",
+    "invalid": "invalid",
+    "stale": "stale",
+    "battery_low": "low",
+    "door_open": "open",
+    "contact_open": "open",
+    "alarm": "alarm",
+    "loggerpi_offline": "offline",
+}
+
+_ALLOWED_MESSAGE_KEYS = set(_DEFAULT_MESSAGES)
+
 
 def _config_dir() -> Path:
     return Path(os.environ.get("OTTERPI_CONFIG_DIR", "/var/lib/loggerpi-otterpi/config"))
@@ -323,6 +340,19 @@ def _validate_notifications(data: Any) -> None:
                 raise ConfigValidationError(f"Channel {i} (webhook) has invalid format: {fmt!r}")
 
 
+def _validate_messages(data: Any) -> None:
+    if not isinstance(data, dict):
+        raise ConfigValidationError("messages.json must be an object.")
+    unknown = set(data) - _ALLOWED_MESSAGE_KEYS
+    if unknown:
+        raise ConfigValidationError(f"messages.json has unknown fields: {sorted(unknown)}")
+    for key, value in data.items():
+        if not isinstance(value, str):
+            raise ConfigValidationError(f"messages.json '{key}' must be a string.")
+        if len(value) > 200:
+            raise ConfigValidationError(f"messages.json '{key}' must be at most 200 characters.")
+
+
 def load_rooms() -> dict:
     data = _read_json(_path("rooms.json"))
     _validate_rooms(data)
@@ -366,3 +396,20 @@ def load_notifications() -> dict:
 def save_notifications(data: dict) -> None:
     _validate_notifications(data)
     _write_json_atomic(_path("notifications.json"), data)
+
+
+def load_messages() -> dict:
+    path = _path("messages.json")
+    if not path.exists():
+        return dict(_DEFAULT_MESSAGES)
+    data = _read_json(path)
+    _validate_messages(data)
+    # Fehlende Keys mit Defaults auffüllen
+    merged = dict(_DEFAULT_MESSAGES)
+    merged.update(data)
+    return merged
+
+
+def save_messages(data: dict) -> None:
+    _validate_messages(data)
+    _write_json_atomic(_path("messages.json"), data)

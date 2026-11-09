@@ -148,8 +148,8 @@ PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.11.12` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.11.12` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
+| LoggerPi | `v1.11.13` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.11.13` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
 
 Der E2E-Datenpfad (LoggerPi → nginx → OtterPi → SQLite) ist verifiziert.
 
@@ -170,6 +170,8 @@ Admin (LAN-only): `https://observer.makki.route64.de/admin`
   System-Karte für LoggerPi-Offline-Erkennung)
 - Mail-Tab: Formular-UI (SMTP, Empfänger, Routing, Dedup, Quiet Hours)
 - Notifications-Tab: Formular-UI (ntfy, webhook)
+- Messages-Tab: Formular-UI (globale Regel-Texte, gruppiert in Measurements,
+  States, System)
 - Alerts-Tab: Alert History mit Acknowledge-Button, Status-Chip
   („Active" / „Resolved"), Filter „Only unacknowledged" / „Only active"
 - Test-Mail-Button im Mail-Tab
@@ -242,6 +244,30 @@ wieder innerhalb der Grenzen ist (bzw. der State wieder normal ist). Der
 Admin-Alerts-Tab zeigt den Status als Chip („Active" / „Resolved") und
 bietet einen Filter „Only active".
 
+### Message-Templates
+
+Die Alert-Texte werden aus zwei Teilen zusammengesetzt:
+
+- **Regel-Text** (editierbar in `messages.json`, Admin-Tab „Messages"):
+  z. B. „too high", „too low", „invalid", „stale", „low", „open".
+- **Measurement-Name** (fest im Code, `MEASUREMENT_DISPLAY_NAMES`):
+  z. B. „Temperature", „Humidity", „Vacuum", „CO₂", „Battery", „Door".
+
+Die Message wird automatisch gebaut:
+
+```text
+R1304 · Culture Room I / Memmert HPP260 · left — Temperature too high: 30.0 °C > 28.0 °C
+```
+
+Der Subject ist kürzer:
+
+```text
+[CRITICAL] Temperature — R1304 · Culture Room I / Memmert HPP260 · left
+```
+
+Raum und Gerät kommen aus `rooms.json`. Wenn ein Sensor nicht zugeordnet ist,
+fällt die Message auf den technischen `sensor_key` zurück.
+
 **Bewusst offen:** Door-Open-Dauer (HPP260 unterstützt es nicht), Defrost,
 Flap (HPP260 unterstützt es nicht). CSV-Export, Statuspage, Dry-Run, Config-Backup/Restore auf „irgendwann"
 verschoben. Alert-Resolve (Active vs. Resolved) und Hysterese sind für einen
@@ -275,18 +301,18 @@ pytest
 git diff --check
 ```
 
-Aktueller Stand: **375 Tests**, alle bestehen.
+Aktueller Stand: **395 Tests**, alle bestehen.
 
 ---
 
-Aktuelle Version: **v1.11.12**
+Aktuelle Version: **v1.11.13**
 
 Die Version wird geführt über:
 
-- `pyproject.toml` → `version = "1.11.12"`
-- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.11.12"`
-- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.11.12"`
-- Git-Tag `v1.11.12`
+- `pyproject.toml` → `version = "1.11.13"`
+- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.11.13"`
+- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.11.13"`
+- Git-Tag `v1.11.13`
 
 ---
 

@@ -232,3 +232,117 @@ def test_email_from_name(monkeypatch):
     alert = Alert(sensor="x", severity="critical", message="m")
     assert n.send(alert) is True
     assert captured["msg"]["From"] == "ZOOLOGY-Observer Alert Engine <f@example.com>"
+
+
+def test_email_uses_subject_if_set(monkeypatch):
+    captured = {}
+
+    class FakeSMTP:
+        def __init__(self, host, port, timeout):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def starttls(self):
+            pass
+
+        def login(self, user, password):
+            pass
+
+        def send_message(self, msg):
+            captured["msg"] = msg
+
+    monkeypatch.setattr("notifier.smtplib.SMTP", FakeSMTP)
+    n = EmailNotifier(
+        {
+            "smtp_host": "smtp.gmail.com",
+            "smtp_port": 587,
+            "smtp_user": "u@example.com",
+            "from": "f@example.com",
+            "recipients": ["a@example.com"],
+        },
+        password="pw",
+    )
+    alert = Alert(
+        sensor="atmoweb_101.temperature_1",
+        severity="critical",
+        message="m",
+        subject="[CRITICAL] Temperature — R1304 / Memmert HPP260",
+    )
+    assert n.send(alert) is True
+    assert captured["msg"]["Subject"] == "[CRITICAL] Temperature — R1304 / Memmert HPP260"
+
+
+def test_email_falls_back_to_sensor(monkeypatch):
+    captured = {}
+
+    class FakeSMTP:
+        def __init__(self, host, port, timeout):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def starttls(self):
+            pass
+
+        def login(self, user, password):
+            pass
+
+        def send_message(self, msg):
+            captured["msg"] = msg
+
+    monkeypatch.setattr("notifier.smtplib.SMTP", FakeSMTP)
+    n = EmailNotifier(
+        {
+            "smtp_host": "smtp.gmail.com",
+            "smtp_port": 587,
+            "smtp_user": "u@example.com",
+            "from": "f@example.com",
+            "recipients": ["a@example.com"],
+        },
+        password="pw",
+    )
+    alert = Alert(sensor="atmoweb_101.temperature_1", severity="critical", message="m")
+    assert n.send(alert) is True
+    assert captured["msg"]["Subject"] == "[CRITICAL] atmoweb_101.temperature_1"
+
+
+def test_ntfy_uses_subject_if_set(monkeypatch):
+    captured = {}
+
+    def fake_urlopen(req, timeout):
+        captured["title"] = req.get_header("Title")
+        return FakeResponse(200)
+
+    monkeypatch.setattr("notifier.urlopen", fake_urlopen)
+    n = NtfyNotifier({"url": "https://ntfy.sh", "topic": "test"})
+    alert = Alert(
+        sensor="atmoweb_101.temperature_1",
+        severity="critical",
+        message="m",
+        subject="[CRITICAL] Temperature — R1304 / Memmert HPP260",
+    )
+    assert n.send(alert) is True
+    assert captured["title"] == "[CRITICAL] Temperature — R1304 / Memmert HPP260"
+
+
+def test_ntfy_falls_back_to_sensor(monkeypatch):
+    captured = {}
+
+    def fake_urlopen(req, timeout):
+        captured["title"] = req.get_header("Title")
+        return FakeResponse(200)
+
+    monkeypatch.setattr("notifier.urlopen", fake_urlopen)
+    n = NtfyNotifier({"url": "https://ntfy.sh", "topic": "test"})
+    alert = Alert(sensor="atmoweb_101.temperature_1", severity="critical", message="m")
+    assert n.send(alert) is True
+    assert captured["title"] == "CRITICAL: atmoweb_101.temperature_1"

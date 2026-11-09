@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, timezone
 from alert_engine import AlertEngine
 from alert_store import AlertStore
 from batch_factory import SequenceStore, create_batch
+from config_store import _DEFAULT_MESSAGES
 from model.measurement import Measurement
 from otterpi_store import BatchStore
 
@@ -495,3 +496,166 @@ class TestResolve:
             engine._alert_store.is_active("weatherhub_015f9410f3eb.battery_low:battery_low:warning")
             is False
         )
+
+
+class TestOfflineResolve:
+    def test_offline_alert_resolved_when_online(self, tmp_path, monkeypatch):
+        engine = _engine(tmp_path)
+        _store_batch(engine._store)
+        with sqlite3.connect(engine._store.path) as conn:
+            old = (datetime.now(timezone.utc) - timedelta(minutes=61)).isoformat()
+            conn.execute("UPDATE batches SET received_at = ?", (old,))
+
+        monkeypatch.setattr(
+            "alert_engine.load_alarm_limits",
+            lambda: {"system": {}, "sensors": {}, "states": {}},
+        )
+        monkeypatch.setattr("alert_engine.load_mail", lambda: {})
+        monkeypatch.setattr("alert_engine.load_notifications", lambda: {"channels": []})
+
+        engine._check()
+        assert engine._alert_store.is_active("system:loggerpi_offline:critical") is True
+
+        # Neuer Batch → LoggerPi wieder online
+        _store_batch(engine._store)
+        engine._check()
+
+        assert engine._alert_store.is_active("system:loggerpi_offline:critical") is False
+
+
+class TestMessageAndSubject:
+    def _mock_config(self, monkeypatch, sensors=None, states=None, messages=None):
+        monkeypatch.setattr(
+            "alert_engine.load_alarm_limits",
+            lambda: {
+                "system": {},
+                "sensors": sensors or {},
+                "states": states or {},
+            },
+        )
+        monkeypatch.setattr("alert_engine.load_mail", lambda: {})
+        monkeypatch.setattr("alert_engine.load_notifications", lambda: {"channels": []})
+        monkeypatch.setattr(
+            "alert_engine.load_messages",
+            lambda: messages if messages is not None else dict(_DEFAULT_MESSAGES),
+        )
+
+    def test_message_includes_room_and_device(self, tmp_path, monkeypatch):
+        engine = _engine(tmp_path)
+        _store_batch(
+            engine._store,
+            measurements={"atmoweb_101.temperature_1": _measurement(30.0)},
+        )
+        self._mock_config(
+            monkeypatch,
+            sensors={
+                "atmoweb_101.temperature_1": {
+                    "critical_max": 28.0,
+                    "enabled": True,
+                }
+            },
+        )
+
+        engine._check()
+
+        alerts = engine._alert_store.list_alerts()
+        assert len(alerts) == 1
+        message = alerts[0]["message"]
+        assert "R1304" in message
+        assert "Memmert HPP260" in message
+        assert "Temperature" in message
+        assert "too high" in message
+        assert "30.0" in message
+        assert "28.0" in message
+
+    def test_subject_includes_measurement_and_room(self, tmp_path, monkeypatch):
+        engine = _engine(tmp_path)
+        _store_batch(
+            engine._store,
+            measurements={"atmoweb_101.temperature_1": _measurement(30.0)},
+        )
+        self._mock_config(
+            monkeypatch,
+            sensors={
+                "atmoweb_101.temperature_1": {
+                    "critical_max": 28.0,
+                    "enabled": True,
+                }
+            },
+        )
+
+        engine._check()
+
+        alerts = engine._alert_store.list_alerts()
+        assert len(alerts) == 1
+        # Subject wird nicht in der DB gespeichert, aber im Alert-Objekt
+        # Wir prüfen es über _build_subject direkt
+        subject = engine._build_subject(
+            "atmoweb_101.temperature_1",
+            "critical_max",
+            "critical",
+            {"atmoweb_101": ("R1304 · Culture Room I", "Memmert HPP260 · left")},
+        )
+        assert subject == (
+            "[CRITICAL] Temperature — R1304 · Culture Room I / Memmert HPP260 · left"
+        )
+
+    def test_message_uses_custom_rule_text(self, tmp_path, monkeypatch):
+        engine = _engine(tmp_path)
+        _store_batch(
+            engine._store,
+            measurements={"atmoweb_101.temperature_1": _measurement(30.0)},
+        )
+        self._mock_config(
+            monkeypatch,
+            sensors={
+                "atmoweb_101.temperature_1": {
+                    "critical_max": 28.0,
+                    "enabled": True,
+                }
+            },
+            messages={"critical_max": "way too hot"},
+        )
+
+        engine._check()
+
+        alerts = engine._alert_store.list_alerts()
+        assert "way too hot" in alerts[0]["message"]
+
+    def test_message_falls_back_to_technical_key(self, tmp_path, monkeypatch):
+        engine = _engine(tmp_path)
+        _store_batch(
+            engine._store,
+            measurements={"unknown_sensor.temperature_1": _measurement(30.0)},
+        )
+        self._mock_config(
+            monkeypatch,
+            sensors={
+                "unknown_sensor.temperature_1": {
+                    "critical_max": 28.0,
+                    "enabled": True,
+                }
+            },
+        )
+
+        engine._check()
+
+        alerts = engine._alert_store.list_alerts()
+        assert len(alerts) == 1
+        assert "unknown_sensor" in alerts[0]["message"]
+
+    def test_offline_message_and_subject(self, tmp_path, monkeypatch):
+        engine = _engine(tmp_path)
+        _store_batch(engine._store)
+        with sqlite3.connect(engine._store.path) as conn:
+            old = (datetime.now(timezone.utc) - timedelta(minutes=61)).isoformat()
+            conn.execute("UPDATE batches SET received_at = ?", (old,))
+
+        self._mock_config(monkeypatch)
+
+        engine._check()
+
+        alerts = engine._alert_store.list_alerts()
+        assert len(alerts) == 1
+        assert "LoggerPi offline" in alerts[0]["message"]
+        assert "61" in alerts[0]["message"] or "60" in alerts[0]["message"]

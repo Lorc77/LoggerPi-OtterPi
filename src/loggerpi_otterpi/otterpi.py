@@ -9,10 +9,12 @@ from config_store import (
     ConfigValidationError,
     load_alarm_limits,
     load_mail,
+    load_messages,
     load_notifications,
     load_rooms,
     save_alarm_limits,
     save_mail,
+    save_messages,
     save_notifications,
     save_rooms,
 )
@@ -39,11 +41,16 @@ def _load_admin_config() -> dict:
         notifications = load_notifications()
     except ConfigValidationError:
         notifications = {"channels": []}
+    try:
+        messages = load_messages()
+    except ConfigValidationError:
+        messages = {}
     return {
         "rooms": {"rooms": rooms},
         "alarm_limits": alarm_limits,
         "mail": mail,
         "notifications": notifications,
+        "messages": messages,
     }
 
 
@@ -237,6 +244,7 @@ class OtterPiHandler(BaseHTTPRequestHandler):
             "/api/admin/alarm-limits": (None, save_alarm_limits),
             "/api/admin/mail": (None, save_mail),
             "/api/admin/notifications": (None, save_notifications),
+            "/api/admin/messages": (None, save_messages),
         }
         if self.path not in routes:
             self.send_error(404)
@@ -282,6 +290,14 @@ class OtterPiHandler(BaseHTTPRequestHandler):
 
         if self.path == "/api/admin/config":
             self._send_json(200, _load_admin_config())
+            return
+
+        if self.path == "/api/admin/messages":
+            try:
+                messages = load_messages()
+            except ConfigValidationError:
+                messages = {}
+            self._send_json(200, messages)
             return
 
         if self.path.startswith("/api/admin/alerts"):

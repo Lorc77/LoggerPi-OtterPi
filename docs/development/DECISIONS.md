@@ -2195,6 +2195,77 @@ wenn der Zustand normal wird, soll er „entsperrt" und resolved werden.
 
 ---
 
+## DEC-070 — Message-Templates (globale Regel-Texte + Measurement-Name)
+
+**Status:** Accepted
+**Datum:** 2026-11-08
+
+### Kontext
+
+Die Alert-Message war bisher technisch (`f"{sensor_key}: {value} > {threshold}"`).
+Der Nutzer wollte lesbare Texte mit Raum, Gerät und Regel-Beschreibung. Eine
+per-Sensor-Konfiguration wäre aufwändig (30 Sensoren × 4 Regeln).
+
+### Entscheidung
+
+Die Message wird aus zwei Teilen zusammengesetzt:
+
+- **Regel-Text** (editierbar in `messages.json`): „too high", „too low",
+  „invalid", „stale", „low", „open", „alarm", „offline".
+- **Measurement-Name** (fest im Code, `MEASUREMENT_DISPLAY_NAMES`):
+  „Temperature", „Humidity", „Vacuum", „CO₂", „Battery", „Door".
+
+Die Alert-Engine baut: `"{room} / {device} — {measurement_name} {rule_text}: {value} {unit} {operator} {threshold} {unit}"`.
+
+### Begründung
+
+- Keine Duplikate: „too high" gilt für alle Measurements.
+- Erweiterbar: Neue Measurements brauchen nur einen Eintrag im Mapping.
+- Editierbar: Die Regel-Texte bleiben im Messages-Tab anpassbar.
+- Lesbar: Raum und Gerät sind in der Message, kein Nachschlagen nötig.
+
+### Konsequenz
+
+Neue Datei `messages.json` (Defaults, Fallback). Neuer Admin-Tab „Messages".
+`alert_engine.py` um `_build_message()` und `_build_subject()` erweitert.
+
+---
+
+## DEC-071 — Subject mit Raum/Gerät/Measurement-Name
+
+**Status:** Accepted
+**Datum:** 2026-11-08
+
+### Kontext
+
+Der E-Mail-Subject war bisher `[CRITICAL] atmoweb_101.temperature_1` – technisch
+und ohne Raum/Gerät. Der Nutzer wollte einen lesbaren Subject.
+
+### Entscheidung
+
+Der Subject wird in der Alert-Engine gebaut und im `Alert`-Objekt als
+`subject`-Feld mitgegeben:
+
+```text
+[CRITICAL] Temperature — R1304 · Culture Room I / Memmert HPP260 · left
+```
+
+`EmailNotifier` und `NtfyNotifier` nutzen `alert.subject`, wenn gesetzt, sonst
+Fallback auf den bisherigen Subject.
+
+### Begründung
+
+Der Subject wird im Notifier gebaut, der keinen Zugriff auf `rooms.json` hat.
+Die Alert-Engine hat den Zugriff und kann den Subject vorbereiten. Das ist
+sauberer als den Notifier mit `rooms.json`-Kenntnis auszustatten.
+
+### Konsequenz
+
+`Alert`-Dataclass um `subject` erweitert. `EmailNotifier` und `NtfyNotifier`
+angepasst. `WebhookNotifier` bleibt unverändert (nutzt `alert.message`).
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:

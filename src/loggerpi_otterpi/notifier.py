@@ -20,6 +20,7 @@ class Alert:
     threshold: Optional[float] = None
     rule: Optional[str] = None
     dedup_key: Optional[str] = None
+    subject: Optional[str] = None
 
 
 class EmailNotifier:
@@ -38,7 +39,7 @@ class EmailNotifier:
         if not recipients:
             return False
         msg = EmailMessage()
-        msg["Subject"] = f"[{alert.severity.upper()}] {alert.sensor}"
+        msg["Subject"] = alert.subject or f"[{alert.severity.upper()}] {alert.sensor}"
         if self.from_name:
             msg["From"] = f"{self.from_name} <{self.from_addr}>"
         else:
@@ -67,7 +68,7 @@ class NtfyNotifier:
         self.token = config.get("token")
 
     def send(self, alert: Alert) -> bool:
-        headers = {"Title": f"{alert.severity.upper()}: {alert.sensor}"}
+        headers = {"Title": alert.subject or f"{alert.severity.upper()}: {alert.sensor}"}
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
         req = Request(

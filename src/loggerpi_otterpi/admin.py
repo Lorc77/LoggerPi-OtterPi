@@ -32,6 +32,7 @@ def render_admin(
     alarm_json = json.dumps(config["alarm_limits"], ensure_ascii=False, indent=2)
     mail_json = json.dumps(config["mail"], ensure_ascii=False, indent=2)
     notifications_json = json.dumps(config["notifications"], ensure_ascii=False, indent=2)
+    messages_json = json.dumps(config.get("messages", {}), ensure_ascii=False, indent=2)
     sensor_schemas_json = json.dumps(SENSOR_SCHEMAS, ensure_ascii=False)
 
     return f"""<!DOCTYPE html>
@@ -420,6 +421,7 @@ textarea.json-editor {{
     <button class="tab-btn" onclick="showTab('alarm', this)">⚠️ Alarm Limits</button>
     <button class="tab-btn" onclick="showTab('mail', this)">📧 Mail</button>
     <button class="tab-btn" onclick="showTab('notifications', this)">🔔 Notifications</button>
+    <button class="tab-btn" onclick="showTab('messages', this)">💬 Messages</button>
     <button class="tab-btn" onclick="showTab('alerts', this)">🚨 Alerts</button>
 </div>
 
@@ -527,6 +529,26 @@ textarea.json-editor {{
     </div>
 </div>
 
+<div id="tab-messages" class="tab-panel">
+    <div id="messages-form"></div>
+    <div class="save-row">
+        <button class="btn btn-primary" onclick="saveMessages()">💾 Save</button>
+        <button class="btn btn-secondary btn-small"
+                onclick="toggleMessagesJson()">⚙️ Advanced (JSON)</button>
+        <span id="messages-status" class="status"></span>
+    </div>
+    <div id="messages-json-editor" style="display: none; margin-top: 12px;">
+        <textarea id="messages-text" class="json-editor">{messages_json}</textarea>
+        <div class="save-row">
+            <button class="btn btn-primary btn-small"
+                    data-endpoint="/api/admin/messages"
+                    data-textarea="messages-text"
+                    data-status="messages-status"
+                    onclick="saveConfig(this)">💾 Save JSON</button>
+        </div>
+    </div>
+</div>
+
 <div id="tab-alerts" class="tab-panel">
     <div class="save-row">
         <button class="btn btn-primary btn-small"
@@ -568,6 +590,9 @@ function showTab(name, btn) {{
     }}
     if (name === 'notifications') {{
         loadNotifications();
+    }}
+    if (name === 'messages') {{
+        loadMessages();
     }}
 }}
 
@@ -1178,6 +1203,89 @@ async function loadNotifications() {{
 
 function toggleNotificationsJson() {{
     const editor = document.getElementById('notifications-json-editor');
+    editor.style.display = editor.style.display === 'none' ? 'block' : 'none';
+}}
+
+async function loadMessages() {{
+    const status = document.getElementById('messages-status');
+    const form = document.getElementById('messages-form');
+    status.textContent = 'Loading...';
+    try {{
+        const resp = await fetch('/api/admin/messages');
+        const messages = await resp.json();
+        const groups = {{
+            'Measurements': [
+                ['critical_max', 'Critical Max'],
+                ['critical_min', 'Critical Min'],
+                ['warning_max', 'Warning Max'],
+                ['warning_min', 'Warning Min'],
+                ['rate_of_change', 'Rate of Change'],
+                ['invalid', 'Invalid'],
+                ['stale', 'Stale'],
+            ],
+            'States': [
+                ['battery_low', 'Battery Low'],
+                ['door_open', 'Door Open'],
+                ['contact_open', 'Contact Open'],
+                ['alarm', 'Alarm'],
+            ],
+            'System': [
+                ['loggerpi_offline', 'LoggerPi Offline'],
+            ],
+        }};
+        let html = '';
+        for (const [groupName, fields] of Object.entries(groups)) {{
+            html += `<div class="config-group"><h4>${{groupName}}</h4><div class="config-grid">`;
+            for (const [key, label] of fields) {{
+                const value = messages[key] || '';
+                html += `
+                    <div class="config-item">
+                        <label>${{label}}:</label>
+                        <input type="text" id="msg-${{key}}" value="${{value}}">
+                    </div>
+                `;
+            }}
+            html += `</div></div>`;
+        }}
+        form.innerHTML = html;
+        status.textContent = 'Loaded.';
+    }} catch (e) {{
+        status.textContent = 'Request failed: ' + e.message;
+    }}
+}}
+
+async function saveMessages() {{
+    const status = document.getElementById('messages-status');
+    status.textContent = 'Saving...';
+    try {{
+        const keys = [
+            'critical_max', 'critical_min', 'warning_max', 'warning_min',
+            'rate_of_change', 'invalid', 'stale',
+            'battery_low', 'door_open', 'contact_open', 'alarm',
+            'loggerpi_offline',
+        ];
+        const messages = {{}};
+        for (const key of keys) {{
+            messages[key] = document.getElementById('msg-' + key).value;
+        }}
+        const putResp = await fetch('/api/admin/messages', {{
+            method: 'PUT',
+            headers: {{'Content-Type': 'application/json'}},
+            body: JSON.stringify(messages)
+        }});
+        if (putResp.ok) {{
+            status.textContent = 'Saved.';
+        }} else {{
+            const err = await putResp.json();
+            status.textContent = 'Error: ' + (err.error?.message || putResp.status);
+        }}
+    }} catch (e) {{
+        status.textContent = 'Request failed: ' + e.message;
+    }}
+}}
+
+function toggleMessagesJson() {{
+    const editor = document.getElementById('messages-json-editor');
     editor.style.display = editor.style.display === 'none' ? 'block' : 'none';
 }}
 
@@ -1810,12 +1918,12 @@ async function loadAlerts() {{
         }}
         list.innerHTML = '';
         for (const alert of result.alerts) {{
-            const severityClass = alert.severity === 'critical'
-                ? 'status-critical'
-                : 'status-warn';
             const severityLabel = alert.severity === 'critical'
                 ? 'alert-severity-critical'
                 : 'alert-severity-warn';
+            const resolvedClass = alert.resolved_at
+                ? 'status-ok'
+                : 'status-critical';
             const parts = alert.sensor.split('.');
             const deviceKey = parts[0];
             const measurement = parts.slice(1).join('.');
@@ -1835,7 +1943,7 @@ async function loadAlerts() {{
             card.className = 'alert-card';
             card.innerHTML = `
                 <div class="alert-header">
-                    <span class="lamp ${{severityClass}}"></span>
+                    <span class="lamp ${{resolvedClass}}"></span>
                     <strong>${{sensorLabel}}</strong>
                     <span class="alert-severity ${{severityLabel}}">${{alert.severity}}</span>
                 </div>

@@ -276,7 +276,7 @@ muss bestätigen, dass die Dateien bereits korrekt formatiert sind.
 pytest
 ```
 
-Aktueller Stand: **375 Tests**, alle bestehen.
+Aktueller Stand: **395 Tests**, alle bestehen.
 
 Alle Tests müssen erfolgreich sein.
 
@@ -558,7 +558,7 @@ Der E2E-Datenpfad (LoggerPi → OtterPi → SQLite) ist praktisch verifiziert:
 - Gerätedetailseite (/device/<sensor_id>) ist implementiert
 - Raumklima-Detailseite (/climate/<room_id>) ist implementiert
 - Batch-Archivierung (archive_batches.py) ist implementiert und getestet
-- Alle 375 Tests bestehen (Stand 2026-11-08)
+- Alle 395 Tests bestehen (Stand 2026-11-08)
 - Alert-Engine implementiert (Thread in `otterpi.observer.service`)
 - Admin: 5 Tabs (Rooms, Alarm Limits, Mail, Notifications, Alerts) mit Formular-UI
 - Rate-of-Change, Routing, `contact_open` in der Alert-Engine
@@ -570,3 +570,6 @@ Der E2E-Datenpfad (LoggerPi → OtterPi → SQLite) ist praktisch verifiziert:
 - Acknowledge-Verhalten implementiert und getestet
 - Alert-Resolve (Active vs. Resolved) implementiert und getestet
 - Admin-Alerts-Tab mit Status-Chip und Filter „Only active"
+- Message-Templates (`messages.json`) implementiert und getestet
+- Message und Subject mit Raum/Gerät/Measurement-Name
+- Admin-Messages-Tab mit Formular-UI

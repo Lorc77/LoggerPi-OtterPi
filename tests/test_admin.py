@@ -72,7 +72,13 @@ def test_admin_config_returns_json(tmp_path):
         with urlopen(f"http://127.0.0.1:{server.server_port}/api/admin/config") as resp:
             assert resp.status == 200
             data = json.loads(resp.read().decode("utf-8"))
-        assert set(data) == {"rooms", "alarm_limits", "mail", "notifications"}
+        assert set(data) == {
+            "rooms",
+            "alarm_limits",
+            "mail",
+            "notifications",
+            "messages",
+        }
     finally:
         server.shutdown()
         thread.join()
@@ -436,3 +442,87 @@ def test_get_alerts_includes_resolved_at(tmp_path):
         server.shutdown()
         thread.join()
         server.server_close()
+
+
+def test_get_messages_returns_defaults(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    server = _server(store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        with urlopen(f"http://127.0.0.1:{server.server_port}/api/admin/messages") as resp:
+            assert resp.status == 200
+            data = json.loads(resp.read().decode("utf-8"))
+        assert data["critical_max"] == "too high"
+        assert data["loggerpi_offline"] == "offline"
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_put_messages_saves(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    server = _server(store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        payload = {
+            "critical_max": "way too hot",
+            "critical_min": "too low",
+            "warning_max": "too high",
+            "warning_min": "too low",
+            "rate_of_change": "rate of change too high",
+            "invalid": "invalid",
+            "stale": "stale",
+            "battery_low": "low",
+            "door_open": "open",
+            "contact_open": "open",
+            "alarm": "alarm",
+            "loggerpi_offline": "offline",
+        }
+        req = _put(
+            f"http://127.0.0.1:{server.server_port}/api/admin/messages",
+            payload,
+        )
+        with urlopen(req) as resp:
+            assert resp.status == 200
+        from config_store import load_messages
+
+        assert load_messages()["critical_max"] == "way too hot"
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_admin_page_contains_messages_tab(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    server = _server(store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        with urlopen(f"http://127.0.0.1:{server.server_port}/admin") as resp:
+            html = resp.read().decode("utf-8")
+        assert "Messages" in html
+        assert "loadMessages" in html
+        assert "saveMessages" in html
+        assert "toggleMessagesJson" in html
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_render_admin_contains_messages_json():
+    from admin import render_admin
+
+    config = {
+        "rooms": {"rooms": {}},
+        "alarm_limits": {"sensors": {}, "states": {}, "system": {}},
+        "mail": {},
+        "notifications": {"channels": []},
+        "messages": {"critical_max": "too high"},
+    }
+    html = render_admin(config)
+    assert "too high" in html
