@@ -506,6 +506,19 @@ textarea.json-editor {{
 .states-table td:first-child {{
     padding-right: 24px;
 }}
+.checkbox-row {{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 6px 0;
+}}
+.checkbox-row label {{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    cursor: pointer;
+}}
 </style>
 </head>
 <body>
@@ -936,34 +949,24 @@ async function loadAlarmLimits() {{
         `;
         list.appendChild(systemCard);
 
-        // Raum-Kacheln mit Geräte-Kacheln
+        // Flache Liste von Geräte-Kacheln
         for (const [roomId, room] of Object.entries(rooms)) {{
-            const roomCard = document.createElement('div');
-            roomCard.className = 'room-card';
-            roomCard.dataset.roomId = roomId;
-
-            let devicesHtml = '';
             for (const device of room.devices) {{
-                devicesHtml += `
-                    <div class="device-card" data-device-key="${{device.key}}">
-                        <h3>${{device.name}}</h3>
-                        <div class="device-meta">Key: ${{device.key}} · Type: ${{device.type}}</div>
-                        ${{buildDeviceContent(device, sensors, states)}}
-                    </div>
+                const card = document.createElement('div');
+                card.className = 'device-card';
+                card.dataset.deviceKey = device.key;
+                card.innerHTML = `
+                    <h3>${{room.icon || ''}} ${{room.name}} · ${{device.name}}</h3>
+                    <div class="device-meta">Key: ${{device.key}} · Type: ${{device.type}}</div>
+                    ${{buildDeviceContent(device, sensors, states)}}
                 `;
+                list.appendChild(card);
+                const toTop = document.createElement('div');
+                toTop.className = 'to-top';
+                toTop.innerHTML = `<button class="btn btn-primary btn-small"
+                    onclick="window.scrollTo({{top: 0, behavior: 'smooth'}})">↑ To Top</button>`;
+                list.appendChild(toTop);
             }}
-
-            roomCard.innerHTML = `
-                <h3>${{room.icon || ''}} ${{room.name}}</h3>
-                ${{devicesHtml}}
-            `;
-            list.appendChild(roomCard);
-
-            const toTop = document.createElement('div');
-            toTop.className = 'to-top';
-            toTop.innerHTML = `<button class="btn btn-primary btn-small"
-                onclick="window.scrollTo({{top: 0, behavior: 'smooth'}})">↑ To Top</button>`;
-            list.appendChild(toTop);
         }}
         status.textContent = 'Loaded.';
     }} catch (e) {{
@@ -1009,7 +1012,11 @@ async function saveSystemConfig() {{
 async function showEditLimitsForm(deviceKey, deviceType) {{
     const card = document.querySelector(`[data-device-key="${{deviceKey}}"]`);
     if (!card) return;
-    if (card.querySelector('.inline-form')) return;
+    const existingForm = card.querySelector('.inline-form');
+    if (existingForm) {{
+        existingForm.remove();
+        return;
+    }}
     const resp = await fetch('/api/admin/config');
     const result = await resp.json();
     const alarmLimits = result.alarm_limits;
@@ -1454,7 +1461,9 @@ function showAddChannelForm() {{
             <option value="discord">discord</option>
             <option value="slack">slack</option>
         </select></label>
-        <label>Enabled: <input type="checkbox" id="new-channel-enabled" checked></label>
+        <div class="checkbox-row">
+            <label><input type="checkbox" id="new-channel-enabled" checked> Enabled</label>
+        </div>
         <label>Severities:</label>
         <div class="severity-checkboxes">
             <label><input type="checkbox" id="new-channel-critical" checked> critical</label>
@@ -1592,8 +1601,10 @@ async function editChannel(index) {{
                     ${{channel.format === 'discord' ? 'selected' : ''}}>discord</option>
             <option value="slack" ${{channel.format === 'slack' ? 'selected' : ''}}>slack</option>
         </select></label>
-        <label>Enabled: <input type="checkbox" id="edit-channel-enabled"
-                ${{channel.enabled ? 'checked' : ''}}></label>
+        <div class="checkbox-row">
+            <label><input type="checkbox" id="edit-channel-enabled"
+                    ${{channel.enabled ? 'checked' : ''}}> Enabled</label>
+        </div>
         <label>Severities:</label>
         <div class="severity-checkboxes">
             <label><input type="checkbox" id="edit-channel-critical"
