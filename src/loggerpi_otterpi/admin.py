@@ -879,7 +879,7 @@ function buildDeviceContent(device, sensors, states) {{
             : '<span class="chip chip-off">not conf.</span>';
         const rateChip = rate !== undefined
             ? `<span class="chip chip-info">Rate ${{rate}}/h</span>`
-            : '<span class="chip chip-off">not conf.</span>';
+            : '<span class="chip chip-off">not configured</span>';
         measurementsHtml += `
             <div class="device-row">
                 <span class="name">${{name}}</span>
