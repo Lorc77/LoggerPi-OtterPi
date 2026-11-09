@@ -439,9 +439,9 @@ textarea.json-editor {{
 }}
 .chip {{
     display: inline-block;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: .75rem;
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-size: .7rem;
     font-weight: 600;
     white-space: nowrap;
 }}
@@ -476,15 +476,14 @@ textarea.json-editor {{
     font-size: .9rem;
 }}
 .device-row {{
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 140px 80px auto auto auto;
     gap: 6px;
+    align-items: center;
     padding: 3px 0;
     font-size: .85rem;
 }}
 .device-row .name {{
-    min-width: 140px;
     color: #d1d5db;
 }}
 .severity-checkboxes {{
@@ -532,6 +531,14 @@ textarea.json-editor {{
     .device-grid {{
         grid-template-columns: 1fr;
     }}
+}}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {{
+    -webkit-appearance: none;
+    margin: 0;
+}}
+input[type="number"] {{
+    -moz-appearance: textfield;
 }}
 </style>
 </head>
