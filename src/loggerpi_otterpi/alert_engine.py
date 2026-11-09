@@ -296,6 +296,10 @@ class AlertEngine(threading.Thread):
                         subject=self._build_subject(device_key, "stale", "warning", sensor_map),
                     )
                 )
+            else:
+                # Gerät ist wieder normal → Alerts resolven
+                self._alert_store.resolve(f"{device_key}:stale:warning")
+                self._alert_store.resolve(f"{device_key}:invalid:critical")
 
         # Pro Measurement: Grenzwerte und rate_of_change
         for sensor_key, limits in sensors.items():
@@ -312,11 +316,6 @@ class AlertEngine(threading.Thread):
 
             if value is None:
                 continue
-
-            # Sensor ist wieder valid → stale/invalid-Alerts resolven
-            device_key = sensor_key.split(".")[0]
-            self._alert_store.resolve(f"{device_key}:stale:warning")
-            self._alert_store.resolve(f"{device_key}:invalid:critical")
 
             for rule, threshold, severity in (
                 ("critical_min", limits.get("critical_min"), "critical"),

@@ -786,3 +786,42 @@ class TestStaleInvalidPerDevice:
         invalid_alerts = [a for a in alerts if a.rule == "invalid"]
         assert len(invalid_alerts) == 1
         assert invalid_alerts[0].sensor == "weatherhub_015f9410f3eb"
+
+
+class TestStaleInvalidPerDeviceMixed:
+    def test_invalid_one_channel_keeps_alert_active(self, tmp_path):
+        engine = _engine(tmp_path)
+        _store_batch(
+            engine._store,
+            measurements={
+                "weatherhub_015f9410f3eb.temperature_1": _measurement(23.0),
+                "weatherhub_015f9410f3eb.temperature_2": _measurement(
+                    None, validity="invalid", validity_reason="overflow"
+                ),
+            },
+        )
+        sensors = {
+            "weatherhub_015f9410f3eb.temperature_1": {"enabled": True},
+            "weatherhub_015f9410f3eb.temperature_2": {"enabled": True},
+        }
+        alerts = engine._check_sensors(engine._store.latest().to_dict(), sensors)
+        invalid_alerts = [a for a in alerts if a.rule == "invalid"]
+        assert len(invalid_alerts) == 1
+        assert invalid_alerts[0].sensor == "weatherhub_015f9410f3eb"
+
+    def test_invalid_resolved_when_all_channels_valid(self, tmp_path):
+        engine = _engine(tmp_path)
+        _store_batch(
+            engine._store,
+            measurements={
+                "weatherhub_015f9410f3eb.temperature_1": _measurement(23.0),
+                "weatherhub_015f9410f3eb.temperature_2": _measurement(-25.0),
+            },
+        )
+        sensors = {
+            "weatherhub_015f9410f3eb.temperature_1": {"enabled": True},
+            "weatherhub_015f9410f3eb.temperature_2": {"enabled": True},
+        }
+        alerts = engine._check_sensors(engine._store.latest().to_dict(), sensors)
+        invalid_alerts = [a for a in alerts if a.rule == "invalid"]
+        assert len(invalid_alerts) == 0
