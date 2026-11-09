@@ -331,7 +331,7 @@ def test_ntfy_uses_subject_if_set(monkeypatch):
         subject="[CRITICAL] Temperature — R1304 / Memmert HPP260",
     )
     assert n.send(alert) is True
-    assert captured["title"] == "[CRITICAL] Temperature — R1304 / Memmert HPP260"
+    assert captured["title"] == "[CRITICAL] Temperature - R1304 / Memmert HPP260"
 
 
 def test_ntfy_falls_back_to_sensor(monkeypatch):

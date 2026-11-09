@@ -4,11 +4,34 @@ Reine Standardbibliothek: smtplib, urllib.request, json.
 """
 
 import json
+import logging
 import smtplib
 from dataclasses import dataclass
 from email.message import EmailMessage
 from typing import Optional
 from urllib.request import Request, urlopen
+
+LOGGER = logging.getLogger(__name__)
+
+
+def _ascii_safe(text: str) -> str:
+    """Ersetzt Nicht-ASCII-Zeichen durch ASCII-Äquivalente."""
+    replacements = {
+        "·": "-",
+        "—": "-",
+        "–": "-",
+        "ä": "ae",
+        "ö": "oe",
+        "ü": "ue",
+        "Ä": "Ae",
+        "Ö": "Oe",
+        "Ü": "Ue",
+        "ß": "ss",
+    }
+    for src, dst in replacements.items():
+        text = text.replace(src, dst)
+    # Fallback: alle verbleibenden Nicht-ASCII-Zeichen ersetzen
+    return text.encode("ascii", errors="replace").decode("ascii")
 
 
 @dataclass(frozen=True)
@@ -71,7 +94,8 @@ class NtfyNotifier:
     def send(self, alert: Alert) -> bool:
         if alert.severity not in self.severities:
             return True
-        headers = {"Title": alert.subject or f"{alert.severity.upper()}: {alert.sensor}"}
+        title = alert.subject or f"{alert.severity.upper()}: {alert.sensor}"
+        headers = {"Title": _ascii_safe(title)}
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
         req = Request(
@@ -82,8 +106,20 @@ class NtfyNotifier:
         )
         try:
             with urlopen(req, timeout=10) as resp:
-                return resp.status == 200
-        except Exception:
+                if resp.status != 200:
+                    LOGGER.warning(
+                        "NtfyNotifier: HTTP %s for %s",
+                        resp.status,
+                        alert.dedup_key,
+                    )
+                    return False
+                return True
+        except Exception as exc:
+            LOGGER.warning(
+                "NtfyNotifier: %s for %s",
+                exc,
+                alert.dedup_key,
+            )
             return False
 
 
