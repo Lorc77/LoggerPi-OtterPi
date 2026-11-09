@@ -16,10 +16,10 @@
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.11.17` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.11.17` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
+| LoggerPi | `v1.11.18` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.11.18` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
 
-LoggerPi und OtterPi laufen produktiv auf Version `v1.11.17`.
+LoggerPi und OtterPi laufen produktiv auf Version `v1.11.18`.
 
 ## Phase A – Config-Admin (abgeschlossen, v1.8.0)
 
@@ -348,6 +348,34 @@ Deploy + Test (v1.11.16). Danach: Dashboard-Limits (3.6), Hysterese (3.8).
 ### Nächster Schritt
 
 Deploy + Test (v1.11.17). Danach: Dashboard-Limits (3.6), Hysterese (3.8).
+
+## Phase C – Alert-Message + Chip-Polish (abgeschlossen, v1.11.18)
+
+**Stand:** 2026-11-09
+
+### Umgesetzt
+
+- **Alert-Messages:** Werte auf 1 Nachkommastelle gerundet. Einheiten
+  umgewandelt (`celsius` → `°C`, `percent` → `%`).
+- **Chip-Texte:** Pfeile für Min/Max (`Warn ↓ 20 °C · ↑ 23 °C`,
+  `Crit ↓ 18 °C · ↑ 28 °C`, `Rate ↕ 1 °C/h`). Nicht konfigurierte Chips:
+  `Warn n/c`, `Crit n/c`, `Rate n/c`.
+- **`resolve`-Fix:** Alert bleibt aktiv, wenn mindestens ein Channel
+  `invalid`/`stale` ist. `resolve` wird nur aufgerufen, wenn alle Channels
+  `valid` sind.
+- **`UNIT_LABELS`/`unitLabel` in `admin.py`:** Einheiten in Chips und
+  Messwerten umgewandelt.
+- **`max-content` für State-Chips:** Chip nimmt nur so viel Platz wie nötig.
+- **„not applicable" für leere States:** Statt leerer Sektion.
+- **Doppelte `.device-row`-Definition bereinigt.**
+
+### Teststand
+
+430 Tests, alle grün.
+
+### Nächster Schritt
+
+Deploy + Test (v1.11.18). Danach: Dashboard-Limits (3.6), Hysterese (3.8).
 
 ---
 

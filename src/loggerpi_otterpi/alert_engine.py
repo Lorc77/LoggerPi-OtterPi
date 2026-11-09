@@ -20,6 +20,14 @@ from sensor_schemas import MEASUREMENT_DISPLAY_NAMES
 
 LOGGER = logging.getLogger(__name__)
 
+UNIT_LABELS = {
+    "celsius": "°C",
+    "percent": "%",
+    "mbar": "mbar",
+    "ppm": "ppm",
+    "rpm": "rpm",
+}
+
 
 class AlertEngine(threading.Thread):
     def __init__(
@@ -154,9 +162,10 @@ class AlertEngine(threading.Thread):
             return f"{prefix} — {rule_text}"
         if value is not None and threshold is not None:
             operator = ">" if rule.endswith("_max") else "<"
+            unit_label = UNIT_LABELS.get(unit, unit)
             return (
                 f"{prefix} — {measurement} {rule_text}: "
-                f"{value} {unit} {operator} {threshold} {unit}"
+                f"{value:.1f} {unit_label} {operator} {threshold:.1f} {unit_label}"
             )
         return f"{prefix} — {measurement} {rule_text}"
 

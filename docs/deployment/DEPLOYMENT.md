@@ -454,6 +454,19 @@ Limits-Tab (Schwellenwerte in Minuten, Checkbox für Warn-Alert).
 - **Chip-Texte gekürzt:** „Warn", „Crit", „not conf.".
 - **Einheiten:** „celsius" → „°C", „percent" → „%".
 
+### Phase C – Alert-Message + Chip-Polish (v1.11.18)
+
+- **Alert-Messages:** Werte auf 1 Nachkommastelle gerundet, Einheiten
+  umgewandelt (`°C`, `%`).
+- **Chip-Texte:** Pfeile für Min/Max (`Warn ↓ 20 °C · ↑ 23 °C`,
+  `Crit ↓ 18 °C · ↑ 28 °C`, `Rate ↕ 1 °C/h`). Nicht konfiguriert:
+  `Warn n/c`, `Crit n/c`, `Rate n/c`.
+- **`resolve`-Fix:** Alert bleibt aktiv, wenn mindestens ein Channel
+  `invalid`/`stale` ist.
+- **`UNIT_LABELS`/`unitLabel` in `admin.py`.**
+- **`max-content` für State-Chips.**
+- **„not applicable" für leere States.**
+
 ---
 
 ## 5. OtterPi HTTP Listener
@@ -774,7 +787,7 @@ Repository:
     main
 
 Version:
-    v1.11.17
+    v1.11.18
 
 Letzter bekannter Release-Commit:
     (wird beim Deploy gesetzt)

@@ -1,8 +1,8 @@
 # Wiedereinstiegsprotokoll – LoggerPi-OtterPi (Stand v1.11.14)
 
 **Projekt:** LoggerPi-OtterPi
-**Aktuelle Version:** v1.11.17 (deployed auf OtterPi)
-**Teststand:** 428 passed, Ruff/Format clean
+**Aktuelle Version:** v1.11.18 (deployed auf OtterPi)
+**Teststand:** 430 passed, Ruff/Format clean
 **Stand:** 2026-11-09
 
 ---
@@ -113,6 +113,19 @@ OtterPi (Python 3.13.5, User=makki)
 - **Nested State Keys Fix:** Regex erlaubt mehrere Punkte.
 - **Chip-Texte gekürzt:** „Warn", „Crit", „not conf.".
 - **Einheiten:** „celsius" → „°C", „percent" → „%".
+
+### v1.11.18 – Alert-Message + Chip-Polish
+
+- **Alert-Messages:** Werte auf 1 Nachkommastelle gerundet, Einheiten
+  umgewandelt (`°C`, `%`).
+- **Chip-Texte:** Pfeile für Min/Max (`Warn ↓ 20 °C · ↑ 23 °C`,
+  `Crit ↓ 18 °C · ↑ 28 °C`, `Rate ↕ 1 °C/h`). Nicht konfiguriert:
+  `Warn n/c`, `Crit n/c`, `Rate n/c`.
+- **`resolve`-Fix:** Alert bleibt aktiv, wenn mindestens ein Channel
+  `invalid`/`stale` ist.
+- **`UNIT_LABELS`/`unitLabel` in `admin.py`.**
+- **`max-content` für State-Chips.**
+- **„not applicable" für leere States.**
 
 ---
 

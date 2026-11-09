@@ -148,8 +148,8 @@ PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.11.17` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.11.17` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
+| LoggerPi | `v1.11.18` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.11.18` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
 
 Der E2E-Datenpfad (LoggerPi → nginx → OtterPi → SQLite) ist verifiziert.
 
@@ -167,10 +167,10 @@ Datenquellen:
 Admin (LAN-only): `https://observer.makki.route64.de/admin`
 - Rooms-Tab: Formular-UI (Raum-/Geräte-Verwaltung, Raumwechsel, Inline-Formulare)
 - Alarm Limits-Tab: Raum-Kacheln mit Geräte-Kacheln, Limits als farbige Chips
-  (Warn gelb, Crit rot, Rate blau, not conf. grau), letzte Messwerte pro
-  Measurement, „Show all"-Filter, Stale/Invalid-Alerts pro Gerät
-  konfigurierbar, Edit Limits pro Gerät, System-Karte für
-  LoggerPi-Offline-Erkennung
+  (Warn ↓ 20 °C · ↑ 23 °C, Crit ↓ 18 °C · ↑ 28 °C, Rate ↕ 1 °C/h,
+  Warn/Crit/Rate n/c), letzte Messwerte pro Measurement, „Show all"-Filter,
+  Stale/Invalid-Alerts pro Gerät konfigurierbar, Edit Limits pro Gerät,
+  System-Karte für LoggerPi-Offline-Erkennung
 - Mail-Tab: Formular-UI (SMTP, Empfänger, Routing, Dedup, Quiet Hours)
 - Notifications-Tab: Formular-UI (ntfy, webhook, Severity-Auswahl pro Kanal)
 - Messages-Tab: Formular-UI (globale Regel-Texte, gruppiert in Measurements,
@@ -306,18 +306,18 @@ pytest
 git diff --check
 ```
 
-Aktueller Stand: **428 Tests**, alle bestehen.
+Aktueller Stand: **430 Tests**, alle bestehen.
 
 ---
 
-Aktuelle Version: **v1.11.17**
+Aktuelle Version: **v1.11.18**
 
 Die Version wird geführt über:
 
-- `pyproject.toml` → `version = "1.11.17"`
-- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.11.17"`
-- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.11.17"`
-- Git-Tag `v1.11.17`
+- `pyproject.toml` → `version = "1.11.18"`
+- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.11.18"`
+- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.11.18"`
+- Git-Tag `v1.11.18`
 
 ---
 

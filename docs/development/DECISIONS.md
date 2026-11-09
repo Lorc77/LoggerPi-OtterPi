@@ -2730,6 +2730,89 @@ Nested State Keys sind notwendig für `switches.a-d` und `lights.day/uv/led`.
 
 ---
 
+## DEC-088 — Alert-Messages runden und Einheiten umwandeln
+
+**Status:** Accepted
+**Datum:** 2026-11-09
+
+### Kontext
+
+Die Alert-Messages zeigten Werte mit vielen Nachkommastellen (z. B.
+`30.123 °C`) und rohe Einheiten (`celsius`, `percent`).
+
+### Entscheidung
+
+Werte werden auf 1 Nachkommastelle gerundet. Einheiten werden umgewandelt:
+`celsius` → `°C`, `percent` → `%`, `mbar`/`ppm`/`rpm` bleiben.
+
+### Begründung
+
+Lesbarkeit. `30.1 °C` ist besser lesbar als `30.123 °C`.
+
+### Konsequenz
+
+`alert_engine.py` `_build_message` erweitert. `UNIT_LABELS` in
+`alert_engine.py` definiert.
+
+---
+
+## DEC-089 — Chip-Texte mit Pfeilen
+
+**Status:** Accepted
+**Datum:** 2026-11-09
+
+### Kontext
+
+Die Chips zeigten `Warn 20–23 °C`, was die Richtung (Min/Max) nicht klar
+machte.
+
+### Entscheidung
+
+Pfeile für Min/Max: `Warn ↓ 20 °C · ↑ 23 °C`, `Crit ↓ 18 °C · ↑ 28 °C`,
+`Rate ↕ 1 °C/h`. Nicht konfigurierte Chips: `Warn n/c`, `Crit n/c`,
+`Rate n/c`.
+
+### Begründung
+
+Klarere Lesbarkeit. `↓` = Min, `↑` = Max, `↕` = beide Richtungen.
+
+### Konsequenz
+
+`admin.py` `buildDeviceContent` erweitert.
+
+---
+
+## DEC-090 — `resolve`-Fix: Alert bleibt aktiv, wenn ein Channel invalid ist
+
+**Status:** Accepted
+**Datum:** 2026-11-09
+
+### Kontext
+
+Nach dem Umbau auf „stale/invalid pro Gerät" wurde der `resolve`-Aufruf
+noch pro Measurement ausgeführt. Wenn `temperature_1` `valid` war und
+`temperature_2` `invalid`, wurde der Geräte-Alert resolved, obwohl der
+Zustand noch aktiv war.
+
+### Entscheidung
+
+`resolve` wird nur aufgerufen, wenn **alle** Channels eines Geräts `valid`
+sind. Wenn mindestens ein Channel `invalid`/`stale` ist, bleibt der Alert
+aktiv.
+
+### Begründung
+
+Ein einzelner Sensor am Gerät kann `invalid` sein (z. B. Kabelsensor
+defekt), während die anderen `valid` sind. Der Alert soll aktiv bleiben,
+solange das Problem besteht.
+
+### Konsequenz
+
+`alert_engine.py` `_check_sensors` umgebaut: `resolve` aus der
+Measurement-Schleife entfernt, in die Geräte-Logik verschoben.
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:
