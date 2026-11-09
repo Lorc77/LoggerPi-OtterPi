@@ -414,6 +414,15 @@ Limits-Tab (Schwellenwerte in Minuten, Checkbox für Warn-Alert).
 - **Admin:** Neuer Messages-Tab mit Formular-UI.
 - **`otterpi.py`:** `GET /api/admin/messages`, `PUT /api/admin/messages`.
 
+### Phase C – Resolve-Button + UI-Polish (v1.11.14)
+
+- **Resolve-Button:** Manuelles Resolven eines Alerts im Admin-Alerts-Tab.
+- **Alert-Tab als Default:** Der Alerts-Tab ist jetzt der erste Tab.
+- **Toast-Notification:** Alle Save-/Delete-/Acknowledge-/Resolve-Aktionen
+  zeigen eine kurze Toast-Benachrichtigung.
+- **Bugfixes:** Stale-/Invalid-Alerts werden resolved, wenn der Sensor wieder
+  `valid` ist. `is_acknowledged()` prüft nur aktive Alerts.
+
 ---
 
 ## 5. OtterPi HTTP Listener
@@ -734,7 +743,7 @@ Repository:
     main
 
 Version:
-    v1.11.13
+    v1.11.14
 
 Letzter bekannter Release-Commit:
     (wird beim Deploy gesetzt)

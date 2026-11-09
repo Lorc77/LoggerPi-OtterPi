@@ -114,6 +114,44 @@ class OtterPiHandler(BaseHTTPRequestHandler):
             self._send_json(200, {"status": "acknowledged"})
             return
 
+        if self.path.startswith("/api/admin/alerts/") and self.path.endswith("/resolve"):
+            parts = self.path.split("/")
+            if len(parts) != 6:
+                self.send_error(404)
+                return
+            try:
+                alert_id = int(parts[4])
+            except ValueError:
+                self.send_error(400)
+                return
+            if self.alert_store is None:
+                self._send_json(
+                    404,
+                    {
+                        "status": "error",
+                        "error": {
+                            "code": "not_found",
+                            "message": "Alert store not configured.",
+                        },
+                    },
+                )
+                return
+            success = self.alert_store.resolve_by_id(alert_id)
+            if not success:
+                self._send_json(
+                    404,
+                    {
+                        "status": "error",
+                        "error": {
+                            "code": "not_found",
+                            "message": "Alert not found or already resolved.",
+                        },
+                    },
+                )
+                return
+            self._send_json(200, {"status": "resolved"})
+            return
+
         if self.path == "/api/admin/test-mail":
             try:
                 mail = load_mail()

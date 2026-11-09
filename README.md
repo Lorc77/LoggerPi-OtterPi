@@ -148,8 +148,8 @@ PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.11.13` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.11.13` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
+| LoggerPi | `v1.11.14` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.11.14` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
 
 Der E2E-Datenpfad (LoggerPi → nginx → OtterPi → SQLite) ist verifiziert.
 
@@ -172,12 +172,14 @@ Admin (LAN-only): `https://observer.makki.route64.de/admin`
 - Notifications-Tab: Formular-UI (ntfy, webhook)
 - Messages-Tab: Formular-UI (globale Regel-Texte, gruppiert in Measurements,
   States, System)
-- Alerts-Tab: Alert History mit Acknowledge-Button, Status-Chip
-  („Active" / „Resolved"), Filter „Only unacknowledged" / „Only active"
+- Alerts-Tab (Default-Tab): Alert History mit Acknowledge-Button,
+  Resolve-Button, Status-Chip („Active" / „Resolved"), Filter
+  „Only unacknowledged" / „Only active"
 - Test-Mail-Button im Mail-Tab
 - JSON-Editor als „Advanced"-Toggle (alle Tabs)
 - JSON-Validierung, `.bak`, atomares Schreiben
 - Statusleuchte im Header (LoggerPi-Offline-Status)
+- Toast-Notification bei allen Save-/Delete-/Acknowledge-/Resolve-Aktionen
 
 ## Alert-Engine
 
@@ -301,18 +303,18 @@ pytest
 git diff --check
 ```
 
-Aktueller Stand: **395 Tests**, alle bestehen.
+Aktueller Stand: **399 Tests**, alle bestehen.
 
 ---
 
-Aktuelle Version: **v1.11.13**
+Aktuelle Version: **v1.11.14**
 
 Die Version wird geführt über:
 
-- `pyproject.toml` → `version = "1.11.13"`
-- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.11.13"`
-- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.11.13"`
-- Git-Tag `v1.11.13`
+- `pyproject.toml` → `version = "1.11.14"`
+- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.11.14"`
+- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.11.14"`
+- Git-Tag `v1.11.14`
 
 ---
 

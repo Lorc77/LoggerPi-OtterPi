@@ -99,7 +99,6 @@ class AlertEngine(threading.Thread):
         # LoggerPi ist wieder online → Offline-Alerts resolven
         for severity in ("critical", "warning"):
             dedup_key = f"system:loggerpi_offline:{severity}"
-            self._alert_store.reset_acknowledged(dedup_key)
             self._alert_store.resolve(dedup_key)
 
         batch = self._store.latest()
@@ -281,6 +280,10 @@ class AlertEngine(threading.Thread):
             if value is None:
                 continue
 
+            # Sensor ist wieder valid → stale/invalid-Alerts resolven
+            self._alert_store.resolve(f"{sensor_key}:stale:warning")
+            self._alert_store.resolve(f"{sensor_key}:invalid:critical")
+
             for rule, threshold, severity in (
                 ("critical_min", limits.get("critical_min"), "critical"),
                 ("critical_max", limits.get("critical_max"), "critical"),
@@ -332,7 +335,6 @@ class AlertEngine(threading.Thread):
                     )
                 else:
                     # Wert wieder innerhalb der Grenzen → Alert resolven
-                    self._alert_store.reset_acknowledged(dedup_key)
                     self._alert_store.resolve(dedup_key)
 
             rate_limit = limits.get("rate_of_change_max_per_hour")
@@ -399,21 +401,13 @@ class AlertEngine(threading.Thread):
 
             # State ist wieder normal → Alert resolven
             if state_name == "alarms" and isinstance(value, list) and not value:
-                dedup_key = f"{state_key}:alarm:critical"
-                self._alert_store.reset_acknowledged(dedup_key)
-                self._alert_store.resolve(dedup_key)
+                self._alert_store.resolve(f"{state_key}:alarm:critical")
             elif state_name == "battery_low" and value is False:
-                dedup_key = f"{state_key}:battery_low:warning"
-                self._alert_store.reset_acknowledged(dedup_key)
-                self._alert_store.resolve(dedup_key)
+                self._alert_store.resolve(f"{state_key}:battery_low:warning")
             elif state_name == "door_open" and value is False:
-                dedup_key = f"{state_key}:door_open:warning"
-                self._alert_store.reset_acknowledged(dedup_key)
-                self._alert_store.resolve(dedup_key)
+                self._alert_store.resolve(f"{state_key}:door_open:warning")
             elif state_name == "contact_open" and value is False:
-                dedup_key = f"{state_key}:contact_open:warning"
-                self._alert_store.reset_acknowledged(dedup_key)
-                self._alert_store.resolve(dedup_key)
+                self._alert_store.resolve(f"{state_key}:contact_open:warning")
 
             if state_name == "alarms" and isinstance(value, list):
                 for alarm in value:

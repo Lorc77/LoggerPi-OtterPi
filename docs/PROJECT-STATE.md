@@ -16,10 +16,10 @@
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.11.13` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.11.13` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
+| LoggerPi | `v1.11.14` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.11.14` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
 
-LoggerPi und OtterPi laufen produktiv auf Version `v1.11.13`.
+LoggerPi und OtterPi laufen produktiv auf Version `v1.11.14`.
 
 ## Phase A – Config-Admin (abgeschlossen, v1.8.0)
 
@@ -227,6 +227,34 @@ Alarm Limits (3.2), Dashboard-Limits (3.6), Rate-of-Change im Admin (3.7).
 ### Nächster Schritt
 
 Deploy + Test (v1.11.13). Danach: UI-Umbau Alarm Limits (3.2),
+Dashboard-Limits (3.6), Rate-of-Change im Admin (3.7).
+
+## Phase C – Resolve-Button + UI-Polish (abgeschlossen, v1.11.14)
+
+**Stand:** 2026-11-08
+
+### Umgesetzt
+
+- **Resolve-Button im Admin-Alerts-Tab:** Manuelles Resolven eines Alerts
+  (per ID). `AlertStore.resolve_by_id()`, `POST /api/admin/alerts/<id>/resolve`.
+- **Alert-Tab als Default:** Der Alerts-Tab ist jetzt der erste Tab und wird
+  beim Öffnen des Admins geladen (statt Rooms).
+- **Toast-Notification:** Alle Save-/Delete-/Acknowledge-/Resolve-Aktionen
+  zeigen eine kurze Toast-Benachrichtigung (grün für Erfolg, rot für Fehler).
+- **Bugfixes:**
+  - Stale-/Invalid-Alerts werden resolved, wenn der Sensor wieder `valid` ist.
+  - `is_acknowledged()` prüft nur aktive (nicht resolved) Alerts. Ein
+    resolveder Alert blockiert keinen neuen Alert mehr.
+  - `reset_acknowledged()` wird nicht mehr beim Resolve aufgerufen. Ein
+    resolveder Alert bleibt acknowledged.
+
+### Teststand
+
+399 Tests, alle grün.
+
+### Nächster Schritt
+
+Deploy + Test (v1.11.14). Danach: UI-Umbau Alarm Limits (3.2),
 Dashboard-Limits (3.6), Rate-of-Change im Admin (3.7).
 
 ---

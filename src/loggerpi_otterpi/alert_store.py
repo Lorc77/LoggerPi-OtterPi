@@ -89,10 +89,11 @@ class AlertStore:
         return row is not None
 
     def is_acknowledged(self, dedup_key: str) -> bool:
-        """True, wenn der letzte Alert mit diesem dedup_key acknowledged ist."""
+        """True, wenn der letzte aktive Alert mit diesem dedup_key acknowledged ist."""
         with self._connect() as connection:
             row = connection.execute(
-                "SELECT acknowledged FROM alerts WHERE dedup_key = ? ORDER BY id DESC LIMIT 1",
+                "SELECT acknowledged FROM alerts WHERE dedup_key = ? "
+                "AND resolved_at IS NULL ORDER BY id DESC LIMIT 1",
                 (dedup_key,),
             ).fetchone()
         if row is None:
@@ -116,6 +117,16 @@ class AlertStore:
                 "UPDATE alerts SET resolved_at = ? WHERE dedup_key = ? AND resolved_at IS NULL",
                 (resolved_at, dedup_key),
             )
+
+    def resolve_by_id(self, alert_id: int) -> bool:
+        """Setzt resolved_at für einen bestimmten Alert (per ID)."""
+        resolved_at = datetime.now(timezone.utc).isoformat()
+        with self._connect() as connection:
+            cursor = connection.execute(
+                "UPDATE alerts SET resolved_at = ? WHERE id = ? AND resolved_at IS NULL",
+                (resolved_at, alert_id),
+            )
+            return cursor.rowcount > 0
 
     def is_active(self, dedup_key: str) -> bool:
         """True, wenn der letzte Alert mit diesem dedup_key noch nicht resolved ist."""

@@ -2266,6 +2266,93 @@ angepasst. `WebhookNotifier` bleibt unverändert (nutzt `alert.message`).
 
 ---
 
+## DEC-072 — Manueller Resolve-Button im Admin
+
+**Status:** Accepted
+**Datum:** 2026-11-08
+
+### Kontext
+
+Alerts werden automatisch resolved, wenn der Zustand wieder normal ist. Aber
+wenn ein Sensor aus dem Batch verschwindet (z. B. weil die Batterie leer ist),
+wird der Alert nie resolved. Ein automatischer „Sweep" wäre gefährlich, weil
+er auch Alerts resolven würde, deren Problem schlimmer geworden ist.
+
+### Entscheidung
+
+Ein manueller Resolve-Button im Admin-Alerts-Tab. `AlertStore.resolve_by_id()`
+setzt `resolved_at` für einen bestimmten Alert (per ID).
+`POST /api/admin/alerts/<id>/resolve`.
+
+### Begründung
+
+Der Nutzer entscheidet explizit, ob ein Alert erledigt ist. Kein automatischer
+Sweep, der falsch-positive Resolves erzeugen könnte.
+
+### Konsequenz
+
+`alert_store.py` um `resolve_by_id()` erweitert. `otterpi.py` um den Endpoint.
+`admin.py` um den Resolve-Button (verschwindet, wenn resolved).
+
+---
+
+## DEC-073 — Alert-Tab als Default-Tab
+
+**Status:** Accepted
+**Datum:** 2026-11-08
+
+### Kontext
+
+Der Rooms-Tab war bisher der Default-Tab. In Produktion schaut man aber am
+häufigsten nach Alerts.
+
+### Entscheidung
+
+Der Alerts-Tab ist jetzt der erste Tab und der Default. Beim Öffnen des Admins
+wird `loadAlerts()` aufgerufen (statt `loadRooms()`).
+
+### Begründung
+
+Der Alert-Tab ist die wichtigste Ansicht für den täglichen Betrieb. Man sieht
+sofort, ob es Probleme gibt.
+
+### Konsequenz
+
+Tab-Reihenfolge: Alerts, Rooms, Alarm Limits, Mail, Notifications, Messages.
+Der Alerts-Tab-Button und das Alerts-Panel haben `class="active"`.
+
+---
+
+## DEC-074 — Toast-Notification für Save-Buttons
+
+**Status:** Accepted
+**Datum:** 2026-11-08
+
+### Kontext
+
+Die Save-Buttons setzten bisher nur `status.textContent = 'Saved.'`. Das war
+leicht zu übersehen.
+
+### Entscheidung
+
+Eine globale `showToast(message, type)`-Funktion und eine `setStatus(statusId,
+message, type)`-Hilfsfunktion. Alle Save-/Delete-/Acknowledge-/Resolve-Aktionen
+zeigen eine kurze Toast-Benachrichtigung (grün für Erfolg, rot für Fehler), die
+nach 3 Sekunden verschwindet.
+
+### Begründung
+
+Auffälliger als ein Text-Status, aber nicht aufdringlich. Einmal eingebaut,
+für alle Aktionen nutzbar.
+
+### Konsequenz
+
+`admin.py` um CSS (`.toast-container`, `.toast`, `.toast-success`,
+`.toast-error`), HTML (`<div id="toast-container">`) und JavaScript
+(`showToast`, `setStatus`) erweitert. Alle Save-Funktionen nutzen `setStatus`.
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:

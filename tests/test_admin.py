@@ -526,3 +526,40 @@ def test_render_admin_contains_messages_json():
     }
     html = render_admin(config)
     assert "too high" in html
+
+
+def test_post_resolve_alert(tmp_path):
+    from alert_store import AlertStore
+    from notifier import Alert
+
+    store = BatchStore(tmp_path / "otter.db")
+    alert_store = AlertStore(tmp_path / "alerts.db")
+    alert_id = alert_store.store(
+        Alert(
+            sensor="test.sensor",
+            severity="critical",
+            message="test",
+            rule="test_rule",
+            dedup_key="test.sensor:test_rule:critical",
+        )
+    )
+    server = create_server("127.0.0.1", 0, store, token=TEST_TOKEN, alert_store=alert_store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        req = Request(
+            f"http://127.0.0.1:{server.server_port}/api/admin/alerts/{alert_id}/resolve",
+            data=b"{}",
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urlopen(req) as resp:
+            assert resp.status == 200
+            data = json.loads(resp.read().decode("utf-8"))
+        assert data == {"status": "resolved"}
+        alerts = alert_store.list_alerts()
+        assert alerts[0]["resolved_at"] is not None
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()

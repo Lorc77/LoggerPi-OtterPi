@@ -189,3 +189,22 @@ class TestListAlertsOnlyActive:
         store.store(_alert(dedup_key="key-1"))
         store.resolve("key-1")
         assert store.list_alerts(only_active=True) == []
+
+
+class TestResolveById:
+    def test_resolve_by_id(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        alert_id = store.store(_alert())
+        assert store.is_active("freezer.temperature:critical_min:critical") is True
+        assert store.resolve_by_id(alert_id) is True
+        assert store.is_active("freezer.temperature:critical_min:critical") is False
+
+    def test_resolve_by_id_twice_returns_false(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        alert_id = store.store(_alert())
+        assert store.resolve_by_id(alert_id) is True
+        assert store.resolve_by_id(alert_id) is False
+
+    def test_resolve_by_id_unknown_returns_false(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        assert store.resolve_by_id(999) is False

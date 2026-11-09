@@ -407,9 +407,40 @@ textarea.json-editor {{
 .lamp.status-critical {{ color: #ef4444; background: #ef4444; }}
 .lamp.status-off {{ color: #6b7280; background: #6b7280; box-shadow: none; }}
 .status {{ color: #d1d5db; font-size: .9rem; }}
+.toast-container {{
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}}
+.toast {{
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: .9rem;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,.3);
+    animation: toast-in 0.3s ease-out;
+    max-width: 400px;
+}}
+.toast-success {{
+    background: rgba(34,197,94,.9);
+    border: 1px solid rgba(34,197,94,.6);
+}}
+.toast-error {{
+    background: rgba(239,68,68,.9);
+    border: 1px solid rgba(239,68,68,.6);
+}}
+@keyframes toast-in {{
+    from {{ opacity: 0; transform: translateX(20px); }}
+    to {{ opacity: 1; transform: translateX(0); }}
+}}
 </style>
 </head>
 <body>
+<div id="toast-container" class="toast-container"></div>
 <div class="container">
 <h1>🛠 ZOOLOGY-Observer Admin</h1>
 <div class="subtitle">
@@ -417,15 +448,15 @@ textarea.json-editor {{
     · Last measurement: {last_update}
 </div>
 <div class="tabs">
-    <button class="tab-btn active" onclick="showTab('rooms', this)">🏠 Rooms</button>
+    <button class="tab-btn active" onclick="showTab('alerts', this)">🚨 Alerts</button>
+    <button class="tab-btn" onclick="showTab('rooms', this)">🏠 Rooms</button>
     <button class="tab-btn" onclick="showTab('alarm', this)">⚠️ Alarm Limits</button>
     <button class="tab-btn" onclick="showTab('mail', this)">📧 Mail</button>
     <button class="tab-btn" onclick="showTab('notifications', this)">🔔 Notifications</button>
     <button class="tab-btn" onclick="showTab('messages', this)">💬 Messages</button>
-    <button class="tab-btn" onclick="showTab('alerts', this)">🚨 Alerts</button>
 </div>
 
-<div id="tab-rooms" class="tab-panel active">
+<div id="tab-rooms" class="tab-panel">
     <details class="howto">
         <summary>How-to: Add a new WeatherHub sensor</summary>
         <ol>
@@ -549,7 +580,7 @@ textarea.json-editor {{
     </div>
 </div>
 
-<div id="tab-alerts" class="tab-panel">
+<div id="tab-alerts" class="tab-panel active">
     <div class="save-row">
         <button class="btn btn-primary btn-small"
                 onclick="loadAlerts()">🔄 Refresh</button>
@@ -570,6 +601,25 @@ textarea.json-editor {{
 
 <script>
 const SENSOR_SCHEMAS = {sensor_schemas_json};
+
+function showToast(message, type) {{
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-' + (type || 'success');
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => {{
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s';
+        setTimeout(() => toast.remove(), 300);
+    }}, 3000);
+}}
+
+function setStatus(statusId, message, type) {{
+    const status = document.getElementById(statusId);
+    if (status) status.textContent = message;
+    showToast(message, type);
+}}
 
 function showTab(name, btn) {{
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -617,12 +667,12 @@ async function saveConfig(btn) {{
         }});
         const result = await resp.json();
         if (resp.ok) {{
-            status.textContent = 'Saved.';
+            setStatus(statusId, 'Saved.', 'success');
         }} else {{
-            status.textContent = 'Error: ' + (result.error?.message || resp.status);
+            setStatus(statusId, 'Error: ' + (result.error?.message || resp.status), 'error');
         }}
     }} catch (e) {{
-        status.textContent = 'Request failed: ' + e.message;
+        setStatus(statusId, 'Request failed: ' + e.message, 'error');
     }}
 }}
 
@@ -858,14 +908,14 @@ async function saveSystemConfig() {{
             body: JSON.stringify(alarmLimits)
         }});
         if (putResp.ok) {{
-            status.textContent = 'System config saved.';
+            setStatus('alarm-status', 'System config saved.', 'success');
             loadAlarmLimits();
         }} else {{
             const err = await putResp.json();
-            status.textContent = 'Error: ' + (err.error?.message || putResp.status);
+            setStatus('alarm-status', 'Error: ' + (err.error?.message || putResp.status), 'error');
         }}
     }} catch (e) {{
-        status.textContent = 'Request failed: ' + e.message;
+        setStatus('alarm-status', 'Request failed: ' + e.message, 'error');
     }}
 }}
 
@@ -990,14 +1040,14 @@ async function submitEditLimits(deviceKey, deviceType) {{
             body: JSON.stringify(alarmLimits)
         }});
         if (putResp.ok) {{
-            status.textContent = 'Saved.';
+            setStatus('alarm-status', 'Saved.', 'success');
             loadAlarmLimits();
         }} else {{
             const err = await putResp.json();
-            status.textContent = 'Error: ' + (err.error?.message || putResp.status);
+            setStatus('alarm-status', 'Error: ' + (err.error?.message || putResp.status), 'error');
         }}
     }} catch (e) {{
-        status.textContent = 'Request failed: ' + e.message;
+        setStatus('alarm-status', 'Request failed: ' + e.message, 'error');
     }}
 }}
 
@@ -1145,13 +1195,13 @@ async function saveMailForm() {{
             body: JSON.stringify(mail)
         }});
         if (putResp.ok) {{
-            status.textContent = 'Saved.';
+            setStatus('mail-status', 'Saved.', 'success');
         }} else {{
             const err = await putResp.json();
-            status.textContent = 'Error: ' + (err.error?.message || putResp.status);
+            setStatus('mail-status', 'Error: ' + (err.error?.message || putResp.status), 'error');
         }}
     }} catch (e) {{
-        status.textContent = 'Request failed: ' + e.message;
+        setStatus('mail-status', 'Request failed: ' + e.message, 'error');
     }}
 }}
 
@@ -1274,13 +1324,17 @@ async function saveMessages() {{
             body: JSON.stringify(messages)
         }});
         if (putResp.ok) {{
-            status.textContent = 'Saved.';
+            setStatus('messages-status', 'Saved.', 'success');
         }} else {{
             const err = await putResp.json();
-            status.textContent = 'Error: ' + (err.error?.message || putResp.status);
+            setStatus(
+                'messages-status',
+                'Error: ' + (err.error?.message || putResp.status),
+                'error'
+            );
         }}
     }} catch (e) {{
-        status.textContent = 'Request failed: ' + e.message;
+        setStatus('messages-status', 'Request failed: ' + e.message, 'error');
     }}
 }}
 
@@ -1360,14 +1414,18 @@ async function submitAddChannel() {{
             body: JSON.stringify(notifications)
         }});
         if (putResp.ok) {{
-            status.textContent = 'Added.';
+            setStatus('notifications-status', 'Added.', 'success');
             loadNotifications();
         }} else {{
             const err = await putResp.json();
-            status.textContent = 'Error: ' + (err.error?.message || putResp.status);
+            setStatus(
+                'notifications-status',
+                'Error: ' + (err.error?.message || putResp.status),
+                'error'
+            );
         }}
     }} catch (e) {{
-        status.textContent = 'Request failed: ' + e.message;
+        setStatus('notifications-status', 'Request failed: ' + e.message, 'error');
     }}
 }}
 
@@ -1386,14 +1444,18 @@ async function deleteChannel(index) {{
             body: JSON.stringify(notifications)
         }});
         if (putResp.ok) {{
-            status.textContent = 'Deleted.';
+            setStatus('notifications-status', 'Deleted.', 'success');
             loadNotifications();
         }} else {{
             const err = await putResp.json();
-            status.textContent = 'Error: ' + (err.error?.message || putResp.status);
+            setStatus(
+                'notifications-status',
+                'Error: ' + (err.error?.message || putResp.status),
+                'error'
+            );
         }}
     }} catch (e) {{
-        status.textContent = 'Request failed: ' + e.message;
+        setStatus('notifications-status', 'Request failed: ' + e.message, 'error');
     }}
 }}
 
@@ -1478,14 +1540,18 @@ async function submitEditChannel(index) {{
             body: JSON.stringify(notifications)
         }});
         if (putResp.ok) {{
-            status.textContent = 'Saved.';
+            setStatus('notifications-status', 'Saved.', 'success');
             loadNotifications();
         }} else {{
             const err = await putResp.json();
-            status.textContent = 'Error: ' + (err.error?.message || putResp.status);
+            setStatus(
+                'notifications-status',
+                'Error: ' + (err.error?.message || putResp.status),
+                'error'
+            );
         }}
     }} catch (e) {{
-        status.textContent = 'Request failed: ' + e.message;
+        setStatus('notifications-status', 'Request failed: ' + e.message, 'error');
     }}
 }}
 
@@ -1515,14 +1581,18 @@ async function moveDevice(deviceKey, newRoomId) {{
             body: JSON.stringify({{rooms: rooms}})
         }});
         if (putResp.ok) {{
-            status.textContent = 'Moved.';
+            setStatus('rooms-status', 'Moved.', 'success');
             loadRooms();
         }} else {{
             const err = await putResp.json();
-            status.textContent = 'Error: ' + (err.error?.message || putResp.status);
+            setStatus(
+                'rooms-status',
+                'Error: ' + (err.error?.message || putResp.status),
+                'error'
+            );
         }}
     }} catch (e) {{
-        status.textContent = 'Request failed: ' + e.message;
+        setStatus('rooms-status', 'Request failed: ' + e.message, 'error');
     }}
 }}
 
@@ -1612,14 +1682,18 @@ async function addDevice(roomId, name, key, type) {{
             body: JSON.stringify({{rooms: rooms}})
         }});
         if (putResp.ok) {{
-            status.textContent = 'Added.';
+            setStatus('rooms-status', 'Added.', 'success');
             loadRooms();
         }} else {{
             const err = await putResp.json();
-            status.textContent = 'Error: ' + (err.error?.message || putResp.status);
+            setStatus(
+                'rooms-status',
+                'Error: ' + (err.error?.message || putResp.status),
+                'error'
+            );
         }}
     }} catch (e) {{
-        status.textContent = 'Request failed: ' + e.message;
+        setStatus('rooms-status', 'Request failed: ' + e.message, 'error');
     }}
 }}
 
@@ -1644,14 +1718,18 @@ async function deleteDevice(deviceKey) {{
             body: JSON.stringify({{rooms: rooms}})
         }});
         if (putResp.ok) {{
-            status.textContent = 'Deleted.';
+            setStatus('rooms-status', 'Deleted.', 'success');
             loadRooms();
         }} else {{
             const err = await putResp.json();
-            status.textContent = 'Error: ' + (err.error?.message || putResp.status);
+            setStatus(
+                'rooms-status',
+                'Error: ' + (err.error?.message || putResp.status),
+                'error'
+            );
         }}
     }} catch (e) {{
-        status.textContent = 'Request failed: ' + e.message;
+        setStatus('rooms-status', 'Request failed: ' + e.message, 'error');
     }}
 }}
 
@@ -1713,14 +1791,18 @@ async function submitEditDevice(deviceKey) {{
             body: JSON.stringify({{rooms: rooms}})
         }});
         if (putResp.ok) {{
-            status.textContent = 'Saved.';
+            setStatus('rooms-status', 'Saved.', 'success');
             loadRooms();
         }} else {{
             const err = await putResp.json();
-            status.textContent = 'Error: ' + (err.error?.message || putResp.status);
+            setStatus(
+                'rooms-status',
+                'Error: ' + (err.error?.message || putResp.status),
+                'error'
+            );
         }}
     }} catch (e) {{
-        status.textContent = 'Request failed: ' + e.message;
+        setStatus('rooms-status', 'Request failed: ' + e.message, 'error');
     }}
 }}
 
@@ -1774,14 +1856,18 @@ async function addRoom(roomId, name, icon) {{
             body: JSON.stringify({{rooms: rooms}})
         }});
         if (putResp.ok) {{
-            status.textContent = 'Added.';
+            setStatus('rooms-status', 'Added.', 'success');
             loadRooms();
         }} else {{
             const err = await putResp.json();
-            status.textContent = 'Error: ' + (err.error?.message || putResp.status);
+            setStatus(
+                'rooms-status',
+                'Error: ' + (err.error?.message || putResp.status),
+                'error'
+            );
         }}
     }} catch (e) {{
-        status.textContent = 'Request failed: ' + e.message;
+        setStatus('rooms-status', 'Request failed: ' + e.message, 'error');
     }}
 }}
 
@@ -1800,14 +1886,18 @@ async function deleteRoom(roomId) {{
             body: JSON.stringify({{rooms: rooms}})
         }});
         if (putResp.ok) {{
-            status.textContent = 'Deleted.';
+            setStatus('rooms-status', 'Deleted.', 'success');
             loadRooms();
         }} else {{
             const err = await putResp.json();
-            status.textContent = 'Error: ' + (err.error?.message || putResp.status);
+            setStatus(
+                'rooms-status',
+                'Error: ' + (err.error?.message || putResp.status),
+                'error'
+            );
         }}
     }} catch (e) {{
-        status.textContent = 'Request failed: ' + e.message;
+        setStatus('rooms-status', 'Request failed: ' + e.message, 'error');
     }}
 }}
 
@@ -1856,14 +1946,18 @@ async function submitEditRoom(roomId) {{
             body: JSON.stringify({{rooms: rooms}})
         }});
         if (putResp.ok) {{
-            status.textContent = 'Saved.';
+            setStatus('rooms-status', 'Saved.', 'success');
             loadRooms();
         }} else {{
             const err = await putResp.json();
-            status.textContent = 'Error: ' + (err.error?.message || putResp.status);
+            setStatus(
+                'rooms-status',
+                'Error: ' + (err.error?.message || putResp.status),
+                'error'
+            );
         }}
     }} catch (e) {{
-        status.textContent = 'Request failed: ' + e.message;
+        setStatus('rooms-status', 'Request failed: ' + e.message, 'error');
     }}
 }}
 
@@ -1878,12 +1972,20 @@ async function sendTestMail(btn) {{
         }});
         const result = await resp.json();
         if (resp.ok) {{
-            status.textContent = 'Sent to ' + result.count + ' notifier(s).';
+            setStatus(
+                'mail-status',
+                'Sent to ' + result.count + ' notifier(s).',
+                'success'
+            );
         }} else {{
-            status.textContent = 'Error: ' + (result.error?.message || resp.status);
+            setStatus(
+                'mail-status',
+                'Error: ' + (result.error?.message || resp.status),
+                'error'
+            );
         }}
     }} catch (e) {{
-        status.textContent = 'Request failed: ' + e.message;
+        setStatus('mail-status', 'Request failed: ' + e.message, 'error');
     }}
 }}
 
@@ -1939,6 +2041,10 @@ async function loadAlerts() {{
                 ? '<span class="alert-ack">✓ Acknowledged</span>'
                 : `<button class="btn btn-primary btn-small"
                         onclick="acknowledgeAlert(${{alert.id}})">✓ Acknowledge</button>`;
+            const resolveButton = alert.resolved_at
+                ? '<span class="alert-resolved">✓ Resolved</span>'
+                : `<button class="btn btn-secondary btn-small"
+                        onclick="resolveAlert(${{alert.id}})">✓ Resolve</button>`;
             const card = document.createElement('div');
             card.className = 'alert-card';
             card.innerHTML = `
@@ -1953,6 +2059,7 @@ async function loadAlerts() {{
                 <div class="alert-message">${{alert.message}}</div>
                 <div class="alert-actions">
                     ${{ackButton}}
+                    ${{resolveButton}}
                 </div>
             `;
             list.appendChild(card);
@@ -1971,18 +2078,39 @@ async function acknowledgeAlert(id) {{
             body: JSON.stringify({{acknowledged_by: 'admin'}})
         }});
         if (resp.ok) {{
+            setStatus('alerts-status', 'Acknowledged.', 'success');
             loadAlerts();
         }} else {{
             const result = await resp.json();
             const msg = result.error?.message || resp.status;
-            document.getElementById('alerts-status').textContent = 'Error: ' + msg;
+            setStatus('alerts-status', 'Error: ' + msg, 'error');
         }}
     }} catch (e) {{
-        document.getElementById('alerts-status').textContent = 'Request failed: ' + e.message;
+        setStatus('alerts-status', 'Request failed: ' + e.message, 'error');
     }}
 }}
 
-loadRooms();
+async function resolveAlert(id) {{
+    try {{
+        const resp = await fetch('/api/admin/alerts/' + id + '/resolve', {{
+            method: 'POST',
+            headers: {{'Content-Type': 'application/json'}},
+            body: '{{}}'
+        }});
+        if (resp.ok) {{
+            setStatus('alerts-status', 'Resolved.', 'success');
+            loadAlerts();
+        }} else {{
+            const result = await resp.json();
+            const msg = result.error?.message || resp.status;
+            setStatus('alerts-status', 'Error: ' + msg, 'error');
+        }}
+    }} catch (e) {{
+        setStatus('alerts-status', 'Request failed: ' + e.message, 'error');
+    }}
+}}
+
+loadAlerts();
 
 </script>
 </body>
