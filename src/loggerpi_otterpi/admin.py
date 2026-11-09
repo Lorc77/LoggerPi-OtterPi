@@ -869,17 +869,17 @@ function buildDeviceContent(device, sensors, states) {{
         const critMin = limits.critical_min;
         const critMax = limits.critical_max;
         const rate = limits.rate_of_change_max_per_hour;
-        const warnText = `Warning ${{warnMin ?? '–'}}–${{warnMax ?? '–'}} ${{unit}}`;
+        const warnText = `Warn ${{warnMin ?? '–'}}–${{warnMax ?? '–'}} ${{unit}}`;
         const warnChip = (warnMin !== undefined || warnMax !== undefined)
             ? `<span class="chip chip-warn">${{warnText}}</span>`
-            : '<span class="chip chip-off">not configured</span>';
-        const critText = `Critical ${{critMin ?? '–'}}–${{critMax ?? '–'}} ${{unit}}`;
+            : '<span class="chip chip-off">not conf.</span>';
+        const critText = `Crit ${{critMin ?? '–'}}–${{critMax ?? '–'}} ${{unit}}`;
         const critChip = (critMin !== undefined || critMax !== undefined)
             ? `<span class="chip chip-critical">${{critText}}</span>`
-            : '<span class="chip chip-off">not configured</span>';
+            : '<span class="chip chip-off">not conf.</span>';
         const rateChip = rate !== undefined
             ? `<span class="chip chip-info">Rate ${{rate}}/h</span>`
-            : '<span class="chip chip-off">not configured</span>';
+            : '<span class="chip chip-off">not conf.</span>';
         measurementsHtml += `
             <div class="device-row">
                 <span class="name">${{name}}</span>
