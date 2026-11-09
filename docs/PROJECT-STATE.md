@@ -16,10 +16,10 @@
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.11.16` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.11.16` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
+| LoggerPi | `v1.11.17` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.11.17` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
 
-LoggerPi und OtterPi laufen produktiv auf Version `v1.11.16`.
+LoggerPi und OtterPi laufen produktiv auf Version `v1.11.17`.
 
 ## Phase A – Config-Admin (abgeschlossen, v1.8.0)
 
@@ -313,6 +313,41 @@ Alarm Limits (3.2), Hysterese (3.8).
 ### Nächster Schritt
 
 Deploy + Test (v1.11.16). Danach: Dashboard-Limits (3.6), Hysterese (3.8).
+
+## Phase C – Alarm Limits Polish (abgeschlossen, v1.11.17)
+
+**Stand:** 2026-11-09
+
+### Umgesetzt
+
+- **Letzte Messwerte im Alarm Limits-Tab:** Jede Measurement-Zeile zeigt den
+  aktuellen Wert (blau, auf eine Nachkommastelle gerundet). Neue Route
+  `GET /api/admin/latest-measurements`.
+- **„Show all"-Filter:** Checkbox unten im Alarm Limits-Tab. Standard: aus
+  (nur aktive Felder). Wenn an: alle Schema-Felder.
+- **Stale/Invalid-Alerts pro Gerät:** Neue Sektion `device` in
+  `alarm_limits.json` mit `stale_enabled` / `invalid_enabled` pro Gerät.
+  Ein Alert pro Gerät, nicht pro Measurement. Behebt doppelte Mails bei
+  Sensoren mit mehreren Messkanälen.
+- **Nicht-Alarm-Trigger-States entfernt:** `door_locked`, `defrost`, `flap`,
+  `lights.day`, `lights.uv`, `lights.led`, `switches.a-d` aus
+  `sensor_schemas.py` entfernt (sie lösen keine Alarme aus, bleiben aber im
+  Dashboard sichtbar).
+- **`operation_mode` entfernt:** Aus `sensor_schemas.py` für `memmert`
+  entfernt (kein Alarm-Trigger).
+- **Nested State Keys Fix:** Regex in `config_store.py` erlaubt jetzt
+  mehrere Punkte (`atmoweb_101.switches.a`, `atmoweb_101.lights.uv`).
+- **Chip-Texte gekürzt:** „Warn", „Crit", „not conf." statt „Warning",
+  „Critical", „not configured".
+- **Einheiten:** „celsius" → „°C", „percent" → „%".
+
+### Teststand
+
+428 Tests, alle grün.
+
+### Nächster Schritt
+
+Deploy + Test (v1.11.17). Danach: Dashboard-Limits (3.6), Hysterese (3.8).
 
 ---
 

@@ -612,14 +612,12 @@ input[type="number"] {{
                 configured notifiers.</li>
         </ol>
     </details>
+    <div id="alarm-list" class="rooms-list"></div>
     <div class="save-row">
         <label>
             <input type="checkbox" id="alarm-show-all" onchange="loadAlarmLimits()">
             Show all
         </label>
-    </div>
-    <div id="alarm-list" class="rooms-list"></div>
-    <div class="save-row">
         <button class="btn btn-secondary btn-small"
                 onclick="toggleAlarmJson()">⚙️ Advanced (JSON)</button>
         <span id="alarm-status" class="status"></span>
@@ -871,7 +869,9 @@ function toggleRoomsJson() {{
     editor.style.display = editor.style.display === 'none' ? 'block' : 'none';
 }}
 
-function buildDeviceContent(device, sensors, states, latestMeasurements, latestStates, showAll) {{
+function buildDeviceContent(
+    device, sensors, states, latestMeasurements, latestStates, showAll, deviceConfig
+) {{
     const schema = SENSOR_SCHEMAS[device.type] || {{measurements: [], states: []}};
     let measurementsHtml = '';
     for (const [name, unit] of schema.measurements) {{
@@ -881,7 +881,7 @@ function buildDeviceContent(device, sensors, states, latestMeasurements, latestS
         const isActive = current !== undefined || limits.enabled === true;
         if (!showAll && !isActive) continue;
         const currentValue = current && current.value !== null
-            ? `${{current.value}} ${{unit}}`
+            ? `${{current.value.toFixed(1)}} ${{unitLabel}}`
             : '–';
         const enabled = limits.enabled === true;
         const enabledChip = enabled
@@ -935,6 +935,27 @@ function buildDeviceContent(device, sensors, states, latestMeasurements, latestS
             </div>
         `;
     }}
+    const deviceRule = deviceConfig[device.key] || {{}};
+    const staleEnabled = deviceRule.stale_enabled !== false;
+    const invalidEnabled = deviceRule.invalid_enabled !== false;
+    const staleChip = staleEnabled
+        ? '<span class="chip chip-ok">Enabled</span>'
+        : '<span class="chip chip-off">Disabled</span>';
+    const invalidChip = invalidEnabled
+        ? '<span class="chip chip-ok">Enabled</span>'
+        : '<span class="chip chip-off">Disabled</span>';
+    statesHtml += `
+        <div class="device-row device-row-states">
+            <span class="name">Stale alerts</span>
+            <span class="current-value">–</span>
+            ${{staleChip}}
+        </div>
+        <div class="device-row device-row-states">
+            <span class="name">Invalid alerts</span>
+            <span class="current-value">–</span>
+            ${{invalidChip}}
+        </div>
+    `;
     return `
         <div class="device-section">
             <h4>Measurements</h4>
@@ -964,6 +985,7 @@ async function loadAlarmLimits() {{
         const alarmLimits = result.alarm_limits;
         const sensors = alarmLimits.sensors || {{}};
         const states = alarmLimits.states || {{}};
+        const deviceConfig = alarmLimits.device || {{}};
         const latestResp = await fetch('/api/admin/latest-measurements');
         const latestData = await latestResp.json();
         const latestMeasurements = latestData.measurements || {{}};
@@ -1015,7 +1037,8 @@ async function loadAlarmLimits() {{
             for (const device of room.devices) {{
                 const meta = `Room: ${{roomId}} · Key: ${{device.key}} · Type: ${{device.type}}`;
                 const content = buildDeviceContent(
-                    device, sensors, states, latestMeasurements, latestStates, showAll
+                    device, sensors, states, latestMeasurements, latestStates,
+                    showAll, deviceConfig
                 );
                 devicesHtml += `
                     <div class="device-card" data-device-key="${{device.key}}">
@@ -1127,6 +1150,19 @@ async function showEditLimitsForm(deviceKey, deviceType) {{
             </tr>
         `;
     }}
+    const deviceRule = (alarmLimits.device || {{}})[deviceKey] || {{}};
+    const staleChecked = deviceRule.stale_enabled !== false ? 'checked' : '';
+    const invalidChecked = deviceRule.invalid_enabled !== false ? 'checked' : '';
+    statesHtml += `
+        <tr>
+            <td>Stale alerts</td>
+            <td><input type="checkbox" id="device-stale-enabled" ${{staleChecked}}></td>
+        </tr>
+        <tr>
+            <td>Invalid alerts</td>
+            <td><input type="checkbox" id="device-invalid-enabled" ${{invalidChecked}}></td>
+        </tr>
+    `;
     const form = document.createElement('div');
     form.className = 'inline-form';
     form.innerHTML = `
@@ -1203,6 +1239,13 @@ async function submitEditLimits(deviceKey, deviceType) {{
                 delete alarmLimits.states[key];
             }}
         }}
+        if (!alarmLimits.device) alarmLimits.device = {{}};
+        const staleEnabled = document.getElementById('device-stale-enabled').checked;
+        const invalidEnabled = document.getElementById('device-invalid-enabled').checked;
+        alarmLimits.device[deviceKey] = {{
+            stale_enabled: staleEnabled,
+            invalid_enabled: invalidEnabled,
+        }};
         const putResp = await fetch('/api/admin/alarm-limits', {{
             method: 'PUT',
             headers: {{'Content-Type': 'application/json'}},

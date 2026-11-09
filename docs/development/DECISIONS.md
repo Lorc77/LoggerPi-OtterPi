@@ -2586,6 +2586,150 @@ HTTP-Header müssen ASCII sein. Die `message` (Body) bleibt UTF-8, nur der
 
 ---
 
+## DEC-083 — Stale/Invalid-Alerts pro Gerät
+
+**Status:** Accepted
+**Datum:** 2026-11-09
+
+### Kontext
+
+`stale` und `invalid` wurden bisher pro Measurement geprüft. Bei Sensoren mit
+mehreren Messkanälen (z. B. WeatherHub ID01 mit `temperature_1` und
+`temperature_2`) führte das zu doppelten Mails.
+
+### Entscheidung
+
+`stale` und `invalid` werden pro Gerät geprüft. Ein Alert pro Gerät, nicht
+pro Measurement. Neue Sektion `device` in `alarm_limits.json`:
+
+```json
+{
+  "device": {
+    "atmoweb_101": {"stale_enabled": true, "invalid_enabled": true}
+  }
+}
+```
+
+`dedup_key` ist jetzt `device_key:stale:warning` bzw.
+`device_key:invalid:critical`.
+
+### Begründung
+
+`stale` und `invalid` sind Eigenschaften des Sensors, nicht des einzelnen
+Measurements. Wenn ein Sensor `stale` ist, sind alle seine Measurements
+`stale`. Ein Alert pro Gerät reicht.
+
+### Konsequenz
+
+`alert_engine.py` `_check_sensors` umgebaut. `config_store.py` validiert die
+`device`-Sektion. `admin.py` zeigt zwei Checkboxen pro Gerät unter „States".
+
+---
+
+## DEC-084 — Letzte Messwerte im Alarm Limits-Tab
+
+**Status:** Accepted
+**Datum:** 2026-11-09
+
+### Kontext
+
+Der Nutzer wollte die aktuellen Messwerte sehen, um besser über Limits
+entscheiden zu können.
+
+### Entscheidung
+
+Neue Route `GET /api/admin/latest-measurements` liefert die Measurements und
+States des letzten Batches. `buildDeviceContent` zeigt den aktuellen Wert
+(blau, auf eine Nachkommastelle gerundet) neben jedem Measurement.
+
+### Begründung
+
+Bessere Entscheidungsgrundlage für die Limit-Konfiguration.
+
+### Konsequenz
+
+`otterpi.py` um die Route erweitert. `admin.py` `buildDeviceContent` erweitert.
+
+---
+
+## DEC-085 — „Show all"-Filter im Alarm Limits-Tab
+
+**Status:** Accepted
+**Datum:** 2026-11-09
+
+### Kontext
+
+Der HPP260 unterstützt nur einen Teil der AtmoWEB-Felder. Der Admin zeigte
+alle Schema-Felder, auch die nicht unterstützten.
+
+### Entscheidung
+
+Checkbox „Show all" unten im Alarm Limits-Tab. Standard: aus (nur aktive
+Felder: im letzten Batch vorhanden oder in `alarm_limits.json` konfiguriert).
+Wenn an: alle Schema-Felder.
+
+### Begründung
+
+Standardmäßig aufgeräumt, aber flexibel für Konfiguration.
+
+### Konsequenz
+
+`admin.py` `buildDeviceContent` erweitert.
+
+---
+
+## DEC-086 — Nicht-Alarm-Trigger-States entfernt
+
+**Status:** Accepted
+**Datum:** 2026-11-09
+
+### Kontext
+
+`sensor_schemas.py` listete States, die keine Alarm-Trigger sind
+(`door_locked`, `defrost`, `flap`, `lights.*`, `switches.*`). Der Admin
+zeigte sie als konfigurierbar, aber die Alert-Engine ignorierte sie.
+
+### Entscheidung
+
+Diese States aus `sensor_schemas.py` entfernt. Sie bleiben im Dashboard
+sichtbar (weil `dashboard_data.py` sie direkt aus dem Batch liest).
+
+### Begründung
+
+Konsistenz: Nur Alarm-Trigger im Alarm Limits-Tab.
+
+### Konsequenz
+
+`sensor_schemas.py` für `atmoweb` reduziert auf `door_open`.
+
+---
+
+## DEC-087 — Nested State Keys Fix
+
+**Status:** Accepted
+**Datum:** 2026-11-09
+
+### Kontext
+
+Der Regex in `config_store.py` erlaubte nur einen Punkt im Key. Nested State
+Keys wie `atmoweb_101.switches.a` oder `atmoweb_101.lights.uv` wurden
+abgelehnt („Invalid state key").
+
+### Entscheidung
+
+Regex auf `^[a-z0-9_]+(\.[a-z0-9_]+)+$` geändert. Erlaubt beliebig viele
+Punkte.
+
+### Begründung
+
+Nested State Keys sind notwendig für `switches.a-d` und `lights.day/uv/led`.
+
+### Konsequenz
+
+`config_store.py` `_SENSOR_KEY_RE` angepasst.
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:

@@ -659,3 +659,130 @@ class TestMessageAndSubject:
         assert len(alerts) == 1
         assert "LoggerPi offline" in alerts[0]["message"]
         assert "61" in alerts[0]["message"] or "60" in alerts[0]["message"]
+
+
+class TestStaleInvalidEnabled:
+    def test_stale_disabled(self, tmp_path):
+        engine = _engine(tmp_path)
+        _store_batch(
+            engine._store,
+            measurements={"atmoweb_101.temperature_1": _measurement(23.0, validity="stale")},
+        )
+        sensors = {
+            "atmoweb_101.temperature_1": {"enabled": True},
+        }
+        device_config = {
+            "atmoweb_101": {"stale_enabled": False},
+        }
+        alerts = engine._check_sensors(
+            engine._store.latest().to_dict(), sensors, device_config=device_config
+        )
+        assert len(alerts) == 0
+
+    def test_stale_enabled_default(self, tmp_path):
+        engine = _engine(tmp_path)
+        _store_batch(
+            engine._store,
+            measurements={"atmoweb_101.temperature_1": _measurement(23.0, validity="stale")},
+        )
+        sensors = {"atmoweb_101.temperature_1": {"enabled": True}}
+        alerts = engine._check_sensors(engine._store.latest().to_dict(), sensors)
+        assert len(alerts) == 1
+        assert alerts[0].rule == "stale"
+
+    def test_invalid_disabled(self, tmp_path):
+        engine = _engine(tmp_path)
+        _store_batch(
+            engine._store,
+            measurements={
+                "atmoweb_101.temperature_1": _measurement(
+                    None, validity="invalid", validity_reason="overflow"
+                )
+            },
+        )
+        sensors = {
+            "atmoweb_101.temperature_1": {"enabled": True},
+        }
+        device_config = {
+            "atmoweb_101": {"invalid_enabled": False},
+        }
+        alerts = engine._check_sensors(
+            engine._store.latest().to_dict(), sensors, device_config=device_config
+        )
+        assert len(alerts) == 0
+
+    def test_invalid_enabled_default(self, tmp_path):
+        engine = _engine(tmp_path)
+        _store_batch(
+            engine._store,
+            measurements={
+                "atmoweb_101.temperature_1": _measurement(
+                    None, validity="invalid", validity_reason="overflow"
+                )
+            },
+        )
+        sensors = {"atmoweb_101.temperature_1": {"enabled": True}}
+        alerts = engine._check_sensors(engine._store.latest().to_dict(), sensors)
+        assert len(alerts) == 1
+        assert alerts[0].rule == "invalid"
+
+
+class TestStaleInvalidPerDevice:
+    def test_stale_one_alert_per_device(self, tmp_path):
+        engine = _engine(tmp_path)
+        _store_batch(
+            engine._store,
+            measurements={
+                "weatherhub_015f9410f3eb.temperature_1": _measurement(23.0, validity="stale"),
+                "weatherhub_015f9410f3eb.temperature_2": _measurement(-25.0, validity="stale"),
+            },
+        )
+        sensors = {
+            "weatherhub_015f9410f3eb.temperature_1": {"enabled": True},
+            "weatherhub_015f9410f3eb.temperature_2": {"enabled": True},
+        }
+        alerts = engine._check_sensors(engine._store.latest().to_dict(), sensors)
+        stale_alerts = [a for a in alerts if a.rule == "stale"]
+        assert len(stale_alerts) == 1
+        assert stale_alerts[0].sensor == "weatherhub_015f9410f3eb"
+
+    def test_stale_disabled_per_device(self, tmp_path):
+        engine = _engine(tmp_path)
+        _store_batch(
+            engine._store,
+            measurements={
+                "weatherhub_015f9410f3eb.temperature_1": _measurement(23.0, validity="stale"),
+            },
+        )
+        sensors = {
+            "weatherhub_015f9410f3eb.temperature_1": {"enabled": True},
+        }
+        device_config = {
+            "weatherhub_015f9410f3eb": {"stale_enabled": False},
+        }
+        alerts = engine._check_sensors(
+            engine._store.latest().to_dict(), sensors, device_config=device_config
+        )
+        assert len([a for a in alerts if a.rule == "stale"]) == 0
+
+    def test_invalid_one_alert_per_device(self, tmp_path):
+        engine = _engine(tmp_path)
+        _store_batch(
+            engine._store,
+            measurements={
+                "weatherhub_015f9410f3eb.temperature_1": _measurement(
+                    None, validity="invalid", validity_reason="overflow"
+                ),
+                "weatherhub_015f9410f3eb.temperature_2": _measurement(
+                    None, validity="invalid", validity_reason="overflow"
+                ),
+            },
+        )
+        sensors = {
+            "weatherhub_015f9410f3eb.temperature_1": {"enabled": True},
+            "weatherhub_015f9410f3eb.temperature_2": {"enabled": True},
+        }
+        alerts = engine._check_sensors(engine._store.latest().to_dict(), sensors)
+        invalid_alerts = [a for a in alerts if a.rule == "invalid"]
+        assert len(invalid_alerts) == 1
+        assert invalid_alerts[0].sensor == "weatherhub_015f9410f3eb"

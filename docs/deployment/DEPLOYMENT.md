@@ -441,6 +441,19 @@ Limits-Tab (Schwellenwerte in Minuten, Checkbox für Warn-Alert).
 - **ntfy ASCII-safe Title:** `NtfyNotifier` ersetzt Nicht-ASCII-Zeichen im
   `Title`-Header.
 
+### Phase C – Alarm Limits Polish (v1.11.17)
+
+- **Letzte Messwerte:** Aktuelle Werte pro Measurement im Alarm Limits-Tab.
+- **„Show all"-Filter:** Checkbox unten im Tab.
+- **Stale/Invalid pro Gerät:** Neue `device`-Sektion in `alarm_limits.json`.
+  Ein Alert pro Gerät, nicht pro Measurement.
+- **Nicht-Alarm-Trigger-States entfernt:** `door_locked`, `defrost`, `flap`,
+  `lights.*`, `switches.*` aus `sensor_schemas.py`.
+- **`operation_mode` entfernt:** Aus `sensor_schemas.py` für `memmert`.
+- **Nested State Keys Fix:** Regex erlaubt mehrere Punkte.
+- **Chip-Texte gekürzt:** „Warn", „Crit", „not conf.".
+- **Einheiten:** „celsius" → „°C", „percent" → „%".
+
 ---
 
 ## 5. OtterPi HTTP Listener
@@ -761,7 +774,7 @@ Repository:
     main
 
 Version:
-    v1.11.16
+    v1.11.17
 
 Letzter bekannter Release-Commit:
     (wird beim Deploy gesetzt)

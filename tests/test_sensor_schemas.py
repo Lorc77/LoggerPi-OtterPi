@@ -72,7 +72,7 @@ class TestGetStateNames:
     def test_atmoweb(self):
         names = get_state_names("atmoweb")
         assert "door_open" in names
-        assert "lights.led" in names
+        assert "lights.led" not in names
 
     def test_freezer(self):
         assert get_state_names("freezer") == ["alarms"]

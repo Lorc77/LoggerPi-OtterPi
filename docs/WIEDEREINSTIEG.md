@@ -1,8 +1,8 @@
 # Wiedereinstiegsprotokoll – LoggerPi-OtterPi (Stand v1.11.14)
 
 **Projekt:** LoggerPi-OtterPi
-**Aktuelle Version:** v1.11.16 (deployed auf OtterPi)
-**Teststand:** 406 passed, Ruff/Format clean
+**Aktuelle Version:** v1.11.17 (deployed auf OtterPi)
+**Teststand:** 428 passed, Ruff/Format clean
 **Stand:** 2026-11-09
 
 ---
@@ -100,6 +100,19 @@ OtterPi (Python 3.13.5, User=makki)
 - **States-Tabelle im Edit-Limits-Formular:** Linksbündig, `width: auto`.
 - **ntfy ASCII-safe Title:** `NtfyNotifier` ersetzt Nicht-ASCII-Zeichen im
   `Title`-Header.
+
+### v1.11.17 – Alarm Limits Polish
+
+- **Letzte Messwerte:** Aktuelle Werte pro Measurement im Alarm Limits-Tab.
+- **„Show all"-Filter:** Checkbox unten im Tab.
+- **Stale/Invalid pro Gerät:** Neue `device`-Sektion in `alarm_limits.json`.
+  Ein Alert pro Gerät, nicht pro Measurement.
+- **Nicht-Alarm-Trigger-States entfernt:** `door_locked`, `defrost`, `flap`,
+  `lights.*`, `switches.*` aus `sensor_schemas.py`.
+- **`operation_mode` entfernt:** Aus `sensor_schemas.py` für `memmert`.
+- **Nested State Keys Fix:** Regex erlaubt mehrere Punkte.
+- **Chip-Texte gekürzt:** „Warn", „Crit", „not conf.".
+- **Einheiten:** „celsius" → „°C", „percent" → „%".
 
 ---
 

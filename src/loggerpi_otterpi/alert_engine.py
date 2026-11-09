@@ -107,7 +107,11 @@ class AlertEngine(threading.Thread):
 
         batch_dict = batch.to_dict()
         self._pending_alerts = self._check_sensors(
-            batch_dict, alarm_limits.get("sensors", {}), messages, sensor_map
+            batch_dict,
+            alarm_limits.get("sensors", {}),
+            messages,
+            sensor_map,
+            alarm_limits.get("device", {}),
         )
         self._pending_alerts.extend(
             self._check_states(batch_dict, alarm_limits.get("states", {}), messages, sensor_map)
@@ -232,12 +236,68 @@ class AlertEngine(threading.Thread):
         sensors: dict,
         messages: Optional[dict] = None,
         sensor_map: Optional[dict] = None,
+        device_config: Optional[dict] = None,
     ) -> list:
         messages = messages or {}
         sensor_map = sensor_map or {}
+        device_config = device_config or {}
         alerts = []
         measurements = batch.get("measurements", {})
         recent_batches = self._store.recent(hours=1)
+
+        # Pro Gerät: stale/invalid prüfen (ein Alert pro Gerät)
+        device_states = {}
+        for sensor_key, limits in sensors.items():
+            if not limits.get("enabled", True):
+                continue
+            measurement = measurements.get(sensor_key)
+            if measurement is None:
+                continue
+            validity = measurement.get("validity")
+            validity_reason = measurement.get("validity_reason")
+            device_key = sensor_key.split(".")[0]
+            if device_key not in device_states:
+                device_states[device_key] = {
+                    "stale": False,
+                    "invalid": False,
+                    "reason": None,
+                }
+            if validity == "invalid":
+                device_states[device_key]["invalid"] = True
+                device_states[device_key]["reason"] = validity_reason
+            elif validity == "stale":
+                device_states[device_key]["stale"] = True
+
+        for device_key, state in device_states.items():
+            device_rule = device_config.get(device_key, {})
+            if state["invalid"] and device_rule.get("invalid_enabled", True):
+                alerts.append(
+                    self._make_alert(
+                        sensor=device_key,
+                        rule="invalid",
+                        severity="critical",
+                        message=self._build_message(
+                            device_key,
+                            "invalid",
+                            messages,
+                            sensor_map,
+                            validity_reason=state["reason"],
+                        ),
+                        subject=self._build_subject(device_key, "invalid", "critical", sensor_map),
+                    )
+                )
+            elif state["stale"] and device_rule.get("stale_enabled", True):
+                alerts.append(
+                    self._make_alert(
+                        sensor=device_key,
+                        rule="stale",
+                        severity="warning",
+                        message=self._build_message(device_key, "stale", messages, sensor_map),
+                        subject=self._build_subject(device_key, "stale", "warning", sensor_map),
+                    )
+                )
+
+        # Pro Measurement: Grenzwerte und rate_of_change
         for sensor_key, limits in sensors.items():
             if not limits.get("enabled", True):
                 continue
@@ -246,45 +306,17 @@ class AlertEngine(threading.Thread):
                 continue
             value = measurement.get("value")
             validity = measurement.get("validity")
-            validity_reason = measurement.get("validity_reason")
 
-            if validity == "invalid":
-                alerts.append(
-                    self._make_alert(
-                        sensor=sensor_key,
-                        rule="invalid",
-                        severity="critical",
-                        message=self._build_message(
-                            sensor_key,
-                            "invalid",
-                            messages,
-                            sensor_map,
-                            validity_reason=validity_reason,
-                        ),
-                        subject=self._build_subject(sensor_key, "invalid", "critical", sensor_map),
-                    )
-                )
-                continue
-
-            if validity == "stale":
-                alerts.append(
-                    self._make_alert(
-                        sensor=sensor_key,
-                        rule="stale",
-                        severity="warning",
-                        message=self._build_message(sensor_key, "stale", messages, sensor_map),
-                        value=value,
-                        subject=self._build_subject(sensor_key, "stale", "warning", sensor_map),
-                    )
-                )
+            if validity in ("invalid", "stale"):
                 continue
 
             if value is None:
                 continue
 
             # Sensor ist wieder valid → stale/invalid-Alerts resolven
-            self._alert_store.resolve(f"{sensor_key}:stale:warning")
-            self._alert_store.resolve(f"{sensor_key}:invalid:critical")
+            device_key = sensor_key.split(".")[0]
+            self._alert_store.resolve(f"{device_key}:stale:warning")
+            self._alert_store.resolve(f"{device_key}:invalid:critical")
 
             for rule, threshold, severity in (
                 ("critical_min", limits.get("critical_min"), "critical"),
@@ -336,7 +368,6 @@ class AlertEngine(threading.Thread):
                         )
                     )
                 else:
-                    # Wert wieder innerhalb der Grenzen → Alert resolven
                     self._alert_store.resolve(dedup_key)
 
             rate_limit = limits.get("rate_of_change_max_per_hour")

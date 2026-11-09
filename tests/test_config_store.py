@@ -349,3 +349,58 @@ def test_states_nested_lights_key():
     }
     save_alarm_limits(data)
     assert load_alarm_limits() == data
+
+
+class TestStaleInvalidEnabled:
+    def test_stale_enabled_valid(self):
+        data = {"sensors": {"atmoweb_101.temperature_1": {"stale_enabled": True}}}
+        save_alarm_limits(data)
+        assert load_alarm_limits() == data
+
+    def test_stale_enabled_invalid(self):
+        data = {"sensors": {"atmoweb_101.temperature_1": {"stale_enabled": "yes"}}}
+        with pytest.raises(ConfigValidationError):
+            save_alarm_limits(data)
+
+    def test_invalid_enabled_valid(self):
+        data = {"sensors": {"atmoweb_101.temperature_1": {"invalid_enabled": False}}}
+        save_alarm_limits(data)
+        assert load_alarm_limits() == data
+
+    def test_invalid_enabled_invalid(self):
+        data = {"sensors": {"atmoweb_101.temperature_1": {"invalid_enabled": 1}}}
+        with pytest.raises(ConfigValidationError):
+            save_alarm_limits(data)
+
+
+class TestDeviceSection:
+    def test_device_roundtrip(self):
+        data = {
+            "sensors": {},
+            "device": {
+                "atmoweb_101": {"stale_enabled": True, "invalid_enabled": False},
+            },
+        }
+        save_alarm_limits(data)
+        assert load_alarm_limits() == data
+
+    def test_device_invalid_key(self):
+        data = {
+            "sensors": {},
+            "device": {"INVALID": {"stale_enabled": True}},
+        }
+        with pytest.raises(ConfigValidationError):
+            save_alarm_limits(data)
+
+    def test_device_invalid_field(self):
+        data = {
+            "sensors": {},
+            "device": {"atmoweb_101": {"stale_enabled": "yes"}},
+        }
+        with pytest.raises(ConfigValidationError):
+            save_alarm_limits(data)
+
+    def test_device_optional(self):
+        data = {"sensors": {}}
+        save_alarm_limits(data)
+        assert load_alarm_limits() == data

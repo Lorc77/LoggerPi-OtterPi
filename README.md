@@ -148,8 +148,8 @@ PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.11.16` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.11.16` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
+| LoggerPi | `v1.11.17` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.11.17` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
 
 Der E2E-Datenpfad (LoggerPi → nginx → OtterPi → SQLite) ist verifiziert.
 
@@ -167,8 +167,10 @@ Datenquellen:
 Admin (LAN-only): `https://observer.makki.route64.de/admin`
 - Rooms-Tab: Formular-UI (Raum-/Geräte-Verwaltung, Raumwechsel, Inline-Formulare)
 - Alarm Limits-Tab: Raum-Kacheln mit Geräte-Kacheln, Limits als farbige Chips
-  (Warning gelb, Critical rot, Rate blau, not configured grau), Edit Limits
-  pro Gerät, System-Karte für LoggerPi-Offline-Erkennung
+  (Warn gelb, Crit rot, Rate blau, not conf. grau), letzte Messwerte pro
+  Measurement, „Show all"-Filter, Stale/Invalid-Alerts pro Gerät
+  konfigurierbar, Edit Limits pro Gerät, System-Karte für
+  LoggerPi-Offline-Erkennung
 - Mail-Tab: Formular-UI (SMTP, Empfänger, Routing, Dedup, Quiet Hours)
 - Notifications-Tab: Formular-UI (ntfy, webhook, Severity-Auswahl pro Kanal)
 - Messages-Tab: Formular-UI (globale Regel-Texte, gruppiert in Measurements,
@@ -304,18 +306,18 @@ pytest
 git diff --check
 ```
 
-Aktueller Stand: **406 Tests**, alle bestehen.
+Aktueller Stand: **428 Tests**, alle bestehen.
 
 ---
 
-Aktuelle Version: **v1.11.16**
+Aktuelle Version: **v1.11.17**
 
 Die Version wird geführt über:
 
-- `pyproject.toml` → `version = "1.11.16"`
-- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.11.16"`
-- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.11.16"`
-- Git-Tag `v1.11.16`
+- `pyproject.toml` → `version = "1.11.17"`
+- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.11.17"`
+- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.11.17"`
+- Git-Tag `v1.11.17`
 
 ---
 

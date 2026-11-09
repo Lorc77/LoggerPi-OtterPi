@@ -32,16 +32,6 @@ SENSOR_SCHEMAS: Dict[str, Dict[str, List]] = {
         ],
         "states": [
             ("door_open", "bool"),
-            ("door_locked", "bool"),
-            ("defrost", "bool"),
-            ("flap", "percent"),
-            ("lights.day", "bool"),
-            ("lights.uv", "bool"),
-            ("lights.led", "percent"),
-            ("switches.a", "bool"),
-            ("switches.b", "bool"),
-            ("switches.c", "bool"),
-            ("switches.d", "bool"),
         ],
     },
     "freezer": {

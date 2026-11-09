@@ -29,6 +29,8 @@ _ALLOWED_LIMIT_KEYS = {
     "critical_max",
     "rate_of_change_max_per_hour",
     "stale_after_seconds",
+    "stale_enabled",
+    "invalid_enabled",
     "enabled",
 }
 
@@ -217,6 +219,9 @@ def _validate_alarm_limits(data: Any) -> None:
                 )
         if "enabled" in limits and not isinstance(limits["enabled"], bool):
             raise ConfigValidationError(f"Sensor {sensor_key!r} 'enabled' must be a boolean.")
+        for field in ("stale_enabled", "invalid_enabled"):
+            if field in limits and not isinstance(limits[field], bool):
+                raise ConfigValidationError(f"Sensor {sensor_key!r} '{field}' must be a boolean.")
 
         cmin = limits.get("critical_min")
         wmin = limits.get("warning_min")
@@ -245,6 +250,21 @@ def _validate_alarm_limits(data: Any) -> None:
                 if not isinstance(v, int) or isinstance(v, bool) or v <= 0:
                     raise ConfigValidationError(
                         f"State {state_key!r} 'max_open_seconds' must be a positive integer."
+                    )
+
+    device = data.get("device")
+    if device is not None:
+        if not isinstance(device, dict):
+            raise ConfigValidationError("alarm_limits.json 'device' must be an object.")
+        for device_key, rule in device.items():
+            if not isinstance(device_key, str) or not _ROOM_KEY_RE.match(device_key):
+                raise ConfigValidationError(f"Invalid device key: {device_key!r}")
+            if not isinstance(rule, dict):
+                raise ConfigValidationError(f"Device {device_key!r} must be an object.")
+            for field in ("stale_enabled", "invalid_enabled"):
+                if field in rule and not isinstance(rule[field], bool):
+                    raise ConfigValidationError(
+                        f"Device {device_key!r} '{field}' must be a boolean."
                     )
 
 

@@ -635,3 +635,46 @@ def test_admin_page_contains_show_all_checkbox(tmp_path):
         server.shutdown()
         thread.join()
         server.server_close()
+
+
+def test_admin_page_contains_device_checkboxes(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    server = _server(store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        with urlopen(f"http://127.0.0.1:{server.server_port}/admin") as resp:
+            html = resp.read().decode("utf-8")
+        assert "device-stale-enabled" in html
+        assert "device-invalid-enabled" in html
+        assert "Stale alerts" in html
+        assert "Invalid alerts" in html
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_put_alarm_limits_with_device(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    server = _server(store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        payload = {
+            "sensors": {},
+            "device": {
+                "atmoweb_101": {"stale_enabled": False, "invalid_enabled": True},
+            },
+        }
+        req = _put(
+            f"http://127.0.0.1:{server.server_port}/api/admin/alarm-limits",
+            payload,
+        )
+        with urlopen(req) as resp:
+            assert resp.status == 200
+        assert load_alarm_limits() == payload
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
