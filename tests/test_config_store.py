@@ -285,3 +285,49 @@ class TestMessages:
     def test_too_long_value(self):
         with pytest.raises(ConfigValidationError):
             save_messages({"critical_max": "x" * 201})
+
+
+class TestNotificationsSeverities:
+    def test_valid_severities(self):
+        data = {
+            "channels": [
+                {
+                    "type": "ntfy",
+                    "enabled": True,
+                    "url": "https://ntfy.sh",
+                    "topic": "t",
+                    "severities": ["critical"],
+                }
+            ]
+        }
+        save_notifications(data)
+        assert load_notifications() == data
+
+    def test_invalid_severity(self):
+        data = {
+            "channels": [
+                {
+                    "type": "ntfy",
+                    "enabled": True,
+                    "url": "https://ntfy.sh",
+                    "topic": "t",
+                    "severities": ["info"],
+                }
+            ]
+        }
+        with pytest.raises(ConfigValidationError):
+            save_notifications(data)
+
+    def test_severities_optional(self):
+        data = {
+            "channels": [
+                {
+                    "type": "ntfy",
+                    "enabled": True,
+                    "url": "https://ntfy.sh",
+                    "topic": "t",
+                }
+            ]
+        }
+        save_notifications(data)
+        assert load_notifications() == data

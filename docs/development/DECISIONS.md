@@ -2353,6 +2353,123 @@ für alle Aktionen nutzbar.
 
 ---
 
+## DEC-075 — Severity-Auswahl pro Notifier-Kanal
+
+**Status:** Accepted
+**Datum:** 2026-11-09
+
+### Kontext
+
+ntfy und Webhook sendeten bisher alle Alerts, unabhängig von der Severity.
+Der Nutzer wollte pro Kanal steuern, welche Severity darüber gemeldet wird
+(z.B. ntfy nur für critical).
+
+### Entscheidung
+
+`notifications.json` → `severities` pro Channel (Liste von `critical`/`warning`).
+`NtfyNotifier` und `WebhookNotifier` prüfen die Severity, bevor sie senden.
+Wenn die Severity nicht in der Liste ist, wird der Alert nicht gesendet
+(Rückgabe `True`, kein Fehler).
+
+### Begründung
+
+Unterschiedliche Kanäle haben unterschiedliche Zwecke: ntfy ist schnell
+(Push), E-Mail ist formell. Manche Nutzer wollen nur critical auf ntfy,
+aber alles per E-Mail.
+
+### Konsequenz
+
+`notifier.py` erweitert. `config_store.py` validiert `severities`.
+Admin-Notifications-Tab um Checkboxen erweitert.
+
+---
+
+## DEC-076 — Rate-of-Change im Admin-Formular
+
+**Status:** Accepted
+**Datum:** 2026-11-09
+
+### Kontext
+
+`rate_of_change_max_per_hour` war in der Alert-Engine implementiert, aber
+im Admin nicht konfigurierbar. Der Nutzer musste die JSON-Datei manuell
+bearbeiten.
+
+### Entscheidung
+
+Im „Edit Limits"-Formular pro Measurement eine zusätzliche Spalte „Rate/h".
+Der Wert wird in `limits.rate_of_change_max_per_hour` gespeichert.
+
+### Begründung
+
+Schließt eine Lücke. Der Nutzer kann die Rate-of-Change jetzt ohne
+JSON-Editor konfigurieren.
+
+### Konsequenz
+
+`admin.py` `showEditLimitsForm` und `submitEditLimits` erweitert.
+
+---
+
+## DEC-077 — Message-Text bei stale/invalid mit Measurement-Key
+
+**Status:** Accepted
+**Datum:** 2026-11-09
+
+### Kontext
+
+Bei `stale` und `invalid` war die Message für `temperature_1` und
+`temperature_2` identisch („Temperature stale"), weil `_measurement_name`
+für beide „Temperature" zurückgibt. Der Nutzer bekam zwei identische Mails
+pro Sensor.
+
+### Entscheidung
+
+Bei `stale` und `invalid` wird der Measurement-Key in Klammern mit in die
+Message aufgenommen:
+```
+R1308 · Culture Room II / Hypsibius · bottom left/night — Temperature (temperature_1) stale
+R1308 · Culture Room II / Hypsibius · bottom left/night — Temperature (temperature_2) stale
+```
+
+### Begründung
+
+Die Messages sind jetzt unterscheidbar. Der Measurement-Name bleibt lesbar,
+der technische Key ist in Klammern.
+
+### Konsequenz
+
+`alert_engine.py` `_build_message` erweitert.
+
+---
+
+## DEC-078 — Resolve-Zeitstempel im Alert-Tab
+
+**Status:** Accepted
+**Datum:** 2026-11-09
+
+### Kontext
+
+Der Alert-Tab zeigte „✓ Resolved", aber nicht, wann der Alert resolved wurde.
+
+### Entscheidung
+
+Der Resolve-Zeitstempel wird neben „✓ Resolved" angezeigt:
+```
+stale · 9.11.2026, 09:45:12 · ✓ Resolved (9.11.2026, 10:15:30)
+```
+
+### Begründung
+
+Der Nutzer sieht, wann der Alert erledigt wurde. Nützlich für die
+Nachvollziehbarkeit.
+
+### Konsequenz
+
+`admin.py` `loadAlerts` erweitert.
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:

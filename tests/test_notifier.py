@@ -346,3 +346,59 @@ def test_ntfy_falls_back_to_sensor(monkeypatch):
     alert = Alert(sensor="atmoweb_101.temperature_1", severity="critical", message="m")
     assert n.send(alert) is True
     assert captured["title"] == "CRITICAL: atmoweb_101.temperature_1"
+
+
+def test_ntfy_skips_warning_when_only_critical(monkeypatch):
+    called = {"count": 0}
+
+    def fake_urlopen(req, timeout):
+        called["count"] += 1
+        return FakeResponse(200)
+
+    monkeypatch.setattr("notifier.urlopen", fake_urlopen)
+    n = NtfyNotifier({"url": "https://ntfy.sh", "topic": "test", "severities": ["critical"]})
+    alert = Alert(sensor="x", severity="warning", message="m")
+    assert n.send(alert) is True
+    assert called["count"] == 0
+
+
+def test_ntfy_sends_critical_when_only_critical(monkeypatch):
+    called = {"count": 0}
+
+    def fake_urlopen(req, timeout):
+        called["count"] += 1
+        return FakeResponse(200)
+
+    monkeypatch.setattr("notifier.urlopen", fake_urlopen)
+    n = NtfyNotifier({"url": "https://ntfy.sh", "topic": "test", "severities": ["critical"]})
+    alert = Alert(sensor="x", severity="critical", message="m")
+    assert n.send(alert) is True
+    assert called["count"] == 1
+
+
+def test_webhook_skips_warning_when_only_critical(monkeypatch):
+    called = {"count": 0}
+
+    def fake_urlopen(req, timeout):
+        called["count"] += 1
+        return FakeResponse(200)
+
+    monkeypatch.setattr("notifier.urlopen", fake_urlopen)
+    n = WebhookNotifier({"url": "https://example.com/hook", "severities": ["critical"]})
+    alert = Alert(sensor="x", severity="warning", message="m")
+    assert n.send(alert) is True
+    assert called["count"] == 0
+
+
+def test_webhook_sends_critical_when_only_critical(monkeypatch):
+    called = {"count": 0}
+
+    def fake_urlopen(req, timeout):
+        called["count"] += 1
+        return FakeResponse(200)
+
+    monkeypatch.setattr("notifier.urlopen", fake_urlopen)
+    n = WebhookNotifier({"url": "https://example.com/hook", "severities": ["critical"]})
+    alert = Alert(sensor="x", severity="critical", message="m")
+    assert n.send(alert) is True
+    assert called["count"] == 1

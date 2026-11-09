@@ -145,9 +145,11 @@ class AlertEngine(threading.Thread):
 
         if rule == "invalid":
             reason = f" ({validity_reason})" if validity_reason else ""
-            return f"{prefix} — {measurement} {rule_text}{reason}"
+            measurement_key = sensor_key.split(".", 1)[-1]
+            return f"{prefix} — {measurement} ({measurement_key}) {rule_text}{reason}"
         if rule == "stale":
-            return f"{prefix} — {measurement} {rule_text}"
+            measurement_key = sensor_key.split(".", 1)[-1]
+            return f"{prefix} — {measurement} ({measurement_key}) {rule_text}"
         if value is not None and threshold is not None:
             operator = ">" if rule.endswith("_max") else "<"
             return (
@@ -497,7 +499,12 @@ class AlertEngine(threading.Thread):
 
         for notifier in notifiers:
             try:
-                notifier.send(alert)
+                if not notifier.send(alert):
+                    LOGGER.warning(
+                        "Notifier %s returned False for %s",
+                        type(notifier).__name__,
+                        alert.dedup_key,
+                    )
             except Exception:
                 LOGGER.exception("Notifier failed")
 

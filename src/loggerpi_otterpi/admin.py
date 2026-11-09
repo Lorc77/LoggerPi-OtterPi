@@ -946,6 +946,8 @@ async function showEditLimitsForm(deviceKey, deviceType) {{
                         value="${{limits.critical_min ?? ''}}"></td>
                 <td><input type="number" step="0.1" id="crit-max-${{name}}"
                         value="${{limits.critical_max ?? ''}}"></td>
+                <td><input type="number" step="0.1" id="rate-${{name}}"
+                        value="${{limits.rate_of_change_max_per_hour ?? ''}}"></td>
             </tr>
         `;
     }}
@@ -975,6 +977,7 @@ async function showEditLimitsForm(deviceKey, deviceType) {{
                     <th>Warn Max</th>
                     <th>Crit Min</th>
                     <th>Crit Max</th>
+                    <th>Rate/h</th>
                 </tr>
             </thead>
             <tbody>${{measurementsHtml}}</tbody>
@@ -1012,12 +1015,14 @@ async function submitEditLimits(deviceKey, deviceType) {{
             const warnMax = document.getElementById('warn-max-' + name).value;
             const critMin = document.getElementById('crit-min-' + name).value;
             const critMax = document.getElementById('crit-max-' + name).value;
+            const rate = document.getElementById('rate-' + name).value;
             const enabled = document.getElementById('meas-enabled-' + name).checked;
             const limits = {{}};
             if (warnMin) limits.warning_min = parseFloat(warnMin);
             if (warnMax) limits.warning_max = parseFloat(warnMax);
             if (critMin) limits.critical_min = parseFloat(critMin);
             if (critMax) limits.critical_max = parseFloat(critMax);
+            if (rate) limits.rate_of_change_max_per_hour = parseFloat(rate);
             if (enabled || Object.keys(limits).length > 0) {{
                 limits.enabled = enabled;
                 alarmLimits.sensors[key] = limits;
@@ -1363,6 +1368,10 @@ function showAddChannelForm() {{
             <option value="slack">slack</option>
         </select></label>
         <label>Enabled: <input type="checkbox" id="new-channel-enabled" checked></label>
+        <label>Severities:
+            <input type="checkbox" id="new-channel-critical" checked> critical
+            <input type="checkbox" id="new-channel-warning" checked> warning
+        </label>
         <div class="save-row">
             <button class="btn btn-primary btn-small"
                     onclick="submitAddChannel()">💾 Save</button>
@@ -1393,6 +1402,10 @@ async function submitAddChannel() {{
         return;
     }}
     const channel = {{type: type, enabled: enabled, url: url}};
+    const severities = [];
+    if (document.getElementById('new-channel-critical').checked) severities.push('critical');
+    if (document.getElementById('new-channel-warning').checked) severities.push('warning');
+    channel.severities = severities;
     if (type === 'ntfy') {{
         channel.topic = document.getElementById('new-channel-topic').value.trim();
         const token = document.getElementById('new-channel-token').value.trim();
@@ -1464,6 +1477,9 @@ async function editChannel(index) {{
     const result = await resp.json();
     const notifications = result.notifications;
     const channel = notifications.channels[index];
+    const severities = channel.severities || ['critical', 'warning'];
+    const criticalChecked = severities.includes('critical') ? 'checked' : '';
+    const warningChecked = severities.includes('warning') ? 'checked' : '';
     const list = document.getElementById('notifications-list');
     if (list.querySelector('.inline-form')) return;
     const form = document.createElement('div');
@@ -1490,6 +1506,12 @@ async function editChannel(index) {{
         </select></label>
         <label>Enabled: <input type="checkbox" id="edit-channel-enabled"
                 ${{channel.enabled ? 'checked' : ''}}></label>
+        <label>Severities:
+            <input type="checkbox" id="edit-channel-critical"
+                    ${{criticalChecked}}> critical
+            <input type="checkbox" id="edit-channel-warning"
+                    ${{warningChecked}}> warning
+        </label>
         <div class="save-row">
             <button class="btn btn-primary btn-small"
                     onclick="submitEditChannel(${{index}})">💾 Save</button>
@@ -1520,6 +1542,10 @@ async function submitEditChannel(index) {{
         return;
     }}
     const channel = {{type: type, enabled: enabled, url: url}};
+    const severities = [];
+    if (document.getElementById('edit-channel-critical').checked) severities.push('critical');
+    if (document.getElementById('edit-channel-warning').checked) severities.push('warning');
+    channel.severities = severities;
     if (type === 'ntfy') {{
         channel.topic = document.getElementById('edit-channel-topic').value.trim();
         const token = document.getElementById('edit-channel-token').value.trim();
@@ -2034,8 +2060,11 @@ async function loadAlerts() {{
                 ? `${{info.roomIcon}} ${{info.roomName}} · ${{info.deviceName}} · ${{measurement}}`
                 : alert.sensor;
             const timeLabel = new Date(alert.created_at).toLocaleString('de-DE');
+            const resolvedAt = alert.resolved_at
+                ? new Date(alert.resolved_at).toLocaleString('de-DE')
+                : '';
             const resolvedLabel = alert.resolved_at
-                ? '<span class="alert-resolved">✓ Resolved</span>'
+                ? `<span class="alert-resolved">✓ Resolved (${{resolvedAt}})</span>`
                 : '<span class="alert-active">● Active</span>';
             const ackButton = alert.acknowledged
                 ? '<span class="alert-ack">✓ Acknowledged</span>'

@@ -148,8 +148,8 @@ PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.11.14` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.11.14` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
+| LoggerPi | `v1.11.15` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.11.15` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
 
 Der E2E-Datenpfad (LoggerPi → nginx → OtterPi → SQLite) ist verifiziert.
 
@@ -167,14 +167,14 @@ Datenquellen:
 Admin (LAN-only): `https://observer.makki.route64.de/admin`
 - Rooms-Tab: Formular-UI (Raum-/Geräte-Verwaltung, Raumwechsel, Inline-Formulare)
 - Alarm Limits-Tab: Formular-UI (Measurements + States pro Gerät, Edit Limits,
-  System-Karte für LoggerPi-Offline-Erkennung)
+  System-Karte für LoggerPi-Offline-Erkennung, Rate-of-Change pro Measurement)
 - Mail-Tab: Formular-UI (SMTP, Empfänger, Routing, Dedup, Quiet Hours)
-- Notifications-Tab: Formular-UI (ntfy, webhook)
+- Notifications-Tab: Formular-UI (ntfy, webhook, Severity-Auswahl pro Kanal)
 - Messages-Tab: Formular-UI (globale Regel-Texte, gruppiert in Measurements,
   States, System)
 - Alerts-Tab (Default-Tab): Alert History mit Acknowledge-Button,
-  Resolve-Button, Status-Chip („Active" / „Resolved"), Filter
-  „Only unacknowledged" / „Only active"
+  Resolve-Button, Status-Chip („Active" / „Resolved") mit Resolve-Zeitstempel,
+  Filter „Only unacknowledged" / „Only active"
 - Test-Mail-Button im Mail-Tab
 - JSON-Editor als „Advanced"-Toggle (alle Tabs)
 - JSON-Validierung, `.bak`, atomares Schreiben
@@ -303,18 +303,18 @@ pytest
 git diff --check
 ```
 
-Aktueller Stand: **399 Tests**, alle bestehen.
+Aktueller Stand: **406 Tests**, alle bestehen.
 
 ---
 
-Aktuelle Version: **v1.11.14**
+Aktuelle Version: **v1.11.15**
 
 Die Version wird geführt über:
 
-- `pyproject.toml` → `version = "1.11.14"`
-- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.11.14"`
-- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.11.14"`
-- Git-Tag `v1.11.14`
+- `pyproject.toml` → `version = "1.11.15"`
+- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.11.15"`
+- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.11.15"`
+- Git-Tag `v1.11.15`
 
 ---
 

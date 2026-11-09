@@ -1,9 +1,9 @@
 # Wiedereinstiegsprotokoll – LoggerPi-OtterPi (Stand v1.11.14)
 
 **Projekt:** LoggerPi-OtterPi
-**Aktuelle Version:** v1.11.14 (deployed auf OtterPi)
-**Teststand:** 399 passed, Ruff/Format clean
-**Stand:** 2026-11-08
+**Aktuelle Version:** v1.11.15 (deployed auf OtterPi)
+**Teststand:** 406 passed, Ruff/Format clean
+**Stand:** 2026-11-09
 
 ---
 
@@ -82,42 +82,19 @@ OtterPi (Python 3.13.5, User=makki)
   - `is_acknowledged()` prüft nur aktive (nicht resolved) Alerts. Ein resolveder Alert blockiert keinen neuen Alert mehr.
   - `reset_acknowledged()` wird nicht mehr beim Resolve aufgerufen. Ein resolveder Alert bleibt acknowledged.
 
+### v1.11.15 – Severity-Auswahl + Rate-of-Change
+
+- **Severity-Auswahl pro Kanal:** `notifications.json` → `severities` pro
+  Channel. `NtfyNotifier` und `WebhookNotifier` prüfen die Severity.
+  Admin-UI: Checkboxen im Notifications-Tab.
+- **Rate-of-Change im Admin:** Spalte „Rate/h" im „Edit Limits"-Formular.
+- **Message-Text bei stale/invalid:** Measurement-Key in Klammern.
+- **Resolve-Zeitstempel im Alert-Tab.**
+- **ntfy-Logging:** `_dispatch` loggt fehlgeschlagene Notifier.
+
 ---
 
 ## 3. Offene Punkte mit detaillierten Plänen
-
-### 3.7 Rate-of-Change im Admin (empfohlener nächster Schritt)
-
-**Problem:** `rate_of_change_max_per_hour` ist in `alert_engine.py` implementiert, aber im Alarm Limits-Tab gibt es kein Feld dafür. Der Nutzer kann die Rate-of-Change also nicht konfigurieren.
-
-**Ziel:** Im „Edit Limits"-Formular pro Measurement ein Feld `Rate of Change (per hour)` hinzufügen.
-
-**Konkrete Vorgehensweise:**
-
-1. **`admin.py` – `showEditLimitsForm` erweitern:**
-   - Zusätzliche Spalte `<th>Rate/h</th>` im Measurements-Header.
-   - Zusätzliche Zelle pro Measurement:
-     ```javascript
-     <td><input type="number" step="0.1" id="rate-${{name}}"
-             value="${{limits.rate_of_change_max_per_hour ?? ''}}"></td>
-     ```
-
-2. **`admin.py` – `submitEditLimits` erweitern:**
-   - `const rate = document.getElementById('rate-' + name).value;`
-   - `if (rate) limits.rate_of_change_max_per_hour = parseFloat(rate);`
-
-3. **Tests:**
-   - `test_admin.py`: Smoke-Test für „Edit Limits"-Formular mit Rate-of-Change-Feld.
-   - `test_config_store.py`: `rate_of_change_max_per_hour` wird korrekt validiert (bereits vorhanden).
-
-4. **Deploy + Test:**
-   - Rate-of-Change in der Admin konfigurieren.
-   - Test-Batch mit schneller Änderung senden.
-   - Prüfen, ob Alert mit `rule="rate_of_change"` ausgelöst wird.
-
-**Aufwand:** Klein (30 Min).
-
----
 
 ### 3.6 Dashboard-Limits
 

@@ -423,6 +423,15 @@ Limits-Tab (Schwellenwerte in Minuten, Checkbox für Warn-Alert).
 - **Bugfixes:** Stale-/Invalid-Alerts werden resolved, wenn der Sensor wieder
   `valid` ist. `is_acknowledged()` prüft nur aktive Alerts.
 
+### Phase C – Severity-Auswahl + Rate-of-Change (v1.11.15)
+
+- **Severity-Auswahl pro Kanal:** `notifications.json` → `severities` pro
+  Channel. Admin-UI: Checkboxen im Notifications-Tab.
+- **Rate-of-Change im Admin:** Spalte „Rate/h" im „Edit Limits"-Formular.
+- **Message-Text bei stale/invalid:** Measurement-Key in Klammern.
+- **Resolve-Zeitstempel im Alert-Tab.**
+- **ntfy-Logging:** `_dispatch` loggt fehlgeschlagene Notifier.
+
 ---
 
 ## 5. OtterPi HTTP Listener
@@ -743,7 +752,7 @@ Repository:
     main
 
 Version:
-    v1.11.14
+    v1.11.15
 
 Letzter bekannter Release-Commit:
     (wird beim Deploy gesetzt)

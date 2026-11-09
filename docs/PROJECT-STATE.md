@@ -16,10 +16,10 @@
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.11.14` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.11.14` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
+| LoggerPi | `v1.11.15` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.11.15` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
 
-LoggerPi und OtterPi laufen produktiv auf Version `v1.11.14`.
+LoggerPi und OtterPi laufen produktiv auf Version `v1.11.15`.
 
 ## Phase A – Config-Admin (abgeschlossen, v1.8.0)
 
@@ -256,6 +256,33 @@ Dashboard-Limits (3.6), Rate-of-Change im Admin (3.7).
 
 Deploy + Test (v1.11.14). Danach: UI-Umbau Alarm Limits (3.2),
 Dashboard-Limits (3.6), Rate-of-Change im Admin (3.7).
+
+## Phase C – Severity-Auswahl + Rate-of-Change (abgeschlossen, v1.11.15)
+
+**Stand:** 2026-11-09
+
+### Umgesetzt
+
+- **Severity-Auswahl pro Kanal:** `notifications.json` → `severities` pro
+  Channel (Liste von `critical`/`warning`). `NtfyNotifier` und
+  `WebhookNotifier` prüfen die Severity, bevor sie senden. Admin-UI:
+  Checkboxen im Notifications-Tab.
+- **Rate-of-Change im Admin:** `rate_of_change_max_per_hour` im
+  „Edit Limits"-Formular pro Measurement. Spalte „Rate/h".
+- **Message-Text bei stale/invalid:** Measurement-Key in Klammern, damit
+  `temperature_1` und `temperature_2` unterscheidbar sind.
+- **Resolve-Zeitstempel im Alert-Tab:** „✓ Resolved (9.11.2026, 10:15:30)".
+- **ntfy-Logging:** `_dispatch` loggt, wenn ein Notifier `False` zurückgibt
+  (Diagnose für fehlgeschlagene ntfy-Zustellungen).
+
+### Teststand
+
+406 Tests, alle grün.
+
+### Nächster Schritt
+
+Deploy + Test (v1.11.15). Danach: Dashboard-Limits (3.6), UI-Umbau
+Alarm Limits (3.2), Hysterese (3.8).
 
 ---
 

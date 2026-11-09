@@ -324,6 +324,14 @@ def _validate_notifications(data: Any) -> None:
             raise ConfigValidationError(f"Channel {i} has invalid type: {ctype!r}")
         if not isinstance(channel.get("enabled"), bool):
             raise ConfigValidationError(f"Channel {i} requires boolean 'enabled'.")
+        severities = channel.get("severities")
+        if severities is not None:
+            if not isinstance(severities, list) or not all(
+                s in {"critical", "warning"} for s in severities
+            ):
+                raise ConfigValidationError(
+                    f"Channel {i} 'severities' must be a list of 'critical' and/or 'warning'."
+                )
         if ctype == "ntfy":
             if not isinstance(channel.get("url"), str) or not channel["url"].strip():
                 raise ConfigValidationError(f"Channel {i} (ntfy) requires 'url'.")

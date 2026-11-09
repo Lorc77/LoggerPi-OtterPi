@@ -66,8 +66,11 @@ class NtfyNotifier:
         self.url = config["url"].rstrip("/")
         self.topic = config["topic"]
         self.token = config.get("token")
+        self.severities = config.get("severities", ["critical", "warning"])
 
     def send(self, alert: Alert) -> bool:
+        if alert.severity not in self.severities:
+            return True
         headers = {"Title": alert.subject or f"{alert.severity.upper()}: {alert.sensor}"}
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
@@ -88,8 +91,11 @@ class WebhookNotifier:
     def __init__(self, config: dict) -> None:
         self.url = config["url"]
         self.format = config.get("format", "generic")
+        self.severities = config.get("severities", ["critical", "warning"])
 
     def send(self, alert: Alert) -> bool:
+        if alert.severity not in self.severities:
+            return True
         if self.format == "discord":
             payload = {"content": alert.message}
         elif self.format == "slack":
