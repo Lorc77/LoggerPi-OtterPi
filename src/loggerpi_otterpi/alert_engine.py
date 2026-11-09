@@ -147,13 +147,11 @@ class AlertEngine(threading.Thread):
         rule_text = messages.get(rule, rule)
         prefix = f"{room} / {device}" if room else device
 
-        if rule == "invalid":
+        if rule in ("invalid", "stale"):
             reason = f" ({validity_reason})" if validity_reason else ""
-            measurement_key = sensor_key.split(".", 1)[-1]
-            return f"{prefix} — {measurement} ({measurement_key}) {rule_text}{reason}"
-        if rule == "stale":
-            measurement_key = sensor_key.split(".", 1)[-1]
-            return f"{prefix} — {measurement} ({measurement_key}) {rule_text}"
+            return f"{prefix} — {rule_text}{reason}"
+        if rule in ("alarm", "battery_low", "door_open", "contact_open"):
+            return f"{prefix} — {rule_text}"
         if value is not None and threshold is not None:
             operator = ">" if rule.endswith("_max") else "<"
             return (
