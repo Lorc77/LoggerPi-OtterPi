@@ -477,7 +477,7 @@ textarea.json-editor {{
 }}
 .device-row {{
     display: grid;
-    grid-template-columns: 140px 80px auto auto auto;
+    grid-template-columns: 120px 70px auto auto auto auto;
     gap: 6px;
     align-items: center;
     padding: 3px 0;
@@ -545,11 +545,8 @@ input[type="number"] {{
     font-size: .8rem;
     min-width: 70px;
 }}
-.device-row {{
-    grid-template-columns: 120px 70px auto auto auto auto;
-}}
 .device-row-states {{
-    grid-template-columns: 120px 70px auto;
+    grid-template-columns: 120px 70px max-content;
 }}
 </style>
 </head>
@@ -872,9 +869,17 @@ function toggleRoomsJson() {{
 function buildDeviceContent(
     device, sensors, states, latestMeasurements, latestStates, showAll, deviceConfig
 ) {{
+    const UNIT_LABELS = {{
+        celsius: '°C',
+        percent: '%',
+        mbar: 'mbar',
+        ppm: 'ppm',
+        rpm: 'rpm',
+    }};
     const schema = SENSOR_SCHEMAS[device.type] || {{measurements: [], states: []}};
     let measurementsHtml = '';
     for (const [name, unit] of schema.measurements) {{
+        const unitLabel = UNIT_LABELS[unit] || unit;
         const key = device.key + '.' + name;
         const limits = sensors[key] || {{}};
         const current = latestMeasurements[key];
@@ -892,11 +897,11 @@ function buildDeviceContent(
         const critMin = limits.critical_min;
         const critMax = limits.critical_max;
         const rate = limits.rate_of_change_max_per_hour;
-        const warnText = `Warn ${{warnMin ?? '–'}}–${{warnMax ?? '–'}} ${{unit}}`;
+        const warnText = `Warn ${{warnMin ?? '–'}}–${{warnMax ?? '–'}} ${{unitLabel}}`;
         const warnChip = (warnMin !== undefined || warnMax !== undefined)
             ? `<span class="chip chip-warn">${{warnText}}</span>`
             : '<span class="chip chip-off">not conf.</span>';
-        const critText = `Crit ${{critMin ?? '–'}}–${{critMax ?? '–'}} ${{unit}}`;
+        const critText = `Crit ${{critMin ?? '–'}}–${{critMax ?? '–'}} ${{unitLabel}}`;
         const critChip = (critMin !== undefined || critMax !== undefined)
             ? `<span class="chip chip-critical">${{critText}}</span>`
             : '<span class="chip chip-off">not conf.</span>';
@@ -956,15 +961,15 @@ function buildDeviceContent(
             ${{invalidChip}}
         </div>
     `;
+    const statesSection = statesHtml
+        ? `<div class="device-section"><h4>States</h4>${{statesHtml}}</div>`
+        : '<div class="device-section"><h4>States</h4><p class="hint">not applicable</p></div>';
     return `
         <div class="device-section">
             <h4>Measurements</h4>
             ${{measurementsHtml}}
         </div>
-        <div class="device-section">
-            <h4>States</h4>
-            ${{statesHtml}}
-        </div>
+        ${{statesSection}}
         <div class="save-row">
             <button class="btn btn-primary btn-small"
                     onclick="showEditLimitsForm('${{device.key}}', '${{device.type}}')">
