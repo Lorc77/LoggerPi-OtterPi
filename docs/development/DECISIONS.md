@@ -2470,6 +2470,122 @@ Nachvollziehbarkeit.
 
 ---
 
+## DEC-079 — Alarm Limits UI-Umbau (Raum-Kacheln mit Geräte-Kacheln)
+
+**Status:** Accepted
+**Datum:** 2026-11-09
+
+### Kontext
+
+Der Alarm Limits-Tab zeigte eine flache Liste von Geräte-Karten mit
+Measurements- und States-Tabellen. Bei 23 Geräten war das unübersichtlich.
+
+### Entscheidung
+
+Raum-Kacheln mit Geräte-Kacheln. Jede Geräte-Kachel zeigt:
+- Gerätename (ohne Raumname, weil der Raum im Raum-Titel steht)
+- Metadaten: Key, Type
+- Measurements/States als Liste mit farbigen Chips
+
+Chips:
+- `[Enabled]` (grün) / `[Disabled]` (grau)
+- `[Warning 20–26 °C]` (gelb)
+- `[Critical 18–28 °C]` (rot)
+- `[Rate 2.0/h]` (blau)
+- `[not configured]` (grau)
+
+### Begründung
+
+- **Übersichtlich:** 8 Raum-Kacheln statt 23 Geräte-Karten.
+- **Konsistent:** Wie Rooms-Tab.
+- **Farbcodiert:** Limits sind auf einen Blick erkennbar.
+- **Keine Tabelle:** Die Chips sind lesbarer als eine Tabelle mit 7 Spalten.
+
+### Konsequenz
+
+`admin.py` `loadAlarmLimits` umgebaut. Neue Hilfsfunktion
+`buildDeviceContent`. CSS für Chips und Geräte-Kacheln.
+
+---
+
+## DEC-080 — Severity-Checkboxen im Notifications-Tab
+
+**Status:** Accepted
+**Datum:** 2026-11-09
+
+### Kontext
+
+Die Severity-Checkboxen waren in einem `<label>`-Element gequetscht und
+unschön dargestellt.
+
+### Entscheidung
+
+Eigene `<div class="severity-checkboxes">` mit Flex-Layout. Jede Checkbox
+in einem eigenen `<label>` (klickbar).
+
+### Begründung
+
+Bessere Darstellung, klickbare Labels, horizontal angeordnet.
+
+### Konsequenz
+
+`admin.py` CSS und HTML angepasst.
+
+---
+
+## DEC-081 — States-Tabelle linksbündig
+
+**Status:** Accepted
+**Datum:** 2026-11-09
+
+### Kontext
+
+Die States-Tabelle im Edit-Limits-Formular war `width: 100%`, deshalb wurde
+die Checkbox in der zweiten Spalte weit nach rechts geschoben.
+
+### Entscheidung
+
+Die States-Tabelle bekommt `width: auto` und die erste Spalte `padding-right:
+24px`. Die Checkbox steht jetzt direkt nach dem State-Namen.
+
+### Begründung
+
+Die States-Tabelle hat nur 2 Spalten, braucht also nicht die volle Breite.
+Die Measurements-Tabelle (7 Spalten) behält `width: 100%`.
+
+### Konsequenz
+
+`admin.py` CSS und HTML angepasst.
+
+---
+
+## DEC-082 — ntfy ASCII-safe Title
+
+**Status:** Accepted
+**Datum:** 2026-11-09
+
+### Kontext
+
+Der `Title`-Header von ntfy enthielt Nicht-ASCII-Zeichen (`·`, `—`), was zu
+`UnicodeEncodeError` führte. ntfy-Benachrichtigungen kamen nicht an.
+
+### Entscheidung
+
+`NtfyNotifier` ersetzt Nicht-ASCII-Zeichen im `Title` durch ASCII-Äquivalente:
+`·` → `-`, `—` → `-`, `ä` → `ae`, etc. Verbleibende Nicht-ASCII-Zeichen
+werden durch `?` ersetzt (Fallback).
+
+### Begründung
+
+HTTP-Header müssen ASCII sein. Die `message` (Body) bleibt UTF-8, nur der
+`Title` wird ASCII-sicher.
+
+### Konsequenz
+
+`notifier.py` um `_ascii_safe()` erweitert. `NtfyNotifier.send` nutzt es.
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:

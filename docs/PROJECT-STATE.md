@@ -16,10 +16,10 @@
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.11.15` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.11.15` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
+| LoggerPi | `v1.11.16` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.11.16` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
 
-LoggerPi und OtterPi laufen produktiv auf Version `v1.11.15`.
+LoggerPi und OtterPi laufen produktiv auf Version `v1.11.16`.
 
 ## Phase A – Config-Admin (abgeschlossen, v1.8.0)
 
@@ -283,6 +283,36 @@ Dashboard-Limits (3.6), Rate-of-Change im Admin (3.7).
 
 Deploy + Test (v1.11.15). Danach: Dashboard-Limits (3.6), UI-Umbau
 Alarm Limits (3.2), Hysterese (3.8).
+
+## Phase C – Alarm Limits UI-Umbau (abgeschlossen, v1.11.16)
+
+**Stand:** 2026-11-09
+
+### Umgesetzt
+
+- **Alarm Limits-Tab:** Raum-Kacheln mit Geräte-Kacheln. Jede Geräte-Kachel
+  zeigt den Gerätenamen, die Metadaten (Key, Type) und die Measurements/States
+  als Liste mit farbigen Chips:
+  - `[Enabled]` (grün) / `[Disabled]` (grau)
+  - `[Warning 20–26 °C]` (gelb)
+  - `[Critical 18–28 °C]` (rot)
+  - `[Rate 2.0/h]` (blau)
+  - `[not configured]` (grau)
+- **Severity-Checkboxen im Notifications-Tab:** Bessere Darstellung
+  (Flex-Layout, horizontal, klickbare Labels).
+- **States-Tabelle im Edit-Limits-Formular:** Linksbündig, `width: auto`,
+  damit die Checkbox direkt nach dem State-Namen steht.
+- **ntfy ASCII-safe Title:** `NtfyNotifier` ersetzt Nicht-ASCII-Zeichen im
+  `Title`-Header durch ASCII-Äquivalente (`·` → `-`, `—` → `-`, `ä` → `ae`,
+  etc.). Behebt `UnicodeEncodeError` bei Sonderzeichen im Subject.
+
+### Teststand
+
+406 Tests, alle grün.
+
+### Nächster Schritt
+
+Deploy + Test (v1.11.16). Danach: Dashboard-Limits (3.6), Hysterese (3.8).
 
 ---
 

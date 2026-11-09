@@ -1,7 +1,7 @@
 # Wiedereinstiegsprotokoll – LoggerPi-OtterPi (Stand v1.11.14)
 
 **Projekt:** LoggerPi-OtterPi
-**Aktuelle Version:** v1.11.15 (deployed auf OtterPi)
+**Aktuelle Version:** v1.11.16 (deployed auf OtterPi)
 **Teststand:** 406 passed, Ruff/Format clean
 **Stand:** 2026-11-09
 
@@ -92,6 +92,15 @@ OtterPi (Python 3.13.5, User=makki)
 - **Resolve-Zeitstempel im Alert-Tab.**
 - **ntfy-Logging:** `_dispatch` loggt fehlgeschlagene Notifier.
 
+### v1.11.16 – Alarm Limits UI-Umbau
+
+- **Alarm Limits-Tab:** Raum-Kacheln mit Geräte-Kacheln, Limits als farbige
+  Chips (Warning gelb, Critical rot, Rate blau, not configured grau).
+- **Severity-Checkboxen im Notifications-Tab:** Flex-Layout, klickbare Labels.
+- **States-Tabelle im Edit-Limits-Formular:** Linksbündig, `width: auto`.
+- **ntfy ASCII-safe Title:** `NtfyNotifier` ersetzt Nicht-ASCII-Zeichen im
+  `Title`-Header.
+
 ---
 
 ## 3. Offene Punkte mit detaillierten Plänen
@@ -149,28 +158,6 @@ OtterPi (Python 3.13.5, User=makki)
 6. **Tests:**
    - `test_dashboard_data.py`: `_device_limits`, `_device_chips` (Near/At limit).
    - `test_dashboard.py`: Smoke-Tests für Limits-Anzeige.
-
-**Aufwand:** Mittel (2–3 h).
-
----
-
-### 3.2 UI-Umbau Alarm Limits
-
-**Ziel:** Alarm Limits-Tab übersichtlicher gestalten, konsistent mit Rooms-Tab.
-
-**Ideen:**
-- Gruppierung nach Raum (wie Rooms-Tab): Raum-Kacheln mit Geräte-Tabellen.
-- Tabellen mit besseren Spaltenbreiten (z.B. `table-layout: fixed`).
-- Buttons konsistent (bereits `btn-primary btn-small` für „Edit Limits").
-- „Enabled"-Checkbox für Measurements (bereits hinzugefügt).
-- Vielleicht: Accordion pro Gerät (wie Rooms-Tab).
-
-**Konkrete Vorgehensweise:**
-
-1. **`loadAlarmLimits` umbauen:** Raum-Kacheln statt flache Liste.
-2. **Pro Raum:** Geräte-Tabellen (Measurements + States).
-3. **Pro Gerät:** „Edit Limits"-Button (bereits da).
-4. **Testen.**
 
 **Aufwand:** Mittel (2–3 h).
 

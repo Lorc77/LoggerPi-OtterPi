@@ -432,6 +432,15 @@ Limits-Tab (Schwellenwerte in Minuten, Checkbox für Warn-Alert).
 - **Resolve-Zeitstempel im Alert-Tab.**
 - **ntfy-Logging:** `_dispatch` loggt fehlgeschlagene Notifier.
 
+### Phase C – Alarm Limits UI-Umbau (v1.11.16)
+
+- **Alarm Limits-Tab:** Raum-Kacheln mit Geräte-Kacheln, Limits als farbige
+  Chips (Warning gelb, Critical rot, Rate blau, not configured grau).
+- **Severity-Checkboxen im Notifications-Tab:** Flex-Layout, klickbare Labels.
+- **States-Tabelle im Edit-Limits-Formular:** Linksbündig, `width: auto`.
+- **ntfy ASCII-safe Title:** `NtfyNotifier` ersetzt Nicht-ASCII-Zeichen im
+  `Title`-Header.
+
 ---
 
 ## 5. OtterPi HTTP Listener
@@ -752,7 +761,7 @@ Repository:
     main
 
 Version:
-    v1.11.15
+    v1.11.16
 
 Letzter bekannter Release-Commit:
     (wird beim Deploy gesetzt)

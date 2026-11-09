@@ -583,3 +583,7 @@ Der E2E-Datenpfad (LoggerPi → OtterPi → SQLite) ist praktisch verifiziert:
 - Message-Text bei stale/invalid mit Measurement-Key
 - Resolve-Zeitstempel im Alert-Tab
 - ntfy-Logging für fehlgeschlagene Notifier
+- Alarm Limits UI-Umbau (Raum-Kacheln mit Geräte-Kacheln, Chips)
+- Severity-Checkboxen im Notifications-Tab (Flex-Layout)
+- States-Tabelle im Edit-Limits-Formular (linksbündig)
+- ntfy ASCII-safe Title (behebt UnicodeEncodeError)

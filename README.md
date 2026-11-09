@@ -148,8 +148,8 @@ PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.11.15` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.11.15` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
+| LoggerPi | `v1.11.16` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.11.16` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
 
 Der E2E-Datenpfad (LoggerPi → nginx → OtterPi → SQLite) ist verifiziert.
 
@@ -166,8 +166,9 @@ Datenquellen:
 
 Admin (LAN-only): `https://observer.makki.route64.de/admin`
 - Rooms-Tab: Formular-UI (Raum-/Geräte-Verwaltung, Raumwechsel, Inline-Formulare)
-- Alarm Limits-Tab: Formular-UI (Measurements + States pro Gerät, Edit Limits,
-  System-Karte für LoggerPi-Offline-Erkennung, Rate-of-Change pro Measurement)
+- Alarm Limits-Tab: Raum-Kacheln mit Geräte-Kacheln, Limits als farbige Chips
+  (Warning gelb, Critical rot, Rate blau, not configured grau), Edit Limits
+  pro Gerät, System-Karte für LoggerPi-Offline-Erkennung
 - Mail-Tab: Formular-UI (SMTP, Empfänger, Routing, Dedup, Quiet Hours)
 - Notifications-Tab: Formular-UI (ntfy, webhook, Severity-Auswahl pro Kanal)
 - Messages-Tab: Formular-UI (globale Regel-Texte, gruppiert in Measurements,
@@ -307,14 +308,14 @@ Aktueller Stand: **406 Tests**, alle bestehen.
 
 ---
 
-Aktuelle Version: **v1.11.15**
+Aktuelle Version: **v1.11.16**
 
 Die Version wird geführt über:
 
-- `pyproject.toml` → `version = "1.11.15"`
-- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.11.15"`
-- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.11.15"`
-- Git-Tag `v1.11.15`
+- `pyproject.toml` → `version = "1.11.16"`
+- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.11.16"`
+- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.11.16"`
+- Git-Tag `v1.11.16`
 
 ---
 

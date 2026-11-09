@@ -437,6 +437,75 @@ textarea.json-editor {{
     from {{ opacity: 0; transform: translateX(20px); }}
     to {{ opacity: 1; transform: translateX(0); }}
 }}
+.chip {{
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: .75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}}
+.chip-ok {{ background: rgba(34,197,94,.2); color: #86efac; }}
+.chip-off {{ background: rgba(107,114,128,.2); color: #d1d5db; }}
+.chip-warn {{ background: rgba(234,179,8,.2); color: #fde047; }}
+.chip-critical {{ background: rgba(239,68,68,.2); color: #fca5a5; }}
+.chip-info {{ background: rgba(147,197,253,.15); color: #bfdbfe; }}
+
+.device-card {{
+    background: rgba(31,41,55,.5);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 12px;
+}}
+.device-card h3 {{
+    margin: 0 0 4px 0;
+    font-size: 1rem;
+}}
+.device-meta {{
+    color: #9ca3af;
+    font-size: .8rem;
+    margin-bottom: 10px;
+}}
+.device-section {{
+    margin-top: 10px;
+}}
+.device-section h4 {{
+    margin: 0 0 6px 0;
+    color: #bfdbfe;
+    font-size: .9rem;
+}}
+.device-row {{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 0;
+    font-size: .85rem;
+}}
+.device-row .name {{
+    min-width: 140px;
+    color: #d1d5db;
+}}
+.severity-checkboxes {{
+    display: flex;
+    gap: 16px;
+    margin-top: 4px;
+    margin-bottom: 8px;
+}}
+.severity-checkboxes label {{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    cursor: pointer;
+}}
+.states-table {{
+    width: auto;
+}}
+.states-table td:first-child {{
+    padding-right: 24px;
+}}
 </style>
 </head>
 <body>
@@ -751,6 +820,75 @@ function toggleRoomsJson() {{
     editor.style.display = editor.style.display === 'none' ? 'block' : 'none';
 }}
 
+function buildDeviceContent(device, sensors, states) {{
+    const schema = SENSOR_SCHEMAS[device.type] || {{measurements: [], states: []}};
+    let measurementsHtml = '';
+    for (const [name, unit] of schema.measurements) {{
+        const key = device.key + '.' + name;
+        const limits = sensors[key] || {{}};
+        const enabled = limits.enabled === true;
+        const enabledChip = enabled
+            ? '<span class="chip chip-ok">Enabled</span>'
+            : '<span class="chip chip-off">Disabled</span>';
+        const warnMin = limits.warning_min;
+        const warnMax = limits.warning_max;
+        const critMin = limits.critical_min;
+        const critMax = limits.critical_max;
+        const rate = limits.rate_of_change_max_per_hour;
+        const warnText = `Warning ${{warnMin ?? '–'}}–${{warnMax ?? '–'}} ${{unit}}`;
+        const warnChip = (warnMin !== undefined || warnMax !== undefined)
+            ? `<span class="chip chip-warn">${{warnText}}</span>`
+            : '<span class="chip chip-off">not configured</span>';
+        const critText = `Critical ${{critMin ?? '–'}}–${{critMax ?? '–'}} ${{unit}}`;
+        const critChip = (critMin !== undefined || critMax !== undefined)
+            ? `<span class="chip chip-critical">${{critText}}</span>`
+            : '<span class="chip chip-off">not configured</span>';
+        const rateChip = rate !== undefined
+            ? `<span class="chip chip-info">Rate ${{rate}}/h</span>`
+            : '<span class="chip chip-off">not configured</span>';
+        measurementsHtml += `
+            <div class="device-row">
+                <span class="name">${{name}}</span>
+                ${{enabledChip}}
+                ${{warnChip}}
+                ${{critChip}}
+                ${{rateChip}}
+            </div>
+        `;
+    }}
+    let statesHtml = '';
+    for (const [name, type] of schema.states) {{
+        const key = device.key + '.' + name;
+        const rule = states[key] || {{}};
+        const enabled = rule.enabled === true;
+        const enabledChip = enabled
+            ? '<span class="chip chip-ok">Enabled</span>'
+            : '<span class="chip chip-off">Disabled</span>';
+        statesHtml += `
+            <div class="device-row">
+                <span class="name">${{name}}</span>
+                ${{enabledChip}}
+            </div>
+        `;
+    }}
+    return `
+        <div class="device-section">
+            <h4>Measurements</h4>
+            ${{measurementsHtml}}
+        </div>
+        <div class="device-section">
+            <h4>States</h4>
+            ${{statesHtml}}
+        </div>
+        <div class="save-row">
+            <button class="btn btn-primary btn-small"
+                    onclick="showEditLimitsForm('${{device.key}}', '${{device.type}}')">
+                ✏️ Edit Limits
+            </button>
+        </div>
+    `;
+}}
+
 async function loadAlarmLimits() {{
     const status = document.getElementById('alarm-status');
     const list = document.getElementById('alarm-list');
@@ -798,85 +936,34 @@ async function loadAlarmLimits() {{
         `;
         list.appendChild(systemCard);
 
+        // Raum-Kacheln mit Geräte-Kacheln
         for (const [roomId, room] of Object.entries(rooms)) {{
+            const roomCard = document.createElement('div');
+            roomCard.className = 'room-card';
+            roomCard.dataset.roomId = roomId;
+
+            let devicesHtml = '';
             for (const device of room.devices) {{
-                const card = document.createElement('div');
-                card.className = 'room-card';
-                card.dataset.deviceKey = device.key;
-                const schema = SENSOR_SCHEMAS[device.type] || {{measurements: [], states: []}};
-                let measurementsHtml = '';
-                for (const [name, unit] of schema.measurements) {{
-                    const key = device.key + '.' + name;
-                    const limits = sensors[key] || {{}};
-                    measurementsHtml += `
-                        <tr>
-                            <td>${{name}}</td>
-                            <td>${{unit}}</td>
-                            <td>${{limits.warning_min ?? '–'}}</td>
-                            <td>${{limits.warning_max ?? '–'}}</td>
-                            <td>${{limits.critical_min ?? '–'}}</td>
-                            <td>${{limits.critical_max ?? '–'}}</td>
-                            <td>${{limits.enabled === true ? '✓' : '–'}}</td>
-                        </tr>
-                    `;
-                }}
-                let statesHtml = '';
-                for (const [name, type] of schema.states) {{
-                    const key = device.key + '.' + name;
-                    const rule = states[key] || {{}};
-                    statesHtml += `
-                        <tr>
-                            <td>${{name}}</td>
-                            <td>${{type}}</td>
-                            <td>${{rule.enabled === true ? '✓' : '–'}}</td>
-                        </tr>
-                    `;
-                }}
-                card.innerHTML = `
-                    <h3>${{device.name}}</h3>
-                    <p>Key: ${{device.key}}</p>
-                    <p>Type: ${{device.type}}</p>
-                    <p>Room: ${{room.name}}</p>
-                    <h4>Measurements</h4>
-                    <table class="devices-table">
-                        <thead>
-                            <tr>
-                                <th>Measurement</th>
-                                <th>Unit</th>
-                                <th>Warn Min</th>
-                                <th>Warn Max</th>
-                                <th>Crit Min</th>
-                                <th>Crit Max</th>
-                                <th>Enabled</th>
-                            </tr>
-                        </thead>
-                        <tbody>${{measurementsHtml}}</tbody>
-                    </table>
-                    <h4>States</h4>
-                    <table class="devices-table">
-                        <thead>
-                            <tr>
-                                <th>State</th>
-                                <th>Type</th>
-                                <th>Enabled</th>
-                            </tr>
-                        </thead>
-                        <tbody>${{statesHtml}}</tbody>
-                    </table>
-                    <div class="save-row">
-                        <button class="btn btn-primary btn-small"
-                                onclick="showEditLimitsForm('${{device.key}}', '${{device.type}}')">
-                            ✏️ Edit Limits
-                        </button>
+                devicesHtml += `
+                    <div class="device-card" data-device-key="${{device.key}}">
+                        <h3>${{device.name}}</h3>
+                        <div class="device-meta">Key: ${{device.key}} · Type: ${{device.type}}</div>
+                        ${{buildDeviceContent(device, sensors, states)}}
                     </div>
                 `;
-                list.appendChild(card);
-                const toTop = document.createElement('div');
-                toTop.className = 'to-top';
-                toTop.innerHTML = `<button class="btn btn-primary btn-small"
-                    onclick="window.scrollTo({{top: 0, behavior: 'smooth'}})">↑ To Top</button>`;
-                list.appendChild(toTop);
             }}
+
+            roomCard.innerHTML = `
+                <h3>${{room.icon || ''}} ${{room.name}}</h3>
+                ${{devicesHtml}}
+            `;
+            list.appendChild(roomCard);
+
+            const toTop = document.createElement('div');
+            toTop.className = 'to-top';
+            toTop.innerHTML = `<button class="btn btn-primary btn-small"
+                onclick="window.scrollTo({{top: 0, behavior: 'smooth'}})">↑ To Top</button>`;
+            list.appendChild(toTop);
         }}
         status.textContent = 'Loaded.';
     }} catch (e) {{
@@ -983,7 +1070,7 @@ async function showEditLimitsForm(deviceKey, deviceType) {{
             <tbody>${{measurementsHtml}}</tbody>
         </table>
         <h5>States</h5>
-        <table class="devices-table">
+        <table class="devices-table states-table">
             <thead>
                 <tr><th>State</th><th>Enabled</th></tr>
             </thead>
@@ -1368,10 +1455,11 @@ function showAddChannelForm() {{
             <option value="slack">slack</option>
         </select></label>
         <label>Enabled: <input type="checkbox" id="new-channel-enabled" checked></label>
-        <label>Severities:
-            <input type="checkbox" id="new-channel-critical" checked> critical
-            <input type="checkbox" id="new-channel-warning" checked> warning
-        </label>
+        <label>Severities:</label>
+        <div class="severity-checkboxes">
+            <label><input type="checkbox" id="new-channel-critical" checked> critical</label>
+            <label><input type="checkbox" id="new-channel-warning" checked> warning</label>
+        </div>
         <div class="save-row">
             <button class="btn btn-primary btn-small"
                     onclick="submitAddChannel()">💾 Save</button>
@@ -1506,12 +1594,13 @@ async function editChannel(index) {{
         </select></label>
         <label>Enabled: <input type="checkbox" id="edit-channel-enabled"
                 ${{channel.enabled ? 'checked' : ''}}></label>
-        <label>Severities:
-            <input type="checkbox" id="edit-channel-critical"
-                    ${{criticalChecked}}> critical
-            <input type="checkbox" id="edit-channel-warning"
-                    ${{warningChecked}}> warning
-        </label>
+        <label>Severities:</label>
+        <div class="severity-checkboxes">
+            <label><input type="checkbox" id="edit-channel-critical"
+                    ${{criticalChecked}}> critical</label>
+            <label><input type="checkbox" id="edit-channel-warning"
+                    ${{warningChecked}}> warning</label>
+        </div>
         <div class="save-row">
             <button class="btn btn-primary btn-small"
                     onclick="submitEditChannel(${{index}})">💾 Save</button>
