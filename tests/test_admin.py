@@ -6,7 +6,9 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 import pytest
+from batch_factory import SequenceStore, create_batch
 from config_store import load_alarm_limits, load_mail, load_notifications, load_rooms
+from model.measurement import Measurement
 from otterpi import create_server
 from otterpi_store import BatchStore
 
@@ -559,6 +561,76 @@ def test_post_resolve_alert(tmp_path):
         assert data == {"status": "resolved"}
         alerts = alert_store.list_alerts()
         assert alerts[0]["resolved_at"] is not None
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_get_latest_measurements(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    seq = SequenceStore(tmp_path / "sequence")
+    measurement = Measurement(
+        value=23.5,
+        unit="celsius",
+        measured_at="2026-11-09T12:00:00+00:00",
+        validity="valid",
+        source="test",
+    )
+    batch = create_batch(
+        "logger-001",
+        seq,
+        measurements={"atmoweb_101.temperature_1": measurement},
+        states={"atmoweb_101": {"door_open": True}},
+    )
+    store.store(batch)
+
+    server = _server(store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        with urlopen(
+            f"http://127.0.0.1:{server.server_port}/api/admin/latest-measurements"
+        ) as resp:
+            assert resp.status == 200
+            data = json.loads(resp.read().decode("utf-8"))
+        assert "atmoweb_101.temperature_1" in data["measurements"]
+        assert data["measurements"]["atmoweb_101.temperature_1"]["value"] == 23.5
+        assert data["states"]["atmoweb_101"]["door_open"] is True
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_get_latest_measurements_empty(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    server = _server(store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        with urlopen(
+            f"http://127.0.0.1:{server.server_port}/api/admin/latest-measurements"
+        ) as resp:
+            assert resp.status == 200
+            data = json.loads(resp.read().decode("utf-8"))
+        assert data == {"measurements": {}, "states": {}}
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_admin_page_contains_show_all_checkbox(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    server = _server(store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        with urlopen(f"http://127.0.0.1:{server.server_port}/admin") as resp:
+            html = resp.read().decode("utf-8")
+        assert "alarm-show-all" in html
+        assert "Show all" in html
     finally:
         server.shutdown()
         thread.join()

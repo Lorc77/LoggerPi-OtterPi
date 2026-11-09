@@ -18,7 +18,7 @@ class ConfigValidationError(ValueError):
 
 
 _ROOM_KEY_RE = re.compile(r"^[a-z0-9_]+$")
-_SENSOR_KEY_RE = re.compile(r"^[a-z0-9_]+\.[a-z0-9_]+$")
+_SENSOR_KEY_RE = re.compile(r"^[a-z0-9_]+(\.[a-z0-9_]+)+$")
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 _TIME_RE = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")
 

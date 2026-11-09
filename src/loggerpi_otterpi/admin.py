@@ -540,6 +540,17 @@ input[type="number"]::-webkit-inner-spin-button {{
 input[type="number"] {{
     -moz-appearance: textfield;
 }}
+.current-value {{
+    color: #bfdbfe;
+    font-size: .8rem;
+    min-width: 70px;
+}}
+.device-row {{
+    grid-template-columns: 120px 70px auto auto auto auto;
+}}
+.device-row-states {{
+    grid-template-columns: 120px 70px auto;
+}}
 </style>
 </head>
 <body>
@@ -601,6 +612,12 @@ input[type="number"] {{
                 configured notifiers.</li>
         </ol>
     </details>
+    <div class="save-row">
+        <label>
+            <input type="checkbox" id="alarm-show-all" onchange="loadAlarmLimits()">
+            Show all
+        </label>
+    </div>
     <div id="alarm-list" class="rooms-list"></div>
     <div class="save-row">
         <button class="btn btn-secondary btn-small"
@@ -854,12 +871,18 @@ function toggleRoomsJson() {{
     editor.style.display = editor.style.display === 'none' ? 'block' : 'none';
 }}
 
-function buildDeviceContent(device, sensors, states) {{
+function buildDeviceContent(device, sensors, states, latestMeasurements, latestStates, showAll) {{
     const schema = SENSOR_SCHEMAS[device.type] || {{measurements: [], states: []}};
     let measurementsHtml = '';
     for (const [name, unit] of schema.measurements) {{
         const key = device.key + '.' + name;
         const limits = sensors[key] || {{}};
+        const current = latestMeasurements[key];
+        const isActive = current !== undefined || limits.enabled === true;
+        if (!showAll && !isActive) continue;
+        const currentValue = current && current.value !== null
+            ? `${{current.value}} ${{unit}}`
+            : '–';
         const enabled = limits.enabled === true;
         const enabledChip = enabled
             ? '<span class="chip chip-ok">Enabled</span>'
@@ -879,10 +902,11 @@ function buildDeviceContent(device, sensors, states) {{
             : '<span class="chip chip-off">not conf.</span>';
         const rateChip = rate !== undefined
             ? `<span class="chip chip-info">Rate ${{rate}}/h</span>`
-            : '<span class="chip chip-off">not configured</span>';
+            : '<span class="chip chip-off">not conf.</span>';
         measurementsHtml += `
             <div class="device-row">
                 <span class="name">${{name}}</span>
+                <span class="current-value">${{currentValue}}</span>
                 ${{enabledChip}}
                 ${{warnChip}}
                 ${{critChip}}
@@ -894,13 +918,19 @@ function buildDeviceContent(device, sensors, states) {{
     for (const [name, type] of schema.states) {{
         const key = device.key + '.' + name;
         const rule = states[key] || {{}};
+        const deviceStates = latestStates[device.key] || {{}};
+        const current = deviceStates[name];
+        const isActive = current !== undefined || rule.enabled === true;
+        if (!showAll && !isActive) continue;
+        const currentValue = current !== undefined ? String(current) : '–';
         const enabled = rule.enabled === true;
         const enabledChip = enabled
             ? '<span class="chip chip-ok">Enabled</span>'
             : '<span class="chip chip-off">Disabled</span>';
         statesHtml += `
-            <div class="device-row">
+            <div class="device-row device-row-states">
                 <span class="name">${{name}}</span>
+                <span class="current-value">${{currentValue}}</span>
                 ${{enabledChip}}
             </div>
         `;
@@ -934,6 +964,11 @@ async function loadAlarmLimits() {{
         const alarmLimits = result.alarm_limits;
         const sensors = alarmLimits.sensors || {{}};
         const states = alarmLimits.states || {{}};
+        const latestResp = await fetch('/api/admin/latest-measurements');
+        const latestData = await latestResp.json();
+        const latestMeasurements = latestData.measurements || {{}};
+        const latestStates = latestData.states || {{}};
+        const showAll = document.getElementById('alarm-show-all').checked;
         list.innerHTML = '';
 
         // System-Karte (LoggerPi-Offline-Erkennung)
@@ -979,11 +1014,14 @@ async function loadAlarmLimits() {{
             let devicesHtml = '';
             for (const device of room.devices) {{
                 const meta = `Room: ${{roomId}} · Key: ${{device.key}} · Type: ${{device.type}}`;
+                const content = buildDeviceContent(
+                    device, sensors, states, latestMeasurements, latestStates, showAll
+                );
                 devicesHtml += `
                     <div class="device-card" data-device-key="${{device.key}}">
                         <h3>${{device.name}}</h3>
                         <div class="device-meta">${{meta}}</div>
-                        ${{buildDeviceContent(device, sensors, states)}}
+                        ${{content}}
                     </div>
                 `;
             }}

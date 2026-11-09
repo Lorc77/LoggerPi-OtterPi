@@ -56,9 +56,7 @@ SENSOR_SCHEMAS: Dict[str, Dict[str, List]] = {
         "measurements": [
             ("temperature", "celsius"),
         ],
-        "states": [
-            ("operation_mode", "int"),
-        ],
+        "states": [],
     },
     "weatherhub_id01": {
         "measurements": [

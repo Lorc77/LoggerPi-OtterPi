@@ -338,6 +338,16 @@ class OtterPiHandler(BaseHTTPRequestHandler):
             self._send_json(200, messages)
             return
 
+        if self.path == "/api/admin/latest-measurements":
+            latest = self.store.latest()
+            if latest is None:
+                self._send_json(200, {"measurements": {}, "states": {}})
+                return
+            measurements = {name: m.to_dict() for name, m in latest.measurements.items()}
+            states = latest.states or {}
+            self._send_json(200, {"measurements": measurements, "states": states})
+            return
+
         if self.path.startswith("/api/admin/alerts"):
             limit = 100
             only_unacknowledged = False

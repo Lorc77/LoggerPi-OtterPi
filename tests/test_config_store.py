@@ -331,3 +331,21 @@ class TestNotificationsSeverities:
         }
         save_notifications(data)
         assert load_notifications() == data
+
+
+def test_states_nested_key():
+    data = {
+        "sensors": {},
+        "states": {"atmoweb_101.switches.a": {"enabled": True}},
+    }
+    save_alarm_limits(data)
+    assert load_alarm_limits() == data
+
+
+def test_states_nested_lights_key():
+    data = {
+        "sensors": {},
+        "states": {"atmoweb_101.lights.day": {"enabled": True}},
+    }
+    save_alarm_limits(data)
+    assert load_alarm_limits() == data
