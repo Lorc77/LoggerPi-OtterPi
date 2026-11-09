@@ -519,6 +519,20 @@ textarea.json-editor {{
     margin: 0;
     cursor: pointer;
 }}
+.device-grid {{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+}}
+.device-grid .device-card {{
+    margin-top: 0;
+}}
+@media (max-width: 900px) {{
+    .device-grid {{
+        grid-template-columns: 1fr;
+    }}
+}}
 </style>
 </head>
 <body>
@@ -949,24 +963,35 @@ async function loadAlarmLimits() {{
         `;
         list.appendChild(systemCard);
 
-        // Flache Liste von Geräte-Kacheln
+        // Raum-Kacheln mit Geräte-Kacheln
         for (const [roomId, room] of Object.entries(rooms)) {{
+            const roomCard = document.createElement('div');
+            roomCard.className = 'room-card';
+            roomCard.dataset.roomId = roomId;
+
+            let devicesHtml = '';
             for (const device of room.devices) {{
-                const card = document.createElement('div');
-                card.className = 'device-card';
-                card.dataset.deviceKey = device.key;
-                card.innerHTML = `
-                    <h3>${{room.icon || ''}} ${{room.name}} · ${{device.name}}</h3>
-                    <div class="device-meta">Key: ${{device.key}} · Type: ${{device.type}}</div>
-                    ${{buildDeviceContent(device, sensors, states)}}
+                const meta = `Room: ${{roomId}} · Key: ${{device.key}} · Type: ${{device.type}}`;
+                devicesHtml += `
+                    <div class="device-card" data-device-key="${{device.key}}">
+                        <h3>${{device.name}}</h3>
+                        <div class="device-meta">${{meta}}</div>
+                        ${{buildDeviceContent(device, sensors, states)}}
+                    </div>
                 `;
-                list.appendChild(card);
-                const toTop = document.createElement('div');
-                toTop.className = 'to-top';
-                toTop.innerHTML = `<button class="btn btn-primary btn-small"
-                    onclick="window.scrollTo({{top: 0, behavior: 'smooth'}})">↑ To Top</button>`;
-                list.appendChild(toTop);
             }}
+
+            roomCard.innerHTML = `
+                <h3>${{room.icon || ''}} ${{room.name}}</h3>
+                <div class="device-grid">${{devicesHtml}}</div>
+            `;
+            list.appendChild(roomCard);
+
+            const toTop = document.createElement('div');
+            toTop.className = 'to-top';
+            toTop.innerHTML = `<button class="btn btn-primary btn-small"
+                onclick="window.scrollTo({{top: 0, behavior: 'smooth'}})">↑ To Top</button>`;
+            list.appendChild(toTop);
         }}
         status.textContent = 'Loaded.';
     }} catch (e) {{
@@ -1444,7 +1469,11 @@ function toggleMessagesJson() {{
 
 function showAddChannelForm() {{
     const list = document.getElementById('notifications-list');
-    if (list.querySelector('.inline-form')) return;
+    const existingForm = list.querySelector('.inline-form');
+    if (existingForm) {{
+        existingForm.remove();
+        return;
+    }}
     const form = document.createElement('div');
     form.className = 'inline-form';
     form.innerHTML = `
@@ -1578,7 +1607,11 @@ async function editChannel(index) {{
     const criticalChecked = severities.includes('critical') ? 'checked' : '';
     const warningChecked = severities.includes('warning') ? 'checked' : '';
     const list = document.getElementById('notifications-list');
-    if (list.querySelector('.inline-form')) return;
+    const existingForm = list.querySelector('.inline-form');
+    if (existingForm) {{
+        existingForm.remove();
+        return;
+    }}
     const form = document.createElement('div');
     form.className = 'inline-form';
     form.innerHTML = `
@@ -1725,7 +1758,11 @@ async function moveDevice(deviceKey, newRoomId) {{
 function showAddDeviceForm(roomId) {{
     const card = document.querySelector(`[data-room-id="${{roomId}}"]`);
     if (!card) return;
-    if (card.querySelector('.inline-form')) return;
+    const existingForm = card.querySelector('.inline-form');
+    if (existingForm) {{
+        existingForm.remove();
+        return;
+    }}
     const form = document.createElement('div');
     form.className = 'inline-form';
     const typeOptions = Object.keys(SENSOR_SCHEMAS).map(
@@ -1876,7 +1913,11 @@ async function editDevice(deviceKey) {{
     if (!device) return;
     const card = document.querySelector(`[data-room-id="${{roomId}}"]`);
     if (!card) return;
-    if (card.querySelector('.inline-form')) return;
+    const existingForm = card.querySelector('.inline-form');
+    if (existingForm) {{
+        existingForm.remove();
+        return;
+    }}
     const form = document.createElement('div');
     form.className = 'inline-form';
     form.innerHTML = `
@@ -1934,7 +1975,11 @@ async function submitEditDevice(deviceKey) {{
 
 function showAddRoomForm() {{
     const list = document.getElementById('rooms-list');
-    if (list.querySelector('.inline-form')) return;
+    const existingForm = list.querySelector('.inline-form');
+    if (existingForm) {{
+        existingForm.remove();
+        return;
+    }}
     const form = document.createElement('div');
     form.className = 'inline-form';
     form.innerHTML = `
@@ -2034,7 +2079,11 @@ async function editRoom(roomId) {{
     const room = rooms[roomId];
     const card = document.querySelector(`[data-room-id="${{roomId}}"]`);
     if (!card) return;
-    if (card.querySelector('.inline-form')) return;
+    const existingForm = card.querySelector('.inline-form');
+    if (existingForm) {{
+        existingForm.remove();
+        return;
+    }}
     const form = document.createElement('div');
     form.className = 'inline-form';
     form.innerHTML = `
