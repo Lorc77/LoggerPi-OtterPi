@@ -117,16 +117,18 @@ OtterPi (Python 3.13.5, User=makki)
 ### v1.11.18 – Alert-Message + Chip-Polish
 
 - **Alert-Messages:** Werte auf 1 Nachkommastelle gerundet, Einheiten
-  umgewandelt (`°C`, `%`).
-- **Chip-Texte:** Pfeile für Min/Max (`Warn ↓ 20 °C · ↑ 23 °C`,
-  `Crit ↓ 18 °C · ↑ 28 °C`, `Rate ↕ 1 °C/h`). Nicht konfiguriert:
-  `Warn n/c`, `Crit n/c`, `Rate n/c`.
+  umgewandelt (`celsius` → `°C`, `percent` → `%`).
+- **Chip-Texte:** Pfeile für Min/Max (`↓ 20 °C ↑ 23 °C`,
+  `↓ 18 °C ↑ 28 °C`, `↕ 1 °C/h`). Nicht konfiguriert: `Warn n/c`,
+  `Crit n/c`, `Rate n/c`.
 - **`resolve`-Fix:** Alert bleibt aktiv, wenn mindestens ein Channel
-  `invalid`/`stale` ist.
-- **`UNIT_LABELS`/`unitLabel` in `admin.py`.**
-- **`max-content` für State-Chips.**
-- **„not applicable" für leere States.**
-
+  `invalid`/`stale` ist. `resolve` wird nur aufgerufen, wenn alle Channels
+  `valid` sind.
+- **`UNIT_LABELS`/`unitLabel` in `admin.py`:** Einheiten in Chips und
+  Messwerten umgewandelt.
+- **`max-content` für State-Chips:** Chip nimmt nur so viel Platz wie nötig.
+- **„not applicable" für leere States:** Statt leerer Sektion.
+- **Doppelte `.device-row`-Definition bereinigt.**
 ---
 
 ## 3. Offene Punkte mit detaillierten Plänen
@@ -238,6 +240,197 @@ OtterPi (Python 3.13.5, User=makki)
    - `test_alert_engine.py`: Hysterese verhindert mehrfache Alerts; Reset bei `value < threshold - hysteresis`.
 
 **Aufwand:** Mittel (2–3 h).
+
+---
+
+### 3.10 Alert-Tab-Überarbeitung
+
+**Problem:** Der Alert-Tab wächst mit jedem Alert. Bei vielen Alerts wird die
+Liste unübersichtlich.
+
+**Ziel:** Übersichtlichere Darstellung, schnellere Orientierung.
+
+**Ideen (zu besprechen):**
+
+1. **Filter:**
+   - Severity: critical / warning / alle.
+   - Raum: Dropdown (alle Räume / R1304 / R1306 / …).
+   - Gerät: Dropdown (alle Geräte / spezifisches Gerät).
+   - Status: active / resolved / acknowledged / alle.
+
+2. **Kompakte Tabelle statt Karten:**
+   - Eine Zeile pro Alert: Zeit, Gerät, Regel, Severity, Status, Aktionen.
+   - Mehr Alerts auf einen Blick.
+   - Weniger visuell (keine Lampe, keine Karte).
+
+3. **Gruppierung nach Datum:**
+   - Alerts nach Tag gruppiert (heute, gestern, älter).
+
+4. **Accordion pro Gerät:**
+   - Jedes Gerät ein Accordion. Eingeklappt: Gerätename + Anzahl.
+   - Aufgeklappt: Die Alerts.
+
+5. **Zusammenfassung oben:**
+   - `3 active critical · 5 active warning · 12 resolved`.
+
+6. **Pagination / „Load more":**
+   - Nur die letzten 20 Alerts, mit „Load more"-Button.
+
+7. **Dedup-Anzeige:**
+   - Wenn ein Alert mehrfach ausgelöst wurde (z.B. jede Stunde), nur den
+     letzten anzeigen, mit Zähler (`3×`).
+
+**Empfehlung:** Kombination aus 1 + 2 + 3 (Filter, kompakte Tabelle,
+Gruppierung nach Datum). Aufwand: 2–3 h.
+
+**Status:** Nach 3.6 (Dashboard-Limits) besprechen.
+
+---
+
+### 3.11 Admin nach außen öffnen (nicht nur LAN)
+
+**Aktuell:** Der Admin ist LAN-only via nginx (`allow 192.168.178.0/24;
+deny all;`). Kein Login, keine Authentifizierung.
+
+**Ziel:** Admin von außen erreichbar machen, mit angemessener
+Authentifizierung und Sicherheit.
+
+**Sicherheits-Level (zu besprechen):**
+
+**Level 1 (Minimum):**
+- HTTPS-only (bereits vorhanden).
+- Basic Auth oder Token-basierte Auth.
+- Rate Limiting (nginx `limit_req`).
+- **Aufwand:** Klein (1 h).
+- **Risiko:** Basic Auth ist anfällig für Brute-Force. Nur mit HTTPS und
+  starken Passwörtern akzeptabel.
+
+**Level 2 (Standard):**
+- Session-basierte Auth (Login-Formular).
+- CSRF-Schutz.
+- Sichere Cookies (HttpOnly, Secure, SameSite=Strict).
+- Passwort-Hashing (bcrypt/argon2).
+- Account-Lockout nach Fehlversuchen.
+- **Aufwand:** Mittel (4–6 h).
+- **Risiko:** Self-Made-Auth im Python-Server (`BaseHTTPRequestHandler`) ist
+  fehleranfällig. Besser: Reverse-Proxy mit Auth.
+
+**Level 3 (Fortgeschritten):**
+- 2FA (TOTP).
+- Audit-Log (wer hat wann was geändert).
+- Fail2ban.
+- Content-Security-Policy.
+- **Aufwand:** Groß (8–12 h).
+
+**Level 4 (Maximum):**
+- Reverse-Proxy mit Auth (z.B. Authelia, Authentik).
+- OIDC / SSO.
+- **Aufwand:** Mittel (2–4 h), aber abhängig von der Lösung.
+- **Vorteil:** Bewährte Auth-Lösung, weniger Self-Made-Code.
+
+**Empfehlung:** Level 4 (Reverse-Proxy mit Auth, z.B. Authelia). Begründung:
+- Bewährte Lösung, weniger Self-Made-Code.
+- Zentrale Auth für alle Admin-Routen.
+- Erweiterbar (2FA, SSO).
+- Der Python-Server (`otterpi.py`) bleibt auth-agnostisch.
+
+**Alternativ:** Level 2 (Self-Made-Auth), wenn keine externe Lösung gewünscht
+ist. Aber: Mehr Aufwand, mehr Risiko.
+
+**Status:** Später (nach 3.6, 3.8, Alert-Tab).
+
+---
+
+### 3.12 Delete-Sicherheit + Smoke-Test-Routine
+
+**Ziel:** Verhindern, dass Räume mit Sensoren gelöscht werden, und dass
+verwaiste Limits entstehen. Zusätzlich: Smoke-Test-Routine für Testraum/
+Test-Sensor.
+
+#### 3.12.1 Smoke-Test-Routine (zuerst, vor dem Umbau)
+
+**Ziel:** Das aktuelle Verhalten von Anlegen/Umziehen/Löschen prüfen, ohne
+echte Sensoren zu verändern.
+
+**Schritte:**
+
+1. **Testraum anlegen:**
+   - Rooms-Tab → „Add Room".
+   - Room ID: `r9999`, Name: `Test Room`, Icon: `🧪`.
+   - Speichern.
+
+2. **Test-Sensor anlegen:**
+   - Im Testraum: „Add Device".
+   - Name: `Test-Sensor`, Key: `weatherhub_test`, Type: `weatherhub_id01`.
+   - Speichern.
+
+3. **Dashboard prüfen:**
+   - Dashboard neu laden (F5).
+   - Der Testraum sollte erscheinen (leer, ohne Raumtemperatur).
+   - Der Test-Sensor sollte im Testraum erscheinen (ohne Daten, weil er keine
+     Batches liefert).
+
+4. **Test-Sensor umziehen:**
+   - Rooms-Tab → Test-Sensor → Raum-Dropdown → z.B. R1304.
+   - Dashboard neu laden (F5).
+   - Der Test-Sensor sollte jetzt in R1304 erscheinen, nicht mehr im Testraum.
+   - Die Raumtemperatur von R1304 sollte sich **nicht** ändern (Test-Sensor
+     liefert keine Daten).
+
+5. **Test-Sensor löschen:**
+   - Rooms-Tab → Test-Sensor → „Delete Device".
+   - `confirm()`-Dialog bestätigen.
+   - Dashboard neu laden (F5).
+   - Der Test-Sensor sollte verschwunden sein.
+
+6. **Testraum löschen:**
+   - Rooms-Tab → Testraum → „Delete Room".
+   - `confirm()`-Dialog bestätigen.
+   - Dashboard neu laden (F5).
+   - Der Testraum sollte verschwunden sein.
+
+**Was zu beobachten ist:**
+- Erscheint/verschwindet der Test-Sensor im Dashboard?
+- Ändert sich die Raumtemperatur? (Sollte nicht, weil Test-Sensor keine
+  Daten liefert.)
+- Gibt es Alerts für den Test-Sensor? (Sollte nicht, weil er keine Daten
+  liefert.)
+- Bleiben verwaiste Limits in `alarm_limits.json`? (Ja, aktuell. Das wird
+  in 3.12.2 behoben.)
+
+#### 3.12.2 Delete-Sicherheit (nach dem Smoke-Test)
+
+**Ziel:** Verhindern, dass Räume mit Sensoren gelöscht werden, und dass
+verwaiste Limits entstehen.
+
+**Änderungen:**
+
+1. **Doppelte Delete-Abfrage** bei Räumen und Sensoren:
+   - Erster `confirm()`: „Delete device X?"
+   - Zweiter `confirm()`: „Are you sure? This cannot be undone."
+
+2. **`deleteRoom` verweigert**, wenn Sensoren im Raum sind:
+   - Prüfung: `if (room.devices.length > 0) { alert('Cannot delete room with devices. Move or delete devices first.'); return; }`
+
+3. **`deleteDevice` löscht Limits mit:**
+   - Nach dem Löschen aus `rooms.json`: Auch `alarm_limits.json` anpassen.
+   - `sensors`: Alle Keys, die mit `deviceKey + '.'` beginnen, entfernen.
+   - `states`: Alle Keys, die mit `deviceKey + '.'` beginnen, entfernen.
+   - `device`: `alarmLimits.device[deviceKey]` entfernen.
+
+4. **Alerts bleiben** (Option A):
+   - Die Alerts in `alerts.sqlite3` bleiben erhalten (History).
+   - Sie sind „verwaist", aber das ist okay.
+   - Wenn der Sensor wieder angelegt wird (gleicher Key), tauchen die alten
+     Alerts wieder auf.
+
+**Tests:**
+- `test_admin.py`: Smoke-Test für doppelte Abfrage, Raum-Verweigerung,
+  Limits-Löschung.
+
+**Aufwand:** 30–45 Min.
+
+**Status:** Morgen als erstes (nach dem Smoke-Test).
 
 ---
 
@@ -561,10 +754,11 @@ Die folgenden DECs sind in dieser Session entstanden und sollten nicht rückgän
 
 **Empfohlene Reihenfolge für morgen:**
 
-1. **3.7 Rate-of-Change im Admin** (30 Min) – klein, schließt eine Lücke.
-2. **3.6 Dashboard-Limits** (2–3 h) – visuell, inhaltlich relevant.
-3. **3.2 UI-Umbau Alarm Limits** (2–3 h) – größerer UI-Eingriff.
-4. **3.8 Hysterese** (2–3 h) – verhindert Flackern.
+0. **3.12.1/3.12.2** (ca. 1h) - Smoke-Test-Routine/Delete-Sicherheit
+1. **3.6 Dashboard-Limits** (2–3 h) – visuell, inhaltlich relevant.
+2. **3.8 Hysterese** (2–3 h) – verhindert Flackern.
+3. **3.10 Alert-Tab-Überarbeitung**
+4. **3.11 Admin nach außen öffnen**
 
 **Danach (nach Bedarf):**
 - Advanced Updates (5.1–5.5, 5.7).
@@ -579,9 +773,9 @@ Die folgenden DECs sind in dieser Session entstanden und sollten nicht rückgän
 | Test-Mail nutzt nicht das neue Format | Bewusste Entscheidung, um Aufwand zu sparen | ⏸️ |
 | Kein Sweep für verwaiste Alerts | Würde falsch-positive Resolves erzeugen | ⏸️ (manueller Resolve-Button) |
 | Hysterese nicht implementiert | Noch nicht gebaut | ⏳ (3.8) |
-| `rate_of_change_max_per_hour` nicht im Admin-Formular | Noch nicht gebaut | ⏳ (3.7) |
 | Dashboard zeigt keine Limits | Noch nicht gebaut | ⏳ (3.6) |
-| Alarm Limits-Tab ist flache Liste | Noch nicht umgebaut | ⏳ (3.2) |
+| Alert-Tab wird lang | Noch nicht umgebaut | ⏳ (3.10) |
+| Admin nur LAN-only | Kein Login, keine Auth | ⏳ (3.11) |
 
 ---
 

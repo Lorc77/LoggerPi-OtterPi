@@ -825,3 +825,36 @@ class TestStaleInvalidPerDeviceMixed:
         alerts = engine._check_sensors(engine._store.latest().to_dict(), sensors)
         invalid_alerts = [a for a in alerts if a.rule == "invalid"]
         assert len(invalid_alerts) == 0
+
+
+class TestRateOfChangeMessage:
+    def test_rate_of_change_message_format(self, tmp_path):
+        engine = _engine(tmp_path)
+        seq = SequenceStore(engine._store.path.parent / "sequence")
+        now = datetime.now(timezone.utc)
+        for i, value in enumerate([20.0, 25.0]):
+            batch = create_batch(
+                "logger-001",
+                seq,
+                measurements={"atmoweb_101.temperature_1": _measurement(value)},
+            )
+            batch = batch.__class__(
+                batch_id=batch.batch_id,
+                logger_id=batch.logger_id,
+                sequence=batch.sequence,
+                created_at=(now - timedelta(minutes=30 * (1 - i))).isoformat(),
+                measurements=batch.measurements,
+            )
+            engine._store.store(batch)
+        sensors = {
+            "atmoweb_101.temperature_1": {
+                "rate_of_change_max_per_hour": 2.0,
+                "enabled": True,
+            }
+        }
+        alerts = engine._check_sensors(engine._store.latest().to_dict(), sensors)
+        rate_alerts = [a for a in alerts if a.rule == "rate_of_change"]
+        assert len(rate_alerts) == 1
+        assert "°C/h" in rate_alerts[0].message
+        assert ">" in rate_alerts[0].message
+        assert "<" not in rate_alerts[0].message

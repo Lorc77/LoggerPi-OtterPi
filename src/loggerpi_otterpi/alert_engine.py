@@ -160,6 +160,12 @@ class AlertEngine(threading.Thread):
             return f"{prefix} — {rule_text}{reason}"
         if rule in ("alarm", "battery_low", "door_open", "contact_open"):
             return f"{prefix} — {rule_text}"
+        if rule == "rate_of_change":
+            unit_label = UNIT_LABELS.get(unit, unit)
+            return (
+                f"{prefix} — {measurement} {rule_text}: "
+                f"{value:.1f} {unit_label}/h > {threshold:.1f} {unit_label}/h"
+            )
         if value is not None and threshold is not None:
             operator = ">" if rule.endswith("_max") else "<"
             unit_label = UNIT_LABELS.get(unit, unit)
@@ -392,7 +398,7 @@ class AlertEngine(threading.Thread):
                                 sensor_map,
                                 value=rate,
                                 threshold=rate_limit,
-                                unit="/h",
+                                unit=measurement.get("unit", ""),
                             ),
                             value=rate,
                             threshold=rate_limit,
@@ -401,6 +407,8 @@ class AlertEngine(threading.Thread):
                             ),
                         )
                     )
+                else:
+                    self._alert_store.resolve(f"{sensor_key}:rate_of_change:warning")
 
         return alerts
 
