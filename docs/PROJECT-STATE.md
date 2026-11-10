@@ -16,10 +16,10 @@
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.11.18` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.11.18` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
+| LoggerPi | `v1.11.19` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.11.19` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
 
-LoggerPi und OtterPi laufen produktiv auf Version `v1.11.18`.
+LoggerPi und OtterPi laufen produktiv auf Version `v1.11.19`.
 
 ## Phase A – Config-Admin (abgeschlossen, v1.8.0)
 
@@ -376,6 +376,37 @@ Deploy + Test (v1.11.17). Danach: Dashboard-Limits (3.6), Hysterese (3.8).
 ### Nächster Schritt
 
 Deploy + Test (v1.11.18). Danach: Dashboard-Limits (3.6), Hysterese (3.8).
+
+---
+
+## Phase C – How-to-Texte + Delete-Sicherheit (abgeschlossen, v1.11.19)
+
+**Stand:** 2026-11-10
+
+### Umgesetzt
+
+- **How-to-Texte in allen Tabs:**
+  - Rooms: WeatherHub-Sensor anlegen (Name, Key, Type, Raum).
+  - Alarm Limits: Warning/Critical, Rate-of-Change, Stale/Invalid, Show all,
+    Acknowledge/Resolve.
+  - Mail: Recipients, Routing, Quiet Hours, Dedup.
+  - Notifications: ntfy, Webhook (Discord/Slack/generic), Severities.
+  - Messages: Regel-Texte, Measurement-Name.
+  - Alerts: Lampe, Status, Acknowledge, Resolve, Filter.
+- **Delete-Sicherheit:**
+  - Doppelte Delete-Abfrage bei Räumen und Sensoren.
+  - `deleteRoom` verweigert, wenn Sensoren im Raum sind.
+  - `deleteDevice` löscht Limits mit (`sensors`, `states`, `device`).
+  - Alerts bleiben (Option A, History).
+
+### Teststand
+
+432 Tests, alle grün.
+
+### Nächster Schritt
+
+Deploy + Test (v1.11.19). Danach: Dashboard-Limits (3.6), Hysterese (3.8),
+Alert-Tab-Überarbeitung (3.10), Admin nach außen (3.11).
 
 ---
 

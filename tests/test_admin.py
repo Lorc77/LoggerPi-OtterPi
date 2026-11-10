@@ -678,3 +678,19 @@ def test_put_alarm_limits_with_device(tmp_path):
         server.shutdown()
         thread.join()
         server.server_close()
+
+
+def test_admin_page_contains_delete_confirmations(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    server = _server(store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        with urlopen(f"http://127.0.0.1:{server.server_port}/admin") as resp:
+            html = resp.read().decode("utf-8")
+        assert "Are you sure? This cannot be undone." in html
+        assert "Cannot delete room with devices" in html
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()

@@ -469,6 +469,15 @@ Limits-Tab (Schwellenwerte in Minuten, Checkbox für Warn-Alert).
 
 ---
 
+### Phase C – How-to-Texte + Delete-Sicherheit (v1.11.19)
+
+- **How-to-Texte in allen Tabs** (Rooms, Alarm Limits, Mail, Notifications,
+  Messages, Alerts).
+- **Delete-Sicherheit:** Doppelte Abfrage, Räume mit Sensoren können nicht
+  gelöscht werden, Limits werden mit dem Sensor gelöscht.
+
+---
+
 ## 5. OtterPi HTTP Listener
 
 Der OtterPi-Anwendungsserver lauscht derzeit nicht öffentlich.
@@ -787,7 +796,7 @@ Repository:
     main
 
 Version:
-    v1.11.18
+    v1.11.19
 
 Letzter bekannter Release-Commit:
     (wird beim Deploy gesetzt)

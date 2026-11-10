@@ -572,9 +572,21 @@ input[type="number"] {{
         <summary>How-to: Add a new WeatherHub sensor</summary>
         <ol>
             <li>Put the sensor into operation (insert battery, pair).</li>
-            <li>Read the sensor ID from the gateway log or from the batch.</li>
-            <li>Click "+ Add WeatherHub-Sensor" and enter sensor ID, name, type, room.</li>
-            <li>The sensor appears in the dashboard and in the alert engine.</li>
+            <li>Read the sensor ID from the sender or from the batch
+                (e.g. <code>015F9410F3EB</code>).</li>
+            <li>Click "+ Add Device" in the room where the sensor is located and enter:
+                <ul>
+                    <li><strong>Name:</strong> a human-readable name (e.g. "Fridge-freezer").</li>
+                    <li><strong>Key:</strong> <code>weatherhub_</code> + sensor ID in
+                        <strong>lowercase</strong> (e.g. <code>weatherhub_015f9410f3eb</code>).</li>
+                    <li><strong>Type:</strong> select from the dropdown, derived from the first
+                        two digits of the sensor ID (e.g. ID <code>015F9410F3EB</code> →
+                        <code>weatherhub_id01</code>).</li>
+                </ul>
+            </li>
+            <li>The sensor appears in the dashboard.</li>
+            <li>For the alert engine: <code>battery_low</code> is added automatically
+                (for <code>weatherhub_*</code> types).</li>
         </ol>
     </details>
     <div id="rooms-list" class="rooms-list"></div>
@@ -601,12 +613,21 @@ input[type="number"] {{
     <details class="howto">
         <summary>How-to: Configure alert limits</summary>
         <ol>
-            <li>Click "Edit Limits" on a device to configure warning/critical limits.</li>
+            <li>Click "Edit Limits" on a device to configure:
+                <ul>
+                    <li>Warning/critical limits (min/max) per measurement.</li>
+                    <li>Rate-of-change limit (per hour) per measurement.</li>
+                    <li>Stale/invalid alerts per device (under "States").</li>
+                </ul>
+            </li>
             <li>WeatherHub sensors are automatically added to the alert engine
                 (battery_low state).</li>
             <li>Limits are checked after every batch and every 300 seconds.</li>
             <li>Alerts are deduplicated, respect quiet hours, and are sent via the
                 configured notifiers.</li>
+            <li>Use "Show all" to display all schema fields (including unsupported ones).</li>
+            <li><strong>Acknowledged alerts are not re-sent until the state changes.</strong></li>
+            <li><strong>Resolved alerts are marked as "Resolved" in the alert history.</strong></li>
         </ol>
     </details>
     <div id="alarm-list" class="rooms-list"></div>
@@ -632,6 +653,23 @@ input[type="number"] {{
 </div>
 
 <div id="tab-mail" class="tab-panel">
+    <details class="howto">
+        <summary>How-to: Configure email notifications</summary>
+        <ol>
+            <li><strong>Recipients:</strong> all email addresses that receive alerts
+                (comma-separated).</li>
+            <li><strong>Routing:</strong> optional per-severity recipients.
+                <code>critical</code> and <code>warning</code> can go to different
+                addresses (must be a subset of recipients).</li>
+            <li><strong>Quiet Hours:</strong> time range (e.g. 22:00–07:00) where
+                no emails are sent. <code>Critical Always</code> overrides this for
+                critical alerts.</li>
+            <li><strong>Dedup Seconds:</strong> how long (in seconds) an identical
+                alert is not re-sent. Default: 3600 (1 hour).</li>
+            <li><strong>Send Test Mail:</strong> sends a test email to all configured
+                notifiers.</li>
+        </ol>
+    </details>
     <div id="mail-form"></div>
     <div class="save-row">
         <button class="btn btn-primary"
@@ -655,6 +693,26 @@ input[type="number"] {{
 </div>
 
 <div id="tab-notifications" class="tab-panel">
+    <details class="howto">
+        <summary>How-to: Configure notification channels</summary>
+        <ol>
+            <li><strong>ntfy:</strong> push notification to a topic (e.g.
+                <code>ZOOLOGY-Observer-alerts</code>). Install the ntfy app on your
+                phone and subscribe to the topic. Optional: token for protected
+                topics.</li>
+            <li><strong>Webhook:</strong> HTTP POST to a URL. Formats:
+                <ul>
+                    <li><code>generic</code>: JSON with sensor, severity, message,
+                        value, threshold.</li>
+                    <li><code>discord</code>: Discord webhook format.</li>
+                    <li><code>slack</code>: Slack webhook format.</li>
+                </ul>
+            </li>
+            <li><strong>Severities:</strong> which severities are sent via this
+                channel (critical and/or warning).</li>
+            <li><strong>Enabled:</strong> toggle the channel on/off.</li>
+        </ol>
+    </details>
     <div id="notifications-list" class="rooms-list"></div>
     <div class="save-row">
         <button class="btn btn-primary"
@@ -676,6 +734,18 @@ input[type="number"] {{
 </div>
 
 <div id="tab-messages" class="tab-panel">
+    <details class="howto">
+        <summary>How-to: Configure alert messages</summary>
+        <ol>
+            <li>Each field defines the <strong>rule text</strong> for a specific
+                alert type (e.g. "too high", "too low", "invalid", "stale").</li>
+            <li>The <strong>measurement name</strong> (e.g. "Temperature",
+                "Humidity") is added automatically from the sensor schema.</li>
+            <li>Example: <code>critical_max</code> = "too high" →
+                "Temperature too high: 30.0 °C > 28.0 °C".</li>
+            <li>Changes are applied immediately (no restart needed).</li>
+        </ol>
+    </details>
     <div id="messages-form"></div>
     <div class="save-row">
         <button class="btn btn-primary" onclick="saveMessages()">💾 Save</button>
@@ -696,6 +766,19 @@ input[type="number"] {{
 </div>
 
 <div id="tab-alerts" class="tab-panel active">
+    <details class="howto">
+        <summary>How-to: Read the alert history</summary>
+        <ol>
+            <li><strong>Lamp:</strong> green = resolved, red = active.</li>
+            <li><strong>Status:</strong> "Active" (not resolved) or "Resolved"
+                (state is back to normal).</li>
+            <li><strong>Acknowledge:</strong> marks the alert as seen. It will not
+                be re-sent until the state changes.</li>
+            <li><strong>Resolve:</strong> manually marks the alert as resolved
+                (e.g. if the sensor is gone).</li>
+            <li><strong>Filters:</strong> "Only unacknowledged" and "Only active".</li>
+        </ol>
+    </details>
     <div class="save-row">
         <button class="btn btn-primary btn-small"
                 onclick="loadAlerts()">🔄 Refresh</button>
@@ -1959,6 +2042,7 @@ async function addDevice(roomId, name, key, type) {{
 
 async function deleteDevice(deviceKey) {{
     if (!confirm('Delete device ' + deviceKey + '?')) return;
+    if (!confirm('Are you sure? This cannot be undone.')) return;
     const status = document.getElementById('rooms-status');
     status.textContent = 'Deleting...';
     try {{
@@ -1978,6 +2062,31 @@ async function deleteDevice(deviceKey) {{
             body: JSON.stringify({{rooms: rooms}})
         }});
         if (putResp.ok) {{
+            const alarmResp = await fetch('/api/admin/config');
+            const alarmResult = await alarmResp.json();
+            const alarmLimits = alarmResult.alarm_limits;
+            if (alarmLimits.sensors) {{
+                for (const key of Object.keys(alarmLimits.sensors)) {{
+                    if (key.startsWith(deviceKey + '.')) {{
+                        delete alarmLimits.sensors[key];
+                    }}
+                }}
+            }}
+            if (alarmLimits.states) {{
+                for (const key of Object.keys(alarmLimits.states)) {{
+                    if (key.startsWith(deviceKey + '.')) {{
+                        delete alarmLimits.states[key];
+                    }}
+                }}
+            }}
+            if (alarmLimits.device) {{
+                delete alarmLimits.device[deviceKey];
+            }}
+            await fetch('/api/admin/alarm-limits', {{
+                method: 'PUT',
+                headers: {{'Content-Type': 'application/json'}},
+                body: JSON.stringify(alarmLimits)
+            }});
             setStatus('rooms-status', 'Deleted.', 'success');
             loadRooms();
         }} else {{
@@ -2140,13 +2249,19 @@ async function addRoom(roomId, name, icon) {{
 }}
 
 async function deleteRoom(roomId) {{
-    if (!confirm('Delete room ' + roomId + '? All devices in this room will be removed.')) return;
+    const resp = await fetch('/api/admin/config');
+    const result = await resp.json();
+    const rooms = result.rooms.rooms;
+    const room = rooms[roomId];
+    if (room && room.devices.length > 0) {{
+        alert('Cannot delete room with devices. Move or delete devices first.');
+        return;
+    }}
+    if (!confirm('Delete room ' + roomId + '?')) return;
+    if (!confirm('Are you sure? This cannot be undone.')) return;
     const status = document.getElementById('rooms-status');
     status.textContent = 'Deleting...';
     try {{
-        const resp = await fetch('/api/admin/config');
-        const result = await resp.json();
-        const rooms = result.rooms.rooms;
         delete rooms[roomId];
         const putResp = await fetch('/api/admin/rooms', {{
             method: 'PUT',

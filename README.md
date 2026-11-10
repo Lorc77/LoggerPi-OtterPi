@@ -148,8 +148,8 @@ PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.11.18` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.11.18` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
+| LoggerPi | `v1.11.19` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.11.19` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
 
 Der E2E-Datenpfad (LoggerPi → nginx → OtterPi → SQLite) ist verifiziert.
 
@@ -165,7 +165,9 @@ Datenquellen:
 - WeatherHub Sensoren (Gateway Proxy, 17 Sensoren) ✅
 
 Admin (LAN-only): `https://observer.makki.route64.de/admin`
-- Rooms-Tab: Formular-UI (Raum-/Geräte-Verwaltung, Raumwechsel, Inline-Formulare)
+- Rooms-Tab: Formular-UI (Raum-/Geräte-Verwaltung, Raumwechsel, Inline-Formulare,
+  How-to für neue WeatherHub-Sensoren, doppelte Delete-Abfrage, Räume mit
+  Sensoren können nicht gelöscht werden, Limits werden mit dem Sensor gelöscht)
 - Alarm Limits-Tab: Raum-Kacheln mit Geräte-Kacheln, Limits als farbige Chips
   (Warn ↓ 20 °C · ↑ 23 °C, Crit ↓ 18 °C · ↑ 28 °C, Rate ↕ 1 °C/h,
   Warn/Crit/Rate n/c), letzte Messwerte pro Measurement, „Show all"-Filter,
@@ -183,6 +185,8 @@ Admin (LAN-only): `https://observer.makki.route64.de/admin`
 - JSON-Validierung, `.bak`, atomares Schreiben
 - Statusleuchte im Header (LoggerPi-Offline-Status)
 - Toast-Notification bei allen Save-/Delete-/Acknowledge-/Resolve-Aktionen
+- How-to-Texte in allen Tabs (Rooms, Alarm Limits, Mail, Notifications,
+  Messages, Alerts)
 
 ## Alert-Engine
 
@@ -306,18 +310,18 @@ pytest
 git diff --check
 ```
 
-Aktueller Stand: **430 Tests**, alle bestehen.
+Aktueller Stand: **432 Tests**, alle bestehen.
 
 ---
 
-Aktuelle Version: **v1.11.18**
+Aktuelle Version: **v1.11.19**
 
 Die Version wird geführt über:
 
-- `pyproject.toml` → `version = "1.11.18"`
-- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.11.18"`
-- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.11.18"`
-- Git-Tag `v1.11.18`
+- `pyproject.toml` → `version = "1.11.19"`
+- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.11.19"`
+- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.11.19"`
+- Git-Tag `v1.11.19`
 
 ---
 

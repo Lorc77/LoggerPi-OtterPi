@@ -1,9 +1,9 @@
 # Wiedereinstiegsprotokoll – LoggerPi-OtterPi (Stand v1.11.14)
 
 **Projekt:** LoggerPi-OtterPi
-**Aktuelle Version:** v1.11.18 (deployed auf OtterPi)
-**Teststand:** 430 passed, Ruff/Format clean
-**Stand:** 2026-11-09
+**Aktuelle Version:** v1.11.19 (deployed auf OtterPi)
+**Teststand:** 432 passed, Ruff/Format clean
+**Stand:** 2026-11-10
 
 ---
 
@@ -129,6 +129,14 @@ OtterPi (Python 3.13.5, User=makki)
 - **`max-content` für State-Chips:** Chip nimmt nur so viel Platz wie nötig.
 - **„not applicable" für leere States:** Statt leerer Sektion.
 - **Doppelte `.device-row`-Definition bereinigt.**
+
+### v1.11.19 – How-to-Texte + Delete-Sicherheit
+
+- **How-to-Texte in allen Tabs** (Rooms, Alarm Limits, Mail, Notifications,
+  Messages, Alerts).
+- **Delete-Sicherheit:** Doppelte Abfrage, Räume mit Sensoren können nicht
+  gelöscht werden, Limits werden mit dem Sensor gelöscht.
+
 ---
 
 ## 3. Offene Punkte mit detaillierten Plänen
@@ -338,99 +346,6 @@ Authentifizierung und Sicherheit.
 ist. Aber: Mehr Aufwand, mehr Risiko.
 
 **Status:** Später (nach 3.6, 3.8, Alert-Tab).
-
----
-
-### 3.12 Delete-Sicherheit + Smoke-Test-Routine
-
-**Ziel:** Verhindern, dass Räume mit Sensoren gelöscht werden, und dass
-verwaiste Limits entstehen. Zusätzlich: Smoke-Test-Routine für Testraum/
-Test-Sensor.
-
-#### 3.12.1 Smoke-Test-Routine (zuerst, vor dem Umbau)
-
-**Ziel:** Das aktuelle Verhalten von Anlegen/Umziehen/Löschen prüfen, ohne
-echte Sensoren zu verändern.
-
-**Schritte:**
-
-1. **Testraum anlegen:**
-   - Rooms-Tab → „Add Room".
-   - Room ID: `r9999`, Name: `Test Room`, Icon: `🧪`.
-   - Speichern.
-
-2. **Test-Sensor anlegen:**
-   - Im Testraum: „Add Device".
-   - Name: `Test-Sensor`, Key: `weatherhub_test`, Type: `weatherhub_id01`.
-   - Speichern.
-
-3. **Dashboard prüfen:**
-   - Dashboard neu laden (F5).
-   - Der Testraum sollte erscheinen (leer, ohne Raumtemperatur).
-   - Der Test-Sensor sollte im Testraum erscheinen (ohne Daten, weil er keine
-     Batches liefert).
-
-4. **Test-Sensor umziehen:**
-   - Rooms-Tab → Test-Sensor → Raum-Dropdown → z.B. R1304.
-   - Dashboard neu laden (F5).
-   - Der Test-Sensor sollte jetzt in R1304 erscheinen, nicht mehr im Testraum.
-   - Die Raumtemperatur von R1304 sollte sich **nicht** ändern (Test-Sensor
-     liefert keine Daten).
-
-5. **Test-Sensor löschen:**
-   - Rooms-Tab → Test-Sensor → „Delete Device".
-   - `confirm()`-Dialog bestätigen.
-   - Dashboard neu laden (F5).
-   - Der Test-Sensor sollte verschwunden sein.
-
-6. **Testraum löschen:**
-   - Rooms-Tab → Testraum → „Delete Room".
-   - `confirm()`-Dialog bestätigen.
-   - Dashboard neu laden (F5).
-   - Der Testraum sollte verschwunden sein.
-
-**Was zu beobachten ist:**
-- Erscheint/verschwindet der Test-Sensor im Dashboard?
-- Ändert sich die Raumtemperatur? (Sollte nicht, weil Test-Sensor keine
-  Daten liefert.)
-- Gibt es Alerts für den Test-Sensor? (Sollte nicht, weil er keine Daten
-  liefert.)
-- Bleiben verwaiste Limits in `alarm_limits.json`? (Ja, aktuell. Das wird
-  in 3.12.2 behoben.)
-
-#### 3.12.2 Delete-Sicherheit (nach dem Smoke-Test)
-
-**Ziel:** Verhindern, dass Räume mit Sensoren gelöscht werden, und dass
-verwaiste Limits entstehen.
-
-**Änderungen:**
-
-1. **Doppelte Delete-Abfrage** bei Räumen und Sensoren:
-   - Erster `confirm()`: „Delete device X?"
-   - Zweiter `confirm()`: „Are you sure? This cannot be undone."
-
-2. **`deleteRoom` verweigert**, wenn Sensoren im Raum sind:
-   - Prüfung: `if (room.devices.length > 0) { alert('Cannot delete room with devices. Move or delete devices first.'); return; }`
-
-3. **`deleteDevice` löscht Limits mit:**
-   - Nach dem Löschen aus `rooms.json`: Auch `alarm_limits.json` anpassen.
-   - `sensors`: Alle Keys, die mit `deviceKey + '.'` beginnen, entfernen.
-   - `states`: Alle Keys, die mit `deviceKey + '.'` beginnen, entfernen.
-   - `device`: `alarmLimits.device[deviceKey]` entfernen.
-
-4. **Alerts bleiben** (Option A):
-   - Die Alerts in `alerts.sqlite3` bleiben erhalten (History).
-   - Sie sind „verwaist", aber das ist okay.
-   - Wenn der Sensor wieder angelegt wird (gleicher Key), tauchen die alten
-     Alerts wieder auf.
-
-**Tests:**
-- `test_admin.py`: Smoke-Test für doppelte Abfrage, Raum-Verweigerung,
-  Limits-Löschung.
-
-**Aufwand:** 30–45 Min.
-
-**Status:** Morgen als erstes (nach dem Smoke-Test).
 
 ---
 

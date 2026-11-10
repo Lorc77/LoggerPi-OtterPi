@@ -2813,6 +2813,61 @@ Measurement-Schleife entfernt, in die Geräte-Logik verschoben.
 
 ---
 
+## DEC-091 — Delete-Sicherheit
+
+**Status:** Accepted
+**Datum:** 2026-11-10
+
+### Kontext
+
+Räume mit Sensoren konnten gelöscht werden (die Sensoren wurden mitgelöscht).
+Sensoren konnten gelöscht werden, ohne dass ihre Limits aus
+`alarm_limits.json` entfernt wurden (verwaiste Limits).
+
+### Entscheidung
+
+1. **Doppelte Delete-Abfrage** bei Räumen und Sensoren (zweiter `confirm()`).
+2. **`deleteRoom` verweigert**, wenn Sensoren im Raum sind.
+3. **`deleteDevice` löscht Limits mit** (`sensors`, `states`, `device`).
+4. **Alerts bleiben** (Option A, History).
+
+### Begründung
+
+- Verhindert versehentliches Löschen von Räumen mit Sensoren.
+- Verhindert verwaiste Limits.
+- Alerts bleiben für die History erhalten.
+
+### Konsequenz
+
+`admin.py` `deleteDevice` und `deleteRoom` erweitert.
+
+---
+
+## DEC-092 — How-to-Texte in allen Tabs
+
+**Status:** Accepted
+**Datum:** 2026-11-10
+
+### Kontext
+
+Die Admin-Tabs hatten keine oder veraltete How-to-Texte. Neue Nutzer wussten
+nicht, was die Felder bedeuten.
+
+### Entscheidung
+
+How-to-Texte in allen Tabs (Rooms, Alarm Limits, Mail, Notifications,
+Messages, Alerts).
+
+### Begründung
+
+Bessere Benutzerführung. Neue Nutzer finden sich schneller zurecht.
+
+### Konsequenz
+
+`admin.py` um `<details class="howto">`-Blöcke erweitert.
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:
