@@ -897,20 +897,20 @@ function buildDeviceContent(
         const critMin = limits.critical_min;
         const critMax = limits.critical_max;
         const rate = limits.rate_of_change_max_per_hour;
-        let warnText = 'Warn';
-        if (warnMin !== undefined) warnText += ` ↓ ${{warnMin}} ${{unitLabel}}`;
+        let warnText = '';
+        if (warnMin !== undefined) warnText += `↓ ${{warnMin}} ${{unitLabel}}`;
         if (warnMax !== undefined) warnText += ` ↑ ${{warnMax}} ${{unitLabel}}`;
         const warnChip = (warnMin !== undefined || warnMax !== undefined)
-            ? `<span class="chip chip-warn">${{warnText}}</span>`
+            ? `<span class="chip chip-warn">${{warnText.trim()}}</span>`
             : '<span class="chip chip-off">Warn n/c</span>';
-        let critText = 'Crit';
-        if (critMin !== undefined) critText += ` ↓ ${{critMin}} ${{unitLabel}}`;
+        let critText = '';
+        if (critMin !== undefined) critText += `↓ ${{critMin}} ${{unitLabel}}`;
         if (critMax !== undefined) critText += ` ↑ ${{critMax}} ${{unitLabel}}`;
         const critChip = (critMin !== undefined || critMax !== undefined)
-            ? `<span class="chip chip-critical">${{critText}}</span>`
+            ? `<span class="chip chip-critical">${{critText.trim()}}</span>`
             : '<span class="chip chip-off">Crit n/c</span>';
         const rateChip = rate !== undefined
-            ? `<span class="chip chip-info">Rate ↕ ${{rate}} ${{unitLabel}}/h</span>`
+            ? `<span class="chip chip-info">↕ ${{rate}} ${{unitLabel}}/h</span>`
             : '<span class="chip chip-off">Rate n/c</span>';
         measurementsHtml += `
             <div class="device-row">
