@@ -172,14 +172,15 @@ def _render_limit_chips(limits: dict, full_key: str, unit: str, compact: bool = 
             text = f"Critical: {text.strip()}"
         chips.append((text.strip(), "chip-critical"))
     if rate is not None:
-        text = f"↕ {rate} {unit}/h"
+        text = f"Δ↕ {rate} {unit}/h"
         if not compact:
             text = f"Rate of Change: {text}"
         chips.append((text, "chip-info"))
     if not chips:
         return ""
     inner = "".join(f'<span class="chip {css}">{text}</span>' for text, css in chips)
-    return f'<div class="limit-chips">{inner}</div>'
+    extra_class = "" if compact else " limit-chips-detailed"
+    return f'<div class="limit-chips{extra_class}">{inner}</div>'
 
 
 def _render_overview(store: BatchStore) -> str:
@@ -696,6 +697,10 @@ h1 {{ text-align: center; margin-top: 0; }}
     font-size: .6rem;
     padding: 0 5px;
     line-height: 1.3;
+}}
+.metric .limit-chips .chip,
+.metric-full .limit-chips .chip {{
+    color: #d1d5db;
 }}
 
 .status-right {{
@@ -2069,6 +2074,11 @@ h1 {{ text-align: center; margin-top: 0; }}
     font-size: .6rem;
     padding: 0 5px;
     line-height: 1.3;
+}}
+.limit-chips-detailed .chip {{
+    font-size: .7rem;
+    padding: 1px 6px;
+    color: #d1d5db;
 }}
 
 .status-right {{
