@@ -725,7 +725,7 @@ h1 {{ text-align: center; margin-top: 0; }}
     border: 1px solid rgba(255,255,255,.08);
     border-radius: 10px;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 10px;
 }}
@@ -739,7 +739,7 @@ h1 {{ text-align: center; margin-top: 0; }}
     border-radius: 10px;
     margin-top: 18px;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 10px;
 }}
@@ -755,7 +755,7 @@ h1 {{ text-align: center; margin-top: 0; }}
 }}
 
 .metric strong, .metric-full strong {{
-    font-size: 1.35rem;
+    font-size: 1.8rem;
 }}
 
 .metric small, .metric-full small {{
@@ -1331,7 +1331,7 @@ h1 {{ text-align: center; margin-top: 0; }}
     padding: 16px 20px;
     text-align: left;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 10px;
 }}
@@ -1347,7 +1347,7 @@ h1 {{ text-align: center; margin-top: 0; }}
 }}
 
 .current-value {{
-    font-size: 1.6rem;
+    font-size: 2rem;
     font-weight: 600;
     color: white;
 }}
@@ -2094,7 +2094,7 @@ h1 {{ text-align: center; margin-top: 0; }}
     padding: 16px 20px;
     text-align: left;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 10px;
 }}
@@ -2110,7 +2110,7 @@ h1 {{ text-align: center; margin-top: 0; }}
 }}
 
 .current-value {{
-    font-size: 1.6rem;
+    font-size: 2rem;
     font-weight: 600;
     color: white;
 }}
