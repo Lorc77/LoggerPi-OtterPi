@@ -438,25 +438,26 @@ def _limit_status(measurements: dict, limits: dict, batches: Optional[list[dict]
 
 
 def _calculate_rate_of_change(batches: list[dict], measurement_key: str) -> Optional[float]:
-    """Berechnet die Rate of Change (pro Stunde) aus den letzten zwei Batches."""
+    """Berechnet die Rate of Change (pro Stunde) aus den Batches.
+
+    Verwendet alle Batches (erster und letzter Wert), wie die Alert-Engine.
+    """
     values = []
-    for batch in reversed(batches):
+    for batch in batches:
         measurement = batch.get("measurements", {}).get(measurement_key, {})
         value = measurement.get("value")
-        measured_at = measurement.get("measured_at")
-        if value is not None and measured_at:
-            values.append((value, measured_at))
-        if len(values) == 2:
-            break
+        created_at = batch.get("created_at")
+        if value is not None and created_at:
+            values.append((created_at, value))
     if len(values) < 2:
         return None
-    (v1, t1), (v2, t2) = values[0], values[1]
-    dt1 = datetime.fromisoformat(t1)
-    dt2 = datetime.fromisoformat(t2)
-    hours = abs((dt1 - dt2).total_seconds()) / 3600
-    if hours == 0:
+    first_time, first_value = values[0]
+    last_time, last_value = values[-1]
+    dt = datetime.fromisoformat(last_time) - datetime.fromisoformat(first_time)
+    hours = dt.total_seconds() / 3600
+    if hours <= 0:
         return None
-    return (v1 - v2) / hours
+    return (last_value - first_value) / hours
 
 
 _ALARM_LABELS = {
