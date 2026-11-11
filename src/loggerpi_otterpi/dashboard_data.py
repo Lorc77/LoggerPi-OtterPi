@@ -295,7 +295,7 @@ def _device_status(batches: list[dict], key: str, device_type: str = "atmoweb") 
         return "status-critical"
 
     limits = _device_limits(key)
-    limit_status = _limit_status(measurements, limits)
+    limit_status = _limit_status(measurements, limits, batches)
     if limit_status == "status-critical":
         return "status-critical"
 
@@ -409,7 +409,7 @@ def _device_limits(device_key: str) -> dict:
     return result
 
 
-def _limit_status(measurements: dict, limits: dict) -> str:
+def _limit_status(measurements: dict, limits: dict, batches: Optional[list[dict]] = None) -> str:
     """Prüft Limit-Verletzungen.
 
     Gibt ``"status-critical"``, ``"status-warn"`` oder ``""`` zurück.
@@ -429,7 +429,34 @@ def _limit_status(measurements: dict, limits: dict) -> str:
             return "status-warn"
         if "warning_max" in limit and value > limit["warning_max"]:
             return "status-warn"
+        rate_limit = limit.get("rate_of_change_max_per_hour")
+        if rate_limit is not None and batches is not None:
+            rate = _calculate_rate_of_change(batches, key)
+            if rate is not None and abs(rate) > rate_limit:
+                return "status-warn"
     return ""
+
+
+def _calculate_rate_of_change(batches: list[dict], measurement_key: str) -> Optional[float]:
+    """Berechnet die Rate of Change (pro Stunde) aus den letzten zwei Batches."""
+    values = []
+    for batch in reversed(batches):
+        measurement = batch.get("measurements", {}).get(measurement_key, {})
+        value = measurement.get("value")
+        measured_at = measurement.get("measured_at")
+        if value is not None and measured_at:
+            values.append((value, measured_at))
+        if len(values) == 2:
+            break
+    if len(values) < 2:
+        return None
+    (v1, t1), (v2, t2) = values[0], values[1]
+    dt1 = datetime.fromisoformat(t1)
+    dt2 = datetime.fromisoformat(t2)
+    hours = abs((dt1 - dt2).total_seconds()) / 3600
+    if hours == 0:
+        return None
+    return (v1 - v2) / hours
 
 
 _ALARM_LABELS = {
@@ -512,6 +539,11 @@ def _device_chips(
             chips.append((f"⚠ {display_name} below limit", "chip-warn"))
         if "warning_max" in limit and value > limit["warning_max"]:
             chips.append((f"⚠ {display_name} above limit", "chip-warn"))
+        rate_limit = limit.get("rate_of_change_max_per_hour")
+        if rate_limit is not None:
+            rate = _calculate_rate_of_change(batches, limit_key)
+            if rate is not None and abs(rate) > rate_limit:
+                chips.append((f"⚠ {display_name} rate of change above limit", "chip-warn"))
 
     alarms = states.get("alarms") or []
     for alarm in alarms:
