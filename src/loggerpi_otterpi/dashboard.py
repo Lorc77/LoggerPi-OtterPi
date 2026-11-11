@@ -2518,7 +2518,15 @@ new Chart(document.getElementById('device-chart'), {{
                     }} else if (item.text === 'Critical min/max') {{
                         togglePair('Critical min', 'Critical max');
                     }} else {{
-                        Chart.defaults.plugins.legend.onClick.call(this, e, item, legend);
+                        // Standard-Toggle (direkt implementiert)
+                        const index = item.datasetIndex;
+                        if (chart.isDatasetVisible(index)) {{
+                            chart.hide(index);
+                            item.hidden = true;
+                        }} else {{
+                            chart.show(index);
+                            item.hidden = false;
+                        }}
                     }}
                 }},
             }},
