@@ -1146,7 +1146,7 @@ new Chart(document.getElementById('chart-hum-avg'), {{
         maintainAspectRatio: false,
         interaction: {{ mode: 'index', intersect: false }},
         plugins: {{
-            legend: {{ labels: {{ color: '#d1d5db', usePointStyle: false, pointStyle: 'line' }} }},
+            legend: {{ labels: {{ color: '#d1d5db', usePointStyle: true, pointStyle: 'line' }} }},
             tooltip: {{
                 usePointStyle: true,
                 boxWidth: 6,
@@ -1202,7 +1202,7 @@ new Chart(document.getElementById('chart-hum-sensors'), {{
         interaction: {{ mode: 'index', intersect: false }},
         plugins: {{
             legend: {{
-                labels: {{ color: '#d1d5db', usePointStyle: false, pointStyle: 'line' }}
+                labels: {{ color: '#d1d5db', usePointStyle: true, pointStyle: 'line' }}
             }},
             tooltip: {{
                 usePointStyle: true,
@@ -1604,7 +1604,7 @@ new Chart(document.getElementById('chart-temp-avg'), {{
         maintainAspectRatio: false,
         interaction: {{ mode: 'index', intersect: false }},
         plugins: {{
-            legend: {{ labels: {{ color: '#d1d5db', usePointStyle: false, pointStyle: 'line' }} }},
+            legend: {{ labels: {{ color: '#d1d5db', usePointStyle: true, pointStyle: 'line' }} }},
             tooltip: {{
                 usePointStyle: true,
                 boxWidth: 6,
@@ -1658,7 +1658,7 @@ new Chart(document.getElementById('chart-temp-sensors'), {{
         interaction: {{ mode: 'index', intersect: false }},
         plugins: {{
             legend: {{
-                labels: {{ color: '#d1d5db', usePointStyle: false, pointStyle: 'line' }}
+                labels: {{ color: '#d1d5db', usePointStyle: true, pointStyle: 'line' }}
             }},
             tooltip: {{
                 usePointStyle: true,
@@ -2491,7 +2491,7 @@ new Chart(document.getElementById('device-chart'), {{
             legend: {{
                 labels: {{
                     color: '#d1d5db',
-                    usePointStyle: false,
+                    usePointStyle: true,
                     pointStyle: 'line',
                     filter: (item) => {{
                         const label = item.text || '';
