@@ -2868,6 +2868,46 @@ Bessere Benutzerführung. Neue Nutzer finden sich schneller zurecht.
 
 ---
 
+## DEC-093 — Dashboard-Limits (Chips, Statusleuchte, Graphen-Linien)
+
+**Status:** Accepted
+**Datum:** 2026-11-10
+
+### Kontext
+
+Die Limits waren nur im Admin sichtbar. Der Nutzer wollte sie auch im
+Dashboard sehen, um den aktuellen Zustand besser einschätzen zu können.
+
+### Entscheidung
+
+1. **Limit-Chips** rechtsbündig im Header der Metric-Zellen (Raumdetail +
+   Device-Detail). Verkürzt auf Raumdetail, ausführlich auf Device-Detail.
+   Nur wenn Limits gesetzt und enabled.
+2. **Statusleuchte** erweitert: Rot bei Crit-Verletzung, Gelb bei
+   Warn-Verletzung. Übersicht folgt automatisch.
+3. **Status-Chips** in der Chip-Leiste: `[Warning: temperature above limit]`,
+   `[Critical: temperature below limit]`, etc.
+4. **Graphen-Linien** als separate Datasets (konstante Werte), gelb/rot
+   gestrichelt. Nur wenn Limits gesetzt.
+5. **Keine Limits für Raumtemperatur** (Mittelwert, keine Regel).
+6. **Keine Chips auf Übersicht/Climate-Detail** (bewusste Entscheidung).
+
+### Begründung
+
+- **Schneller Überblick:** Chips zeigen die Limits ohne Chart.
+- **Visueller Vergleich:** Linien zeigen die Position im Chart.
+- **Keine Redundanz:** Chips = Zahlen, Linien = Position.
+- **Konsistenz:** Gleiche Logik wie im Admin.
+
+### Konsequenz
+
+`dashboard_data.py` um `_device_limits`, `_limit_status` erweitert.
+`_device_status` und `_device_chips` erweitert. `dashboard.py` um
+`_render_limit_chips` und Limit-Linien erweitert. `dashboard_charts.py`
+um `limit_datasets` erweitert.
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:

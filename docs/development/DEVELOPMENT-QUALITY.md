@@ -597,3 +597,4 @@ Der E2E-Datenpfad (LoggerPi → OtterPi → SQLite) ist praktisch verifiziert:
 - `resolve`-Fix: Alert bleibt aktiv, wenn ein Channel invalid ist
 - How-to-Texte in allen Tabs
 - Delete-Sicherheit (doppelte Abfrage, Raum-Verweigerung, Limits löschen)
+- Dashboard-Limits: Chips, Statusleuchte, Status-Chips, Graphen-Linien

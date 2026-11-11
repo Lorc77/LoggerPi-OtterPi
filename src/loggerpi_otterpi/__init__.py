@@ -1,3 +1,3 @@
 """LoggerPi-OtterPi: Environmental monitoring system."""
 
-__version__ = "1.11.19"
+__version__ = "1.12.0"

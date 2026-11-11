@@ -148,8 +148,8 @@ PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.11.19` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.11.19` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
+| LoggerPi | `v1.12.0` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.12.0` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
 
 Der E2E-Datenpfad (LoggerPi → nginx → OtterPi → SQLite) ist verifiziert.
 
@@ -314,14 +314,14 @@ Aktueller Stand: **432 Tests**, alle bestehen.
 
 ---
 
-Aktuelle Version: **v1.11.19**
+Aktuelle Version: **v1.12.0**
 
 Die Version wird geführt über:
 
-- `pyproject.toml` → `version = "1.11.19"`
-- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.11.19"`
-- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.11.19"`
-- Git-Tag `v1.11.19`
+- `pyproject.toml` → `version = "1.12.0"`
+- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.12.0"`
+- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.12.0"`
+- Git-Tag `v1.12.0`
 
 ---
 

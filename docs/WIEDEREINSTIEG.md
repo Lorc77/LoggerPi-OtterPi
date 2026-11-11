@@ -1,7 +1,7 @@
 # Wiedereinstiegsprotokoll – LoggerPi-OtterPi (Stand v1.11.14)
 
 **Projekt:** LoggerPi-OtterPi
-**Aktuelle Version:** v1.11.19 (deployed auf OtterPi)
+**Aktuelle Version:** v1.12.0 (deployed auf OtterPi)
 **Teststand:** 432 passed, Ruff/Format clean
 **Stand:** 2026-11-10
 
@@ -137,65 +137,144 @@ OtterPi (Python 3.13.5, User=makki)
 - **Delete-Sicherheit:** Doppelte Abfrage, Räume mit Sensoren können nicht
   gelöscht werden, Limits werden mit dem Sensor gelöscht.
 
+### v1.12.0 – Dashboard-Limits
+
+- **Limit-Chips:** Rechtsbündig im Header der Metric-Zellen (Raumdetail +
+  Device-Detail). Nur wenn Limits gesetzt und enabled.
+- **Statusleuchte:** Rot bei Crit-Verletzung, Gelb bei Warn-Verletzung.
+- **Status-Chips:** `[Warning: temperature above limit]`, etc.
+- **Graphen-Linien:** Horizontale Linien für Warn/Crit Min/Max als separate
+  Datasets.
+
 ---
 
 ## 3. Offene Punkte mit detaillierten Plänen
 
-### 3.6 Dashboard-Limits
+## 3.6 Dashboard-Limits (Konzept, Stand 2026-11-10) --> erledigt, noch nicht getestet.. diesen Punkt nach test entfernen
 
-**Ziel:** Limits (Warn/Crit Min/Max, Rate-of-Change, Stale) im Dashboard sichtbar machen.
+**Ziel:** Limits (Warn/Crit Min/Max, Rate-of-Change) im Dashboard sichtbar
+machen – ohne Redundanz, ohne Overengineering.
 
-**Vorschläge (alle, nicht nur Empfehlung):**
+### 3.6.1 Design-Entscheidungen
 
-**1. Gerätekacheln (Raumdetail):**
-- **Limit-Badges** unter dem Gerätenamen: z.B. `⚠ 20–26 °C · ⛔ 18–28 °C`.
-- **Status-Chip** „Near limit" (gelb), wenn der Wert innerhalb von 10 % des Warn-Limits liegt.
-- **Status-Chip** „At limit" (rot), wenn der Wert das Crit-Limit erreicht.
+- **Keine Limits für Raumtemperatur.** Die Raumtemperatur ist ein Mittelwert,
+  keine Regel. Die einzelnen Sensoren haben Limits.
+- **Chips nur auf Raumdetail (verkürzt) und Device-Detail (ausführlich).**
+  Nicht auf der Übersicht, nicht auf Climate-Detail.
+- **Chips nur, wenn Limits gesetzt und enabled sind.** Sonst weglassen
+  (kein „–").
+- **Statusleuchte folgt derselben Logik** wie die Chips (Limit-Verletzungen
+  werden erkannt).
+- **Graphen-Linien als separate Datasets** (konstante Werte), keine
+  zusätzliche Dependency.
+- **Keine Statistik-Blöcke, keine Tabellen, keine Kopfzeilen.**
 
-**2. Graphen (Device-Detail + Raumdetail):**
-- **Horizontale Linien** für Warn Min/Max (gelb, gestrichelt) und Crit Min/Max (rot, gestrichelt).
-- **Chart.js-Plugin** `annotation` (oder manuell via `scales.y.grid`).
-- **Legende** mit „Warning Min/Max", „Critical Min/Max".
+### 3.6.2 Was wo erscheint
 
-**3. Device-Detail:**
-- **Limits-Tabelle** (zusätzlich zur Statistik): `Warning Min`, `Warning Max`, `Critical Min`, `Critical Max`, `Rate of Change`, `Stale After`.
-- **Aktueller Status** relativ zu den Limits (z.B. „OK", „Near warning", „At critical").
+| Seite | Chips? | Format | Graphen-Linien? |
+|---|---|---|---|
+| **Übersicht (Raum-Kacheln)** | ❌ Nein | – | ❌ Nein |
+| **Raumdetail (Gerätekacheln)** | ✅ Ja | Verkürzt: `↓ 15 °C ↑ 18 °C` | ✅ Ja |
+| **Device-Detail** | ✅ Ja | Ausführlich: `Warning: ↓ 15 °C ↑ 18 °C` | ✅ Ja |
+| **Climate-Detail** | ❌ Nein | – | ❌ Nein |
 
-**4. Übersicht (Raum-Kacheln):**
-- **Limit-Badge** in der Raum-Kopfzeile: z.B. „2 sensors near limit".
-- **Status-Lampe** bereits vorhanden (grün/gelb/rot).
+**Platzierung:** Rechtsbündig im Header, wo `🌡️ Temperature 16.3 °C` bzw.
+`💧 Relative Humidity 62.2 %` steht. Die Chips werden **übereinander**
+angeordnet (Flex-Column, rechtsbündig).
 
-**Empfohlene Priorität:**
-1. **Graphen:** Horizontale Linien für Warn/Crit (größter visueller Nutzen).
-2. **Gerätekacheln:** Limit-Badges (schneller Überblick).
-3. **Device-Detail:** Limits-Tabelle (Detail-Info).
-4. **Übersicht:** Limit-Badge in Raum-Kopfzeile (optional).
+**Nur die Limits des jeweiligen Headers:** Bei ID01-Sensoren wird nur
+`temperature_2` angezeigt (nicht `temperature_1`). Bei AtmoWEB werden
+`temperature_1` und `humidity` angezeigt.
 
-**Konkrete Vorgehensweise:**
+### 3.6.3 Chip-Logik
 
-1. **`dashboard_data.py` – Limits laden:**
-   - Neue Funktion `_device_limits(device_key, device_type)` → liest `alarm_limits.json` und gibt Limits für das Gerät zurück.
-   - `_device_chips` erweitern: „Near limit", „At limit".
+**Limit-Chips (immer sichtbar, wenn Limit gesetzt und enabled):**
+- `[↓ 15 °C ↑ 18 °C]` (gelb) – Warning Min/Max.
+- `[↓ 13 °C ↑ 20 °C]` (rot) – Critical Min/Max.
+- `[↕ 3 °C/h]` (blau) – Rate-of-Change.
 
-2. **`dashboard_charts.py` – Chart.js-Plugin:**
-   - `_render_device_script` erweitern: Horizontale Linien für Warn/Crit Min/Max.
-   - Chart.js-Plugin `annotation` (oder manuell via `scales.y.grid`).
+**Status-Chips (nur wenn Zustand aktiv):**
+- `[Warning: below limit]` (gelb) – wenn `value < warning_min`.
+- `[Warning: above limit]` (gelb) – wenn `value > warning_max`.
+- `[Critical: below limit]` (rot) – wenn `value < critical_min`.
+- `[Critical: above limit]` (rot) – wenn `value > critical_max`.
+- `[Warning: rate of change above limit]` (gelb) – wenn
+  `abs(rate) > rate_of_change_max_per_hour`.
 
-3. **`dashboard.py` – Device-Detail:**
-   - Limits-Tabelle in der Info-Card.
-   - Status relativ zu Limits.
+**Mehrere Status-Chips simultan möglich:** z.B.
+`[Warning: above limit] [Battery low] [Door open]`.
 
-4. **`dashboard.py` – Raumdetail:**
-   - Limit-Badges unter Gerätenamen.
+### 3.6.4 Statusleuchte-Logik
 
-5. **`dashboard.py` – Übersicht:**
-   - Limit-Badge in Raum-Kopfzeile.
+**Prioritäten (Rot > Gelb > Grün > Grau):**
+1. **Rot:** Alarm (freezer.alarms), Invalid, Critical (below/above limit).
+2. **Gelb:** Warning (below/above limit), Warning (rate of change above
+   limit), Stale, Battery low.
+3. **Grün:** OK.
+4. **Grau:** Offline.
 
-6. **Tests:**
-   - `test_dashboard_data.py`: `_device_limits`, `_device_chips` (Near/At limit).
-   - `test_dashboard.py`: Smoke-Tests für Limits-Anzeige.
+**Die Statusleuchte auf der Übersicht folgt derselben Logik** (via
+`_device_status`). Wenn wir `_device_status` erweitern, folgt die Übersicht
+automatisch.
 
-**Aufwand:** Mittel (2–3 h).
+### 3.6.5 Graphen-Linien
+
+**Wo:** Device-Detail, Raumdetail. **Nicht** Climate-Detail.
+
+**Welche Linien:**
+- **Warn Min/Max:** gelb (`#eab308`), gestrichelt (`borderDash: [5, 5]`).
+- **Crit Min/Max:** rot (`#ef4444`), gestrichelt (`borderDash: [5, 5]`).
+- **Nur wenn Limits gesetzt:** Sonst keine Linien.
+
+**Implementierung:** Separate Datasets pro Limit-Linie, mit konstanten
+Werten (`tempValues.map(() => 15)`), `pointRadius: 0`, `borderWidth: 1`.
+
+**Legende:** „Warning Min/Max", „Critical Min/Max" (ausblendbar).
+
+### 3.6.6 Implementierungsschritte
+
+**Schritt 1: Chips (Raumdetail + Device-Detail)**
+
+1. **`dashboard_data.py`:**
+   - `_device_limits(device_key, device_type)` – liest `alarm_limits.json`,
+     gibt `None` zurück, wenn keine Limits gesetzt sind.
+   - `_device_status` erweitern: Limit-Verletzungen erkennen.
+   - `_device_chips` erweitern: Limit-Chips hinzufügen.
+
+2. **`dashboard.py`:**
+   - Chips in den Metric-Zellen (Raumdetail + Device-Detail).
+   - CSS für die Chips (Flex-Column, rechtsbündig).
+
+3. **Tests:**
+   - `test_dashboard_data.py`: `_device_limits`, `_device_status`
+     (Limit-Verletzungen), `_device_chips` (Limit-Chips).
+   - `test_dashboard.py`: Smoke-Tests.
+
+**Schritt 2: Statusleuchte (Raumdetail + Device-Detail)**
+
+- `_device_status` erweitern (siehe 3.6.4).
+- Tests.
+
+**Schritt 3: Graphen-Linien (Device-Detail + Raumdetail)**
+
+- `dashboard_charts.py`: `_render_device_script` erweitern, um Limit-Linien
+  als separate Datasets hinzuzufügen.
+- Tests.
+
+### 3.6.7 Offene Fragen
+
+- **Rate-of-Change in der Statusleuchte:** Soll die Lampe auch auf
+  Rate-of-Change reagieren? (Vorschlag: ja, gelb.)
+- **Stale/Invalid:** Die Lampe zeigt schon stale/invalid. Das bleibt.
+- **Chips auf der Übersicht:** Nein (entschieden).
+- **Chips auf Climate-Detail:** Nein (entschieden).
+- **Limits für Raumtemperatur:** Nein (entschieden).
+
+### 3.6.8 Bekannte Lücken
+
+- **Keine Limits für Raumtemperatur:** Bewusste Entscheidung.
+- **Keine Chips auf der Übersicht:** Bewusste Entscheidung.
+- **Keine Chips auf Climate-Detail:** Bewusste Entscheidung.
 
 ---
 

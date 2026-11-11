@@ -294,6 +294,11 @@ def _device_status(batches: list[dict], key: str, device_type: str = "atmoweb") 
     if states.get("alarms"):
         return "status-critical"
 
+    limits = _device_limits(key)
+    limit_status = _limit_status(measurements, limits)
+    if limit_status == "status-critical":
+        return "status-critical"
+
     if device_type in ("freezer", "memmert", "weatherhub_id01", "weatherhub_id0e"):
         if device_type in ("freezer", "memmert"):
             measurement_key = f"{key}.temperature"
@@ -312,6 +317,8 @@ def _device_status(batches: list[dict], key: str, device_type: str = "atmoweb") 
         if validity == "valid":
             if states.get("battery_low"):
                 return "status-warn"
+            if limit_status == "status-warn":
+                return "status-warn"
             return "status-ok"
         return "status-off"
 
@@ -325,6 +332,8 @@ def _device_status(batches: list[dict], key: str, device_type: str = "atmoweb") 
         if "stale" in validities:
             return "status-warn"
         if states.get("battery_low"):
+            return "status-warn"
+        if limit_status == "status-warn":
             return "status-warn"
         return "status-ok"
     if temp.get("value") is not None or hum.get("value") is not None:
@@ -377,6 +386,50 @@ def _latest_device(batches: list[dict], device_key: str) -> dict:
 def _latest_serial(batches: list[dict]) -> dict:
     latest = _latest_batch(batches)
     return latest.get("serial", {})
+
+
+def _device_limits(device_key: str) -> dict:
+    """Liest die Limits für ein Gerät aus alarm_limits.json.
+
+    Gibt ein Dict ``{full_key: limits}`` zurück (z.B.
+    ``{"atmoweb_101.temperature_1": {"warning_min": 22, ...}}``).
+    Leeres Dict, wenn keine Limits gesetzt sind.
+    """
+    try:
+        from config_store import load_alarm_limits
+
+        data = load_alarm_limits()
+    except Exception:
+        return {}
+    sensors = data.get("sensors", {})
+    result = {}
+    for key, limits in sensors.items():
+        if key.startswith(device_key + "."):
+            result[key] = limits
+    return result
+
+
+def _limit_status(measurements: dict, limits: dict) -> str:
+    """Prüft Limit-Verletzungen.
+
+    Gibt ``"status-critical"``, ``"status-warn"`` oder ``""`` zurück.
+    """
+    for key, limit in limits.items():
+        if not limit.get("enabled", True):
+            continue
+        measurement = measurements.get(key, {})
+        value = measurement.get("value")
+        if value is None:
+            continue
+        if "critical_min" in limit and value < limit["critical_min"]:
+            return "status-critical"
+        if "critical_max" in limit and value > limit["critical_max"]:
+            return "status-critical"
+        if "warning_min" in limit and value < limit["warning_min"]:
+            return "status-warn"
+        if "warning_max" in limit and value > limit["warning_max"]:
+            return "status-warn"
+    return ""
 
 
 _ALARM_LABELS = {
@@ -472,6 +525,36 @@ def _device_chips(
     if "operation_mode" in states:
         mode = "local" if states["operation_mode"] == 0 else "remote"
         chips.append((f"Mode: {mode}", "chip-info"))
+
+    limits = _device_limits(key)
+    for limit_key, limit in limits.items():
+        if not limit.get("enabled", True):
+            continue
+        measurement = measurements.get(limit_key, {})
+        value = measurement.get("value")
+        if value is None:
+            continue
+        measurement_name = limit_key.split(".", 1)[1]
+        display_name = {
+            "temperature_1": "Temperature",
+            "temperature_2": "Temperature",
+            "temperature_3": "Temperature",
+            "temperature_4": "Temperature",
+            "temperature": "Temperature",
+            "humidity": "Humidity",
+            "vacuum": "Vacuum",
+            "co2": "CO₂",
+            "o2": "O₂",
+            "fan_speed": "Fan Speed",
+        }.get(measurement_name, measurement_name)
+        if "critical_min" in limit and value < limit["critical_min"]:
+            chips.append((f"⛔ {display_name} below limit", "chip-critical"))
+        if "critical_max" in limit and value > limit["critical_max"]:
+            chips.append((f"⛔ {display_name} above limit", "chip-critical"))
+        if "warning_min" in limit and value < limit["warning_min"]:
+            chips.append((f"⚠ {display_name} below limit", "chip-warn"))
+        if "warning_max" in limit and value > limit["warning_max"]:
+            chips.append((f"⚠ {display_name} above limit", "chip-warn"))
 
     return chips
 

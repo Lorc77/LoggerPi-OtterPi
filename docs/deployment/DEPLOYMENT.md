@@ -478,6 +478,17 @@ Limits-Tab (Schwellenwerte in Minuten, Checkbox für Warn-Alert).
 
 ---
 
+### Phase C – Dashboard-Limits (v1.12.0)
+
+- **Limit-Chips:** Rechtsbündig im Header der Metric-Zellen (Raumdetail +
+  Device-Detail). Nur wenn Limits gesetzt und enabled.
+- **Statusleuchte:** Rot bei Crit-Verletzung, Gelb bei Warn-Verletzung.
+- **Status-Chips:** `[Warning: temperature above limit]`, etc.
+- **Graphen-Linien:** Horizontale Linien für Warn/Crit Min/Max als separate
+  Datasets.
+
+---
+
 ## 5. OtterPi HTTP Listener
 
 Der OtterPi-Anwendungsserver lauscht derzeit nicht öffentlich.
@@ -796,7 +807,7 @@ Repository:
     main
 
 Version:
-    v1.11.19
+    v1.12.0
 
 Letzter bekannter Release-Commit:
     (wird beim Deploy gesetzt)

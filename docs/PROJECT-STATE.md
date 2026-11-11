@@ -16,10 +16,10 @@
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.11.19` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.11.19` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
+| LoggerPi | `v1.12.0` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.12.0` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
 
-LoggerPi und OtterPi laufen produktiv auf Version `v1.11.19`.
+LoggerPi und OtterPi laufen produktiv auf Version `v1.12.0`.
 
 ## Phase A – Config-Admin (abgeschlossen, v1.8.0)
 
@@ -407,6 +407,37 @@ Deploy + Test (v1.11.18). Danach: Dashboard-Limits (3.6), Hysterese (3.8).
 
 Deploy + Test (v1.11.19). Danach: Dashboard-Limits (3.6), Hysterese (3.8),
 Alert-Tab-Überarbeitung (3.10), Admin nach außen (3.11).
+
+---
+
+## Phase C – Dashboard-Limits (abgeschlossen, v1.12.0)
+
+**Stand:** 2026-11-10
+
+### Umgesetzt
+
+- **Limit-Chips:** Rechtsbündig im Header der Metric-Zellen (Raumdetail +
+  Device-Detail). Verkürzt (`↓ 15 °C ↑ 18 °C`) auf Raumdetail, ausführlich
+  (`Warning: ↓ 15 °C ↑ 18 °C`) auf Device-Detail. Nur wenn Limits gesetzt
+  und enabled.
+- **Statusleuchte:** Rot bei Crit-Verletzung, Gelb bei Warn-Verletzung.
+  Übersicht folgt automatisch (via `_device_status`).
+- **Status-Chips:** `[Warning: temperature above limit]`,
+  `[Critical: temperature below limit]`, etc. in der Chip-Leiste.
+- **Graphen-Linien:** Horizontale Linien für Warn Min/Max (gelb, gestrichelt)
+  und Crit Min/Max (rot, gestrichelt) als separate Datasets. Nur wenn Limits
+  gesetzt.
+- **Keine Limits für Raumtemperatur:** Bewusste Entscheidung.
+- **Keine Chips auf Übersicht/Climate-Detail:** Bewusste Entscheidung.
+
+### Teststand
+
+432 Tests, alle grün.
+
+### Nächster Schritt
+
+Deploy + Test (v1.12.0). Danach: Hysterese (3.8), Alert-Tab-Überarbeitung
+(3.10), Admin nach außen (3.11).
 
 ---
 

@@ -25,6 +25,7 @@ from dashboard_data import (
     _current_values,
     _device_chips,
     _device_current,
+    _device_limits,
     _device_status,
     _latest_device,
     _led_value,
@@ -139,6 +140,39 @@ def _render_chips(chips: list[tuple[str, str]]) -> str:
     if not chips:
         return ""
     return "".join(f'<span class="chip {css}">{text}</span>' for text, css in chips)
+
+
+def _render_limit_chips(limits: dict, full_key: str, unit: str) -> str:
+    """Rendert die Limit-Chips für ein Measurement (rechtsbündig, übereinander)."""
+    limit = limits.get(full_key, {})
+    if not limit or not limit.get("enabled", True):
+        return ""
+    chips = []
+    warn_min = limit.get("warning_min")
+    warn_max = limit.get("warning_max")
+    crit_min = limit.get("critical_min")
+    crit_max = limit.get("critical_max")
+    rate = limit.get("rate_of_change_max_per_hour")
+    if warn_min is not None or warn_max is not None:
+        text = ""
+        if warn_min is not None:
+            text += f"↓ {warn_min} {unit}"
+        if warn_max is not None:
+            text += f" ↑ {warn_max} {unit}"
+        chips.append((text.strip(), "chip-warn"))
+    if crit_min is not None or crit_max is not None:
+        text = ""
+        if crit_min is not None:
+            text += f"↓ {crit_min} {unit}"
+        if crit_max is not None:
+            text += f" ↑ {crit_max} {unit}"
+        chips.append((text.strip(), "chip-critical"))
+    if rate is not None:
+        chips.append((f"↕ {rate} {unit}/h", "chip-info"))
+    if not chips:
+        return ""
+    inner = "".join(f'<span class="chip {css}">{text}</span>' for text, css in chips)
+    return f'<div class="limit-chips">{inner}</div>'
 
 
 def _render_overview(store: BatchStore) -> str:
@@ -403,6 +437,40 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
         device_current = _device_current(batches, device["key"], device_type)
         status = _device_status(batches, device["key"], device_type)
         chart_id = f"chart-{device['key'].replace('_', '-')}"
+        limits = _device_limits(device["key"])
+        if device_type in ("freezer", "memmert"):
+            temp_key = f"{device['key']}.temperature"
+            hum_key = None
+        elif device_type == "weatherhub_id01":
+            temp_key = f"{device['key']}.temperature_2"
+            hum_key = None
+        elif device_type == "weatherhub_id0e":
+            temp_key = f"{device['key']}.temperature"
+            hum_key = f"{device['key']}.humidity"
+        else:  # atmoweb
+            temp_key = f"{device['key']}.temperature_1"
+            hum_key = f"{device['key']}.humidity"
+        limit_chips_temp = _render_limit_chips(limits, temp_key, "°C")
+        limit_chips_hum = _render_limit_chips(limits, hum_key, "%") if hum_key else ""
+
+        limit_lines = []
+        for limit_key, limit in limits.items():
+            if not limit.get("enabled", True):
+                continue
+            if limit_key == temp_key:
+                axis = "temperature"
+            elif limit_key == hum_key:
+                axis = "humidity"
+            else:
+                continue
+            if "warning_min" in limit:
+                limit_lines.append(("Warning Min", limit["warning_min"], "#eab308", axis))
+            if "warning_max" in limit:
+                limit_lines.append(("Warning Max", limit["warning_max"], "#eab308", axis))
+            if "critical_min" in limit:
+                limit_lines.append(("Critical Min", limit["critical_min"], "#ef4444", axis))
+            if "critical_max" in limit:
+                limit_lines.append(("Critical Max", limit["critical_max"], "#ef4444", axis))
         device_views.append(
             {
                 "name": device["name"],
@@ -423,6 +491,9 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
                 "hum_values_json": json.dumps([point["value"] for point in hum_series]),
                 "chips_html": _render_chips(_device_chips(batches, device["key"], device_type)),
                 "led_html": _render_led_svg(_led_value(batches, device["key"])),
+                "limit_chips_temp": limit_chips_temp,
+                "limit_chips_hum": limit_chips_hum,
+                "limit_lines": limit_lines,
             }
         )
 
@@ -606,6 +677,18 @@ h1 {{ text-align: center; margin-top: 0; }}
 .chip-critical {{ background: rgba(239,68,68,.2); color: #fca5a5; }}
 .chip-off {{ background: rgba(107,114,128,.2); color: #d1d5db; }}
 .chip-info {{ background: rgba(147,197,253,.15); color: #bfdbfe; }}
+
+.limit-chips {{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    margin-top: 6px;
+}}
+.limit-chips .chip {{
+    font-size: .65rem;
+    padding: 1px 6px;
+}}
 
 .status-right {{
     display: flex;
@@ -1707,6 +1790,43 @@ def _render_device_detail(
     temp_values_json = json.dumps([point["value"] for point in temp_series])
     hum_values_json = json.dumps([point["value"] for point in hum_series])
 
+    # Limit-Chips (vor current_values_header definieren)
+    limits = _device_limits(device_key)
+    limit_chips_temp = _render_limit_chips(limits, temp_key, "°C")
+    limit_chips_hum = _render_limit_chips(limits, hum_key, "%") if hum_key else ""
+
+    limit_lines = []
+    for limit_key, limit in limits.items():
+        if not limit.get("enabled", True):
+            continue
+        if limit_key == temp_key:
+            axis = "temperature"
+        elif limit_key == hum_key:
+            axis = "humidity"
+        else:
+            continue
+        if "warning_min" in limit:
+            limit_lines.append(("Warning Min", limit["warning_min"], "#eab308", axis))
+        if "warning_max" in limit:
+            limit_lines.append(("Warning Max", limit["warning_max"], "#eab308", axis))
+        if "critical_min" in limit:
+            limit_lines.append(("Critical Min", limit["critical_min"], "#ef4444", axis))
+        if "critical_max" in limit:
+            limit_lines.append(("Critical Max", limit["critical_max"], "#ef4444", axis))
+
+    limit_datasets = ""
+    for label, value, color, axis in limit_lines:
+        limit_datasets += f"""
+            {{
+                label: '{label}',
+                data: tempValues.map(() => {value}),
+                borderColor: '{color}',
+                borderDash: [5, 5],
+                pointRadius: 0,
+                borderWidth: 1,
+                yAxisID: '{axis}',
+            }},"""
+
     # Große aktuelle Werte-Header (kleiner Stil wie auf Raumübersicht)
     has_humidity = len(hum_series) > 0
 
@@ -1716,10 +1836,12 @@ def _render_device_detail(
     <div class="current-value-box">
         <span class="current-value-label">🌡️ Temperature</span>
         <span class="current-value">{device_current["temp"]:.1f} <small>°C</small></span>
+        {limit_chips_temp}
     </div>
     <div class="current-value-box">
         <span class="current-value-label">💧 Relative Humidity</span>
         <span class="current-value">{device_current["hum"]:.1f} <small>%</small></span>
+        {limit_chips_hum}
     </div>
 </div>
 """
@@ -1729,6 +1851,7 @@ def _render_device_detail(
     <div class="current-value-box">
         <span class="current-value-label">🌡️ Temperature</span>
         <span class="current-value">{device_current["temp"]:.1f} <small>°C</small></span>
+        {limit_chips_temp}
     </div>
 </div>
 """
@@ -1894,6 +2017,18 @@ h1 {{ text-align: center; margin-top: 0; }}
 .chip-critical {{ background: rgba(239,68,68,.2); color: #fca5a5; }}
 .chip-off {{ background: rgba(107,114,128,.2); color: #d1d5db; }}
 .chip-info {{ background: rgba(147,197,253,.15); color: #bfdbfe; }}
+
+.limit-chips {{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    margin-top: 6px;
+}}
+.limit-chips .chip {{
+    font-size: .65rem;
+    padding: 1px 6px;
+}}
 
 .status-right {{
     display: flex;
@@ -2201,7 +2336,7 @@ const datasets = [
         pointHoverRadius: 4,
         yAxisID: 'temperature',
         tension: 0.3
-    }}
+    }},{limit_datasets}
 ];
 
 const scales = {{
@@ -2443,6 +2578,7 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
         <div class="metric-full">
             <span>🌡️ Temperature</span>
             <strong>{device["temp"]:.1f} <small>°C</small></strong>
+            {device["limit_chips_temp"]}
         </div>
         <div class="device-chart">
             <canvas id="{device["chart_id"]}"></canvas>
@@ -2467,10 +2603,12 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
             <div class="metric">
                 <span>🌡️ Temperature</span>
                 <strong>{device["temp"]:.1f} <small>°C</small></strong>
+                {device["limit_chips_temp"]}
             </div>
             <div class="metric">
                 <span>💧 Relative Humidity</span>
                 <strong>{device["hum"]:.1f} <small>%</small></strong>
+                {device["limit_chips_hum"]}
             </div>
         </div>
         <div class="device-chart">

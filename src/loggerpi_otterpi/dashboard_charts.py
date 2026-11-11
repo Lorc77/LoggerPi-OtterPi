@@ -64,6 +64,19 @@ def _render_device_script(device: dict) -> str:
     if device["type"] == "placeholder":
         return ""
 
+    limit_datasets = ""
+    for label, value, color, axis in device.get("limit_lines", []):
+        limit_datasets += f"""
+            {{
+                label: '{label}',
+                data: {chart_var}Labels.map(() => {value}),
+                borderColor: '{color}',
+                borderDash: [5, 5],
+                pointRadius: 0,
+                borderWidth: 1,
+                yAxisID: '{axis}',
+            }},"""
+
     if device["type"] in ("freezer", "memmert", "weatherhub_id01"):
         return f"""
 const {chart_var}Labels = {device["labels_json"]};
@@ -81,7 +94,7 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                 pointRadius: 2,
                 pointHoverRadius: 4,
                 tension: 0.3
-            }}
+            }},{limit_datasets}
         ]
     }},
     options: {{
@@ -191,7 +204,7 @@ const {chart_var}Datasets = [
         pointHoverRadius: 4,
         yAxisID: 'temperature',
         tension: 0.3
-    }}
+    }},{limit_datasets}
 ];
 
 const {chart_var}Scales = {{
