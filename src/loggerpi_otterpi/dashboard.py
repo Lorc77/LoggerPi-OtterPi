@@ -726,6 +726,7 @@ h1 {{ text-align: center; margin-top: 0; }}
     border-radius: 10px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 10px;
 }}
 
@@ -739,27 +740,27 @@ h1 {{ text-align: center; margin-top: 0; }}
     margin-top: 18px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 10px;
 }}
 
+.metric-left {{
+    display: flex;
+    flex-direction: column;
+}}
+
 .metric span, .metric-full span {{
-    flex: 0 0 auto;
     color: #d1d5db;
     font-size: .8rem;
 }}
 
 .metric strong, .metric-full strong {{
-    flex: 0 0 auto;
     font-size: 1.35rem;
 }}
 
 .metric small, .metric-full small {{
     color: #9ca3af;
     font-size: .8rem;
-}}
-
-.metric .limit-chips, .metric-full .limit-chips {{
-    margin-left: auto;
 }}
 
 .device-chart {{
@@ -1234,12 +1235,16 @@ new Chart(document.getElementById('chart-hum-sensors'), {{
         current_values_header = f"""
 <div class="current-values-header">
     <div class="current-value-box">
-        <span class="current-value-label">🌡️ Temperature</span>
-        <span class="current-value">{current_temp:.1f} <small>°C</small></span>
+        <div class="current-value-left">
+            <span class="current-value-label">🌡️ Temperature</span>
+            <span class="current-value">{current_temp:.1f} <small>°C</small></span>
+        </div>
     </div>
     <div class="current-value-box">
-        <span class="current-value-label">💧 Relative Humidity</span>
-        <span class="current-value">{current_hum:.1f} <small>%</small></span>
+        <div class="current-value-left">
+            <span class="current-value-label">💧 Relative Humidity</span>
+            <span class="current-value">{current_hum:.1f} <small>%</small></span>
+        </div>
     </div>
 </div>
 """
@@ -1247,8 +1252,10 @@ new Chart(document.getElementById('chart-hum-sensors'), {{
         current_values_header = f"""
 <div class="current-values-header">
     <div class="current-value-box">
-        <span class="current-value-label">🌡️ Temperature</span>
-        <span class="current-value">{current_temp:.1f} <small>°C</small></span>
+        <div class="current-value-left">
+            <span class="current-value-label">🌡️ Temperature</span>
+            <span class="current-value">{current_temp:.1f} <small>°C</small></span>
+        </div>
     </div>
 </div>
 """
@@ -1325,17 +1332,21 @@ h1 {{ text-align: center; margin-top: 0; }}
     text-align: left;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 10px;
 }}
 
+.current-value-left {{
+    display: flex;
+    flex-direction: column;
+}}
+
 .current-value-label {{
-    flex: 0 0 auto;
     color: #d1d5db;
     font-size: .85rem;
 }}
 
 .current-value {{
-    flex: 0 0 auto;
     font-size: 1.6rem;
     font-weight: 600;
     color: white;
@@ -1344,10 +1355,6 @@ h1 {{ text-align: center; margin-top: 0; }}
 .current-value small {{
     font-size: 1rem;
     color: #9ca3af;
-}}
-
-.current-value-box .limit-chips {{
-    margin-left: auto;
 }}
 
 .time-range-buttons {{
@@ -1855,13 +1862,17 @@ def _render_device_detail(
         current_values_header = f"""
 <div class="current-values-header">
     <div class="current-value-box">
-        <span class="current-value-label">🌡️ Temperature</span>
-        <span class="current-value">{device_current["temp"]:.1f} <small>°C</small></span>
+        <div class="current-value-left">
+            <span class="current-value-label">🌡️ Temperature</span>
+            <span class="current-value">{device_current["temp"]:.1f} <small>°C</small></span>
+        </div>
         {limit_chips_temp}
     </div>
     <div class="current-value-box">
-        <span class="current-value-label">💧 Relative Humidity</span>
-        <span class="current-value">{device_current["hum"]:.1f} <small>%</small></span>
+        <div class="current-value-left">
+            <span class="current-value-label">💧 Relative Humidity</span>
+            <span class="current-value">{device_current["hum"]:.1f} <small>%</small></span>
+        </div>
         {limit_chips_hum}
     </div>
 </div>
@@ -1870,8 +1881,10 @@ def _render_device_detail(
         current_values_header = f"""
 <div class="current-values-header">
     <div class="current-value-box">
-        <span class="current-value-label">🌡️ Temperature</span>
-        <span class="current-value">{device_current["temp"]:.1f} <small>°C</small></span>
+        <div class="current-value-left">
+            <span class="current-value-label">🌡️ Temperature</span>
+            <span class="current-value">{device_current["temp"]:.1f} <small>°C</small></span>
+        </div>
         {limit_chips_temp}
     </div>
 </div>
@@ -2082,17 +2095,21 @@ h1 {{ text-align: center; margin-top: 0; }}
     text-align: left;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 10px;
 }}
 
+.current-value-left {{
+    display: flex;
+    flex-direction: column;
+}}
+
 .current-value-label {{
-    flex: 0 0 auto;
     color: #d1d5db;
     font-size: .85rem;
 }}
 
 .current-value {{
-    flex: 0 0 auto;
     font-size: 1.6rem;
     font-weight: 600;
     color: white;
@@ -2101,10 +2118,6 @@ h1 {{ text-align: center; margin-top: 0; }}
 .current-value small {{
     font-size: 1rem;
     color: #9ca3af;
-}}
-
-.current-value-box .limit-chips {{
-    margin-left: auto;
 }}
 
 .time-range-buttons {{
@@ -2602,8 +2615,10 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
             </div>
         </div>
         <div class="metric-full">
-            <span>🌡️ Temperature</span>
-            <strong>{device["temp"]:.1f} <small>°C</small></strong>
+            <div class="metric-left">
+                <span>🌡️ Temperature</span>
+                <strong>{device["temp"]:.1f} <small>°C</small></strong>
+            </div>
             {device["limit_chips_temp"]}
         </div>
         <div class="device-chart">
@@ -2627,13 +2642,17 @@ def _render_device_card(device: dict, device_views: list[dict]) -> str:
         </div>
         <div class="metric-grid">
             <div class="metric">
-                <span>🌡️ Temperature</span>
-                <strong>{device["temp"]:.1f} <small>°C</small></strong>
+                <div class="metric-left">
+                    <span>🌡️ Temperature</span>
+                    <strong>{device["temp"]:.1f} <small>°C</small></strong>
+                </div>
                 {device["limit_chips_temp"]}
             </div>
             <div class="metric">
-                <span>💧 Relative Humidity</span>
-                <strong>{device["hum"]:.1f} <small>%</small></strong>
+                <div class="metric-left">
+                    <span>💧 Relative Humidity</span>
+                    <strong>{device["hum"]:.1f} <small>%</small></strong>
+                </div>
                 {device["limit_chips_hum"]}
             </div>
         </div>
