@@ -692,8 +692,9 @@ h1 {{ text-align: center; margin-top: 0; }}
     gap: 2px;
 }}
 .limit-chips .chip {{
-    font-size: .65rem;
-    padding: 1px 6px;
+    font-size: .6rem;
+    padding: 0 5px;
+    line-height: 1.3;
 }}
 
 .status-right {{
@@ -2061,8 +2062,9 @@ h1 {{ text-align: center; margin-top: 0; }}
     gap: 2px;
 }}
 .limit-chips .chip {{
-    font-size: .65rem;
-    padding: 1px 6px;
+    font-size: .6rem;
+    padding: 0 5px;
+    line-height: 1.3;
 }}
 
 .status-right {{
