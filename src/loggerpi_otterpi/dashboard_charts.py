@@ -108,12 +108,20 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                     color: '#d1d5db',
                     usePointStyle: true,
                     pointStyle: 'line',
+                    filter: (item) => {{
+                        const label = item.text || '';
+                        return !label.startsWith('Warning') && !label.startsWith('Critical');
+                    }},
                 }}
             }},
             tooltip: {{
                 usePointStyle: true,
                 boxWidth: 6,
                 boxHeight: 6,
+                filter: (item) => {{
+                    const label = item.dataset.label || '';
+                    return !label.startsWith('Warning') && !label.startsWith('Critical');
+                }},
                 callbacks: {{
                     labelColor: (context) => ({{
                         borderColor: context.dataset.borderColor,
@@ -269,12 +277,20 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                     color: '#d1d5db',
                     usePointStyle: true,
                     pointStyle: 'line',
+                    filter: (item) => {{
+                        const label = item.text || '';
+                        return !label.startsWith('Warning') && !label.startsWith('Critical');
+                    }},
                 }}
             }},
             tooltip: {{
                 usePointStyle: true,
                 boxWidth: 6,
                 boxHeight: 6,
+                filter: (item) => {{
+                    const label = item.dataset.label || '';
+                    return !label.startsWith('Warning') && !label.startsWith('Critical');
+                }},
                 callbacks: {{
                     labelColor: (context) => ({{
                         borderColor: context.dataset.borderColor,

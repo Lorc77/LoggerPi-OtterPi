@@ -471,10 +471,11 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
                 axis = "humidity"
             else:
                 continue
+            warning_color = "#fb923c" if axis == "temperature" else "#38bdf8"
             if "warning_min" in limit:
-                limit_lines.append(("Warning Min", limit["warning_min"], "#eab308", axis))
+                limit_lines.append(("Warning Min", limit["warning_min"], warning_color, axis))
             if "warning_max" in limit:
-                limit_lines.append(("Warning Max", limit["warning_max"], "#eab308", axis))
+                limit_lines.append(("Warning Max", limit["warning_max"], warning_color, axis))
             if "critical_min" in limit:
                 limit_lines.append(("Critical Min", limit["critical_min"], "#ef4444", axis))
             if "critical_max" in limit:
@@ -1844,10 +1845,11 @@ def _render_device_detail(
             axis = "humidity"
         else:
             continue
+        warning_color = "#fb923c" if axis == "temperature" else "#38bdf8"
         if "warning_min" in limit:
-            limit_lines.append(("Warning Min", limit["warning_min"], "#eab308", axis))
+            limit_lines.append(("Warning Min", limit["warning_min"], warning_color, axis))
         if "warning_max" in limit:
-            limit_lines.append(("Warning Max", limit["warning_max"], "#eab308", axis))
+            limit_lines.append(("Warning Max", limit["warning_max"], warning_color, axis))
         if "critical_min" in limit:
             limit_lines.append(("Critical Min", limit["critical_min"], "#ef4444", axis))
         if "critical_max" in limit:
@@ -2465,6 +2467,10 @@ new Chart(document.getElementById('device-chart'), {{
                 usePointStyle: true,
                 boxWidth: 6,
                 boxHeight: 6,
+                filter: (item) => {{
+                    const label = item.dataset.label || '';
+                    return !label.startsWith('Warning') && !label.startsWith('Critical');
+                }},
                 callbacks: {{
                     labelColor: (context) => ({{
                         borderColor: context.dataset.borderColor,

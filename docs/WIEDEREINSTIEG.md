@@ -429,6 +429,157 @@ ist. Aber: Mehr Aufwand, mehr Risiko.
 
 ---
 
+### 3.13 Gemeinsame Logik / Refactoring
+
+**Problem:** Mehrere Logiken sind dupliziert. Das führt zu Inkonsistenzen und
+Wartungsaufwand.
+
+#### 3.13.1 Alert-Logik (Dashboard vs. Alert-Engine)
+
+| Logik | Dashboard | Alert-Engine |
+|---|---|---|
+| **Grenzwerte** (critical/warning min/max) | `_limit_status` | `_check_sensors` |
+| **Stale/Invalid** | `_device_status` | `_check_sensors` |
+| **States** (battery_low, door_open, etc.) | `_device_chips` | `_check_states` |
+| **Rate-of-Change** | `_calculate_rate_of_change` | `_calculate_rate_of_change` |
+
+**Ziel:** Eine gemeinsame Status-Berechnung (z.B. `status.py`), die von beiden
+verwendet wird.
+
+**Vorschlag:**
+1. Neue Datei `status.py` mit gemeinsamen Funktionen:
+   - `calculate_rate_of_change(batches, measurement_key, hours)`.
+   - `check_limits(measurements, limits)` → `(status, chips)`.
+   - `check_states(states, rules)` → `(status, chips)`.
+   - `check_stale_invalid(measurements, device_config)` → `(status, chips)`.
+2. `alert_engine.py` importiert diese Funktionen.
+3. `dashboard_data.py` importiert diese Funktionen.
+4. Beide verwenden dieselbe Logik.
+
+**Hotfix (bereits live):** Dashboard-Rate-of-Change an Alert-Engine angepasst
+(alle Batches, erster/letzter Wert, `created_at`).
+
+#### 3.13.2 Chart-Logik (dashboard_charts.py vs. dashboard.py)
+
+**Problem:** Die Chart.js-Skripte sind dupliziert:
+- `_render_device_script` (in `dashboard_charts.py`) für die Gerätekacheln
+  (Raumdetailseite).
+- `_render_device_detail` (in `dashboard.py`) für die Device-Detailseite.
+
+Beide enthalten ähnliche Tooltip-, Legenden- und Skalen-Logik. Änderungen
+müssen an mehreren Stellen gemacht werden.
+
+**Ziel:** Eine gemeinsame Funktion `_render_chart_script(device, options)`,
+die von beiden verwendet wird.
+
+**Vorschlag:**
+1. Gemeinsame Funktion in `dashboard_charts.py`:
+   `_render_chart_script(device, *, height, show_limits, show_legend)`.
+2. `_render_device_script` ruft sie mit `height=280, show_limits=True` auf.
+3. `_render_device_detail` ruft sie mit `height=400, show_limits=True` auf.
+4. `_render_climate_detail` ruft sie mit `show_limits=False` auf (keine
+   Limit-Linien).
+
+**Aufwand:** Mittel (2–3 h).
+
+#### 3.13.3 Unit-Labels (alert_engine.py vs. admin.py)
+
+**Problem:** `UNIT_LABELS` ist zweimal definiert:
+- `alert_engine.py` (für Alert-Messages).
+- `admin.py` (für die Chips im Alarm Limits-Tab).
+
+**Ziel:** Eine gemeinsame Konstante in `sensor_schemas.py` (oder einer neuen
+`units.py`).
+
+**Vorschlag:**
+1. `UNIT_LABELS` in `sensor_schemas.py` verschieben.
+2. `alert_engine.py` und `admin.py` importieren sie.
+
+**Aufwand:** Klein (30 Min).
+
+#### 3.13.4 Measurement-Display-Names (sensor_schemas.py vs. dashboard_data.py)
+
+**Problem:** Die Anzeigenamen für Measurements sind zweimal definiert:
+- `MEASUREMENT_DISPLAY_NAMES` in `sensor_schemas.py` (für Alert-Messages).
+- `display_name`-Map in `dashboard_data.py` (`_device_chips`).
+
+**Ziel:** Eine gemeinsame Konstante in `sensor_schemas.py`.
+
+**Vorschlag:**
+1. `display_name`-Map in `dashboard_data.py` durch
+   `MEASUREMENT_DISPLAY_NAMES` ersetzen.
+2. `dashboard_data.py` importiert `MEASUREMENT_DISPLAY_NAMES`.
+
+**Aufwand:** Klein (30 Min).
+
+#### 3.13.5 Offline-Thresholds (dashboard.py vs. alert_engine.py)
+
+**Problem:** Die Offline-Schwellenwerte werden an zwei Stellen gelesen:
+- `_offline_thresholds` in `dashboard.py` (für die Statusleuchte im Header).
+- `_check_loggerpi_heartbeat` in `alert_engine.py` (für den Offline-Alert).
+
+**Ziel:** Eine gemeinsame Funktion in `heartbeat.py` (oder `config_store.py`).
+
+**Vorschlag:**
+1. `load_offline_thresholds()` in `heartbeat.py`.
+2. `dashboard.py` und `alert_engine.py` importieren sie.
+
+**Aufwand:** Klein (30 Min).
+
+#### 3.13.6 RAM-Optimierung
+
+**Problem:** Der OtterPi hat nur ~966 MB RAM (aktuell 742 MB verfügbar). Bei
+langen Zeiträumen (90d) könnten die Batches viel RAM verbrauchen.
+
+**Optimierungen:**
+
+1. **SQL-Filterung in `_recent_batches`:**
+   - Aktuell: Alle Batches werden geladen (`LIMIT`), dann in Python nach
+     `created_at >= cutoff` gefiltert.
+   - Neu: `WHERE created_at >= ?` in SQL. Das reduziert die Anzahl der
+     geladenen Batches.
+   - **Gewinn:** Bei 24h: ~50% weniger Batches (~5–10 MB). Bei 90d: ~10–15 MB.
+
+2. **mtime-Cache für `alarm_limits.json`:**
+   - Aktuell: `_device_limits` ruft `load_alarm_limits()` bei jedem Aufruf auf
+     (46 Datei-Lesevorgänge pro Dashboard-Render).
+   - Neu: mtime-Cache (analog zu `get_rooms()` in `dashboard_config.py`).
+   - **Gewinn:** ~0 MB RAM (nur CPU-Entlastung).
+
+3. **Chart-Daten per AJAX (optional):**
+   - Aktuell: Chart-Daten werden als JSON in den HTML-Code eingebettet.
+   - Neu: `GET /api/dashboard/series?device=...&range=...`.
+   - **Gewinn:** Bei 90d: ~5–8 MB (weniger HTML-Generierung).
+   - **Aufwand:** 2–3 h (größerer Umbau).
+
+**Geschätzte RAM-Gewinne:**
+
+| Optimierung | Gewinn (24h) | Gewinn (90d) |
+|---|---|---|
+| SQL-Filterung | ~5–10 MB | ~10–15 MB |
+| mtime-Cache | ~0 MB | ~0 MB |
+| Chart-Daten per AJAX | ~1–2 MB | ~5–8 MB |
+| **Gesamt** | **~6–12 MB** | **~15–23 MB** |
+
+**Priorität:** SQL-Filterung (30 Min, größter Gewinn). mtime-Cache (30 Min,
+CPU-Entlastung). AJAX (2–3 h, optional).
+
+#### 3.13.7 Gesamtaufwand
+
+| Punkt | Aufwand |
+|---|---|
+| 3.13.1 Alert-Logik | 2–3 h |
+| 3.13.2 Chart-Logik | 2–3 h |
+| 3.13.3 Unit-Labels | 30 Min |
+| 3.13.4 Measurement-Display-Names | 30 Min |
+| 3.13.5 Offline-Thresholds | 30 Min |
+| 3.13.6 RAM-Optimierung | 1–2 h (SQL + Cache), 2–3 h (AJAX) |
+| **Gesamt** | **7–10 h** |
+
+**Status:** Nach 3.8 (Hysterese) und 3.10 (Alert-Tab).
+
+---
+
 ## 4. Advanced Updates (Abschnitt 5, aus dem ursprünglichen Protokoll)
 
 ### 5.1 „Send on change" für device/setpoints
@@ -753,7 +904,8 @@ Die folgenden DECs sind in dieser Session entstanden und sollten nicht rückgän
 1. **3.6 Dashboard-Limits** (2–3 h) – visuell, inhaltlich relevant.
 2. **3.8 Hysterese** (2–3 h) – verhindert Flackern.
 3. **3.10 Alert-Tab-Überarbeitung**
-4. **3.11 Admin nach außen öffnen**
+4. **3.13 Gemeinsame Status-Berechnung**
+5. **3.11 Admin nach außen öffnen**
 
 **Danach (nach Bedarf):**
 - Advanced Updates (5.1–5.5, 5.7).
