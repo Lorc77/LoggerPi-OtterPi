@@ -1885,6 +1885,20 @@ def _render_device_detail(
                 pointRadius: 0,
                 yAxisID: '{axis}',
             }},"""
+        has_critical = any(
+            label.startswith("Critical") and a == axis for label, _, _, a in limit_lines
+        )
+        if has_critical:
+            legend_datasets += f"""
+            {{
+                label: 'Critical min/max',
+                data: [],
+                borderColor: '#ef4444',
+                borderDash: [2, 2],
+                borderWidth: 0.8,
+                pointRadius: 0,
+                yAxisID: '{axis}',
+            }},"""
 
     # Große aktuelle Werte-Header (kleiner Stil wie auf Raumübersicht)
     has_humidity = len(hum_series) > 0
@@ -2481,21 +2495,28 @@ new Chart(document.getElementById('device-chart'), {{
                     pointStyle: 'line',
                     filter: (item) => {{
                         const label = item.text || '';
-                        return label !== 'Warning min' && label !== 'Warning max';
+                        return label !== 'Warning min' && label !== 'Warning max'
+                            && label !== 'Critical min' && label !== 'Critical max';
                     }},
                 }},
                 onClick: (e, item, legend) => {{
                     const chart = legend.chart;
-                    if (item.text === 'Warning min/max') {{
+                    const axis = item.dataset.yAxisID;
+                    const togglePair = (minLabel, maxLabel) => {{
                         const minDataset = chart.data.datasets.find(
-                            d => d.label === 'Warning min'
+                            d => d.label === minLabel && d.yAxisID === axis
                         );
                         const maxDataset = chart.data.datasets.find(
-                            d => d.label === 'Warning max'
+                            d => d.label === maxLabel && d.yAxisID === axis
                         );
                         if (minDataset) minDataset.hidden = !minDataset.hidden;
                         if (maxDataset) maxDataset.hidden = !maxDataset.hidden;
                         chart.update();
+                    }};
+                    if (item.text === 'Warning min/max') {{
+                        togglePair('Warning min', 'Warning max');
+                    }} else if (item.text === 'Critical min/max') {{
+                        togglePair('Critical min', 'Critical max');
                     }} else {{
                         Chart.defaults.plugins.legend.onClick.call(this, e, item, legend);
                     }}
