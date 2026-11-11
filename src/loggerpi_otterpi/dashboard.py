@@ -2501,7 +2501,8 @@ new Chart(document.getElementById('device-chart'), {{
                 }},
                 onClick: (e, item, legend) => {{
                     const chart = legend.chart;
-                    const axis = item.dataset.yAxisID;
+                    const dataset = chart.data.datasets[item.datasetIndex];
+                    const axis = dataset ? dataset.yAxisID : undefined;
                     const togglePair = (minLabel, maxLabel) => {{
                         const minIndex = chart.data.datasets.findIndex(
                             d => d.label === minLabel && d.yAxisID === axis
