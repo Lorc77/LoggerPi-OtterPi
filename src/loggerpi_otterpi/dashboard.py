@@ -2503,14 +2503,22 @@ new Chart(document.getElementById('device-chart'), {{
                     const chart = legend.chart;
                     const axis = item.dataset.yAxisID;
                     const togglePair = (minLabel, maxLabel) => {{
-                        const minDataset = chart.data.datasets.find(
+                        const minIndex = chart.data.datasets.findIndex(
                             d => d.label === minLabel && d.yAxisID === axis
                         );
-                        const maxDataset = chart.data.datasets.find(
+                        const maxIndex = chart.data.datasets.findIndex(
                             d => d.label === maxLabel && d.yAxisID === axis
                         );
-                        if (minDataset) minDataset.hidden = !minDataset.hidden;
-                        if (maxDataset) maxDataset.hidden = !maxDataset.hidden;
+                        if (minIndex >= 0) {{
+                            chart.setDatasetVisibility(
+                                minIndex, !chart.isDatasetVisible(minIndex)
+                            );
+                        }}
+                        if (maxIndex >= 0) {{
+                            chart.setDatasetVisibility(
+                                maxIndex, !chart.isDatasetVisible(maxIndex)
+                            );
+                        }}
                         chart.update();
                     }};
                     if (item.text === 'Warning min/max') {{
@@ -2518,15 +2526,11 @@ new Chart(document.getElementById('device-chart'), {{
                     }} else if (item.text === 'Critical min/max') {{
                         togglePair('Critical min', 'Critical max');
                     }} else {{
-                        // Standard-Toggle (direkt implementiert)
                         const index = item.datasetIndex;
-                        if (chart.isDatasetVisible(index)) {{
-                            chart.hide(index);
-                            item.hidden = true;
-                        }} else {{
-                            chart.show(index);
-                            item.hidden = false;
-                        }}
+                        chart.setDatasetVisibility(
+                            index, !chart.isDatasetVisible(index)
+                        );
+                        chart.update();
                     }}
                 }},
             }},
