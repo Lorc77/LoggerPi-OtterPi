@@ -689,7 +689,8 @@ h1 {{ text-align: center; margin-top: 0; }}
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 2px;
+    gap: 4px;
+    align-self: center;
 }}
 .limit-chips .chip {{
     font-size: .6rem;
@@ -749,6 +750,7 @@ h1 {{ text-align: center; margin-top: 0; }}
     display: flex;
     flex-direction: column;
     gap: 4px;
+    align-self: flex-start;
 }}
 
 .metric span, .metric-full span {{
@@ -1342,6 +1344,7 @@ h1 {{ text-align: center; margin-top: 0; }}
     display: flex;
     flex-direction: column;
     gap: 4px;
+    align-self: flex-start;
 }}
 
 .current-value-label {{
@@ -2059,7 +2062,8 @@ h1 {{ text-align: center; margin-top: 0; }}
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 2px;
+    gap: 4px;
+    align-self: center;
 }}
 .limit-chips .chip {{
     font-size: .6rem;
@@ -2107,6 +2111,7 @@ h1 {{ text-align: center; margin-top: 0; }}
     display: flex;
     flex-direction: column;
     gap: 4px;
+    align-self: flex-start;
 }}
 
 .current-value-label {{
