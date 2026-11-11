@@ -71,9 +71,9 @@ def _render_device_script(device: dict) -> str:
                 label: '{label}',
                 data: {chart_var}Labels.map(() => {value}),
                 borderColor: '{color}',
-                borderDash: [5, 5],
+                borderDash: [2, 2],
                 pointRadius: 0,
-                borderWidth: 1,
+                borderWidth: 0.8,
                 yAxisID: '{axis}',
             }},"""
 

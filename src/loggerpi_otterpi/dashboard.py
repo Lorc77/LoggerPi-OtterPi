@@ -1868,6 +1868,24 @@ def _render_device_detail(
                 yAxisID: '{axis}',
             }},"""
 
+    legend_datasets = ""
+    for axis in ("temperature", "humidity"):
+        has_warning = any(
+            label.startswith("Warning") and a == axis for label, _, _, a in limit_lines
+        )
+        if has_warning:
+            warning_color = "#fb923c" if axis == "temperature" else "#38bdf8"
+            legend_datasets += f"""
+            {{
+                label: 'Warning min/max',
+                data: [],
+                borderColor: '{warning_color}',
+                borderDash: [2, 2],
+                borderWidth: 0.8,
+                pointRadius: 0,
+                yAxisID: '{axis}',
+            }},"""
+
     # Große aktuelle Werte-Header (kleiner Stil wie auf Raumübersicht)
     has_humidity = len(hum_series) > 0
 
@@ -2397,7 +2415,7 @@ const datasets = [
         pointHoverRadius: 4,
         yAxisID: 'temperature',
         tension: 0.3
-    }},{limit_datasets}
+    }},{limit_datasets}{legend_datasets}
 ];
 
 const scales = {{
@@ -2461,7 +2479,27 @@ new Chart(document.getElementById('device-chart'), {{
                     color: '#d1d5db',
                     usePointStyle: false,
                     pointStyle: 'line',
-                }}
+                    filter: (item) => {{
+                        const label = item.text || '';
+                        return label !== 'Warning min' && label !== 'Warning max';
+                    }},
+                }},
+                onClick: (e, item, legend) => {{
+                    const chart = legend.chart;
+                    if (item.text === 'Warning min/max') {{
+                        const minDataset = chart.data.datasets.find(
+                            d => d.label === 'Warning min'
+                        );
+                        const maxDataset = chart.data.datasets.find(
+                            d => d.label === 'Warning max'
+                        );
+                        if (minDataset) minDataset.hidden = !minDataset.hidden;
+                        if (maxDataset) maxDataset.hidden = !maxDataset.hidden;
+                        chart.update();
+                    }} else {{
+                        Chart.defaults.plugins.legend.onClick.call(this, e, item, legend);
+                    }}
+                }},
             }},
             tooltip: {{
                 usePointStyle: true,
