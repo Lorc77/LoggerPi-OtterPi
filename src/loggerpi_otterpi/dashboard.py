@@ -473,13 +473,13 @@ def _render_room_detail(store: BatchStore, room_id: str) -> str:
                 continue
             warning_color = "#fb923c" if axis == "temperature" else "#38bdf8"
             if "warning_min" in limit:
-                limit_lines.append(("Warning Min", limit["warning_min"], warning_color, axis))
+                limit_lines.append(("Warning min", limit["warning_min"], warning_color, axis))
             if "warning_max" in limit:
-                limit_lines.append(("Warning Max", limit["warning_max"], warning_color, axis))
+                limit_lines.append(("Warning max", limit["warning_max"], warning_color, axis))
             if "critical_min" in limit:
-                limit_lines.append(("Critical Min", limit["critical_min"], "#ef4444", axis))
+                limit_lines.append(("Critical min", limit["critical_min"], "#ef4444", axis))
             if "critical_max" in limit:
-                limit_lines.append(("Critical Max", limit["critical_max"], "#ef4444", axis))
+                limit_lines.append(("Critical max", limit["critical_max"], "#ef4444", axis))
         device_views.append(
             {
                 "name": device["name"],
@@ -1146,7 +1146,7 @@ new Chart(document.getElementById('chart-hum-avg'), {{
         maintainAspectRatio: false,
         interaction: {{ mode: 'index', intersect: false }},
         plugins: {{
-            legend: {{ labels: {{ color: '#d1d5db', usePointStyle: true, pointStyle: 'line' }} }},
+            legend: {{ labels: {{ color: '#d1d5db', usePointStyle: false, pointStyle: 'line' }} }},
             tooltip: {{
                 usePointStyle: true,
                 boxWidth: 6,
@@ -1202,7 +1202,7 @@ new Chart(document.getElementById('chart-hum-sensors'), {{
         interaction: {{ mode: 'index', intersect: false }},
         plugins: {{
             legend: {{
-                labels: {{ color: '#d1d5db', usePointStyle: true, pointStyle: 'line' }}
+                labels: {{ color: '#d1d5db', usePointStyle: false, pointStyle: 'line' }}
             }},
             tooltip: {{
                 usePointStyle: true,
@@ -1604,7 +1604,7 @@ new Chart(document.getElementById('chart-temp-avg'), {{
         maintainAspectRatio: false,
         interaction: {{ mode: 'index', intersect: false }},
         plugins: {{
-            legend: {{ labels: {{ color: '#d1d5db', usePointStyle: true, pointStyle: 'line' }} }},
+            legend: {{ labels: {{ color: '#d1d5db', usePointStyle: false, pointStyle: 'line' }} }},
             tooltip: {{
                 usePointStyle: true,
                 boxWidth: 6,
@@ -1658,7 +1658,7 @@ new Chart(document.getElementById('chart-temp-sensors'), {{
         interaction: {{ mode: 'index', intersect: false }},
         plugins: {{
             legend: {{
-                labels: {{ color: '#d1d5db', usePointStyle: true, pointStyle: 'line' }}
+                labels: {{ color: '#d1d5db', usePointStyle: false, pointStyle: 'line' }}
             }},
             tooltip: {{
                 usePointStyle: true,
@@ -1847,13 +1847,13 @@ def _render_device_detail(
             continue
         warning_color = "#fb923c" if axis == "temperature" else "#38bdf8"
         if "warning_min" in limit:
-            limit_lines.append(("Warning Min", limit["warning_min"], warning_color, axis))
+            limit_lines.append(("Warning min", limit["warning_min"], warning_color, axis))
         if "warning_max" in limit:
-            limit_lines.append(("Warning Max", limit["warning_max"], warning_color, axis))
+            limit_lines.append(("Warning max", limit["warning_max"], warning_color, axis))
         if "critical_min" in limit:
-            limit_lines.append(("Critical Min", limit["critical_min"], "#ef4444", axis))
+            limit_lines.append(("Critical min", limit["critical_min"], "#ef4444", axis))
         if "critical_max" in limit:
-            limit_lines.append(("Critical Max", limit["critical_max"], "#ef4444", axis))
+            limit_lines.append(("Critical max", limit["critical_max"], "#ef4444", axis))
 
     limit_datasets = ""
     for label, value, color, axis in limit_lines:
@@ -1862,9 +1862,9 @@ def _render_device_detail(
                 label: '{label}',
                 data: tempValues.map(() => {value}),
                 borderColor: '{color}',
-                borderDash: [5, 5],
+                borderDash: [2, 2],
                 pointRadius: 0,
-                borderWidth: 1,
+                borderWidth: 0.8,
                 yAxisID: '{axis}',
             }},"""
 
@@ -2459,7 +2459,7 @@ new Chart(document.getElementById('device-chart'), {{
             legend: {{
                 labels: {{
                     color: '#d1d5db',
-                    usePointStyle: true,
+                    usePointStyle: false,
                     pointStyle: 'line',
                 }}
             }},

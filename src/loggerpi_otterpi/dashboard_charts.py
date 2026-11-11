@@ -106,7 +106,7 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
             legend: {{
                 labels: {{
                     color: '#d1d5db',
-                    usePointStyle: true,
+                    usePointStyle: false,
                     pointStyle: 'line',
                     filter: (item) => {{
                         const label = item.text || '';
@@ -275,7 +275,7 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
             legend: {{
                 labels: {{
                     color: '#d1d5db',
-                    usePointStyle: true,
+                    usePointStyle: false,
                     pointStyle: 'line',
                     filter: (item) => {{
                         const label = item.text || '';
