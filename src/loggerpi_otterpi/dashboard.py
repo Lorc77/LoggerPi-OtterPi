@@ -747,7 +747,7 @@ h1 {{ text-align: center; margin-top: 0; }}
 .metric-left {{
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 }}
 
 .metric span, .metric-full span {{
@@ -1340,7 +1340,7 @@ h1 {{ text-align: center; margin-top: 0; }}
 .current-value-left {{
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 }}
 
 .current-value-label {{
@@ -2104,7 +2104,7 @@ h1 {{ text-align: center; margin-top: 0; }}
 .current-value-left {{
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 }}
 
 .current-value-label {{
