@@ -478,14 +478,15 @@ Limits-Tab (Schwellenwerte in Minuten, Checkbox für Warn-Alert).
 
 ---
 
-### Phase C – Dashboard-Limits (v1.12.0)
+### Phase C – Dashboard-Limits (v1.12.1)
 
-- **Limit-Chips:** Rechtsbündig im Header der Metric-Zellen (Raumdetail +
-  Device-Detail). Nur wenn Limits gesetzt und enabled.
-- **Statusleuchte:** Rot bei Crit-Verletzung, Gelb bei Warn-Verletzung.
-- **Status-Chips:** `[Warning: temperature above limit]`, etc.
-- **Graphen-Linien:** Horizontale Linien für Warn/Crit Min/Max als separate
-  Datasets.
+- **Limit-Chips** in den Metric-Zellen (Raumdetail: kompakt, Device-Detail:
+  ausführlich).
+- **Statusleuchte** reagiert auf Limit-Verletzungen.
+- **Status-Chips** in der Chip-Leiste.
+- **Horizontale Limit-Linien** in den Charts.
+- **Bugfixes:** Y-Achse, humidity-Achse, `_stale_age`, Chip-Reihenfolge,
+  doppelte Limit-Schleife, Flex-Layout.
 
 ---
 
@@ -807,7 +808,7 @@ Repository:
     main
 
 Version:
-    v1.12.0
+    v1.12.1
 
 Letzter bekannter Release-Commit:
     (wird beim Deploy gesetzt)

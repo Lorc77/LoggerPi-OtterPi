@@ -483,49 +483,6 @@ def _device_chips(
     operation = latest.get("operation", {}).get(key, {})
     chips: list[tuple[str, str]] = []
 
-    alarms = states.get("alarms") or []
-    for alarm in alarms:
-        label = _ALARM_LABELS.get(alarm, alarm)
-        chips.append((f"🚨 Alarm: {label}", "chip-critical"))
-
-    status = _device_status(batches, key, device_type)
-
-    if status == "status-critical" and not alarms:
-        reason = _invalid_reason(measurements, key, device_type)
-        if reason == "overflow":
-            chips.append(("⛔ Sensor overflow", "chip-critical"))
-        elif reason == "sensor_error":
-            chips.append(("⛔ Sensor error", "chip-critical"))
-        else:
-            chips.append(("⛔ Invalid", "chip-critical"))
-    elif status == "status-warn":
-        if states.get("battery_low"):
-            chips.append(("⚠ Battery low", "chip-warn"))
-        else:
-            age = _stale_age(measurements, key, device_type)
-            if age is not None:
-                chips.append((f"⚠ No data for {age}", "chip-warn"))
-            else:
-                chips.append(("⚠ Stale", "chip-warn"))
-    elif status == "status-ok":
-        chips.append(("OK", "chip-ok"))
-    elif status == "status-off":
-        chips.append(("Offline", "chip-off"))
-
-    if states.get("door_open"):
-        chips.append(("Door open", "chip-info"))
-    if states.get("door_locked"):
-        chips.append(("Door locked", "chip-info"))
-    if states.get("defrost"):
-        chips.append(("Defrost", "chip-info"))
-    if "flap" in states:
-        chips.append((f"Flap {states['flap']:.0f}%", "chip-info"))
-    if "mode" in operation:
-        chips.append((f"Mode: {operation['mode']}", "chip-info"))
-    if "operation_mode" in states:
-        mode = "local" if states["operation_mode"] == 0 else "remote"
-        chips.append((f"Mode: {mode}", "chip-info"))
-
     limits = _device_limits(key)
     for limit_key, limit in limits.items():
         if not limit.get("enabled", True):
@@ -555,6 +512,51 @@ def _device_chips(
             chips.append((f"⚠ {display_name} below limit", "chip-warn"))
         if "warning_max" in limit and value > limit["warning_max"]:
             chips.append((f"⚠ {display_name} above limit", "chip-warn"))
+
+    alarms = states.get("alarms") or []
+    for alarm in alarms:
+        label = _ALARM_LABELS.get(alarm, alarm)
+        chips.append((f"🚨 Alarm: {label}", "chip-critical"))
+
+    status = _device_status(batches, key, device_type)
+
+    if status == "status-critical" and not alarms:
+        reason = _invalid_reason(measurements, key, device_type)
+        if reason == "overflow":
+            chips.append(("⛔ Sensor overflow", "chip-critical"))
+        elif reason == "sensor_error":
+            chips.append(("⛔ Sensor error", "chip-critical"))
+        else:
+            chips.append(("⛔ Invalid", "chip-critical"))
+    elif status == "status-warn":
+        if states.get("battery_low"):
+            chips.append(("⚠ Battery low", "chip-warn"))
+        else:
+            primary = _primary_measurement(measurements, key, device_type)
+            if primary.get("validity") == "stale":
+                age = _stale_age(measurements, key, device_type)
+                if age is not None:
+                    chips.append((f"⚠ No data for {age}", "chip-warn"))
+                else:
+                    chips.append(("⚠ Stale", "chip-warn"))
+    elif status == "status-ok":
+        chips.append(("OK", "chip-ok"))
+    elif status == "status-off":
+        chips.append(("Offline", "chip-off"))
+
+    if states.get("door_open"):
+        chips.append(("Door open", "chip-info"))
+    if states.get("door_locked"):
+        chips.append(("Door locked", "chip-info"))
+    if states.get("defrost"):
+        chips.append(("Defrost", "chip-info"))
+    if "flap" in states:
+        chips.append((f"Flap {states['flap']:.0f}%", "chip-info"))
+    if "mode" in operation:
+        chips.append((f"Mode: {operation['mode']}", "chip-info"))
+    if "operation_mode" in states:
+        mode = "local" if states["operation_mode"] == 0 else "remote"
+        chips.append((f"Mode: {mode}", "chip-info"))
 
     return chips
 

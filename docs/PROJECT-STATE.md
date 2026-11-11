@@ -410,25 +410,29 @@ Alert-Tab-Überarbeitung (3.10), Admin nach außen (3.11).
 
 ---
 
-## Phase C – Dashboard-Limits (abgeschlossen, v1.12.0)
+## Phase C – Dashboard-Limits (abgeschlossen, v1.12.1)
 
 **Stand:** 2026-11-10
 
 ### Umgesetzt
 
-- **Limit-Chips:** Rechtsbündig im Header der Metric-Zellen (Raumdetail +
-  Device-Detail). Verkürzt (`↓ 15 °C ↑ 18 °C`) auf Raumdetail, ausführlich
-  (`Warning: ↓ 15 °C ↑ 18 °C`) auf Device-Detail. Nur wenn Limits gesetzt
-  und enabled.
+- **Limit-Chips in den Metric-Zellen:**
+  - Raumdetail: kompakt (`↓ 15 °C ↑ 18 °C`).
+  - Device-Detail: ausführlich (`Warning: ↓ 15 °C ↑ 18 °C`).
+  - Nur wenn Limits gesetzt und enabled.
 - **Statusleuchte:** Rot bei Crit-Verletzung, Gelb bei Warn-Verletzung.
-  Übersicht folgt automatisch (via `_device_status`).
-- **Status-Chips:** `[Warning: temperature above limit]`,
-  `[Critical: temperature below limit]`, etc. in der Chip-Leiste.
-- **Graphen-Linien:** Horizontale Linien für Warn Min/Max (gelb, gestrichelt)
-  und Crit Min/Max (rot, gestrichelt) als separate Datasets. Nur wenn Limits
-  gesetzt.
-- **Keine Limits für Raumtemperatur:** Bewusste Entscheidung.
-- **Keine Chips auf Übersicht/Climate-Detail:** Bewusste Entscheidung.
+- **Status-Chips:** `Warning: temperature above limit`,
+  `Critical: temperature below limit`, etc.
+- **Horizontale Limit-Linien in den Charts:** Warn Min/Max (gelb,
+  gestrichelt), Crit Min/Max (rot, gestrichelt). Als separate Datasets.
+- **Bugfixes:**
+  - Y-Achse in `temperature` umbenannt (keine graue Achse mehr).
+  - `humidity`-Achse immer erstellen (keine graue Achse mehr).
+  - `_stale_age` nur bei `validity == "stale"` (kein „No data" bei
+    Limit-Verletzung).
+  - Chip-Reihenfolge: Limit-Chips zuerst, Mode zuletzt.
+  - Doppelte Limit-Schleife in `_device_chips` entfernt.
+  - Flex-Layout für Metric-Zellen (Chips rechtsbündig neben dem Wert).
 
 ### Teststand
 
@@ -436,7 +440,7 @@ Alert-Tab-Überarbeitung (3.10), Admin nach außen (3.11).
 
 ### Nächster Schritt
 
-Deploy + Test (v1.12.0). Danach: Hysterese (3.8), Alert-Tab-Überarbeitung
+Deploy + Test (v1.12.1). Danach: Hysterese (3.8), Alert-Tab-Überarbeitung
 (3.10), Admin nach außen (3.11).
 
 ---

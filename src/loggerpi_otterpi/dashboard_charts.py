@@ -93,6 +93,7 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                 borderWidth: 1.5,
                 pointRadius: 2,
                 pointHoverRadius: 4,
+                yAxisID: 'temperature',
                 tension: 0.3
             }},{limit_datasets}
         ]
@@ -174,7 +175,7 @@ new Chart(document.getElementById('{device["chart_id"]}'), {{
                     callback: (value) => {chart_var}Labels[value]
                 }}
             }},
-            y: {{
+            temperature: {{
                 type: 'linear',
                 ticks: {{
                     color: '#fb923c',
@@ -238,19 +239,19 @@ if ({chart_var}HasHumidity) {{
         yAxisID: 'humidity',
         tension: 0.3
     }});
-    {chart_var}Scales.humidity = {{
-        type: 'linear',
-        position: 'right',
-        ticks: {{
-            color: '#38bdf8',
-            callback: (value) => {{
-                const rounded = Math.round(value * 10) / 10;
-                return rounded + ' %';
-            }}
-        }},
-        grid: {{ drawOnChartArea: false }}
-    }};
 }}
+{chart_var}Scales.humidity = {{
+    type: 'linear',
+    position: 'right',
+    ticks: {{
+        color: '#38bdf8',
+        callback: (value) => {{
+            const rounded = Math.round(value * 10) / 10;
+            return rounded + ' %';
+        }}
+    }},
+    grid: {{ drawOnChartArea: false }}
+}};
 
 new Chart(document.getElementById('{device["chart_id"]}'), {{
     type: 'line',

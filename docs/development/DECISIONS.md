@@ -2875,36 +2875,64 @@ Bessere Benutzerführung. Neue Nutzer finden sich schneller zurecht.
 
 ### Kontext
 
-Die Limits waren nur im Admin sichtbar. Der Nutzer wollte sie auch im
-Dashboard sehen, um den aktuellen Zustand besser einschätzen zu können.
+Limits waren im Dashboard nicht sichtbar. Der Nutzer musste im Admin
+nachschauen, welche Limits gelten.
 
 ### Entscheidung
 
-1. **Limit-Chips** rechtsbündig im Header der Metric-Zellen (Raumdetail +
-   Device-Detail). Verkürzt auf Raumdetail, ausführlich auf Device-Detail.
-   Nur wenn Limits gesetzt und enabled.
-2. **Statusleuchte** erweitert: Rot bei Crit-Verletzung, Gelb bei
-   Warn-Verletzung. Übersicht folgt automatisch.
-3. **Status-Chips** in der Chip-Leiste: `[Warning: temperature above limit]`,
-   `[Critical: temperature below limit]`, etc.
-4. **Graphen-Linien** als separate Datasets (konstante Werte), gelb/rot
-   gestrichelt. Nur wenn Limits gesetzt.
-5. **Keine Limits für Raumtemperatur** (Mittelwert, keine Regel).
-6. **Keine Chips auf Übersicht/Climate-Detail** (bewusste Entscheidung).
+- **Limit-Chips** in den Metric-Zellen (Raumdetail: kompakt, Device-Detail:
+  ausführlich). Nur wenn Limits gesetzt und enabled.
+- **Statusleuchte** reagiert auf Limit-Verletzungen (rot/gelb).
+- **Status-Chips** in der Chip-Leiste (`Warning: temperature above limit`).
+- **Horizontale Limit-Linien** in den Charts (separate Datasets).
 
 ### Begründung
 
-- **Schneller Überblick:** Chips zeigen die Limits ohne Chart.
-- **Visueller Vergleich:** Linien zeigen die Position im Chart.
-- **Keine Redundanz:** Chips = Zahlen, Linien = Position.
-- **Konsistenz:** Gleiche Logik wie im Admin.
+- Schneller Überblick über die Limits.
+- Visueller Vergleich im Chart.
+- Keine Redundanz mit dem Admin (dort werden die Limits konfiguriert).
 
 ### Konsequenz
 
 `dashboard_data.py` um `_device_limits`, `_limit_status` erweitert.
-`_device_status` und `_device_chips` erweitert. `dashboard.py` um
-`_render_limit_chips` und Limit-Linien erweitert. `dashboard_charts.py`
-um `limit_datasets` erweitert.
+`dashboard.py` um `_render_limit_chips` erweitert. `dashboard_charts.py`
+um Limit-Linien erweitert.
+
+---
+
+## DEC-094 — Dashboard-Limits Bugfixes
+
+**Status:** Accepted
+**Datum:** 2026-11-10
+
+### Kontext
+
+Nach dem Einbau der Dashboard-Limits gab es mehrere Bugs:
+- Graue Y-Achse (weil die Achse `y` hieß, die Limit-Linien aber
+  `yAxisID: 'temperature'` hatten).
+- Graue `humidity`-Achse (weil sie nur bei `hasHumidity` erstellt wurde).
+- „No data for X min" bei Limit-Verletzungen (weil `_stale_age` zu
+  aggressiv aufgerufen wurde).
+- Falsche Chip-Reihenfolge (Limit-Chips nach Mode-Chips).
+- Doppelte Limit-Chips (weil die Limit-Schleife zweimal drin war).
+- Umbrechende Chips (weil die Metric-Zellen Block-Layout hatten).
+
+### Entscheidung
+
+- Y-Achse in `temperature` umbenannt.
+- `humidity`-Achse immer erstellen.
+- `_stale_age` nur bei `validity == "stale"`.
+- Chip-Reihenfolge: Limit-Chips zuerst, Mode zuletzt.
+- Doppelte Limit-Schleife entfernt.
+- Flex-Layout für Metric-Zellen.
+
+### Begründung
+
+Konsistenz, Lesbarkeit, keine redundanten Chips.
+
+### Konsequenz
+
+`dashboard_charts.py`, `dashboard_data.py`, `dashboard.py` angepasst.
 
 ---
 

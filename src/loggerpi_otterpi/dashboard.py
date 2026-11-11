@@ -142,7 +142,7 @@ def _render_chips(chips: list[tuple[str, str]]) -> str:
     return "".join(f'<span class="chip {css}">{text}</span>' for text, css in chips)
 
 
-def _render_limit_chips(limits: dict, full_key: str, unit: str) -> str:
+def _render_limit_chips(limits: dict, full_key: str, unit: str, compact: bool = True) -> str:
     """Rendert die Limit-Chips für ein Measurement (rechtsbündig, übereinander)."""
     limit = limits.get(full_key, {})
     if not limit or not limit.get("enabled", True):
@@ -159,6 +159,8 @@ def _render_limit_chips(limits: dict, full_key: str, unit: str) -> str:
             text += f"↓ {warn_min} {unit}"
         if warn_max is not None:
             text += f" ↑ {warn_max} {unit}"
+        if not compact:
+            text = f"Warning: {text.strip()}"
         chips.append((text.strip(), "chip-warn"))
     if crit_min is not None or crit_max is not None:
         text = ""
@@ -166,9 +168,14 @@ def _render_limit_chips(limits: dict, full_key: str, unit: str) -> str:
             text += f"↓ {crit_min} {unit}"
         if crit_max is not None:
             text += f" ↑ {crit_max} {unit}"
+        if not compact:
+            text = f"Critical: {text.strip()}"
         chips.append((text.strip(), "chip-critical"))
     if rate is not None:
-        chips.append((f"↕ {rate} {unit}/h", "chip-info"))
+        text = f"↕ {rate} {unit}/h"
+        if not compact:
+            text = f"Rate of Change: {text}"
+        chips.append((text, "chip-info"))
     if not chips:
         return ""
     inner = "".join(f'<span class="chip {css}">{text}</span>' for text, css in chips)
@@ -683,7 +690,6 @@ h1 {{ text-align: center; margin-top: 0; }}
     flex-direction: column;
     align-items: flex-end;
     gap: 2px;
-    margin-top: 6px;
 }}
 .limit-chips .chip {{
     font-size: .65rem;
@@ -718,6 +724,9 @@ h1 {{ text-align: center; margin-top: 0; }}
     background: rgba(255,255,255,.06);
     border: 1px solid rgba(255,255,255,.08);
     border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }}
 
 .metric-full {{
@@ -728,23 +737,29 @@ h1 {{ text-align: center; margin-top: 0; }}
     border: 1px solid rgba(255,255,255,.08);
     border-radius: 10px;
     margin-top: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }}
 
 .metric span, .metric-full span {{
-    display: block;
+    flex: 0 0 auto;
     color: #d1d5db;
     font-size: .8rem;
 }}
 
 .metric strong, .metric-full strong {{
-    display: block;
-    margin-top: 5px;
+    flex: 0 0 auto;
     font-size: 1.35rem;
 }}
 
 .metric small, .metric-full small {{
     color: #9ca3af;
     font-size: .8rem;
+}}
+
+.metric .limit-chips, .metric-full .limit-chips {{
+    margin-left: auto;
 }}
 
 .device-chart {{
@@ -1308,17 +1323,19 @@ h1 {{ text-align: center; margin-top: 0; }}
     border-radius: 12px;
     padding: 16px 20px;
     text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }}
 
 .current-value-label {{
-    display: block;
+    flex: 0 0 auto;
     color: #d1d5db;
     font-size: .85rem;
-    margin-bottom: 4px;
 }}
 
 .current-value {{
-    display: block;
+    flex: 0 0 auto;
     font-size: 1.6rem;
     font-weight: 600;
     color: white;
@@ -1327,6 +1344,10 @@ h1 {{ text-align: center; margin-top: 0; }}
 .current-value small {{
     font-size: 1rem;
     color: #9ca3af;
+}}
+
+.current-value-box .limit-chips {{
+    margin-left: auto;
 }}
 
 .time-range-buttons {{
@@ -1792,8 +1813,8 @@ def _render_device_detail(
 
     # Limit-Chips (vor current_values_header definieren)
     limits = _device_limits(device_key)
-    limit_chips_temp = _render_limit_chips(limits, temp_key, "°C")
-    limit_chips_hum = _render_limit_chips(limits, hum_key, "%") if hum_key else ""
+    limit_chips_temp = _render_limit_chips(limits, temp_key, "°C", compact=False)
+    limit_chips_hum = _render_limit_chips(limits, hum_key, "%", compact=False) if hum_key else ""
 
     limit_lines = []
     for limit_key, limit in limits.items():
@@ -2023,7 +2044,6 @@ h1 {{ text-align: center; margin-top: 0; }}
     flex-direction: column;
     align-items: flex-end;
     gap: 2px;
-    margin-top: 6px;
 }}
 .limit-chips .chip {{
     font-size: .65rem;
@@ -2060,17 +2080,19 @@ h1 {{ text-align: center; margin-top: 0; }}
     border-radius: 12px;
     padding: 16px 20px;
     text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }}
 
 .current-value-label {{
-    display: block;
+    flex: 0 0 auto;
     color: #d1d5db;
     font-size: .85rem;
-    margin-bottom: 4px;
 }}
 
 .current-value {{
-    display: block;
+    flex: 0 0 auto;
     font-size: 1.6rem;
     font-weight: 600;
     color: white;
@@ -2079,6 +2101,10 @@ h1 {{ text-align: center; margin-top: 0; }}
 .current-value small {{
     font-size: 1rem;
     color: #9ca3af;
+}}
+
+.current-value-box .limit-chips {{
+    margin-left: auto;
 }}
 
 .time-range-buttons {{

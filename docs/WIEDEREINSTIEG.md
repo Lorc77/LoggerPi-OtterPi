@@ -1,7 +1,7 @@
 # Wiedereinstiegsprotokoll – LoggerPi-OtterPi (Stand v1.11.14)
 
 **Projekt:** LoggerPi-OtterPi
-**Aktuelle Version:** v1.12.0 (deployed auf OtterPi)
+**Aktuelle Version:** v1.12.1 (deployed auf OtterPi)
 **Teststand:** 432 passed, Ruff/Format clean
 **Stand:** 2026-11-10
 
@@ -137,14 +137,15 @@ OtterPi (Python 3.13.5, User=makki)
 - **Delete-Sicherheit:** Doppelte Abfrage, Räume mit Sensoren können nicht
   gelöscht werden, Limits werden mit dem Sensor gelöscht.
 
-### v1.12.0 – Dashboard-Limits
+### v1.12.0/v1.12.1 – Dashboard-Limits
 
-- **Limit-Chips:** Rechtsbündig im Header der Metric-Zellen (Raumdetail +
-  Device-Detail). Nur wenn Limits gesetzt und enabled.
-- **Statusleuchte:** Rot bei Crit-Verletzung, Gelb bei Warn-Verletzung.
-- **Status-Chips:** `[Warning: temperature above limit]`, etc.
-- **Graphen-Linien:** Horizontale Linien für Warn/Crit Min/Max als separate
-  Datasets.
+- **Limit-Chips** in den Metric-Zellen (Raumdetail: kompakt, Device-Detail:
+  ausführlich).
+- **Statusleuchte** reagiert auf Limit-Verletzungen.
+- **Status-Chips** in der Chip-Leiste.
+- **Horizontale Limit-Linien** in den Charts.
+- **Bugfixes:** Y-Achse, humidity-Achse, `_stale_age`, Chip-Reihenfolge,
+  doppelte Limit-Schleife, Flex-Layout.
 
 ---
 
