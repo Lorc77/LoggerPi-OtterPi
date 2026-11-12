@@ -146,6 +146,7 @@ class AlertStore:
         only_active: bool = False,
         severity: Optional[str] = None,
         status: Optional[str] = None,
+        include_older_active: bool = False,
     ) -> list:
         query = "SELECT * FROM alerts"
         conditions = []
@@ -161,6 +162,11 @@ class AlertStore:
         if severity:
             conditions.append("severity = ?")
             params.append(severity)
+        if include_older_active:
+            cutoff = (datetime.now(timezone.utc) - timedelta(days=3)).isoformat()
+            conditions.append("(created_at >= ? OR (created_at < ? AND resolved_at IS NULL))")
+            params.append(cutoff)
+            params.append(cutoff)
         if conditions:
             query += " WHERE " + " AND ".join(conditions)
         query += " ORDER BY created_at DESC LIMIT ?"

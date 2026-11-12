@@ -460,10 +460,17 @@ textarea.json-editor {{
     border-radius: 10px;
     padding: 12px;
 }}
+.chart-title {{
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    color: #d1d5db;
+    font-size: .9rem;
+    z-index: 1;
+}}
 .alert-summary {{
     display: flex;
     gap: 16px;
-    margin-top: 12px;
     font-size: .9rem;
 }}
 .alert-summary-item {{
@@ -873,9 +880,16 @@ input[type="number"] {{
             <li><strong>Filters:</strong> "Only unacknowledged" and "Only active".</li>
         </ol>
     </details>
+    <div id="alerts-chart" class="alert-chart">
+        <span class="chart-title">Alerts last 14 days</span>
+        <canvas id="alerts-chart-canvas"></canvas>
+    </div>
     <div class="save-row">
+        <div id="alerts-summary" class="alert-summary"></div>
         <button class="btn btn-primary btn-small"
                 onclick="loadAlerts()">🔄 Refresh</button>
+    </div>
+    <div class="save-row">
         <label>
             <input type="checkbox" id="alerts-only-unack" onchange="loadAlerts()">
             Only unacknowledged
@@ -885,10 +899,6 @@ input[type="number"] {{
             Only active
         </label>
         <span id="alerts-status" class="status"></span>
-    </div>
-    <div id="alerts-summary" class="alert-summary"></div>
-    <div id="alerts-chart" class="alert-chart">
-        <canvas id="alerts-chart-canvas"></canvas>
     </div>
     <div id="alerts-list"></div>
 </div>
@@ -2510,7 +2520,8 @@ async function loadAlerts() {{
         }}
         let url = '/api/admin/alerts?limit=100&only_unacknowledged='
             + (onlyUnack ? '1' : '0')
-            + '&only_active=' + (onlyActive ? '1' : '0');
+            + '&only_active=' + (onlyActive ? '1' : '0')
+            + '&include_older_active=1';
         if (currentFilters.severity) {{
             url += '&severity=' + currentFilters.severity;
         }}
@@ -2528,7 +2539,7 @@ async function loadAlerts() {{
         renderAlertSummary(summary, stats.by_status);
         renderAlertChart(stats.by_day);
         renderAlertTable(list, result.alerts, deviceMap);
-        status.textContent = result.alerts.length + ' alert(s).';
+        status.textContent = 'Showing ' + result.alerts.length + ' alert(s).';
     }} catch (e) {{
         status.textContent = 'Request failed: ' + e.message;
     }}
@@ -2575,19 +2586,19 @@ function renderAlertChart(byDay) {{
                 {{
                     label: 'Warning',
                     data: warningData,
-                    backgroundColor: '#fbbf24',
+                    backgroundColor: '#d98906',
                     stack: 'alerts',
                 }},
                 {{
                     label: 'Critical',
                     data: criticalData,
-                    backgroundColor: '#f87171',
+                    backgroundColor: '#dc2626',
                     stack: 'alerts',
                 }},
                 {{
                     label: 'Resolved',
                     data: resolvedData,
-                    backgroundColor: '#4ade80',
+                    backgroundColor: '#16a34a',
                     stack: 'alerts',
                 }},
             ],
@@ -2631,18 +2642,36 @@ function renderAlertTable(container, alerts, deviceMap) {{
         container.innerHTML = '<p class="hint">No alerts.</p>';
         return;
     }}
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 2);
+    cutoff.setHours(0, 0, 0, 0);
+
+    const olderActive = [];
     const groups = {{}};
     for (const alert of alerts) {{
-        const date = new Date(alert.created_at).toLocaleDateString('sv-SE');
-        if (!groups[date]) {{
-            groups[date] = [];
+        const created = new Date(alert.created_at);
+        if (created < cutoff) {{
+            if (!alert.resolved_at) {{
+                olderActive.push(alert);
+            }}
+        }} else {{
+            const date = created.toLocaleDateString('sv-SE');
+            if (!groups[date]) {{
+                groups[date] = [];
+            }}
+            groups[date].push(alert);
         }}
-        groups[date].push(alert);
     }}
     let html = '<table class="alert-table"><thead><tr>'
         + '<th>Status</th><th>Time</th><th>Severity</th>'
         + '<th>Rule</th><th>Device</th><th>Actions</th>'
         + '</tr></thead><tbody>';
+    if (olderActive.length > 0) {{
+        html += '<tr><td colspan="6" class="alert-day-header">Older active</td></tr>';
+        for (const alert of olderActive) {{
+            html += renderAlertRow(alert, deviceMap);
+        }}
+    }}
     for (const [date, dayAlerts] of Object.entries(groups)) {{
         html += `<tr><td colspan="6" class="alert-day-header">${{formatDayHeader(date)}}</td></tr>`;
         for (const alert of dayAlerts) {{

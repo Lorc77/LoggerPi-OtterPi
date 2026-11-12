@@ -363,6 +363,7 @@ class OtterPiHandler(BaseHTTPRequestHandler):
             only_active = False
             severity = None
             status = None
+            include_older_active = False
             if "?" in self.path:
                 _, query = self.path.split("?", 1)
                 for param in query.split("&"):
@@ -379,6 +380,8 @@ class OtterPiHandler(BaseHTTPRequestHandler):
                         severity = param.split("=", 1)[1]
                     elif param.startswith("status="):
                         status = param.split("=", 1)[1]
+                    elif param.startswith("include_older_active="):
+                        include_older_active = param.split("=", 1)[1] == "1"
             if self.alert_store is None:
                 self._send_json(200, {"alerts": []})
                 return
@@ -388,6 +391,7 @@ class OtterPiHandler(BaseHTTPRequestHandler):
                 only_active=only_active,
                 severity=severity,
                 status=status,
+                include_older_active=include_older_active,
             )
             self._send_json(200, {"alerts": alerts})
             return
