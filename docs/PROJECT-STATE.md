@@ -469,6 +469,35 @@ Archiv-Tab (3.10.3) – Short-Klick-Buttons, Kalender, Filter, Pagination.
 
 ---
 
+## Phase C – Alert-Tab Polish + klickbare Status-Zeile (abgeschlossen, v1.12.3)
+
+**Stand:** 2026-11-13
+
+### Umgesetzt
+
+- **Englische Header in der Alert-Tabelle:** `Zeit` → `Time`, `Regel` → `Rule`,
+  `Gerät` → `Device`, `Aktionen` → `Actions`.
+- **Tages-Header mit Wochentag + Datum + Relativangabe:**
+  `Monday, 11.11.2026 (today)` / `Sunday, 10.11.2026 (yesterday)` /
+  `Saturday, 09.11.2026 (2 days ago)`.
+- **Weichere Chart-Farben:** Warning `#fbbf24` (amber-400), Critical
+  `#f87171` (red-400), Resolved `#4ade80` (green-400).
+- **Kompaktere Chip-Labels im Alarm Limits-Tab:** `↓15°C ↑18°C` statt
+  `↓ 15 °C ↑ 18 °C`.
+- **Klickbare Status-Zeile:** Klick auf „3 active critical" filtert auf
+  `status=active&severity=critical`. Nochmal klicken hebt den Filter auf.
+  Aktiver Filter wird visuell hervorgehoben.
+- **`AlertStore.list_alerts()` erweitert:** Neue Parameter `severity` und
+  `status` (`"active"` / `"resolved"`). `only_active` bleibt als Alias.
+- **`GET /api/admin/alerts` erweitert:** Query-Parameter `severity` und
+  `status`.
+
+### Nächster Schritt
+
+Archiv-Tab (3.10.3) – Short-Klick-Buttons, Kalender, Filter, Pagination.
+
+---
+
 Seit `v1.6.3` sind folgende Features implementiert:
 
 - **Stale-Logik für WeatherHub-Sensoren:** Konfigurierbar über

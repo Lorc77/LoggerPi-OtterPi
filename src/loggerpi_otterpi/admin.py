@@ -485,6 +485,10 @@ textarea.json-editor {{
 .alert-summary-item.resolved {{
     color: #86efac;
 }}
+.alert-summary-item.active {{
+    background: rgba(147,197,253,.3);
+    border: 1px solid rgba(147,197,253,.6);
+}}
 .lamp {{
     display: inline-block;
     width: 12px;
@@ -1075,19 +1079,19 @@ function buildDeviceContent(
         const critMax = limits.critical_max;
         const rate = limits.rate_of_change_max_per_hour;
         let warnText = '';
-        if (warnMin !== undefined) warnText += `↓ ${{warnMin}} ${{unitLabel}}`;
-        if (warnMax !== undefined) warnText += ` ↑ ${{warnMax}} ${{unitLabel}}`;
+        if (warnMin !== undefined) warnText += `↓${{warnMin}}${{unitLabel}}`;
+        if (warnMax !== undefined) warnText += ` ↑${{warnMax}}${{unitLabel}}`;
         const warnChip = (warnMin !== undefined || warnMax !== undefined)
             ? `<span class="chip chip-warn">${{warnText.trim()}}</span>`
             : '<span class="chip chip-off">Warn n/c</span>';
         let critText = '';
-        if (critMin !== undefined) critText += `↓ ${{critMin}} ${{unitLabel}}`;
-        if (critMax !== undefined) critText += ` ↑ ${{critMax}} ${{unitLabel}}`;
+        if (critMin !== undefined) critText += `↓${{critMin}}${{unitLabel}}`;
+        if (critMax !== undefined) critText += ` ↑${{critMax}}${{unitLabel}}`;
         const critChip = (critMin !== undefined || critMax !== undefined)
             ? `<span class="chip chip-critical">${{critText.trim()}}</span>`
             : '<span class="chip chip-off">Crit n/c</span>';
         const rateChip = rate !== undefined
-            ? `<span class="chip chip-info">↕ ${{rate}} ${{unitLabel}}/h</span>`
+            ? `<span class="chip chip-info">Δ↕${{rate}}${{unitLabel}}/h</span>`
             : '<span class="chip chip-off">Rate n/c</span>';
         measurementsHtml += `
             <div class="device-row">
@@ -2470,6 +2474,19 @@ async function sendTestMail(btn) {{
     }}
 }}
 
+let currentFilters = {{ severity: null, status: null }};
+
+function filterByStatus(status, severity) {{
+    if (currentFilters.status === status && currentFilters.severity === severity) {{
+        currentFilters.status = null;
+        currentFilters.severity = null;
+    }} else {{
+        currentFilters.status = status;
+        currentFilters.severity = severity;
+    }}
+    loadAlerts();
+}}
+
 async function loadAlerts() {{
     const status = document.getElementById('alerts-status');
     const list = document.getElementById('alerts-list');
@@ -2491,9 +2508,15 @@ async function loadAlerts() {{
                 }};
             }}
         }}
-        const url = '/api/admin/alerts?limit=100&only_unacknowledged='
+        let url = '/api/admin/alerts?limit=100&only_unacknowledged='
             + (onlyUnack ? '1' : '0')
             + '&only_active=' + (onlyActive ? '1' : '0');
+        if (currentFilters.severity) {{
+            url += '&severity=' + currentFilters.severity;
+        }}
+        if (currentFilters.status) {{
+            url += '&status=' + currentFilters.status;
+        }}
         const resp = await fetch(url);
         const result = await resp.json();
         if (!resp.ok) {{
@@ -2512,14 +2535,22 @@ async function loadAlerts() {{
 }}
 
 function renderAlertSummary(container, byStatus) {{
+    const isActive = (status, severity) =>
+        currentFilters.status === status && currentFilters.severity === severity;
+    const critActive = isActive('active', 'critical') ? 'active' : '';
+    const warnActive = isActive('active', 'warning') ? 'active' : '';
+    const resActive = isActive('resolved', null) ? 'active' : '';
     container.innerHTML = `
-        <span class="alert-summary-item critical">
+        <span class="alert-summary-item critical ${{critActive}}"
+              onclick="filterByStatus('active', 'critical')">
             ${{byStatus.active_critical}} active critical
         </span>
-        <span class="alert-summary-item warning">
+        <span class="alert-summary-item warning ${{warnActive}}"
+              onclick="filterByStatus('active', 'warning')">
             ${{byStatus.active_warning}} active warning
         </span>
-        <span class="alert-summary-item resolved">
+        <span class="alert-summary-item resolved ${{resActive}}"
+              onclick="filterByStatus('resolved', null)">
             ${{byStatus.resolved}} resolved
         </span>
     `;
@@ -2544,19 +2575,19 @@ function renderAlertChart(byDay) {{
                 {{
                     label: 'Warning',
                     data: warningData,
-                    backgroundColor: '#eab308',
+                    backgroundColor: '#fbbf24',
                     stack: 'alerts',
                 }},
                 {{
                     label: 'Critical',
                     data: criticalData,
-                    backgroundColor: '#ef4444',
+                    backgroundColor: '#f87171',
                     stack: 'alerts',
                 }},
                 {{
                     label: 'Resolved',
                     data: resolvedData,
-                    backgroundColor: '#22c55e',
+                    backgroundColor: '#4ade80',
                     stack: 'alerts',
                 }},
             ],
@@ -2577,6 +2608,24 @@ function renderAlertChart(byDay) {{
     }});
 }}
 
+function formatDayHeader(dateStr) {{
+    const date = new Date(dateStr + 'T00:00:00');
+    const today = new Date();
+    const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const dateMidnight = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const diffDays = Math.round((todayMidnight - dateMidnight) / (1000 * 60 * 60 * 24));
+
+    const weekday = date.toLocaleDateString('en-US', {{ weekday: 'long' }});
+    const dateLabel = date.toLocaleDateString('de-DE');
+
+    let suffix = '';
+    if (diffDays === 0) suffix = ' (today)';
+    else if (diffDays === 1) suffix = ' (yesterday)';
+    else if (diffDays === 2) suffix = ' (2 days ago)';
+
+    return `${{weekday}}, ${{dateLabel}}${{suffix}}`;
+}}
+
 function renderAlertTable(container, alerts, deviceMap) {{
     if (alerts.length === 0) {{
         container.innerHTML = '<p class="hint">No alerts.</p>';
@@ -2584,18 +2633,18 @@ function renderAlertTable(container, alerts, deviceMap) {{
     }}
     const groups = {{}};
     for (const alert of alerts) {{
-        const date = new Date(alert.created_at).toLocaleDateString('de-DE');
+        const date = new Date(alert.created_at).toLocaleDateString('sv-SE');
         if (!groups[date]) {{
             groups[date] = [];
         }}
         groups[date].push(alert);
     }}
     let html = '<table class="alert-table"><thead><tr>'
-        + '<th>Status</th><th>Zeit</th><th>Severity</th>'
-        + '<th>Regel</th><th>Gerät</th><th>Aktionen</th>'
+        + '<th>Status</th><th>Time</th><th>Severity</th>'
+        + '<th>Rule</th><th>Device</th><th>Actions</th>'
         + '</tr></thead><tbody>';
     for (const [date, dayAlerts] of Object.entries(groups)) {{
-        html += `<tr><td colspan="6" class="alert-day-header">${{date}}</td></tr>`;
+        html += `<tr><td colspan="6" class="alert-day-header">${{formatDayHeader(date)}}</td></tr>`;
         for (const alert of dayAlerts) {{
             html += renderAlertRow(alert, deviceMap);
         }}

@@ -2968,6 +2968,44 @@ Status-Zeile und Balkendiagramm.
 
 ---
 
+## DEC-096 — Klickbare Status-Zeile im Alert-Tab
+
+**Status:** Accepted
+**Datum:** 2026-11-13
+
+### Kontext
+
+Die Status-Zeile im Alert-Tab (`3 active critical · 5 active warning ·
+12 resolved`) war bisher nur eine Anzeige. Der Nutzer musste die Filter
+manuell über die Checkboxen setzen, um z.B. nur critical Alerts zu sehen.
+
+### Entscheidung
+
+Die drei Status-Items sind klickbar und filtern die Alert-Tabelle:
+
+- Klick auf „3 active critical" → `status=active&severity=critical`
+- Klick auf „5 active warning" → `status=active&severity=warning`
+- Klick auf „12 resolved" → `status=resolved`
+
+Ein erneuter Klick auf dasselbe Item hebt den Filter wieder auf (Toggle).
+Der aktive Filter wird visuell hervorgehoben (`.alert-summary-item.active`).
+
+### Begründung
+
+- Schneller Zugriff auf die häufigsten Filter.
+- Kein manuelles Setzen von Checkboxen nötig.
+- Toggle-Verhalten ist intuitiv (kein separater „Clear"-Button nötig).
+
+### Konsequenz
+
+- `AlertStore.list_alerts()` um `severity` und `status` erweitert.
+- `GET /api/admin/alerts` um `severity` und `status` Query-Parameter erweitert.
+- `admin.py`: `filterByStatus()`-Funktion, `currentFilters`-State,
+  `onclick`-Handler in `renderAlertSummary()`.
+- CSS: `.alert-summary-item.active`.
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:

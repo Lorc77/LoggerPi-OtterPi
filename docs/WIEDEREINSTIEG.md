@@ -1,7 +1,7 @@
 # Wiedereinstiegsprotokoll – LoggerPi-OtterPi (Stand v1.11.14)
 
 **Projekt:** LoggerPi-OtterPi
-**Aktuelle Version:** v1.12.2 (deployed auf OtterPi)
+**Aktuelle Version:** v1.12.3 (deployed auf OtterPi)
 **Teststand:** 437 passed, Ruff/Format clean
 **Stand:** 2026-11-12
 
@@ -155,6 +155,25 @@ OtterPi (Python 3.13.5, User=makki)
 - **Balkendiagramm:** 14 Tage kumulativ pro Tag, gestapelt.
 - **Neue API-Route:** `GET /api/admin/alerts/stats`.
 - **Neue Methoden:** `AlertStore.count_by_day()`, `AlertStore.count_by_status()`.
+
+### v1.12.3 – Alert-Tab Polish + klickbare Status-Zeile
+
+- **Englische Header in der Alert-Tabelle:** `Zeit` → `Time`, `Regel` → `Rule`,
+  `Gerät` → `Device`, `Aktionen` → `Actions`.
+- **Tages-Header mit Wochentag + Datum + Relativangabe:**
+  `Monday, 11.11.2026 (today)` / `Sunday, 10.11.2026 (yesterday)` /
+  `Saturday, 09.11.2026 (2 days ago)`.
+- **Weichere Chart-Farben:** Warning `#fbbf24` (amber-400), Critical
+  `#f87171` (red-400), Resolved `#4ade80` (green-400).
+- **Kompaktere Chip-Labels im Alarm Limits-Tab:** `↓15°C ↑18°C` statt
+  `↓ 15 °C ↑ 18 °C`.
+- **Klickbare Status-Zeile:** Klick auf „3 active critical" filtert auf
+  `status=active&severity=critical`. Nochmal klicken hebt den Filter auf.
+  Aktiver Filter wird visuell hervorgehoben.
+- **`AlertStore.list_alerts()` erweitert:** Neue Parameter `severity` und
+  `status` (`"active"` / `"resolved"`). `only_active` bleibt als Alias.
+- **`GET /api/admin/alerts` erweitert:** Query-Parameter `severity` und
+  `status`.
 
 ---
 
@@ -577,6 +596,25 @@ verwendet wird.
 **Hotfix (bereits live):** Dashboard-Rate-of-Change an Alert-Engine angepasst
 (alle Batches, erster/letzter Wert, `created_at`).
 
+**Bekannter Bug (beim Umbau mitfixen):**
+
+- **Falscher „⛔ Invalid"-Chip bei Limit-Verletzung:**
+  - `_device_chips()` fügt den generischen „⛔ Invalid"-Chip hinzu, sobald
+    `status == "status-critical"` und keine Alarme vorliegen — unabhängig
+    davon, ob die Ursache eine Grenzwertverletzung oder ein ungültiger
+    Messwert ist.
+  - Bei einem AtmoWEB-Gerät, das z.B. `critical_max` in `humidity`
+    überschreitet, erscheinen **beide** Chips: „⛔ Humidity above limit"
+    (korrekt) und „⛔ Invalid" (irreführend).
+  - **Fix:** In `_device_chips()` tracken, ob bereits ein kritischer
+    Limit-Chip hinzugefügt wurde (`limit_critical_added`). Den generischen
+    „⛔ Invalid"-Chip nur zeigen, wenn `not limit_critical_added`.
+  - **Verwandt:** `_status_text()` mappt `status-critical` pauschal auf
+    „INVALID" (Device-Detailseite). Sollte auf „CRITICAL" umgestellt werden,
+    oder die Detailseite sollte den konkreten Grund anzeigen.
+  - **Test:** `test_dashboard_data.py::test_no_invalid_chip_when_limit_violation`.
+  - **Aufwand:** ~15–30 Min (Teil von 3.13.1).
+
 #### 3.13.2 Chart-Logik (dashboard_charts.py vs. dashboard.py)
 
 **Problem:** Die Chart.js-Skripte sind dupliziert:
@@ -686,7 +724,7 @@ CPU-Entlastung). AJAX (2–3 h, optional).
 
 | Punkt | Aufwand |
 |---|---|
-| 3.13.1 Alert-Logik | 2–3 h |
+| 3.13.1 Alert-Logik | 2–3 h (inkl. Chip-Fix) |
 | 3.13.2 Chart-Logik | 2–3 h |
 | 3.13.3 Unit-Labels | 30 Min |
 | 3.13.4 Measurement-Display-Names | 30 Min |
@@ -1168,7 +1206,8 @@ Die folgenden DECs sind in dieser Session entstanden und sollten nicht rückgän
 
 **Empfohlene Reihenfolge:**
 
-1. **3.10 Alert-Tab-Überarbeitung** (3–4 h) – Übersichtlichkeit.
+1. **3.10.3 Archiv-Tab** (1–2 h) – Short-Klick-Buttons, Kalender, Filter,
+   Pagination.
    - **Start:** `alert_store.py` (`count_by_day`, `count_by_status`).
    - **Dann:** `otterpi.py` (`GET /api/admin/alerts/stats`).
    - **Dann:** `admin.py` (Tabelle, Status-Zeile, Balkendiagramm, Archiv).
@@ -1193,6 +1232,7 @@ Die folgenden DECs sind in dieser Session entstanden und sollten nicht rückgän
 | Dashboard zeigt Limits | ✅ Erledigt (v1.12.1) | ✅ |
 | Alert-Tab wird lang | Noch nicht umgebaut | ⏳ (3.10) |
 | Admin nur LAN-only | Kein Login, keine Auth | ⏳ (3.11) |
+| Falscher „⛔ Invalid"-Chip bei Limit-Verletzung | `_device_chips()` prüft nicht, ob die Ursache eine Limit-Verletzung ist | ⏳ (3.13.1) |
 
 ---
 
@@ -1202,3 +1242,5 @@ Die folgenden DECs sind in dieser Session entstanden und sollten nicht rückgän
 - Soll `from_name` in `mail.json` bleiben? (Ja, umgesetzt.)
 - Soll `btn-warning` entfernt werden? (Aktuell: behalten für spätere Aktionen.)
 - Soll die Statuspage in die bestehende System-Statuspage integriert werden? (Unklar, aufgeschoben.)
+- Soll `_status_text()` auf „CRITICAL" umgestellt werden, oder soll die
+  Device-Detailseite den konkreten Grund (Limit/Alarm/Invalid) anzeigen?

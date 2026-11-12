@@ -817,7 +817,7 @@ Repository:
     main
 
 Version:
-    v1.12.2
+    v1.12.3
 
 Letzter bekannter Release-Commit:
     (wird beim Deploy gesetzt)

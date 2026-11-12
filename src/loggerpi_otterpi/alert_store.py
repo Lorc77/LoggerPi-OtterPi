@@ -3,7 +3,7 @@
 import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 
 from notifier import Alert
 
@@ -144,14 +144,23 @@ class AlertStore:
         limit: int = 100,
         only_unacknowledged: bool = False,
         only_active: bool = False,
+        severity: Optional[str] = None,
+        status: Optional[str] = None,
     ) -> list:
         query = "SELECT * FROM alerts"
         conditions = []
         params: list = []
         if only_unacknowledged:
             conditions.append("acknowledged = 0")
-        if only_active:
+        if status is None and only_active:
+            status = "active"
+        if status == "active":
             conditions.append("resolved_at IS NULL")
+        elif status == "resolved":
+            conditions.append("resolved_at IS NOT NULL")
+        if severity:
+            conditions.append("severity = ?")
+            params.append(severity)
         if conditions:
             query += " WHERE " + " AND ".join(conditions)
         query += " ORDER BY created_at DESC LIMIT ?"
