@@ -3006,6 +3006,58 @@ Der aktive Filter wird visuell hervorgehoben (`.alert-summary-item.active`).
 
 ---
 
+## DEC-097 — Archiv als Sub-Tab innerhalb „Alerts"
+
+**Status:** Accepted
+**Datum:** 2026-11-13
+
+### Kontext
+
+Die Alert-Tabelle wächst mit jedem Alert. Ältere Alerts sollen aus der
+Hauptansicht raus, aber weiter browsbar bleiben. Die Spec (3.10.3) sieht
+einen Archiv-Tab vor.
+
+### Entscheidung
+
+Das Archiv ist **kein eigener Top-Level-Tab**, sondern ein **Sub-Tab
+innerhalb des Alerts-Tabs**. Oben im Alerts-Tab sitzen zwei Sub-Tab-Buttons
+`[Current] [Archive]`. Der bisherige Inhalt wandert in `#subtab-current`,
+der neue Archiv-Inhalt in `#subtab-archive`.
+
+### Begründung
+
+- Alert-bezogene Inhalte bleiben zusammen (ein Top-Level-Tab statt zwei).
+- Der Nutzer wechselt schnell zwischen „was ist jetzt?" und „was war früher?".
+- Die Top-Level-Tab-Leiste bleibt übersichtlich.
+
+### Konsequenz
+
+- `admin.py`: Neue CSS-Klassen `.sub-tabs`, `.sub-tab-btn`,
+  `.sub-tab-panel`.
+- `admin.py`: Neue JS-Funktion `showSubTab(name, btn)`.
+- `admin.py`: `#tab-alerts` enthält jetzt `#subtab-current` und
+  `#subtab-archive`.
+- `admin.py`: Neue Funktionen `loadArchive(period)`,
+  `fetchArchivePage()`, `loadMoreArchive()`, `renderArchiveTable()`,
+  `populateArchiveDropdowns()`, `buildDeviceMap()`,
+  `getArchiveDateRange(period)`.
+- `alert_store.py`: `_build_where()` als gemeinsame Hilfsmethode,
+  `list_alerts()` um `offset`/`since`/`until`/`device_prefixes`
+  erweitert, `count_alerts()` neu.
+- `otterpi.py`: `GET /api/admin/alerts` um `offset`/`since`/`until`/
+  `devices` erweitert, Response um `total`/`offset`/`limit`.
+
+### Bewusste Entscheidungen
+
+- **Kein „All" im Archiv:** Maximal „Last 3 months" (zu riskant für den
+  OtterPi).
+- **Kein Room-/Search-Filter in der Hauptansicht:** Over-Engineering,
+  gehört ins Archiv.
+- **Pagination nur im Archiv:** Hauptansicht zeigt „letzte 3 Tage +
+  ältere aktive", das ist begrenzt genug.
+
+  ---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:

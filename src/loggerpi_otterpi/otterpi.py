@@ -364,6 +364,10 @@ class OtterPiHandler(BaseHTTPRequestHandler):
             severity = None
             status = None
             include_older_active = False
+            offset = 0
+            since = None
+            until = None
+            devices = None
             if "?" in self.path:
                 _, query = self.path.split("?", 1)
                 for param in query.split("&"):
@@ -382,18 +386,49 @@ class OtterPiHandler(BaseHTTPRequestHandler):
                         status = param.split("=", 1)[1]
                     elif param.startswith("include_older_active="):
                         include_older_active = param.split("=", 1)[1] == "1"
+                    elif param.startswith("offset="):
+                        try:
+                            offset = int(param.split("=", 1)[1])
+                        except ValueError:
+                            pass
+                    elif param.startswith("since="):
+                        since = param.split("=", 1)[1]
+                    elif param.startswith("until="):
+                        until = param.split("=", 1)[1]
+                    elif param.startswith("devices="):
+                        devices = [d for d in param.split("=", 1)[1].split(",") if d]
             if self.alert_store is None:
-                self._send_json(200, {"alerts": []})
+                self._send_json(
+                    200,
+                    {"alerts": [], "total": 0, "offset": 0, "limit": limit},
+                )
                 return
             alerts = self.alert_store.list_alerts(
                 limit=limit,
+                offset=offset,
                 only_unacknowledged=only_unacknowledged,
                 only_active=only_active,
                 severity=severity,
                 status=status,
                 include_older_active=include_older_active,
+                since=since,
+                until=until,
+                device_prefixes=devices,
             )
-            self._send_json(200, {"alerts": alerts})
+            total = self.alert_store.count_alerts(
+                only_unacknowledged=only_unacknowledged,
+                only_active=only_active,
+                severity=severity,
+                status=status,
+                include_older_active=include_older_active,
+                since=since,
+                until=until,
+                device_prefixes=devices,
+            )
+            self._send_json(
+                200,
+                {"alerts": alerts, "total": total, "offset": offset, "limit": limit},
+            )
             return
 
         # Neue Routen: /room/, /device/, /climate/ + Redirect von /raum/

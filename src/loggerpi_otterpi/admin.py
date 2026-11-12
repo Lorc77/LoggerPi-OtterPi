@@ -91,6 +91,37 @@ h1 {{ text-align: center; margin-top: 0; }}
     border-color: rgba(147,197,253,.6);
     color: #bfdbfe;
 }}
+.sub-tabs {{
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+    padding-bottom: 8px;
+}}
+.sub-tab-btn {{
+    padding: 6px 16px;
+    border-radius: 8px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: #9ca3af;
+    cursor: pointer;
+    font-size: .9rem;
+    transition: .2s;
+}}
+.sub-tab-btn:hover {{
+    color: #bfdbfe;
+}}
+.sub-tab-btn.active {{
+    background: rgba(147,197,253,.15);
+    border-color: rgba(147,197,253,.4);
+    color: #bfdbfe;
+}}
+.sub-tab-panel {{
+    display: none;
+}}
+.sub-tab-panel.active {{
+    display: block;
+}}
 .footer {{
     text-align: center;
     margin-top: 30px;
@@ -867,40 +898,103 @@ input[type="number"] {{
 </div>
 
 <div id="tab-alerts" class="tab-panel active">
-    <details class="howto">
-        <summary>How-to: Read the alert history</summary>
-        <ol>
-            <li><strong>Lamp:</strong> green = resolved, red = active.</li>
-            <li><strong>Status:</strong> "Active" (not resolved) or "Resolved"
-                (state is back to normal).</li>
-            <li><strong>Acknowledge:</strong> marks the alert as seen. It will not
-                be re-sent until the state changes.</li>
-            <li><strong>Resolve:</strong> manually marks the alert as resolved
-                (e.g. if the sensor is gone).</li>
-            <li><strong>Filters:</strong> "Only unacknowledged" and "Only active".</li>
-        </ol>
-    </details>
-    <div id="alerts-chart" class="alert-chart">
-        <span class="chart-title">Alerts last 14 days</span>
-        <canvas id="alerts-chart-canvas"></canvas>
+    <div class="sub-tabs">
+        <button class="sub-tab-btn active" onclick="showSubTab('current', this)">Current</button>
+        <button class="sub-tab-btn" onclick="showSubTab('archive', this)">Archive</button>
     </div>
-    <div class="save-row">
-        <div id="alerts-summary" class="alert-summary"></div>
-        <button class="btn btn-primary btn-small"
-                onclick="loadAlerts()">🔄 Refresh</button>
+    <div id="subtab-current" class="sub-tab-panel active">
+        <details class="howto">
+            <summary>How-to: Read the alert history</summary>
+            <ol>
+                <li><strong>Lamp:</strong> green = resolved, red = active.</li>
+                <li><strong>Status:</strong> "Active" (not resolved) or "Resolved"
+                    (state is back to normal).</li>
+                <li><strong>Acknowledge:</strong> marks the alert as seen. It will not
+                    be re-sent until the state changes.</li>
+                <li><strong>Resolve:</strong> manually marks the alert as resolved
+                    (e.g. if the sensor is gone).</li>
+                <li><strong>Filters:</strong> "Only unacknowledged" and "Only active".</li>
+            </ol>
+        </details>
+        <div id="alerts-chart" class="alert-chart">
+            <span class="chart-title">Alerts last 14 days</span>
+            <canvas id="alerts-chart-canvas"></canvas>
+        </div>
+        <div class="save-row">
+            <button class="btn btn-primary btn-small"
+                    onclick="loadAlerts()">🔄 Refresh</button>
+            <div id="alerts-summary" class="alert-summary"></div>
+        </div>
+        <div class="save-row">
+            <label>
+                <input type="checkbox" id="alerts-only-unack" onchange="loadAlerts()">
+                Only unacknowledged
+            </label>
+            <label>
+                <input type="checkbox" id="alerts-only-active" onchange="loadAlerts()">
+                Only active
+            </label>
+            <span id="alerts-status" class="status"></span>
+        </div>
+        <div id="alerts-list"></div>
     </div>
-    <div class="save-row">
-        <label>
-            <input type="checkbox" id="alerts-only-unack" onchange="loadAlerts()">
-            Only unacknowledged
-        </label>
-        <label>
-            <input type="checkbox" id="alerts-only-active" onchange="loadAlerts()">
-            Only active
-        </label>
-        <span id="alerts-status" class="status"></span>
+    <div id="subtab-archive" class="sub-tab-panel">
+        <details class="howto">
+            <summary>How-to: Browse older alerts</summary>
+            <ol>
+                <li><strong>Period:</strong> quick buttons for last week, month,
+                    or 3 months.</li>
+                <li><strong>Custom range:</strong> pick a start and end date.</li>
+                <li><strong>Filters:</strong> device, severity, room, status.</li>
+                <li><strong>Pagination:</strong> 50 alerts per page,
+                    "Load more" for the next page.</li>
+            </ol>
+        </details>
+        <div class="save-row">
+            <button class="btn btn-secondary btn-small"
+                    onclick="loadArchive('week')">Last week</button>
+            <button class="btn btn-secondary btn-small"
+                    onclick="loadArchive('month')">Last month</button>
+            <button class="btn btn-secondary btn-small"
+                    onclick="loadArchive('3months')">Last 3 months</button>
+        </div>
+        <div class="save-row">
+            <label>From: <input type="date" id="archive-from"></label>
+            <label>To: <input type="date" id="archive-to"></label>
+            <button class="btn btn-primary btn-small"
+                    onclick="loadArchive('custom')">Apply</button>
+        </div>
+        <div class="save-row">
+            <label>Device:
+                <select id="archive-device"><option value="">All</option></select>
+            </label>
+            <label>Severity:
+                <select id="archive-severity">
+                    <option value="">All</option>
+                    <option value="critical">Critical</option>
+                    <option value="warning">Warning</option>
+                </select>
+            </label>
+            <label>Room:
+                <select id="archive-room"><option value="">All</option></select>
+            </label>
+            <label>Status:
+                <select id="archive-status">
+                    <option value="">All</option>
+                    <option value="active">Active</option>
+                    <option value="resolved">Resolved</option>
+                </select>
+            </label>
+            <button class="btn btn-primary btn-small"
+                    onclick="loadArchive('custom')">🔄 Refresh</button>
+            <span id="archive-status-text" class="status"></span>
+        </div>
+        <div id="archive-list"></div>
+        <div class="save-row">
+            <button class="btn btn-primary btn-small" id="archive-load-more"
+                    onclick="loadMoreArchive()" style="display: none;">Load more</button>
+        </div>
     </div>
-    <div id="alerts-list"></div>
 </div>
 <div class="footer">🦦 otterpi · ZOOLOGY-Observer Admin {VERSION}</div>
 </div>
@@ -2495,6 +2589,187 @@ function filterByStatus(status, severity) {{
         currentFilters.severity = severity;
     }}
     loadAlerts();
+}}
+
+function showSubTab(name, btn) {{
+    document.querySelectorAll('.sub-tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('subtab-' + name).classList.add('active');
+    btn.classList.add('active');
+    if (name === 'archive') {{
+        loadArchive('week');
+    }}
+}}
+
+let archiveState = {{
+    offset: 0,
+    limit: 50,
+    total: 0,
+    alerts: [],
+    filters: {{}},
+    deviceMap: {{}},
+}};
+let archiveDropdownsPopulated = false;
+
+function getArchiveDateRange(period) {{
+    const now = new Date();
+    let since = null;
+    let until = null;
+    if (period === 'week') {{
+        const d = new Date(now);
+        d.setDate(d.getDate() - 7);
+        since = d.toISOString().slice(0, 10);
+    }} else if (period === 'month') {{
+        const d = new Date(now);
+        d.setMonth(d.getMonth() - 1);
+        since = d.toISOString().slice(0, 10);
+    }} else if (period === '3months') {{
+        const d = new Date(now);
+        d.setMonth(d.getMonth() - 3);
+        since = d.toISOString().slice(0, 10);
+    }} else if (period === 'custom') {{
+        since = document.getElementById('archive-from').value || null;
+        until = document.getElementById('archive-to').value || null;
+    }}
+    return {{ since: since, until: until }};
+}}
+
+function populateArchiveDropdowns(rooms) {{
+    const deviceSelect = document.getElementById('archive-device');
+    const roomSelect = document.getElementById('archive-room');
+    deviceSelect.innerHTML = '<option value="">All</option>';
+    roomSelect.innerHTML = '<option value="">All</option>';
+    for (const [roomId, room] of Object.entries(rooms)) {{
+        const roomOpt = document.createElement('option');
+        roomOpt.value = roomId;
+        roomOpt.textContent = room.name;
+        roomSelect.appendChild(roomOpt);
+        for (const device of room.devices) {{
+            const devOpt = document.createElement('option');
+            devOpt.value = device.key;
+            devOpt.textContent = room.name + ' / ' + device.name;
+            deviceSelect.appendChild(devOpt);
+        }}
+    }}
+}}
+
+function buildDeviceMap(rooms) {{
+    const deviceMap = {{}};
+    for (const [roomId, room] of Object.entries(rooms)) {{
+        for (const device of room.devices) {{
+            deviceMap[device.key] = {{
+                roomName: room.name,
+                roomIcon: room.icon || '',
+                deviceName: device.name,
+            }};
+        }}
+    }}
+    return deviceMap;
+}}
+
+async function loadArchive(period) {{
+    const status = document.getElementById('archive-status-text');
+    status.textContent = 'Loading...';
+    try {{
+        const configResp = await fetch('/api/admin/config');
+        const config = await configResp.json();
+        const rooms = config.rooms.rooms;
+        if (!archiveDropdownsPopulated) {{
+            populateArchiveDropdowns(rooms);
+            archiveDropdownsPopulated = true;
+        }}
+        archiveState.deviceMap = buildDeviceMap(rooms);
+
+        const range = getArchiveDateRange(period);
+        const severity = document.getElementById('archive-severity').value;
+        const statusFilter = document.getElementById('archive-status').value;
+        const deviceKey = document.getElementById('archive-device').value;
+        const roomId = document.getElementById('archive-room').value;
+
+        let devices = null;
+        if (deviceKey) {{
+            devices = [deviceKey];
+        }} else if (roomId) {{
+            devices = rooms[roomId].devices.map(d => d.key);
+        }}
+
+        archiveState.filters = {{
+            since: range.since,
+            until: range.until,
+            severity: severity,
+            status: statusFilter,
+            devices: devices,
+        }};
+        archiveState.alerts = [];
+        archiveState.offset = 0;
+        await fetchArchivePage();
+    }} catch (e) {{
+        status.textContent = 'Request failed: ' + e.message;
+    }}
+}}
+
+async function fetchArchivePage() {{
+    const status = document.getElementById('archive-status-text');
+    const list = document.getElementById('archive-list');
+    const loadMoreBtn = document.getElementById('archive-load-more');
+    const f = archiveState.filters;
+    let url = '/api/admin/alerts?limit=' + archiveState.limit
+        + '&offset=' + archiveState.offset;
+    if (f.since) url += '&since=' + encodeURIComponent(f.since);
+    if (f.until) url += '&until=' + encodeURIComponent(f.until);
+    if (f.severity) url += '&severity=' + encodeURIComponent(f.severity);
+    if (f.status) url += '&status=' + encodeURIComponent(f.status);
+    if (f.devices && f.devices.length > 0) {{
+        url += '&devices=' + encodeURIComponent(f.devices.join(','));
+    }}
+    const resp = await fetch(url);
+    const result = await resp.json();
+    if (!resp.ok) {{
+        status.textContent = 'Error: ' + (result.error?.message || resp.status);
+        return;
+    }}
+    archiveState.alerts = archiveState.alerts.concat(result.alerts);
+    archiveState.total = result.total;
+    archiveState.offset = archiveState.alerts.length;
+    renderArchiveTable(list, archiveState.alerts, archiveState.deviceMap);
+    status.textContent = 'Showing ' + archiveState.offset + ' of '
+        + archiveState.total + ' alerts.';
+    if (archiveState.offset < archiveState.total) {{
+        loadMoreBtn.style.display = 'inline-block';
+    }} else {{
+        loadMoreBtn.style.display = 'none';
+    }}
+}}
+
+async function loadMoreArchive() {{
+    await fetchArchivePage();
+}}
+
+function renderArchiveTable(container, alerts, deviceMap) {{
+    if (alerts.length === 0) {{
+        container.innerHTML = '<p class="hint">No alerts.</p>';
+        return;
+    }}
+    const groups = {{}};
+    for (const alert of alerts) {{
+        const date = new Date(alert.created_at).toLocaleDateString('sv-SE');
+        if (!groups[date]) {{
+            groups[date] = [];
+        }}
+        groups[date].push(alert);
+    }}
+    let html = '<table class="alert-table"><thead><tr>'
+        + '<th>Status</th><th>Time</th><th>Severity</th>'
+        + '<th>Rule</th><th>Device</th><th>Actions</th>'
+        + '</tr></thead><tbody>';
+    for (const [date, dayAlerts] of Object.entries(groups)) {{
+        html += `<tr><td colspan="6" class="alert-day-header">${{formatDayHeader(date)}}</td></tr>`;
+        for (const alert of dayAlerts) {{
+            html += renderAlertRow(alert, deviceMap);
+        }}
+    }}
+    html += '</tbody></table>';
+    container.innerHTML = html;
 }}
 
 async function loadAlerts() {{

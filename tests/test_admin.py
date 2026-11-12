@@ -236,7 +236,7 @@ def test_get_alerts_returns_json(tmp_path):
         with urlopen(f"http://127.0.0.1:{server.server_port}/api/admin/alerts") as resp:
             assert resp.status == 200
             data = json.loads(resp.read().decode("utf-8"))
-        assert data == {"alerts": []}
+        assert data == {"alerts": [], "total": 0, "offset": 0, "limit": 100}
     finally:
         server.shutdown()
         thread.join()
@@ -733,6 +733,158 @@ def test_get_alerts_stats(tmp_path):
         assert data["by_status"]["active_critical"] == 1
         assert data["by_status"]["active_warning"] == 1
         assert data["by_status"]["resolved"] == 0
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_get_alerts_with_since(tmp_path):
+    from alert_store import AlertStore
+
+    store = BatchStore(tmp_path / "otter.db")
+    alert_store = AlertStore(tmp_path / "alerts.db")
+    with alert_store._connect() as conn:
+        conn.execute(
+            "INSERT INTO alerts "
+            "(created_at, sensor, rule, severity, message, dedup_key) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (
+                "2026-10-01T12:00:00+00:00",
+                "test.sensor",
+                "test_rule",
+                "critical",
+                "test",
+                "test:rule:critical",
+            ),
+        )
+        conn.execute(
+            "INSERT INTO alerts "
+            "(created_at, sensor, rule, severity, message, dedup_key) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (
+                "2026-11-15T12:00:00+00:00",
+                "test.sensor",
+                "test_rule",
+                "critical",
+                "test",
+                "test:rule:critical",
+            ),
+        )
+    server = create_server("127.0.0.1", 0, store, token=TEST_TOKEN, alert_store=alert_store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        url = f"http://127.0.0.1:{server.server_port}/api/admin/alerts?since=2026-11-01"
+        with urlopen(url) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        assert len(data["alerts"]) == 1
+        assert data["total"] == 1
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_get_alerts_with_devices(tmp_path):
+    from alert_store import AlertStore
+
+    store = BatchStore(tmp_path / "otter.db")
+    alert_store = AlertStore(tmp_path / "alerts.db")
+    with alert_store._connect() as conn:
+        conn.execute(
+            "INSERT INTO alerts "
+            "(created_at, sensor, rule, severity, message, dedup_key) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (
+                "2026-11-15T12:00:00+00:00",
+                "atmoweb_101.temperature_1",
+                "test_rule",
+                "critical",
+                "test",
+                "test:rule:critical",
+            ),
+        )
+        conn.execute(
+            "INSERT INTO alerts "
+            "(created_at, sensor, rule, severity, message, dedup_key) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (
+                "2026-11-15T12:00:00+00:00",
+                "atmoweb_102.temperature_1",
+                "test_rule",
+                "critical",
+                "test",
+                "test:rule:critical",
+            ),
+        )
+    server = create_server("127.0.0.1", 0, store, token=TEST_TOKEN, alert_store=alert_store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        url = f"http://127.0.0.1:{server.server_port}/api/admin/alerts?devices=atmoweb_101"
+        with urlopen(url) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        assert len(data["alerts"]) == 1
+        assert data["alerts"][0]["sensor"] == "atmoweb_101.temperature_1"
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_get_alerts_with_offset(tmp_path):
+    from alert_store import AlertStore
+
+    store = BatchStore(tmp_path / "otter.db")
+    alert_store = AlertStore(tmp_path / "alerts.db")
+    with alert_store._connect() as conn:
+        for i in range(3):
+            conn.execute(
+                "INSERT INTO alerts "
+                "(created_at, sensor, rule, severity, message, dedup_key) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (
+                    f"2026-11-0{i + 1}T12:00:00+00:00",
+                    "test.sensor",
+                    "test_rule",
+                    "critical",
+                    "test",
+                    f"test:rule:{i}",
+                ),
+            )
+    server = create_server("127.0.0.1", 0, store, token=TEST_TOKEN, alert_store=alert_store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        url = f"http://127.0.0.1:{server.server_port}/api/admin/alerts?limit=1&offset=1"
+        with urlopen(url) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        assert len(data["alerts"]) == 1
+        assert data["total"] == 3
+        assert data["offset"] == 1
+        assert data["limit"] == 1
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_admin_page_contains_archive_tab(tmp_path):
+    store = BatchStore(tmp_path / "otter.db")
+    server = _server(store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        with urlopen(f"http://127.0.0.1:{server.server_port}/admin") as resp:
+            html = resp.read().decode("utf-8")
+        assert "subtab-archive" in html
+        assert "loadArchive" in html
+        assert "archive-device" in html
+        assert "archive-severity" in html
+        assert "archive-room" in html
+        assert "archive-status" in html
+        assert "archive-load-more" in html
     finally:
         server.shutdown()
         thread.join()

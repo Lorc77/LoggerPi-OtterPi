@@ -139,16 +139,17 @@ class AlertStore:
             return False
         return row[0] is None
 
-    def list_alerts(
+    def _build_where(
         self,
-        limit: int = 100,
         only_unacknowledged: bool = False,
         only_active: bool = False,
         severity: Optional[str] = None,
         status: Optional[str] = None,
         include_older_active: bool = False,
-    ) -> list:
-        query = "SELECT * FROM alerts"
+        since: Optional[str] = None,
+        until: Optional[str] = None,
+        device_prefixes: Optional[list] = None,
+    ) -> tuple:
         conditions = []
         params: list = []
         if only_unacknowledged:
@@ -167,14 +168,84 @@ class AlertStore:
             conditions.append("(created_at >= ? OR (created_at < ? AND resolved_at IS NULL))")
             params.append(cutoff)
             params.append(cutoff)
-        if conditions:
-            query += " WHERE " + " AND ".join(conditions)
-        query += " ORDER BY created_at DESC LIMIT ?"
+        if since:
+            if len(since) == 10:
+                since = since + "T00:00:00"
+            conditions.append("created_at >= ?")
+            params.append(since)
+        if until:
+            if len(until) == 10:
+                until_dt = datetime.fromisoformat(until) + timedelta(days=1)
+                conditions.append("created_at < ?")
+                params.append(until_dt.strftime("%Y-%m-%dT00:00:00"))
+            else:
+                conditions.append("created_at <= ?")
+                params.append(until)
+        if device_prefixes:
+            device_conditions = []
+            for prefix in device_prefixes:
+                device_conditions.append("(sensor = ? OR sensor LIKE ?)")
+                params.append(prefix)
+                params.append(prefix + ".%")
+            conditions.append("(" + " OR ".join(device_conditions) + ")")
+        where = " WHERE " + " AND ".join(conditions) if conditions else ""
+        return where, params
+
+    def list_alerts(
+        self,
+        limit: int = 100,
+        offset: int = 0,
+        only_unacknowledged: bool = False,
+        only_active: bool = False,
+        severity: Optional[str] = None,
+        status: Optional[str] = None,
+        include_older_active: bool = False,
+        since: Optional[str] = None,
+        until: Optional[str] = None,
+        device_prefixes: Optional[list] = None,
+    ) -> list:
+        where, params = self._build_where(
+            only_unacknowledged=only_unacknowledged,
+            only_active=only_active,
+            severity=severity,
+            status=status,
+            include_older_active=include_older_active,
+            since=since,
+            until=until,
+            device_prefixes=device_prefixes,
+        )
+        query = "SELECT * FROM alerts" + where + " ORDER BY created_at DESC LIMIT ? OFFSET ?"
         params.append(limit)
+        params.append(offset)
         with self._connect() as connection:
             connection.row_factory = sqlite3.Row
             rows = connection.execute(query, params).fetchall()
         return [dict(row) for row in rows]
+
+    def count_alerts(
+        self,
+        only_unacknowledged: bool = False,
+        only_active: bool = False,
+        severity: Optional[str] = None,
+        status: Optional[str] = None,
+        include_older_active: bool = False,
+        since: Optional[str] = None,
+        until: Optional[str] = None,
+        device_prefixes: Optional[list] = None,
+    ) -> int:
+        where, params = self._build_where(
+            only_unacknowledged=only_unacknowledged,
+            only_active=only_active,
+            severity=severity,
+            status=status,
+            include_older_active=include_older_active,
+            since=since,
+            until=until,
+            device_prefixes=device_prefixes,
+        )
+        query = "SELECT COUNT(*) FROM alerts" + where
+        with self._connect() as connection:
+            return connection.execute(query, params).fetchone()[0]
 
     def count_by_day(self, days: int = 14) -> list[dict]:
         """Aggregiert die Alerts pro Tag (warning, critical, resolved)."""

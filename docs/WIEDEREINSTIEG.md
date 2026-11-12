@@ -1,8 +1,8 @@
 # Wiedereinstiegsprotokoll – LoggerPi-OtterPi (Stand v1.11.14)
 
 **Projekt:** LoggerPi-OtterPi
-**Aktuelle Version:** v1.12.3 (deployed auf OtterPi)
-**Teststand:** 437 passed, Ruff/Format clean
+**Aktuelle Version:** v1.12.4 (deployed auf OtterPi)
+**Teststand:** 462 passed, Ruff/Format clean
 **Stand:** 2026-11-12
 
 ---
@@ -174,6 +174,35 @@ OtterPi (Python 3.13.5, User=makki)
   `status` (`"active"` / `"resolved"`). `only_active` bleibt als Alias.
 - **`GET /api/admin/alerts` erweitert:** Query-Parameter `severity` und
   `status`.
+
+### v1.12.4 – Archiv-Tab
+
+- **Archiv als Sub-Tab innerhalb „Alerts":** Sub-Tab-Buttons
+  `[Current] [Archive]` oben im Alerts-Tab. Der bisherige Inhalt wandert
+  in `#subtab-current`, der neue Archiv-Inhalt in `#subtab-archive`.
+- **Short-Klick-Buttons:** „Last week", „Last month", „Last 3 months".
+- **Kalender:** From/To-Datum mit „Apply"-Button.
+- **Filter:** Device, Severity, Room, Status (Dropdowns).
+- **Pagination:** 50 Alerts pro Seite, „Load more"-Button.
+- **Tabelle:** Wiederverwendet `renderAlertRow`, gruppiert nach Tagen
+  (ohne „Older active"-Sektion).
+- **`AlertStore._build_where()`:** Neue Hilfsmethode, baut die
+  WHERE-Klausel aus allen Filtern (wird von `list_alerts` und
+  `count_alerts` genutzt).
+- **`AlertStore.list_alerts()` erweitert:** Neue Parameter `offset`,
+  `since`, `until`, `device_prefixes`.
+- **`AlertStore.count_alerts()` neu:** Liefert die Gesamtzahl der
+  gefilterten Alerts (für Pagination).
+- **`GET /api/admin/alerts` erweitert:** Query-Parameter `offset`,
+  `since`, `until`, `devices` (kommasepariert). Response um `total`,
+  `offset`, `limit` erweitert.
+- **Bugfix `until`-Handling:** `until=YYYY-MM-DD` wird als
+  `created_at < (Datum + 1 Tag)` interpretiert, damit Alerts am
+  letzten Tag (auch mit Mikrosekunden) eingeschlossen werden.
+- **Tests:** `TestBuildWhere` (14), `TestListAlertsFilters` (4),
+  `TestCountAlerts` (3), `test_get_alerts_with_since`,
+  `test_get_alerts_with_devices`, `test_get_alerts_with_offset`,
+  `test_admin_page_contains_archive_tab`. Gesamt: 462 Tests.
 
 ---
 
@@ -1206,15 +1235,9 @@ Die folgenden DECs sind in dieser Session entstanden und sollten nicht rückgän
 
 **Empfohlene Reihenfolge:**
 
-1. **3.10.3 Archiv-Tab** (1–2 h) – Short-Klick-Buttons, Kalender, Filter,
-   Pagination.
-   - **Start:** `alert_store.py` (`count_by_day`, `count_by_status`).
-   - **Dann:** `otterpi.py` (`GET /api/admin/alerts/stats`).
-   - **Dann:** `admin.py` (Tabelle, Status-Zeile, Balkendiagramm, Archiv).
-   - **Dann:** Tests + manueller Test.
-2. **3.13 Gemeinsame Status-Berechnung** (7–10 h) – Refactoring.
-3. **3.14 Acknowledge-Button im Dashboard** (1–2 h, nach 3.13).
-4. **3.11 Admin nach außen öffnen** (2–6 h, je nach Level).
+1. **3.13 Gemeinsame Status-Berechnung** (7–10 h) – Refactoring.
+2. **3.14 Acknowledge-Button im Dashboard** (1–2 h, nach 3.13).
+3. **3.11 Admin nach außen öffnen** (2–6 h, je nach Level).
 
 **Danach (nach Bedarf):**
 - Advanced Updates (5.1–5.5, 5.7).

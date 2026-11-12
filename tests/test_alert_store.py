@@ -243,3 +243,188 @@ class TestCountByStatus:
         assert result["active_warning"] == 1
         assert result["active_critical"] == 1
         assert result["resolved"] == 0
+
+
+class TestBuildWhere:
+    def test_empty(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        where, params = store._build_where()
+        assert where == ""
+        assert params == []
+
+    def test_only_unacknowledged(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        where, params = store._build_where(only_unacknowledged=True)
+        assert where == " WHERE acknowledged = 0"
+        assert params == []
+
+    def test_status_active(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        where, params = store._build_where(status="active")
+        assert where == " WHERE resolved_at IS NULL"
+        assert params == []
+
+    def test_status_resolved(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        where, params = store._build_where(status="resolved")
+        assert where == " WHERE resolved_at IS NOT NULL"
+        assert params == []
+
+    def test_only_active_alias(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        where, params = store._build_where(only_active=True)
+        assert where == " WHERE resolved_at IS NULL"
+        assert params == []
+
+    def test_severity(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        where, params = store._build_where(severity="critical")
+        assert where == " WHERE severity = ?"
+        assert params == ["critical"]
+
+    def test_since_date_only(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        where, params = store._build_where(since="2026-11-01")
+        assert where == " WHERE created_at >= ?"
+        assert params == ["2026-11-01T00:00:00"]
+
+    def test_since_full_timestamp(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        where, params = store._build_where(since="2026-11-01T12:00:00")
+        assert where == " WHERE created_at >= ?"
+        assert params == ["2026-11-01T12:00:00"]
+
+    def test_until_date_only(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        where, params = store._build_where(until="2026-11-30")
+        assert where == " WHERE created_at < ?"
+        assert params == ["2026-12-01T00:00:00"]
+
+    def test_until_full_timestamp(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        where, params = store._build_where(until="2026-11-30T23:59:59")
+        assert where == " WHERE created_at <= ?"
+        assert params == ["2026-11-30T23:59:59"]
+
+    def test_device_prefixes_single(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        where, params = store._build_where(device_prefixes=["atmoweb_101"])
+        assert where == " WHERE ((sensor = ? OR sensor LIKE ?))"
+        assert params == ["atmoweb_101", "atmoweb_101.%"]
+
+    def test_device_prefixes_multiple(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        where, params = store._build_where(device_prefixes=["atmoweb_101", "atmoweb_102"])
+        assert where == (" WHERE ((sensor = ? OR sensor LIKE ?) OR (sensor = ? OR sensor LIKE ?))")
+        assert params == [
+            "atmoweb_101",
+            "atmoweb_101.%",
+            "atmoweb_102",
+            "atmoweb_102.%",
+        ]
+
+    def test_include_older_active(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        where, params = store._build_where(include_older_active=True)
+        assert "created_at >= ?" in where
+        assert "created_at < ?" in where
+        assert "resolved_at IS NULL" in where
+        assert len(params) == 2
+
+    def test_combined(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        where, params = store._build_where(
+            severity="critical",
+            status="active",
+            since="2026-11-01",
+        )
+        assert "severity = ?" in where
+        assert "resolved_at IS NULL" in where
+        assert "created_at >= ?" in where
+        assert params == ["critical", "2026-11-01T00:00:00"]
+
+
+def _insert_alert(
+    store,
+    created_at,
+    sensor="test.sensor",
+    severity="critical",
+    resolved_at=None,
+):
+    with store._connect() as conn:
+        conn.execute(
+            "INSERT INTO alerts "
+            "(created_at, sensor, rule, severity, message, dedup_key, resolved_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (
+                created_at,
+                sensor,
+                "test_rule",
+                severity,
+                "test",
+                "test:rule:critical",
+                resolved_at,
+            ),
+        )
+
+
+class TestListAlertsFilters:
+    def test_since(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        _insert_alert(store, "2026-10-01T12:00:00+00:00")
+        _insert_alert(store, "2026-11-15T12:00:00+00:00")
+        alerts = store.list_alerts(since="2026-11-01")
+        assert len(alerts) == 1
+        assert alerts[0]["created_at"] == "2026-11-15T12:00:00+00:00"
+
+    def test_until(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        _insert_alert(store, "2026-10-01T12:00:00+00:00")
+        _insert_alert(store, "2026-11-15T12:00:00+00:00")
+        alerts = store.list_alerts(until="2026-10-31")
+        assert len(alerts) == 1
+        assert alerts[0]["created_at"] == "2026-10-01T12:00:00+00:00"
+
+    def test_device_prefixes(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        _insert_alert(
+            store,
+            "2026-11-15T12:00:00+00:00",
+            sensor="atmoweb_101.temperature_1",
+        )
+        _insert_alert(
+            store,
+            "2026-11-15T12:00:00+00:00",
+            sensor="atmoweb_102.temperature_1",
+        )
+        alerts = store.list_alerts(device_prefixes=["atmoweb_101"])
+        assert len(alerts) == 1
+        assert alerts[0]["sensor"] == "atmoweb_101.temperature_1"
+
+    def test_offset(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        _insert_alert(store, "2026-11-01T12:00:00+00:00")
+        _insert_alert(store, "2026-11-02T12:00:00+00:00")
+        _insert_alert(store, "2026-11-03T12:00:00+00:00")
+        alerts = store.list_alerts(limit=1, offset=1)
+        assert len(alerts) == 1
+        assert alerts[0]["created_at"] == "2026-11-02T12:00:00+00:00"
+
+
+class TestCountAlerts:
+    def test_empty(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        assert store.count_alerts() == 0
+
+    def test_counts(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        _insert_alert(store, "2026-11-01T12:00:00+00:00")
+        _insert_alert(store, "2026-11-02T12:00:00+00:00")
+        _insert_alert(store, "2026-11-03T12:00:00+00:00")
+        assert store.count_alerts() == 3
+
+    def test_with_filters(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        _insert_alert(store, "2026-11-01T12:00:00+00:00", severity="critical")
+        _insert_alert(store, "2026-11-02T12:00:00+00:00", severity="warning")
+        assert store.count_alerts(severity="critical") == 1
