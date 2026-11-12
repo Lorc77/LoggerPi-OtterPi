@@ -41,6 +41,7 @@ def render_admin(
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>🛠 ZOOLOGY-Observer Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 * {{ box-sizing: border-box; }}
 body {{
