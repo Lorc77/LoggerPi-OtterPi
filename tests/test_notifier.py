@@ -402,3 +402,45 @@ def test_webhook_sends_critical_when_only_critical(monkeypatch):
     alert = Alert(sensor="x", severity="critical", message="m")
     assert n.send(alert) is True
     assert called["count"] == 1
+
+
+def test_email_skips_when_no_recipients_for_severity(monkeypatch):
+    called = {"count": 0}
+
+    class FakeSMTP:
+        def __init__(self, host, port, timeout):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def starttls(self):
+            pass
+
+        def login(self, user, password):
+            pass
+
+        def send_message(self, msg):
+            called["count"] += 1
+
+    monkeypatch.setattr("notifier.smtplib.SMTP", FakeSMTP)
+    n = EmailNotifier(
+        {
+            "smtp_host": "smtp.gmail.com",
+            "smtp_port": 587,
+            "smtp_user": "u@example.com",
+            "from": "f@example.com",
+            "recipients": ["a@example.com"],
+            "routing": {
+                "critical": ["a@example.com"],
+                "warning": [],
+            },
+        },
+        password="pw",
+    )
+    alert = Alert(sensor="x", severity="warning", message="m")
+    assert n.send(alert) is True
+    assert called["count"] == 0

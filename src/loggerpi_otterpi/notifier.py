@@ -60,7 +60,7 @@ class EmailNotifier:
     def send(self, alert: Alert) -> bool:
         recipients = self.routing.get(alert.severity, self.recipients)
         if not recipients:
-            return False
+            return True
         msg = EmailMessage()
         msg["Subject"] = alert.subject or f"[{alert.severity.upper()}] {alert.sensor}"
         if self.from_name:
