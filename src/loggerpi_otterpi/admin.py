@@ -395,6 +395,95 @@ textarea.json-editor {{
     color: #ef4444;
     font-size: .85rem;
 }}
+.alert-table {{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .85rem;
+    margin-top: 12px;
+}}
+.alert-table th {{
+    text-align: left;
+    padding: 8px 10px;
+    color: #9ca3af;
+    font-weight: normal;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+}}
+.alert-table td {{
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+    vertical-align: middle;
+}}
+.alert-row:hover {{
+    background: rgba(147,197,253,.05);
+}}
+.alert-status {{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}}
+.alert-severity-badge {{
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: .7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}}
+.alert-severity-badge.critical {{
+    background: rgba(239,68,68,.2);
+    color: #fca5a5;
+}}
+.alert-severity-badge.warning {{
+    background: rgba(234,179,8,.2);
+    color: #fde047;
+}}
+.alert-actions {{
+    display: flex;
+    gap: 6px;
+    white-space: nowrap;
+}}
+.alert-day-header {{
+    padding: 12px 10px 6px 10px;
+    color: #bfdbfe;
+    font-size: .9rem;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(147,197,253,.2);
+}}
+.alert-chart {{
+    position: relative;
+    height: 200px;
+    margin-top: 12px;
+    background: rgba(31,41,55,.5);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 10px;
+    padding: 12px;
+}}
+.alert-summary {{
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+    font-size: .9rem;
+}}
+.alert-summary-item {{
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: 8px;
+    background: rgba(255,255,255,.05);
+    transition: .2s;
+}}
+.alert-summary-item:hover {{
+    background: rgba(147,197,253,.15);
+}}
+.alert-summary-item.critical {{
+    color: #fca5a5;
+}}
+.alert-summary-item.warning {{
+    color: #fde047;
+}}
+.alert-summary-item.resolved {{
+    color: #86efac;
+}}
 .lamp {{
     display: inline-block;
     width: 12px;
@@ -792,7 +881,11 @@ input[type="number"] {{
         </label>
         <span id="alerts-status" class="status"></span>
     </div>
-    <div id="alerts-list" class="alerts-list"></div>
+    <div id="alerts-summary" class="alert-summary"></div>
+    <div id="alerts-chart" class="alert-chart">
+        <canvas id="alerts-chart-canvas"></canvas>
+    </div>
+    <div id="alerts-list"></div>
 </div>
 <div class="footer">🦦 otterpi · ZOOLOGY-Observer Admin {VERSION}</div>
 </div>
@@ -2379,6 +2472,7 @@ async function sendTestMail(btn) {{
 async function loadAlerts() {{
     const status = document.getElementById('alerts-status');
     const list = document.getElementById('alerts-list');
+    const summary = document.getElementById('alerts-summary');
     const onlyUnack = document.getElementById('alerts-only-unack').checked;
     const onlyActive = document.getElementById('alerts-only-active').checked;
     status.textContent = 'Loading...';
@@ -2405,59 +2499,157 @@ async function loadAlerts() {{
             status.textContent = 'Error: ' + (result.error?.message || resp.status);
             return;
         }}
-        list.innerHTML = '';
-        for (const alert of result.alerts) {{
-            const severityLabel = alert.severity === 'critical'
-                ? 'alert-severity-critical'
-                : 'alert-severity-warn';
-            const resolvedClass = alert.resolved_at
-                ? 'status-ok'
-                : 'status-critical';
-            const parts = alert.sensor.split('.');
-            const deviceKey = parts[0];
-            const measurement = parts.slice(1).join('.');
-            const info = deviceMap[deviceKey] || {{}};
-            const sensorLabel = info.deviceName
-                ? `${{info.roomIcon}} ${{info.roomName}} · ${{info.deviceName}} · ${{measurement}}`
-                : alert.sensor;
-            const timeLabel = new Date(alert.created_at).toLocaleString('de-DE');
-            const resolvedAt = alert.resolved_at
-                ? new Date(alert.resolved_at).toLocaleString('de-DE')
-                : '';
-            const resolvedLabel = alert.resolved_at
-                ? `<span class="alert-resolved">✓ Resolved (${{resolvedAt}})</span>`
-                : '<span class="alert-active">● Active</span>';
-            const ackButton = alert.acknowledged
-                ? '<span class="alert-ack">✓ Acknowledged</span>'
-                : `<button class="btn btn-primary btn-small"
-                        onclick="acknowledgeAlert(${{alert.id}})">✓ Acknowledge</button>`;
-            const resolveButton = alert.resolved_at
-                ? '<span class="alert-resolved">✓ Resolved</span>'
-                : `<button class="btn btn-secondary btn-small"
-                        onclick="resolveAlert(${{alert.id}})">✓ Resolve</button>`;
-            const card = document.createElement('div');
-            card.className = 'alert-card';
-            card.innerHTML = `
-                <div class="alert-header">
-                    <span class="lamp ${{resolvedClass}}"></span>
-                    <strong>${{sensorLabel}}</strong>
-                    <span class="alert-severity ${{severityLabel}}">${{alert.severity}}</span>
-                </div>
-                <div class="alert-meta">
-                    ${{alert.rule}} · ${{timeLabel}} · ${{resolvedLabel}}
-                </div>
-                <div class="alert-message">${{alert.message}}</div>
-                <div class="alert-actions">
-                    ${{ackButton}}
-                    ${{resolveButton}}
-                </div>
-            `;
-            list.appendChild(card);
-        }}
+        const statsResp = await fetch('/api/admin/alerts/stats');
+        const stats = await statsResp.json();
+        renderAlertSummary(summary, stats.by_status);
+        renderAlertChart(stats.by_day);
+        renderAlertTable(list, result.alerts, deviceMap);
         status.textContent = result.alerts.length + ' alert(s).';
     }} catch (e) {{
         status.textContent = 'Request failed: ' + e.message;
     }}
+}}
+
+function renderAlertSummary(container, byStatus) {{
+    container.innerHTML = `
+        <span class="alert-summary-item critical">
+            ${{byStatus.active_critical}} active critical
+        </span>
+        <span class="alert-summary-item warning">
+            ${{byStatus.active_warning}} active warning
+        </span>
+        <span class="alert-summary-item resolved">
+            ${{byStatus.resolved}} resolved
+        </span>
+    `;
+}}
+
+let alertsChart = null;
+function renderAlertChart(byDay) {{
+    const canvas = document.getElementById('alerts-chart-canvas');
+    if (!canvas) return;
+    if (alertsChart) {{
+        alertsChart.destroy();
+    }}
+    const labels = byDay.map(d => d.date);
+    const warningData = byDay.map(d => d.warning);
+    const criticalData = byDay.map(d => d.critical);
+    const resolvedData = byDay.map(d => d.resolved);
+    alertsChart = new Chart(canvas, {{
+        type: 'bar',
+        data: {{
+            labels: labels,
+            datasets: [
+                {{
+                    label: 'Warning',
+                    data: warningData,
+                    backgroundColor: '#eab308',
+                    stack: 'alerts',
+                }},
+                {{
+                    label: 'Critical',
+                    data: criticalData,
+                    backgroundColor: '#ef4444',
+                    stack: 'alerts',
+                }},
+                {{
+                    label: 'Resolved',
+                    data: resolvedData,
+                    backgroundColor: '#22c55e',
+                    stack: 'alerts',
+                }},
+            ],
+        }},
+        options: {{
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {{
+                legend: {{
+                    labels: {{ color: '#d1d5db' }},
+                }},
+            }},
+            scales: {{
+                x: {{ stacked: true, ticks: {{ color: '#9ca3af' }} }},
+                y: {{ stacked: true, ticks: {{ color: '#9ca3af' }} }},
+            }},
+        }},
+    }});
+}}
+
+function renderAlertTable(container, alerts, deviceMap) {{
+    if (alerts.length === 0) {{
+        container.innerHTML = '<p class="hint">No alerts.</p>';
+        return;
+    }}
+    const groups = {{}};
+    for (const alert of alerts) {{
+        const date = new Date(alert.created_at).toLocaleDateString('de-DE');
+        if (!groups[date]) {{
+            groups[date] = [];
+        }}
+        groups[date].push(alert);
+    }}
+    let html = '<table class="alert-table"><thead><tr>'
+        + '<th>Status</th><th>Zeit</th><th>Severity</th>'
+        + '<th>Regel</th><th>Gerät</th><th>Aktionen</th>'
+        + '</tr></thead><tbody>';
+    for (const [date, dayAlerts] of Object.entries(groups)) {{
+        html += `<tr><td colspan="6" class="alert-day-header">${{date}}</td></tr>`;
+        for (const alert of dayAlerts) {{
+            html += renderAlertRow(alert, deviceMap);
+        }}
+    }}
+    html += '</tbody></table>';
+    container.innerHTML = html;
+}}
+
+function renderAlertRow(alert, deviceMap) {{
+    const parts = alert.sensor.split('.');
+    const deviceKey = parts[0];
+    const measurement = parts.slice(1).join('.');
+    const info = deviceMap[deviceKey] || {{}};
+    const deviceLabel = info.deviceName
+        ? `${{info.roomIcon}} ${{info.roomName}} / ${{info.deviceName}}`
+        : alert.sensor;
+    const timeLabel = new Date(alert.created_at).toLocaleTimeString('de-DE', {{
+        hour: '2-digit',
+        minute: '2-digit',
+    }});
+    const statusLabel = alert.resolved_at
+        ? '<span class="alert-resolved">🟢 Resolved</span>'
+        : '<span class="alert-active">🔴 Active</span>';
+    const severityClass = alert.severity === 'critical' ? 'critical' : 'warning';
+    const ruleLabel = measurement
+        ? `${{measurement}}: ${{alert.rule}}`
+        : alert.rule;
+    const ackButton = alert.acknowledged
+        ? '<span class="alert-ack">✓ Acknowledged</span>'
+        : `<button class="btn btn-primary btn-small"
+                onclick="acknowledgeAlert(${{alert.id}})">✓ Acknowledge</button>`;
+    const resolvedAt = alert.resolved_at
+        ? new Date(alert.resolved_at).toLocaleTimeString('de-DE', {{
+            hour: '2-digit',
+            minute: '2-digit',
+        }})
+        : '';
+    const resolveButton = alert.resolved_at
+        ? `<span class="alert-resolved">✓ Resolved (${{resolvedAt}})</span>`
+        : `<button class="btn btn-secondary btn-small"
+                onclick="resolveAlert(${{alert.id}})">✓ Resolve</button>`;
+    return `
+        <tr class="alert-row" title="${{alert.message}}">
+            <td class="alert-status">${{statusLabel}}</td>
+            <td>${{timeLabel}}</td>
+            <td>
+                <span class="alert-severity-badge ${{severityClass}}">
+                    ${{alert.severity}}
+                </span>
+            </td>
+            <td>${{ruleLabel}}</td>
+            <td>${{deviceLabel}}</td>
+            <td class="alert-actions">${{ackButton}} ${{resolveButton}}</td>
+        </tr>
+    `;
 }}
 
 async function acknowledgeAlert(id) {{

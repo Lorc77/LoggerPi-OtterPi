@@ -12,14 +12,12 @@
 
 ## Deployment-Stand
 
-**Stand:** 2026-11-08
+**Stand:** 2026-11-11
 
-| System | Version | Status |
-|--------|---------|--------|
-| LoggerPi | `v1.12.0` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.12.0` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
+| LoggerPi | `v1.12.2` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.12.2` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
 
-LoggerPi und OtterPi laufen produktiv auf Version `v1.12.0`.
+LoggerPi und OtterPi laufen produktiv auf Version `v1.12.2`.
 
 ## Phase A – Config-Admin (abgeschlossen, v1.8.0)
 
@@ -442,6 +440,32 @@ Alert-Tab-Überarbeitung (3.10), Admin nach außen (3.11).
 
 Deploy + Test (v1.12.1). Danach: Hysterese (3.8), Alert-Tab-Überarbeitung
 (3.10), Admin nach außen (3.11).
+
+---
+
+## Phase C – Alert-Tab-Überarbeitung (abgeschlossen, v1.12.2)
+
+**Stand:** 2026-11-12
+
+### Umgesetzt
+
+- **Alert-Tab als Tabelle:** Statt Karten. Spalten: Status, Zeit, Severity,
+  Regel, Gerät, Aktionen. Gruppiert nach Tagen.
+- **Status-Zeile:** `3 active critical · 5 active warning · 12 resolved`.
+- **Balkendiagramm:** 14 Tage kumulativ pro Tag, gestapelt
+  (warning gelb, critical rot, resolved grün).
+- **Neue API-Route:** `GET /api/admin/alerts/stats` (Aggregation für
+  Balkendiagramm und Status-Zeile).
+- **Neue Methoden:** `AlertStore.count_by_day()`, `AlertStore.count_by_status()`.
+- **Tooltip:** Beim Hover über eine Zeile erscheint die volle Message.
+
+### Teststand
+
+437 Tests, alle grün.
+
+### Nächster Schritt
+
+Archiv-Tab (3.10.3) – Short-Klick-Buttons, Kalender, Filter, Pagination.
 
 ---
 

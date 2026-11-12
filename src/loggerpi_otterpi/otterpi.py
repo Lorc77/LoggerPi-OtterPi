@@ -348,6 +348,15 @@ class OtterPiHandler(BaseHTTPRequestHandler):
             self._send_json(200, {"measurements": measurements, "states": states})
             return
 
+        if self.path == "/api/admin/alerts/stats":
+            if self.alert_store is None:
+                self._send_json(200, {"by_day": [], "by_status": {}})
+                return
+            by_day = self.alert_store.count_by_day(days=14)
+            by_status = self.alert_store.count_by_status()
+            self._send_json(200, {"by_day": by_day, "by_status": by_status})
+            return
+
         if self.path.startswith("/api/admin/alerts"):
             limit = 100
             only_unacknowledged = False

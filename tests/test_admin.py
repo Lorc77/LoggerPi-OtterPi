@@ -694,3 +694,46 @@ def test_admin_page_contains_delete_confirmations(tmp_path):
         server.shutdown()
         thread.join()
         server.server_close()
+
+
+def test_get_alerts_stats(tmp_path):
+    from alert_store import AlertStore
+    from notifier import Alert
+
+    store = BatchStore(tmp_path / "otter.db")
+    alert_store = AlertStore(tmp_path / "alerts.db")
+    alert_store.store(
+        Alert(
+            sensor="test.sensor",
+            severity="critical",
+            message="test",
+            rule="test_rule",
+            dedup_key="test.sensor:test_rule:critical",
+        )
+    )
+    alert_store.store(
+        Alert(
+            sensor="test.sensor2",
+            severity="warning",
+            message="test2",
+            rule="test_rule2",
+            dedup_key="test.sensor2:test_rule2:warning",
+        )
+    )
+
+    server = create_server("127.0.0.1", 0, store, token=TEST_TOKEN, alert_store=alert_store)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        with urlopen(f"http://127.0.0.1:{server.server_port}/api/admin/alerts/stats") as resp:
+            assert resp.status == 200
+            data = json.loads(resp.read().decode("utf-8"))
+        assert "by_day" in data
+        assert "by_status" in data
+        assert data["by_status"]["active_critical"] == 1
+        assert data["by_status"]["active_warning"] == 1
+        assert data["by_status"]["resolved"] == 0
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()

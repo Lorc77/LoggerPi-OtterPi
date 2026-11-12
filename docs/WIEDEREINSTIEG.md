@@ -1,9 +1,9 @@
 # Wiedereinstiegsprotokoll – LoggerPi-OtterPi (Stand v1.11.14)
 
 **Projekt:** LoggerPi-OtterPi
-**Aktuelle Version:** v1.12.1 (deployed auf OtterPi)
-**Teststand:** 432 passed, Ruff/Format clean
-**Stand:** 2026-11-10
+**Aktuelle Version:** v1.12.2 (deployed auf OtterPi)
+**Teststand:** 437 passed, Ruff/Format clean
+**Stand:** 2026-11-12
 
 ---
 
@@ -147,139 +147,20 @@ OtterPi (Python 3.13.5, User=makki)
 - **Bugfixes:** Y-Achse, humidity-Achse, `_stale_age`, Chip-Reihenfolge,
   doppelte Limit-Schleife, Flex-Layout.
 
+### v1.12.2 – Alert-Tab-Überarbeitung (Teil 1)
+
+- **Alert-Tab als Tabelle:** Statt Karten. Spalten: Status, Zeit, Severity,
+  Regel, Gerät, Aktionen. Gruppiert nach Tagen.
+- **Status-Zeile:** `3 active critical · 5 active warning · 12 resolved`.
+- **Balkendiagramm:** 14 Tage kumulativ pro Tag, gestapelt.
+- **Neue API-Route:** `GET /api/admin/alerts/stats`.
+- **Neue Methoden:** `AlertStore.count_by_day()`, `AlertStore.count_by_status()`.
+
 ---
 
 ## 3. Offene Punkte mit detaillierten Plänen
 
-## 3.6 Dashboard-Limits (Konzept, Stand 2026-11-10) --> erledigt, noch nicht getestet.. diesen Punkt nach test entfernen
-
-**Ziel:** Limits (Warn/Crit Min/Max, Rate-of-Change) im Dashboard sichtbar
-machen – ohne Redundanz, ohne Overengineering.
-
-### 3.6.1 Design-Entscheidungen
-
-- **Keine Limits für Raumtemperatur.** Die Raumtemperatur ist ein Mittelwert,
-  keine Regel. Die einzelnen Sensoren haben Limits.
-- **Chips nur auf Raumdetail (verkürzt) und Device-Detail (ausführlich).**
-  Nicht auf der Übersicht, nicht auf Climate-Detail.
-- **Chips nur, wenn Limits gesetzt und enabled sind.** Sonst weglassen
-  (kein „–").
-- **Statusleuchte folgt derselben Logik** wie die Chips (Limit-Verletzungen
-  werden erkannt).
-- **Graphen-Linien als separate Datasets** (konstante Werte), keine
-  zusätzliche Dependency.
-- **Keine Statistik-Blöcke, keine Tabellen, keine Kopfzeilen.**
-
-### 3.6.2 Was wo erscheint
-
-| Seite | Chips? | Format | Graphen-Linien? |
-|---|---|---|---|
-| **Übersicht (Raum-Kacheln)** | ❌ Nein | – | ❌ Nein |
-| **Raumdetail (Gerätekacheln)** | ✅ Ja | Verkürzt: `↓ 15 °C ↑ 18 °C` | ✅ Ja |
-| **Device-Detail** | ✅ Ja | Ausführlich: `Warning: ↓ 15 °C ↑ 18 °C` | ✅ Ja |
-| **Climate-Detail** | ❌ Nein | – | ❌ Nein |
-
-**Platzierung:** Rechtsbündig im Header, wo `🌡️ Temperature 16.3 °C` bzw.
-`💧 Relative Humidity 62.2 %` steht. Die Chips werden **übereinander**
-angeordnet (Flex-Column, rechtsbündig).
-
-**Nur die Limits des jeweiligen Headers:** Bei ID01-Sensoren wird nur
-`temperature_2` angezeigt (nicht `temperature_1`). Bei AtmoWEB werden
-`temperature_1` und `humidity` angezeigt.
-
-### 3.6.3 Chip-Logik
-
-**Limit-Chips (immer sichtbar, wenn Limit gesetzt und enabled):**
-- `[↓ 15 °C ↑ 18 °C]` (gelb) – Warning Min/Max.
-- `[↓ 13 °C ↑ 20 °C]` (rot) – Critical Min/Max.
-- `[↕ 3 °C/h]` (blau) – Rate-of-Change.
-
-**Status-Chips (nur wenn Zustand aktiv):**
-- `[Warning: below limit]` (gelb) – wenn `value < warning_min`.
-- `[Warning: above limit]` (gelb) – wenn `value > warning_max`.
-- `[Critical: below limit]` (rot) – wenn `value < critical_min`.
-- `[Critical: above limit]` (rot) – wenn `value > critical_max`.
-- `[Warning: rate of change above limit]` (gelb) – wenn
-  `abs(rate) > rate_of_change_max_per_hour`.
-
-**Mehrere Status-Chips simultan möglich:** z.B.
-`[Warning: above limit] [Battery low] [Door open]`.
-
-### 3.6.4 Statusleuchte-Logik
-
-**Prioritäten (Rot > Gelb > Grün > Grau):**
-1. **Rot:** Alarm (freezer.alarms), Invalid, Critical (below/above limit).
-2. **Gelb:** Warning (below/above limit), Warning (rate of change above
-   limit), Stale, Battery low.
-3. **Grün:** OK.
-4. **Grau:** Offline.
-
-**Die Statusleuchte auf der Übersicht folgt derselben Logik** (via
-`_device_status`). Wenn wir `_device_status` erweitern, folgt die Übersicht
-automatisch.
-
-### 3.6.5 Graphen-Linien
-
-**Wo:** Device-Detail, Raumdetail. **Nicht** Climate-Detail.
-
-**Welche Linien:**
-- **Warn Min/Max:** gelb (`#eab308`), gestrichelt (`borderDash: [5, 5]`).
-- **Crit Min/Max:** rot (`#ef4444`), gestrichelt (`borderDash: [5, 5]`).
-- **Nur wenn Limits gesetzt:** Sonst keine Linien.
-
-**Implementierung:** Separate Datasets pro Limit-Linie, mit konstanten
-Werten (`tempValues.map(() => 15)`), `pointRadius: 0`, `borderWidth: 1`.
-
-**Legende:** „Warning Min/Max", „Critical Min/Max" (ausblendbar).
-
-### 3.6.6 Implementierungsschritte
-
-**Schritt 1: Chips (Raumdetail + Device-Detail)**
-
-1. **`dashboard_data.py`:**
-   - `_device_limits(device_key, device_type)` – liest `alarm_limits.json`,
-     gibt `None` zurück, wenn keine Limits gesetzt sind.
-   - `_device_status` erweitern: Limit-Verletzungen erkennen.
-   - `_device_chips` erweitern: Limit-Chips hinzufügen.
-
-2. **`dashboard.py`:**
-   - Chips in den Metric-Zellen (Raumdetail + Device-Detail).
-   - CSS für die Chips (Flex-Column, rechtsbündig).
-
-3. **Tests:**
-   - `test_dashboard_data.py`: `_device_limits`, `_device_status`
-     (Limit-Verletzungen), `_device_chips` (Limit-Chips).
-   - `test_dashboard.py`: Smoke-Tests.
-
-**Schritt 2: Statusleuchte (Raumdetail + Device-Detail)**
-
-- `_device_status` erweitern (siehe 3.6.4).
-- Tests.
-
-**Schritt 3: Graphen-Linien (Device-Detail + Raumdetail)**
-
-- `dashboard_charts.py`: `_render_device_script` erweitern, um Limit-Linien
-  als separate Datasets hinzuzufügen.
-- Tests.
-
-### 3.6.7 Offene Fragen
-
-- **Rate-of-Change in der Statusleuchte:** Soll die Lampe auch auf
-  Rate-of-Change reagieren? (Vorschlag: ja, gelb.)
-- **Stale/Invalid:** Die Lampe zeigt schon stale/invalid. Das bleibt.
-- **Chips auf der Übersicht:** Nein (entschieden).
-- **Chips auf Climate-Detail:** Nein (entschieden).
-- **Limits für Raumtemperatur:** Nein (entschieden).
-
-### 3.6.8 Bekannte Lücken
-
-- **Keine Limits für Raumtemperatur:** Bewusste Entscheidung.
-- **Keine Chips auf der Übersicht:** Bewusste Entscheidung.
-- **Keine Chips auf Climate-Detail:** Bewusste Entscheidung.
-
----
-
-### 3.8 Hysterese (Reset-Hysterese)
+### 3.8 Hysterese (⏸️ zurückgestellt – „wenn Bedarf")
 
 **Problem:** Aktuell gibt es keine Hysterese. Wenn der Wert um den Limit-Punkt flackert, könnte nach `dedup_seconds` (1 Stunde) erneut ein Alert kommen.
 
@@ -329,49 +210,286 @@ Werten (`tempValues.map(() => 15)`), `pointRadius: 0`, `borderWidth: 1`.
 
 **Aufwand:** Mittel (2–3 h).
 
+**Status:** ⏸️ Zurückgestellt. Dedup + Autoresolve decken die meisten Fälle
+ab. Hysterese kann später ergänzt werden, wenn konkreter Bedarf besteht
+(z.B. bei einem rauschenden Sensor).
+
 ---
 
 ### 3.10 Alert-Tab-Überarbeitung
 
 **Problem:** Der Alert-Tab wächst mit jedem Alert. Bei vielen Alerts wird die
-Liste unübersichtlich.
+Liste unübersichtlich. Die Seite darf nicht unendlich länger werden.
 
-**Ziel:** Übersichtlichere Darstellung, schnellere Orientierung.
+**Ziel:** Übersichtlichere Darstellung, schnellere Orientierung. Ältere Alerts
+aus der Hauptansicht rausschieben. **Nur Layout-Änderung** – keine Änderung an
+der Funktionalität (Alert-Engine, AlertStore, API-Routen bleiben unverändert).
 
-**Ideen (zu besprechen):**
+#### 3.10.1 Design-Entscheidungen
 
-1. **Filter:**
-   - Severity: critical / warning / alle.
-   - Raum: Dropdown (alle Räume / R1304 / R1306 / …).
-   - Gerät: Dropdown (alle Geräte / spezifisches Gerät).
-   - Status: active / resolved / acknowledged / alle.
+- **Hauptansicht (Tab „Aktuell"):** Letzte 3 Tage (heute, gestern, vorgestern)
+  + ältere aktive Alarme.
+- **Archiv (Tab „Archiv"):** Ältere Alerts, browsbar nach Datum, Filter.
+- **Tabelle mit Chips/Lampe:** Statt Karten. Spalten: Status, Zeit, Severity,
+  Regel, Gerät, Aktionen.
+- **Gruppierung nach Tagen:** Überschriften für jeden Tag.
+- **Chronologische Anordnung:** Neueste oben.
+- **Status-Zeile:** Über dem Balkendiagramm.
+- **Balkendiagramm:** 14 Tage kumulativ pro Tag, farbcodiert.
+- **Kein „All" im Archiv:** Maximal „Last 3 months".
+- **Nur Layout-Änderung:** Keine Änderung an der Funktionalität.
 
-2. **Kompakte Tabelle statt Karten:**
-   - Eine Zeile pro Alert: Zeit, Gerät, Regel, Severity, Status, Aktionen.
-   - Mehr Alerts auf einen Blick.
-   - Weniger visuell (keine Lampe, keine Karte).
+#### 3.10.2 Hauptansicht (Tab „Aktuell")
 
-3. **Gruppierung nach Datum:**
-   - Alerts nach Tag gruppiert (heute, gestern, älter).
+**Inhalt:**
+- Letzte 3 Tage (heute, gestern, vorgestern): Alle Alerts.
+- Ältere aktive Alarme: Nur die, die noch nicht resolved sind.
+- Gruppiert nach Tagen.
+- Tabelle mit Chips/Lampe.
 
-4. **Accordion pro Gerät:**
-   - Jedes Gerät ein Accordion. Eingeklappt: Gerätename + Anzahl.
-   - Aufgeklappt: Die Alerts.
+**Status-Zeile:** Über dem Balkendiagramm:
+`3 active critical · 5 active warning · 12 resolved`.
 
-5. **Zusammenfassung oben:**
-   - `3 active critical · 5 active warning · 12 resolved`.
+**Balkendiagramm:** 14 Tage kumulativ pro Tag, farbcodiert
+(gelb = warning, rot = critical, grün = resolved).
 
-6. **Pagination / „Load more":**
-   - Nur die letzten 20 Alerts, mit „Load more"-Button.
+**Filter:** Severity, Raum, Status.
 
-7. **Dedup-Anzeige:**
-   - Wenn ein Alert mehrfach ausgelöst wurde (z.B. jede Stunde), nur den
-     letzten anzeigen, mit Zähler (`3×`).
+#### 3.10.3 Archiv (Tab „Archiv")
 
-**Empfehlung:** Kombination aus 1 + 2 + 3 (Filter, kompakte Tabelle,
-Gruppierung nach Datum). Aufwand: 2–3 h.
+**Inhalt:**
+- Ältere Alerts (älter als 3 Tage).
+- Short-Klick-Buttons: „Last week", „Last month", „Last 3 months".
+- Browsbar nach Datum (Kalender/Dropdown).
+- Filter: Gerät, Severity, Raum, Status.
+- Tabelle mit Chips/Lampe.
 
-**Status:** Nach 3.6 (Dashboard-Limits) besprechen.
+**Kein „All":** Maximal „Last 3 months" (zu riskant für den Otter).
+
+#### 3.10.4 Tabelle
+
+**Spalten:**
+
+| Status | Zeit | Severity | Regel | Gerät | Aktionen |
+|---|---|---|---|---|---|
+| 🔴 Active | 21:15 | `warning` | temperature_2: rate of change too high | 🧬 R1306 / Freezer · Windows | ✓ Acknowledged · ✓ Resolve |
+| 🟢 Resolved | 20:14 | `critical` | invalid | 🧬 R1306 / Freezer · Windows | ✓ Acknowledged · ✓ Resolved (20:15) |
+
+**Details:**
+- **Status:** `🔴 Active` oder `🟢 Resolved`.
+- **Zeit:** `21:15` (oder `11.11.2026, 21:15`).
+- **Severity:** Badge (`critical` / `warning`).
+- **Regel:** Regel-Name (z.B. `temperature_2: rate of change too high`).
+  Message im Tooltip.
+- **Gerät:** Raum + Gerät (z.B. `🧬 R1306 / Freezer · Windows`).
+  System-Alerts: „System".
+- **Aktionen:** Acknowledge + Resolve (Buttons oder Text).
+  - **Nicht acknowledged:** `✓ Acknowledge` (Button).
+  - **Acknowledged:** `✓ Acknowledged` (Text, grün).
+  - **Nicht resolved:** `✓ Resolve` (Button).
+  - **Resolved:** `✓ Resolved (Zeitstempel)` (Text, grün).
+
+**Tooltip:** Beim Hover über die Zeile erscheint die volle Message
+(z.B. `Temperature rate of change too high: -5.2 °C/h > 5.0 °C/h`).
+
+**Beispiele:**
+
+| Alert-Typ | Regel-Spalte | Tooltip |
+|---|---|---|
+| Measurement | `temperature_2: rate of change too high` | `Temperature rate of change too high: -5.2 °C/h > 5.0 °C/h` |
+| Measurement | `humidity: critical_min` | `Humidity too low: 49.0 % < 50.0 %` |
+| State | `battery_low` | `battery_low` |
+| State | `door_open` | `door_open` |
+| Stale | `stale` | `stale` |
+| Invalid | `invalid` | `invalid` |
+| System | `loggerpi_offline` | `LoggerPi offline for 120 minutes.` |
+
+**Wichtig:** Resolved erzeugt **keinen neuen Eintrag**, sondern updated den
+bestehenden (wie jetzt auch).
+
+#### 3.10.5 Balkendiagramm
+
+**Wo:** Am Seitenanfang, über die ganze Breite.
+
+**Was:** 14 Tage kumulativ pro Tag.
+
+**Farben:** gelb = warning, rot = critical, grün = resolved.
+
+**Chart.js:** Bereits eingebunden.
+
+**Aufwand:** 1–2 h.
+
+#### 3.10.6 Status-Zeile
+
+**Wo:** Über dem Balkendiagramm.
+
+**Format:** `3 active critical · 5 active warning · 12 resolved`.
+
+**Klickbar:** Optional (um zu filtern).
+
+#### 3.10.7 Filter
+
+**Hauptansicht:** Severity, Raum, Status.
+**Archiv:** Gerät, Severity, Raum, Status.
+
+**UI:** Dropdowns oder Checkboxen.
+
+#### 3.10.8 Gruppierung nach Tagen
+
+**Format:**
+```text
+── Heute (11.11.2026) ──
+  Alert 1
+  Alert 2
+── Gestern (10.11.2026) ──
+  Alert 3
+── Vorgestern (09.11.2026) ──
+  Alert 4
+── Ältere aktive Alarme ──
+  Alert 5 (active)
+```
+
+#### 3.10.9 Entschieden
+
+1. **Filter:** Dropdowns (Severity, Raum, Status) + Checkboxen
+   (Only active, Only unacknowledged). Alle Filter kombinierbar (UND).
+2. **Gruppierung:** Überschriften für jeden Tag, alle Tage aufgeklappt
+   (kein Accordion).
+3. **Pagination:** Hauptansicht: keine (nur 3 Tage + ältere aktive).
+   Archiv: 50 Alerts pro Seite, mit „Load more"-Button.
+4. **Balkendiagramm:** Gestapelt (warning gelb `#eab308`, critical rot
+   `#ef4444`, resolved grün `#22c55e`).
+5. **Status-Zeile:** `3 active critical · 5 active warning · 12 resolved`.
+   Klickbar (filtert nach der jeweiligen Kategorie).
+6. **Archiv:** Short-Klick-Buttons (Last week, Last month, Last 3 months)
+   + Kalender (Datum von/bis) + Filter (Gerät, Severity, Raum, Status).
+7. **Mobile:** Horizontal scrollen (Tabelle bleibt Tabelle). Später
+   optional: Spalten ausblenden oder auf Karten umstellen.
+
+#### 3.10.10 Aufwand
+
+**Geschätzt:** 3–4 h (ohne Heatmap).
+
+#### 3.10.11 Status
+
+**Teil 1 erledigt (v1.12.2):** Tabelle, Status-Zeile, Balkendiagramm.
+**Teil 2 offen:** Archiv-Tab (3.10.3) – Short-Klick-Buttons, Kalender,
+Filter, Pagination.
+
+#### 3.10.12 Datenquelle
+
+- **Alerts:** `alerts.sqlite3` via `AlertStore.list_alerts()` (bereits
+  vorhanden). Keine neue Tabelle nötig.
+- **Balkendiagramm:** Aggregation aus `alerts.sqlite3` (pro Tag: Anzahl
+  warning, critical, resolved). Neue Methode
+  `AlertStore.count_by_day(days=14)` oder SQL-Aggregation in `otterpi.py`.
+- **Status-Zeile:** Aggregation aus `alerts.sqlite3` (Anzahl active critical,
+  active warning, resolved). Neue Methode `AlertStore.count_by_status()`.
+
+#### 3.10.13 API-Routen
+
+- **`GET /api/admin/alerts`** (bereits vorhanden): Liefert die Alerts.
+  Erweiterung: Query-Parameter `since` (Datum) und `until` (Datum) für das
+  Archiv.
+- **`GET /api/admin/alerts/stats`** (neu): Liefert die Aggregation für das
+  Balkendiagramm und die Status-Zeile.
+  - Response: `{"by_day": [{"date": "2026-11-11", "warning": 3, "critical": 1, "resolved": 5}, ...], "by_status": {"active_critical": 3, "active_warning": 5, "resolved": 12}}`.
+
+#### 3.10.14 CSS
+
+**Neue Klassen:**
+- `.alert-table` – Die Tabelle (volle Breite, `border-collapse`).
+- `.alert-row` – Eine Zeile (Hover-Effekt).
+- `.alert-status` – Status-Spalte (Lampe + Text).
+- `.alert-severity-badge` – Severity-Badge (critical/warning).
+- `.alert-actions` – Aktions-Spalte (Buttons).
+- `.alert-day-header` – Tages-Überschrift (Gruppierung).
+- `.alert-chart` – Balkendiagramm-Container.
+- `.alert-summary` – Status-Zeile.
+
+**Bestehende Klassen** (wiederverwenden):
+- `.lamp` (für die Status-Lampe).
+- `.chip` (für die Severity-Badges).
+- `.btn`, `.btn-primary`, `.btn-secondary` (für die Buttons).
+
+#### 3.10.15 JavaScript
+
+**Neue Funktionen:**
+- `loadAlerts()` – Erweitern: Tabelle statt Karten rendern, Gruppierung nach
+  Tagen, Filter anwenden.
+- `renderAlertTable(alerts)` – Baut die Tabelle aus den Alerts.
+- `renderAlertChart(stats)` – Baut das Balkendiagramm (Chart.js).
+- `renderAlertSummary(stats)` – Baut die Status-Zeile.
+- `applyFilters()` – Wendet die Filter an (Severity, Raum, Status).
+- `loadArchive(period)` – Lädt das Archiv für einen Zeitraum
+  („Last week", „Last month", „Last 3 months").
+
+**Bestehende Funktionen** (wiederverwenden):
+- `acknowledgeAlert(id)` – Bleibt.
+- `resolveAlert(id)` – Bleibt.
+
+#### 3.10.16 Test-Strategie
+
+- **`test_admin.py`:** Smoke-Tests für die neue Tabelle (HTML enthält
+  `.alert-table`, `.alert-row`, etc.).
+- **`test_admin.py`:** Smoke-Test für die neue API-Route
+  `GET /api/admin/alerts/stats`.
+- **`test_alert_store.py`:** Unit-Tests für `count_by_day()` und
+  `count_by_status()`.
+- **Manueller Test:** Tabelle im Admin öffnen, Filter testen, Archiv testen,
+  Balkendiagramm prüfen.
+
+#### 3.10.17 Implementierungsreihenfolge
+
+1. **`alert_store.py`:** `count_by_day()`, `count_by_status()`.
+2. **`otterpi.py`:** `GET /api/admin/alerts/stats`.
+3. **`admin.py`:** CSS-Klassen, `loadAlerts` umbauen (Tabelle),
+   `renderAlertTable`, `renderAlertChart`, `renderAlertSummary`,
+   `applyFilters`, `loadArchive`.
+4. **Tests:** `test_alert_store.py`, `test_admin.py`.
+5. **Manueller Test.**
+
+#### 3.10.18 Nächste Schritte (Implementierung)
+
+**Reihenfolge:**
+
+1. **`alert_store.py`:** `count_by_day(days=14)` und `count_by_status()`.
+   - `count_by_day`: Aggregation pro Tag (warning, critical, resolved).
+   - `count_by_status`: Anzahl active critical, active warning, resolved.
+   - Tests: `test_alert_store.py`.
+
+2. **`otterpi.py`:** `GET /api/admin/alerts/stats`.
+   - Response: `{"by_day": [...], "by_status": {...}}`.
+   - Tests: `test_admin.py`.
+
+3. **`admin.py`:** CSS-Klassen für die Tabelle.
+   - `.alert-table`, `.alert-row`, `.alert-status`, `.alert-severity-badge`,
+     `.alert-actions`, `.alert-day-header`, `.alert-chart`, `.alert-summary`.
+   - Wiederverwenden: `.lamp`, `.chip`, `.btn`, `.alert-ack`,
+     `.alert-resolved`, `.alert-active`.
+
+4. **`admin.py`:** `loadAlerts` umbauen.
+   - Tabelle statt Karten rendern.
+   - Gruppierung nach Tagen.
+   - Filter anwenden.
+   - Status-Zeile rendern.
+   - Balkendiagramm rendern (Chart.js).
+
+5. **`admin.py`:** `loadArchive(period)` für das Archiv.
+   - Short-Klick-Buttons (Last week, Last month, Last 3 months).
+   - Kalender (Datum von/bis).
+   - Filter (Gerät, Severity, Raum, Status).
+   - Pagination (50 pro Seite, „Load more").
+
+6. **Tests:** `test_admin.py` (Smoke-Tests für Tabelle, Status-Zeile,
+   Balkendiagramm, Archiv).
+
+7. **Manueller Test:** Tabelle im Admin öffnen, Filter testen, Archiv testen,
+   Balkendiagramm prüfen, Mobile-Ansicht prüfen.
+
+**Aufwand:** 3–4 h.
+
+**Status:** Bereit zur Implementierung.
 
 ---
 
@@ -577,6 +695,156 @@ CPU-Entlastung). AJAX (2–3 h, optional).
 | **Gesamt** | **7–10 h** |
 
 **Status:** Nach 3.8 (Hysterese) und 3.10 (Alert-Tab).
+
+#### 3.13.8 Aufräumen (verwaister Code/CSS)
+
+**Problem:** Durch die Umbauten (3.10 Alert-Tab, 3.6 Dashboard-Limits) sind
+Code und CSS verwaist.
+
+**Verwaiste Python-Funktionen in `dashboard_data.py`:**
+- `_latest_batch` – nicht mehr verwendet.
+- `_latest_states` – nicht mehr verwendet.
+- `_latest_setpoints` – nicht mehr verwendet.
+- `_latest_serial` – nicht mehr verwendet.
+
+**Verwaiste CSS-Klassen in `admin.py` (nach 3.10-Umbau):**
+- `.alert-card` – Karten-Container (durch Tabelle ersetzt).
+- `.alert-header` – Karten-Header.
+- `.alert-header strong` – Sensor-Label.
+- `.alert-severity` – Severity-Badge (Karte).
+- `.alert-severity-critical` – Severity-Badge (critical).
+- `.alert-severity-warn` – Severity-Badge (warning).
+- `.alert-meta` – Meta-Zeile.
+- `.alert-message` – Message-Zeile.
+
+**Vorgehen:**
+1. Prüfen, ob die Funktionen/Klassen wirklich nirgends mehr verwendet werden
+   (z.B. mit `grep`).
+2. Entfernen.
+3. Tests laufen lassen (`pytest`).
+4. Deployen.
+
+**Aufwand:** Klein (30–60 Min).
+
+**Status:** Nach 3.10 (Alert-Tab) und 3.13.1–3.13.7.
+
+---
+
+### 3.14 Acknowledge-Button im Dashboard
+
+**Problem:** Der Acknowledge-Button ist aktuell nur im Admin verfügbar. Der
+Nutzer muss also in den Admin wechseln, um einen Alert zu quittieren. Das ist
+umständlich, weil er die Alerts im Dashboard sieht.
+
+**Idee:** Der Acknowledge-Button erscheint im Dashboard direkt neben der
+Statusleuchte (Raumseite + Device-Detailseite), wenn ein aktiver Alarm
+existiert. Der Button wird grün, wenn jemand ihn gedrückt hat. Im Admin bleibt
+nur der Resolve-Button (die „Acknowledged"-Anzeige bleibt sichtbar).
+
+**Ziel:** Der Acknowledge-Button ist dort, wo man ihn braucht (im Dashboard,
+wo man die Alerts sieht). Der Admin bleibt für das Resolven zuständig.
+
+#### 3.14.1 Konzept
+
+**Wo:**
+- **Raumseite** (Gerätekacheln): Neben der Statusleuchte im `device-header`.
+- **Device-Detailseite:** Neben der Statusleuchte im `device-header`.
+
+**Wann sichtbar:**
+- Nur wenn ein **aktiver Alarm** für das Gerät existiert (Status `critical`
+  oder `warn`).
+- Nicht sichtbar, wenn der Status `ok` oder `off` ist.
+
+**Verhalten:**
+- **Nicht acknowledged:** Button „✓ Acknowledge" (blau/grau).
+- **Acknowledged:** Button wird grün, Text „✓ Acknowledged".
+- **Klick:** Ruft `POST /api/dashboard/acknowledge?dedup_key=...` auf.
+- **Nach Klick:** Button wird grün, ohne Seiten-Reload (via JavaScript).
+
+**Im Admin:**
+- Der Acknowledge-Button wird **entfernt**.
+- Der Resolve-Button bleibt.
+- Die „Acknowledged"-Anzeige bleibt sichtbar (als Text, nicht als Button).
+
+#### 3.14.2 Sicherheitsproblem
+
+**Das Dashboard ist öffentlich** (`observer.makki.route64.de`). Jeder könnte
+den Acknowledge-Button drücken. Das könnte missbraucht werden.
+
+**Optionen:**
+- **A:** Button nur für Nutzer im LAN anzeigen (IP-Prüfung). **Nicht möglich**,
+  weil der Otter nicht im selben Netz wie einige Nutzer steht.
+- **B:** Button mit einem Token schützen (z.B. `?token=...`). Aufwand: mittel.
+- **C:** Dashboard authentifizieren (das ist 3.11). Aufwand: groß.
+- **D:** Button im Dashboard anzeigen, aber ohne Schutz (Risiko). **Für den
+  Anfang akzeptabel**, um das Konzept zu testen.
+
+**Entscheidung:** Option D (ohne Schutz) für den ersten Wurf. Später kann man
+auf Option B oder C umsteigen.
+
+#### 3.14.3 Abhängigkeiten
+
+**3.13.1 (Alert-Logik):** Die gemeinsame `status.py` berechnet die
+`dedup_key`s. Das Dashboard weiß dann, welche Alerts aktiv sind. Ohne 3.13
+müsste das Dashboard die `dedup_key`s selbst berechnen (Duplikation).
+
+**Aufwand:**
+- **Mit 3.13:** 1–2 h.
+- **Ohne 3.13:** 2–3 h.
+
+#### 3.14.4 Bausteine
+
+1. **API-Route `GET /api/dashboard/alerts`:**
+   - Liefert die aktiven Alerts (aus `alerts.sqlite3`) mit Acknowledge-Status.
+   - Optional: Filter nach `dedup_key`.
+   - ~30 Zeilen.
+
+2. **API-Route `POST /api/dashboard/acknowledge?dedup_key=...`:**
+   - Ruft `AlertStore.acknowledge_by_dedup_key(dedup_key)` auf.
+   - ~30 Zeilen.
+
+3. **`AlertStore.acknowledge_by_dedup_key(dedup_key)`:**
+   - Neue Methode, die den letzten aktiven Alert mit diesem `dedup_key`
+     acknowledged.
+   - ~10 Zeilen.
+
+4. **Dashboard-Button (Raumseite + Device-Detail):**
+   - HTML: `<button class="btn btn-ack" onclick="acknowledgeAlert('...')">✓ Acknowledge</button>`
+   - Nur sichtbar, wenn ein aktiver Alarm existiert.
+   - ~30 Zeilen.
+
+5. **JavaScript `acknowledgeAlert(dedup_key)`:**
+   - Ruft `POST /api/dashboard/acknowledge?dedup_key=...` auf.
+   - Ändert den Button-Status (grün, „✓ Acknowledged").
+   - ~20 Zeilen.
+
+6. **Admin: Acknowledge-Button entfernen:**
+   - In `loadAlerts` den Acknowledge-Button durch die „Acknowledged"-Anzeige
+     ersetzen.
+   - ~10 Zeilen.
+
+7. **Tests:**
+   - `test_alert_store.py`: `acknowledge_by_dedup_key`.
+   - `test_admin.py`: API-Routen.
+   - ~30 Zeilen.
+
+#### 3.14.5 Offene Fragen
+
+1. **Sicherheit:** Option D (ohne Schutz) für den Anfang. Später Option B
+   (Token) oder C (Auth)?
+2. **Button-Design:** Blau/grau (nicht acknowledged) → grün (acknowledged).
+   Oder andere Farben?
+3. **Mehrere Alerts pro Gerät:** Wenn ein Gerät mehrere aktive Alerts hat
+   (z.B. `critical_max` und `warning_min`), soll der Button alle auf einmal
+   acknowledgen, oder nur den schwerwiegendsten?
+4. **Admin:** Soll der Acknowledge-Button komplett entfernt werden, oder als
+   „Advanced"-Option bleiben?
+
+#### 3.14.6 Status
+
+**Zurückgestellt** – nach 3.13 (Gemeinsame Logik) und 3.10 (Alert-Tab).
+
+**Aufwand:** 1–2 h (mit 3.13), 2–3 h (ohne 3.13).
 
 ---
 
@@ -898,14 +1166,16 @@ Die folgenden DECs sind in dieser Session entstanden und sollten nicht rückgän
 
 ## 8. Nächster konkreter Schritt
 
-**Empfohlene Reihenfolge für morgen:**
+**Empfohlene Reihenfolge:**
 
-0. **3.12.1/3.12.2** (ca. 1h) - Smoke-Test-Routine/Delete-Sicherheit
-1. **3.6 Dashboard-Limits** (2–3 h) – visuell, inhaltlich relevant.
-2. **3.8 Hysterese** (2–3 h) – verhindert Flackern.
-3. **3.10 Alert-Tab-Überarbeitung**
-4. **3.13 Gemeinsame Status-Berechnung**
-5. **3.11 Admin nach außen öffnen**
+1. **3.10 Alert-Tab-Überarbeitung** (3–4 h) – Übersichtlichkeit.
+   - **Start:** `alert_store.py` (`count_by_day`, `count_by_status`).
+   - **Dann:** `otterpi.py` (`GET /api/admin/alerts/stats`).
+   - **Dann:** `admin.py` (Tabelle, Status-Zeile, Balkendiagramm, Archiv).
+   - **Dann:** Tests + manueller Test.
+2. **3.13 Gemeinsame Status-Berechnung** (7–10 h) – Refactoring.
+3. **3.14 Acknowledge-Button im Dashboard** (1–2 h, nach 3.13).
+4. **3.11 Admin nach außen öffnen** (2–6 h, je nach Level).
 
 **Danach (nach Bedarf):**
 - Advanced Updates (5.1–5.5, 5.7).
@@ -919,8 +1189,8 @@ Die folgenden DECs sind in dieser Session entstanden und sollten nicht rückgän
 |---|---|---|
 | Test-Mail nutzt nicht das neue Format | Bewusste Entscheidung, um Aufwand zu sparen | ⏸️ |
 | Kein Sweep für verwaiste Alerts | Würde falsch-positive Resolves erzeugen | ⏸️ (manueller Resolve-Button) |
-| Hysterese nicht implementiert | Noch nicht gebaut | ⏳ (3.8) |
-| Dashboard zeigt keine Limits | Noch nicht gebaut | ⏳ (3.6) |
+| Hysterese nicht implementiert | Zurückgestellt („wenn Bedarf") | ⏸️ |
+| Dashboard zeigt Limits | ✅ Erledigt (v1.12.1) | ✅ |
 | Alert-Tab wird lang | Noch nicht umgebaut | ⏳ (3.10) |
 | Admin nur LAN-only | Kein Login, keine Auth | ⏳ (3.11) |
 

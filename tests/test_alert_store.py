@@ -208,3 +208,38 @@ class TestResolveById:
     def test_resolve_by_id_unknown_returns_false(self, tmp_path):
         store = AlertStore(tmp_path / "alerts.db")
         assert store.resolve_by_id(999) is False
+
+
+class TestCountByDay:
+    def test_empty(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        assert store.count_by_day() == []
+
+    def test_counts(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        store.store(_alert(severity="warning"))
+        store.store(_alert(severity="critical"))
+        result = store.count_by_day()
+        assert len(result) == 1
+        assert result[0]["warning"] == 1
+        assert result[0]["critical"] == 1
+        assert result[0]["resolved"] == 0
+
+
+class TestCountByStatus:
+    def test_empty(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        assert store.count_by_status() == {
+            "active_critical": 0,
+            "active_warning": 0,
+            "resolved": 0,
+        }
+
+    def test_counts(self, tmp_path):
+        store = AlertStore(tmp_path / "alerts.db")
+        store.store(_alert(severity="warning"))
+        store.store(_alert(severity="critical"))
+        result = store.count_by_status()
+        assert result["active_warning"] == 1
+        assert result["active_critical"] == 1
+        assert result["resolved"] == 0

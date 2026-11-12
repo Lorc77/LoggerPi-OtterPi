@@ -558,7 +558,7 @@ Der E2E-Datenpfad (LoggerPi → OtterPi → SQLite) ist praktisch verifiziert:
 - Gerätedetailseite (/device/<sensor_id>) ist implementiert
 - Raumklima-Detailseite (/climate/<room_id>) ist implementiert
 - Batch-Archivierung (archive_batches.py) ist implementiert und getestet
-- Alle 432 Tests bestehen (Stand 2026-11-10)
+- Alle 437 Tests bestehen (Stand 2026-11-12)
 - Alert-Engine implementiert (Thread in `otterpi.observer.service`)
 - Admin: 5 Tabs (Rooms, Alarm Limits, Mail, Notifications, Alerts) mit Formular-UI
 - Rate-of-Change, Routing, `contact_open` in der Alert-Engine
@@ -600,4 +600,4 @@ Der E2E-Datenpfad (LoggerPi → OtterPi → SQLite) ist praktisch verifiziert:
 - Dashboard-Limits (Chips, Statusleuchte, Status-Chips, Graphen-Linien)
 - Bugfixes: Y-Achse, humidity-Achse, `_stale_age`, Chip-Reihenfolge,
   doppelte Limit-Schleife, Flex-Layout
-  
+- Alert-Tab als Tabelle mit Status-Zeile und Balkendiagramm

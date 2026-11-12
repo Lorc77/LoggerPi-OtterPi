@@ -2936,6 +2936,38 @@ Konsistenz, Lesbarkeit, keine redundanten Chips.
 
 ---
 
+## DEC-095 — Alert-Tab als Tabelle mit Status-Zeile und Balkendiagramm
+
+**Status:** Accepted
+**Datum:** 2026-11-12
+
+### Kontext
+
+Der Alert-Tab zeigte Karten. Bei vielen Alerts wurde die Liste lang und
+unübersichtlich.
+
+### Entscheidung
+
+- **Tabelle statt Karten:** Spalten: Status, Zeit, Severity, Regel, Gerät,
+  Aktionen. Gruppiert nach Tagen.
+- **Status-Zeile:** `3 active critical · 5 active warning · 12 resolved`.
+- **Balkendiagramm:** 14 Tage kumulativ pro Tag, gestapelt.
+- **Tooltip:** Volle Message beim Hover.
+
+### Begründung
+
+- Kompakter (mehr Alerts auf einen Blick).
+- Gruppierung nach Tagen erleichtert die Orientierung.
+- Balkendiagramm gibt einen schnellen Überblick über die Historie.
+
+### Konsequenz
+
+`alert_store.py` um `count_by_day()` und `count_by_status()` erweitert.
+`otterpi.py` um `GET /api/admin/alerts/stats`. `admin.py` um Tabelle,
+Status-Zeile und Balkendiagramm.
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:

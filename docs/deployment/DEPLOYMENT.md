@@ -490,6 +490,15 @@ Limits-Tab (Schwellenwerte in Minuten, Checkbox für Warn-Alert).
 
 ---
 
+### Phase C – Alert-Tab-Überarbeitung (v1.12.2)
+
+- **Alert-Tab als Tabelle:** Statt Karten. Gruppiert nach Tagen.
+- **Status-Zeile:** `3 active critical · 5 active warning · 12 resolved`.
+- **Balkendiagramm:** 14 Tage kumulativ pro Tag, gestapelt.
+- **Neue API-Route:** `GET /api/admin/alerts/stats`.
+
+---
+
 ## 5. OtterPi HTTP Listener
 
 Der OtterPi-Anwendungsserver lauscht derzeit nicht öffentlich.
@@ -808,7 +817,7 @@ Repository:
     main
 
 Version:
-    v1.12.1
+    v1.12.2
 
 Letzter bekannter Release-Commit:
     (wird beim Deploy gesetzt)

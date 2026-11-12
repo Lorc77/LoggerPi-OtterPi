@@ -1,7 +1,7 @@
 """SQLite-Speicher für Alerts."""
 
 import sqlite3
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Union
 
@@ -160,6 +160,52 @@ class AlertStore:
             connection.row_factory = sqlite3.Row
             rows = connection.execute(query, params).fetchall()
         return [dict(row) for row in rows]
+
+    def count_by_day(self, days: int = 14) -> list[dict]:
+        """Aggregiert die Alerts pro Tag (warning, critical, resolved)."""
+        since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+        with self._connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT
+                    DATE(created_at) AS day,
+                    SUM(CASE WHEN severity = 'warning' THEN 1 ELSE 0 END) AS warning,
+                    SUM(CASE WHEN severity = 'critical' THEN 1 ELSE 0 END) AS critical,
+                    SUM(CASE WHEN resolved_at IS NOT NULL THEN 1 ELSE 0 END) AS resolved
+                FROM alerts
+                WHERE created_at >= ?
+                GROUP BY day
+                ORDER BY day
+                """,
+                (since,),
+            ).fetchall()
+        return [
+            {
+                "date": row[0],
+                "warning": row[1],
+                "critical": row[2],
+                "resolved": row[3],
+            }
+            for row in rows
+        ]
+
+    def count_by_status(self) -> dict:
+        """Zählt die Alerts nach Status (active critical, active warning, resolved)."""
+        with self._connect() as connection:
+            active_rows = connection.execute(
+                "SELECT severity, COUNT(*) FROM alerts WHERE resolved_at IS NULL GROUP BY severity"
+            ).fetchall()
+            resolved_row = connection.execute(
+                "SELECT COUNT(*) FROM alerts WHERE resolved_at IS NOT NULL"
+            ).fetchone()
+        result = {"active_critical": 0, "active_warning": 0, "resolved": 0}
+        for severity, count in active_rows:
+            if severity == "critical":
+                result["active_critical"] = count
+            elif severity == "warning":
+                result["active_warning"] = count
+        result["resolved"] = resolved_row[0] if resolved_row else 0
+        return result
 
     def acknowledge(self, alert_id: int, by: str) -> bool:
         acknowledged_at = datetime.now(timezone.utc).isoformat()
