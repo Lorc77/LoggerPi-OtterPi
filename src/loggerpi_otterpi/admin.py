@@ -938,6 +938,10 @@ input[type="number"] {{
             <span id="alerts-status" class="status"></span>
         </div>
         <div id="alerts-list"></div>
+        <div class="to-top">
+            <button class="btn btn-primary btn-small"
+                    onclick="window.scrollTo({{top: 0, behavior: 'smooth'}})">↑ To Top</button>
+        </div>
     </div>
     <div id="subtab-archive" class="sub-tab-panel">
         <details class="howto">
@@ -1000,6 +1004,10 @@ input[type="number"] {{
         <div class="save-row">
             <button class="btn btn-primary btn-small" id="archive-load-more"
                     onclick="loadMoreArchive()" style="display: none;">Load more</button>
+        </div>
+        <div class="to-top">
+            <button class="btn btn-primary btn-small"
+                    onclick="window.scrollTo({{top: 0, behavior: 'smooth'}})">↑ To Top</button>
         </div>
     </div>
 </div>
@@ -2784,10 +2792,13 @@ async function loadMoreArchive() {{
 }}
 
 function renderArchiveTable(container, alerts, deviceMap) {{
+    const toTop = container.parentElement.querySelector('.to-top');
     if (alerts.length === 0) {{
         container.innerHTML = '<p class="hint">No alerts.</p>';
+        if (toTop) toTop.style.display = 'none';
         return;
     }}
+    if (toTop) toTop.style.display = 'block';
     const groups = {{}};
     for (const alert of alerts) {{
         const date = new Date(alert.created_at).toLocaleDateString('sv-SE');
