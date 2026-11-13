@@ -618,29 +618,49 @@ im produktiven Betrieb.
 
 ---
 
-### Admin (LAN-only)
+### Admin (Basic Auth)
 
-Der Admin ist Teil des OtterPi-Service und wird über nginx auf das LAN
-beschränkt. Die Admin-UI bietet Formular-UI in allen Tabs (Rooms, Alarm
-Limits, Mail, Notifications) mit JSON-Editor als „Advanced"-Toggle.
+Der Admin ist Teil des OtterPi-Service. Der Zugriff wird über nginx
+geregelt: LAN ohne Login, extern mit Basic Auth.
 
 ```nginx
 location /admin {
+    satisfy any;
     allow 192.168.178.0/24;
+    allow 2a02:908:1a66:ecc0::/64;
+    allow fdb7:145b:1d9f:0::/64;
     deny all;
+    auth_basic "ZOOLOGY-Observer Admin";
+    auth_basic_user_file /etc/nginx/.htpasswd;
+    limit_req zone=zoology_observer_login burst=3 nodelay;
     proxy_pass http://127.0.0.1:8090;
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
 }
 
 location /api/admin/ {
+    satisfy any;
     allow 192.168.178.0/24;
+    allow 2a02:908:1a66:ecc0::/64;
+    allow fdb7:145b:1d9f:0::/64;
     deny all;
+    auth_basic "ZOOLOGY-Observer Admin";
+    auth_basic_user_file /etc/nginx/.htpasswd;
+    limit_req zone=zoology_observer_api burst=30 nodelay;
     proxy_pass http://127.0.0.1:8090;
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
 }
 ```
+
+**Rate Limiting:** Zonen in `/etc/nginx/conf.d/ratelimit.conf`:
+
+```nginx
+limit_req_zone \$binary_remote_addr zone=zoology_observer_login:10m rate=3r/m;
+limit_req_zone \$binary_remote_addr zone=zoology_observer_api:10m rate=60r/m;
+```
+
+**`.htpasswd`:** `/etc/nginx/.htpasswd` (Username + Passwort).
 
 Nach Änderung:
 

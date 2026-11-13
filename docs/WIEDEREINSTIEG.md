@@ -1,9 +1,83 @@
-# Wiedereinstiegsprotokoll – LoggerPi-OtterPi (Stand v1.11.14)
+# Wiedereinstiegsprotokoll – LoggerPi-OtterPi (Stand v1.12.6)
+
+## Fahrplan (Stand v1.12.6)
+
+### Sofort (morgen)
+
+**1. Admin von außen (3.11, simpel) — ~30 min**
+
+- nginx Basic Auth auf `/admin` und `/api/admin/`
+- `.htpasswd` mit starkem Passwort
+- HTTPS ist schon da
+- Später auf Authelia umsteigen, wenn mehr Sicherheit gewünscht
+
+**2. 3.16 Batch-Delivery-Handling — ~1–2 h**
+
+- `DeliveryResult` (SUCCESS/PERMANENT/TRANSIENT)
+- Logging
+- Dead-Letter-Queue
+- Check auf bestehende Dead Batches
+
+### Diese Woche
+
+**3. 3.15 Alert-Archivierung — ~1–2 h**
+
+- `archive_batches.py` um `_archive_alerts()` erweitern
+- Nur resolved Alerts älter als 12 Monate
+- Gleicher Timer
+
+**4. Healthchecks.io — ~15 min**
+
+- Auf dem OtterPi: Cronjob, der jede Minute `curl https://hc-ping.com/<uuid>` aufruft
+- Alarmiert per Mail/Push, wenn der OtterPi ausfällt
+
+**5. NAS-Backup — ~30 min**
+
+- Täglicher `sqlite3 .backup` für `batches.sqlite3` und `alerts.sqlite3`
+- Per cron auf NAS kopieren
+
+### Nächste Wochen
+
+**6. 3.13 Gemeinsame Status-Berechnung — ~7–10 h**
+
+- Refactoring
+- Behebt „⛔ Invalid"-Chip-Bug
+- Reduziert Duplikate
+
+**7. 3.14 Acknowledge-Button im Dashboard — ~1–2 h**
+
+- Button neben Statusleuchte
+- Im Admin bleibt nur Resolve
+
+### Irgendwann
+
+**8. 3.8 Hysterese — ~2–3 h**
+
+- Nur bei rauschenden Sensoren
+
+**9. Advanced Updates (5.1–5.7) — ~10–15 h**
+
+- Send-on-change, ntfy self-host, Diagnostics, Events
+
+**10. Verschobene Punkte**
+
+- CSV-Export, Statuspage, Dry-Run, Config-Backup/Restore, Audit-Log, Mobile-Optimierung
+
+### Im Hinterkopf
+
+- **Healthchecks.io** und **NAS-Backup** sind Betrieb, nicht Code — aber wichtig für „echten" Produktionsbetrieb.
+- **Monitoring des OtterPi selbst** — Healthchecks.io deckt das ab.
+
+
+
+**Empfehlung für morgen:** Admin von außen zuerst (du brauchst es), dann 3.16. Beides zusammen ~2 h.
+
+---
 
 **Projekt:** LoggerPi-OtterPi
-**Aktuelle Version:** v1.12.4 (deployed auf OtterPi)
-**Teststand:** 462 passed, Ruff/Format clean
-**Stand:** 2026-11-12
+**Aktuelle Version:** v1.12.6 (deployed auf OtterPi + LoggerPi)
+**Teststand:** 463 passed, Ruff/Format clean
+**Stand:** 2026-11-13
 
 ---
 
@@ -204,6 +278,43 @@ OtterPi (Python 3.13.5, User=makki)
   `test_get_alerts_with_devices`, `test_get_alerts_with_offset`,
   `test_admin_page_contains_archive_tab`. Gesamt: 462 Tests.
 
+### v1.12.5 – Archiv-Sub-Tab Bugfixes
+
+- **Layout:** From/To/Apply in einer Zeile mit den Perioden-Buttons.
+- **Refresh-Button entfernt:** Filter-Dropdowns refreshen automatisch
+  (`onchange="loadArchive('custom')"`).
+- **Room-Dropdown-Bugfix:** Räume mit mehreren Geräten liefern jetzt Alerts.
+  Ursache: `encodeURIComponent(f.devices.join(','))` kodierte das Komma zu
+  `%2C`, Python splittet aber auf `,`. Fix:
+  `f.devices.map(encodeURIComponent).join(',')`.
+- **Neue Räume/Geräte:** Erscheinen sofort in den Dropdowns (kein F5 mehr
+  nötig). `archiveDropdownsPopulated`-Flag entfernt.
+- **Auswahl bleibt erhalten:** `populateArchiveDropdowns` merkt sich die
+  aktuelle Auswahl.
+- **Datumsbereich bleibt erhalten:** Perioden-Buttons füllen die From/To-Felder,
+  damit Filter-Wechsel den Zeitraum nicht verlieren.
+- **Room-Dropdown nach vorn:** Reihenfolge jetzt Room → Device → Severity → Status.
+- **Device-Dropdown nach Room gefiltert:** Zeigt nur Geräte des gewählten Raums.
+  Bei Room = „All" alle Geräte. Verhindert stillen Override.
+
+### v1.12.6 – Alert-Tab-Umbau
+
+- **Current-Tab zeigt nur aktive Alerts:** `only_active=1` fest,
+  „Only active"-Checkbox entfernt, `include_older_active` entfernt
+  (redundant).
+- **Current-Tab nutzt `renderArchiveTable`:** Tagesgruppen für alle aktiven
+  Alerts, keine „Older active"-Sektion mehr. `renderAlertTable` gelöscht.
+- **Archive-Tab: „Last 3 days"-Button** als erster/Default-Button.
+  `getArchiveDateRange('3days')` neu. `showSubTab` lädt `3days` statt `week`.
+- **Archive-Tab: „Unacknowledged" im Status-Dropdown.** Filtert auf
+  `acknowledged = 0` (unabhängig von Active/Resolved).
+  `only_unacknowledged=1` wird gesendet.
+- **Chart: Datum als `dd.mm.yyyy`** statt `YYYY-MM-DD`.
+- **Aktiver Perioden-Button wird highlighted** (`.btn.active`).
+- **„↑ To Top"-Button** in Current und Archive, zentriert, dynamisch
+  ausgeblendet bei leerer Tabelle.
+- **How-to-Texte** in Current und Archive aktualisiert.
+
 ---
 
 ## 3. Offene Punkte mit detaillierten Plänen
@@ -261,283 +372,6 @@ OtterPi (Python 3.13.5, User=makki)
 **Status:** ⏸️ Zurückgestellt. Dedup + Autoresolve decken die meisten Fälle
 ab. Hysterese kann später ergänzt werden, wenn konkreter Bedarf besteht
 (z.B. bei einem rauschenden Sensor).
-
----
-
-### 3.10 Alert-Tab-Überarbeitung
-
-**Problem:** Der Alert-Tab wächst mit jedem Alert. Bei vielen Alerts wird die
-Liste unübersichtlich. Die Seite darf nicht unendlich länger werden.
-
-**Ziel:** Übersichtlichere Darstellung, schnellere Orientierung. Ältere Alerts
-aus der Hauptansicht rausschieben. **Nur Layout-Änderung** – keine Änderung an
-der Funktionalität (Alert-Engine, AlertStore, API-Routen bleiben unverändert).
-
-#### 3.10.1 Design-Entscheidungen
-
-- **Hauptansicht (Tab „Aktuell"):** Letzte 3 Tage (heute, gestern, vorgestern)
-  + ältere aktive Alarme.
-- **Archiv (Tab „Archiv"):** Ältere Alerts, browsbar nach Datum, Filter.
-- **Tabelle mit Chips/Lampe:** Statt Karten. Spalten: Status, Zeit, Severity,
-  Regel, Gerät, Aktionen.
-- **Gruppierung nach Tagen:** Überschriften für jeden Tag.
-- **Chronologische Anordnung:** Neueste oben.
-- **Status-Zeile:** Über dem Balkendiagramm.
-- **Balkendiagramm:** 14 Tage kumulativ pro Tag, farbcodiert.
-- **Kein „All" im Archiv:** Maximal „Last 3 months".
-- **Nur Layout-Änderung:** Keine Änderung an der Funktionalität.
-
-#### 3.10.2 Hauptansicht (Tab „Aktuell")
-
-**Inhalt:**
-- Letzte 3 Tage (heute, gestern, vorgestern): Alle Alerts.
-- Ältere aktive Alarme: Nur die, die noch nicht resolved sind.
-- Gruppiert nach Tagen.
-- Tabelle mit Chips/Lampe.
-
-**Status-Zeile:** Über dem Balkendiagramm:
-`3 active critical · 5 active warning · 12 resolved`.
-
-**Balkendiagramm:** 14 Tage kumulativ pro Tag, farbcodiert
-(gelb = warning, rot = critical, grün = resolved).
-
-**Filter:** Severity, Raum, Status.
-
-#### 3.10.3 Archiv (Tab „Archiv")
-
-**Inhalt:**
-- Ältere Alerts (älter als 3 Tage).
-- Short-Klick-Buttons: „Last week", „Last month", „Last 3 months".
-- Browsbar nach Datum (Kalender/Dropdown).
-- Filter: Gerät, Severity, Raum, Status.
-- Tabelle mit Chips/Lampe.
-
-**Kein „All":** Maximal „Last 3 months" (zu riskant für den Otter).
-
-#### 3.10.4 Tabelle
-
-**Spalten:**
-
-| Status | Zeit | Severity | Regel | Gerät | Aktionen |
-|---|---|---|---|---|---|
-| 🔴 Active | 21:15 | `warning` | temperature_2: rate of change too high | 🧬 R1306 / Freezer · Windows | ✓ Acknowledged · ✓ Resolve |
-| 🟢 Resolved | 20:14 | `critical` | invalid | 🧬 R1306 / Freezer · Windows | ✓ Acknowledged · ✓ Resolved (20:15) |
-
-**Details:**
-- **Status:** `🔴 Active` oder `🟢 Resolved`.
-- **Zeit:** `21:15` (oder `11.11.2026, 21:15`).
-- **Severity:** Badge (`critical` / `warning`).
-- **Regel:** Regel-Name (z.B. `temperature_2: rate of change too high`).
-  Message im Tooltip.
-- **Gerät:** Raum + Gerät (z.B. `🧬 R1306 / Freezer · Windows`).
-  System-Alerts: „System".
-- **Aktionen:** Acknowledge + Resolve (Buttons oder Text).
-  - **Nicht acknowledged:** `✓ Acknowledge` (Button).
-  - **Acknowledged:** `✓ Acknowledged` (Text, grün).
-  - **Nicht resolved:** `✓ Resolve` (Button).
-  - **Resolved:** `✓ Resolved (Zeitstempel)` (Text, grün).
-
-**Tooltip:** Beim Hover über die Zeile erscheint die volle Message
-(z.B. `Temperature rate of change too high: -5.2 °C/h > 5.0 °C/h`).
-
-**Beispiele:**
-
-| Alert-Typ | Regel-Spalte | Tooltip |
-|---|---|---|
-| Measurement | `temperature_2: rate of change too high` | `Temperature rate of change too high: -5.2 °C/h > 5.0 °C/h` |
-| Measurement | `humidity: critical_min` | `Humidity too low: 49.0 % < 50.0 %` |
-| State | `battery_low` | `battery_low` |
-| State | `door_open` | `door_open` |
-| Stale | `stale` | `stale` |
-| Invalid | `invalid` | `invalid` |
-| System | `loggerpi_offline` | `LoggerPi offline for 120 minutes.` |
-
-**Wichtig:** Resolved erzeugt **keinen neuen Eintrag**, sondern updated den
-bestehenden (wie jetzt auch).
-
-#### 3.10.5 Balkendiagramm
-
-**Wo:** Am Seitenanfang, über die ganze Breite.
-
-**Was:** 14 Tage kumulativ pro Tag.
-
-**Farben:** gelb = warning, rot = critical, grün = resolved.
-
-**Chart.js:** Bereits eingebunden.
-
-**Aufwand:** 1–2 h.
-
-#### 3.10.6 Status-Zeile
-
-**Wo:** Über dem Balkendiagramm.
-
-**Format:** `3 active critical · 5 active warning · 12 resolved`.
-
-**Klickbar:** Optional (um zu filtern).
-
-#### 3.10.7 Filter
-
-**Hauptansicht:** Severity, Raum, Status.
-**Archiv:** Gerät, Severity, Raum, Status.
-
-**UI:** Dropdowns oder Checkboxen.
-
-#### 3.10.8 Gruppierung nach Tagen
-
-**Format:**
-```text
-── Heute (11.11.2026) ──
-  Alert 1
-  Alert 2
-── Gestern (10.11.2026) ──
-  Alert 3
-── Vorgestern (09.11.2026) ──
-  Alert 4
-── Ältere aktive Alarme ──
-  Alert 5 (active)
-```
-
-#### 3.10.9 Entschieden
-
-1. **Filter:** Dropdowns (Severity, Raum, Status) + Checkboxen
-   (Only active, Only unacknowledged). Alle Filter kombinierbar (UND).
-2. **Gruppierung:** Überschriften für jeden Tag, alle Tage aufgeklappt
-   (kein Accordion).
-3. **Pagination:** Hauptansicht: keine (nur 3 Tage + ältere aktive).
-   Archiv: 50 Alerts pro Seite, mit „Load more"-Button.
-4. **Balkendiagramm:** Gestapelt (warning gelb `#eab308`, critical rot
-   `#ef4444`, resolved grün `#22c55e`).
-5. **Status-Zeile:** `3 active critical · 5 active warning · 12 resolved`.
-   Klickbar (filtert nach der jeweiligen Kategorie).
-6. **Archiv:** Short-Klick-Buttons (Last week, Last month, Last 3 months)
-   + Kalender (Datum von/bis) + Filter (Gerät, Severity, Raum, Status).
-7. **Mobile:** Horizontal scrollen (Tabelle bleibt Tabelle). Später
-   optional: Spalten ausblenden oder auf Karten umstellen.
-
-#### 3.10.10 Aufwand
-
-**Geschätzt:** 3–4 h (ohne Heatmap).
-
-#### 3.10.11 Status
-
-**Teil 1 erledigt (v1.12.2):** Tabelle, Status-Zeile, Balkendiagramm.
-**Teil 2 offen:** Archiv-Tab (3.10.3) – Short-Klick-Buttons, Kalender,
-Filter, Pagination.
-
-#### 3.10.12 Datenquelle
-
-- **Alerts:** `alerts.sqlite3` via `AlertStore.list_alerts()` (bereits
-  vorhanden). Keine neue Tabelle nötig.
-- **Balkendiagramm:** Aggregation aus `alerts.sqlite3` (pro Tag: Anzahl
-  warning, critical, resolved). Neue Methode
-  `AlertStore.count_by_day(days=14)` oder SQL-Aggregation in `otterpi.py`.
-- **Status-Zeile:** Aggregation aus `alerts.sqlite3` (Anzahl active critical,
-  active warning, resolved). Neue Methode `AlertStore.count_by_status()`.
-
-#### 3.10.13 API-Routen
-
-- **`GET /api/admin/alerts`** (bereits vorhanden): Liefert die Alerts.
-  Erweiterung: Query-Parameter `since` (Datum) und `until` (Datum) für das
-  Archiv.
-- **`GET /api/admin/alerts/stats`** (neu): Liefert die Aggregation für das
-  Balkendiagramm und die Status-Zeile.
-  - Response: `{"by_day": [{"date": "2026-11-11", "warning": 3, "critical": 1, "resolved": 5}, ...], "by_status": {"active_critical": 3, "active_warning": 5, "resolved": 12}}`.
-
-#### 3.10.14 CSS
-
-**Neue Klassen:**
-- `.alert-table` – Die Tabelle (volle Breite, `border-collapse`).
-- `.alert-row` – Eine Zeile (Hover-Effekt).
-- `.alert-status` – Status-Spalte (Lampe + Text).
-- `.alert-severity-badge` – Severity-Badge (critical/warning).
-- `.alert-actions` – Aktions-Spalte (Buttons).
-- `.alert-day-header` – Tages-Überschrift (Gruppierung).
-- `.alert-chart` – Balkendiagramm-Container.
-- `.alert-summary` – Status-Zeile.
-
-**Bestehende Klassen** (wiederverwenden):
-- `.lamp` (für die Status-Lampe).
-- `.chip` (für die Severity-Badges).
-- `.btn`, `.btn-primary`, `.btn-secondary` (für die Buttons).
-
-#### 3.10.15 JavaScript
-
-**Neue Funktionen:**
-- `loadAlerts()` – Erweitern: Tabelle statt Karten rendern, Gruppierung nach
-  Tagen, Filter anwenden.
-- `renderAlertTable(alerts)` – Baut die Tabelle aus den Alerts.
-- `renderAlertChart(stats)` – Baut das Balkendiagramm (Chart.js).
-- `renderAlertSummary(stats)` – Baut die Status-Zeile.
-- `applyFilters()` – Wendet die Filter an (Severity, Raum, Status).
-- `loadArchive(period)` – Lädt das Archiv für einen Zeitraum
-  („Last week", „Last month", „Last 3 months").
-
-**Bestehende Funktionen** (wiederverwenden):
-- `acknowledgeAlert(id)` – Bleibt.
-- `resolveAlert(id)` – Bleibt.
-
-#### 3.10.16 Test-Strategie
-
-- **`test_admin.py`:** Smoke-Tests für die neue Tabelle (HTML enthält
-  `.alert-table`, `.alert-row`, etc.).
-- **`test_admin.py`:** Smoke-Test für die neue API-Route
-  `GET /api/admin/alerts/stats`.
-- **`test_alert_store.py`:** Unit-Tests für `count_by_day()` und
-  `count_by_status()`.
-- **Manueller Test:** Tabelle im Admin öffnen, Filter testen, Archiv testen,
-  Balkendiagramm prüfen.
-
-#### 3.10.17 Implementierungsreihenfolge
-
-1. **`alert_store.py`:** `count_by_day()`, `count_by_status()`.
-2. **`otterpi.py`:** `GET /api/admin/alerts/stats`.
-3. **`admin.py`:** CSS-Klassen, `loadAlerts` umbauen (Tabelle),
-   `renderAlertTable`, `renderAlertChart`, `renderAlertSummary`,
-   `applyFilters`, `loadArchive`.
-4. **Tests:** `test_alert_store.py`, `test_admin.py`.
-5. **Manueller Test.**
-
-#### 3.10.18 Nächste Schritte (Implementierung)
-
-**Reihenfolge:**
-
-1. **`alert_store.py`:** `count_by_day(days=14)` und `count_by_status()`.
-   - `count_by_day`: Aggregation pro Tag (warning, critical, resolved).
-   - `count_by_status`: Anzahl active critical, active warning, resolved.
-   - Tests: `test_alert_store.py`.
-
-2. **`otterpi.py`:** `GET /api/admin/alerts/stats`.
-   - Response: `{"by_day": [...], "by_status": {...}}`.
-   - Tests: `test_admin.py`.
-
-3. **`admin.py`:** CSS-Klassen für die Tabelle.
-   - `.alert-table`, `.alert-row`, `.alert-status`, `.alert-severity-badge`,
-     `.alert-actions`, `.alert-day-header`, `.alert-chart`, `.alert-summary`.
-   - Wiederverwenden: `.lamp`, `.chip`, `.btn`, `.alert-ack`,
-     `.alert-resolved`, `.alert-active`.
-
-4. **`admin.py`:** `loadAlerts` umbauen.
-   - Tabelle statt Karten rendern.
-   - Gruppierung nach Tagen.
-   - Filter anwenden.
-   - Status-Zeile rendern.
-   - Balkendiagramm rendern (Chart.js).
-
-5. **`admin.py`:** `loadArchive(period)` für das Archiv.
-   - Short-Klick-Buttons (Last week, Last month, Last 3 months).
-   - Kalender (Datum von/bis).
-   - Filter (Gerät, Severity, Raum, Status).
-   - Pagination (50 pro Seite, „Load more").
-
-6. **Tests:** `test_admin.py` (Smoke-Tests für Tabelle, Status-Zeile,
-   Balkendiagramm, Archiv).
-
-7. **Manueller Test:** Tabelle im Admin öffnen, Filter testen, Archiv testen,
-   Balkendiagramm prüfen, Mobile-Ansicht prüfen.
-
-**Aufwand:** 3–4 h.
-
-**Status:** Bereit zur Implementierung.
 
 ---
 
@@ -915,6 +749,214 @@ müsste das Dashboard die `dedup_key`s selbst berechnen (Duplikation).
 
 ---
 
+### 3.15 Alert-Archivierung (geplant, Option B)
+
+**Problem:** `alerts.sqlite3` wächst kontinuierlich. Ohne Archivierung würde
+sie unbegrenzt wachsen. `archive_batches.py` archiviert bisher nur Batches.
+
+**Ziel:** `archive_batches.py` um `_archive_alerts()` erweitern (Option B).
+Nur **resolved** Alerts (`resolved_at IS NOT NULL`) älter als 12 Monate
+werden archiviert. Aktive Alerts bleiben in der Live-DB.
+
+**Format:** JSON Lines + gzip, `loggerpi-otterpi_alerts_YYYY-MM.json.gz`.
+Gleicher systemd-Timer (`archive-batches.timer`).
+
+**Begründung:**
+- Aktive Alerts müssen in der Live-DB bleiben, damit die Alert-Engine
+  `is_acknowledged()` und `is_active()` korrekt prüfen kann.
+- Ein gemeinsamer Timer reicht (Option B), kein separater Service.
+- Gleiches Format wie Batches (JSON Lines + gzip).
+
+**Aufwand:** ~1–2 h.
+
+**Status:** Proposed (DEC-100). Noch nicht implementiert.
+
+---
+
+### 3.16 Batch-Delivery-Handling
+
+**Problem:** `delivery.py` unterscheidet nicht zwischen permanenten und
+transienten Fehlern. Ein 400 (invalid payload) bleibt für immer in der
+Queue und blockiert alle nachfolgenden Batches (wegen `break` im
+Queue-Replay). Kein Logging, keine Dead-Letter-Queue, kein Backoff.
+
+**Aktueller Code:**
+
+`delivery.py`:
+```python
+try:
+    with urlopen(request, timeout=self.timeout) as response:
+        return response.status == 202
+except (HTTPError, URLError):
+    return False
+```
+
+`runtime.py`:
+```python
+for queued_batch in self.queue.pending():
+    if self.delivery.send(queued_batch):
+        self.queue.remove(queued_batch)
+    else:
+        break
+```
+
+**Ziel:**
+
+- **4xx** (permanent) von **5xx/Netzwerk** (transient) unterscheiden.
+- **Logging** für jeden Fehlschlag (Status, Grund, Batch-ID).
+- **Dead-Letter-Queue** für permanente Fehler (manuell inspizierbar).
+- **Transiente Fehler** bleiben in der Queue, Reihenfolge erhalten.
+- **Backoff** (optional): Retry-Intervall bei wiederholten Fehlern erhöhen.
+
+**HTTP-Codes:**
+
+| Code | Bedeutung | Retry sinnvoll? |
+|---|---|---|
+| 202 | accepted | – (Erfolg) |
+| 400 | invalid payload | ❌ permanent |
+| 401 | unauthorized (Token falsch) | ❌ permanent |
+| 404 | unknown path (URL falsch) | ❌ permanent |
+| 409 | batch conflict | ❌ permanent |
+| 415 | unsupported media type | ❌ permanent |
+| 408 | request timeout | ✅ transient |
+| 429 | too many requests | ✅ transient |
+| 500 | server error | ✅ transient |
+| 502/503/504 | gateway error | ✅ transient |
+| Netzwerk-Timeout | – | ✅ transient |
+
+**Lösungsideen:**
+
+**1. `DeliveryResult` in `delivery.py`:**
+
+```python
+class DeliveryResult:
+    SUCCESS = "success"  # 202
+    PERMANENT = "permanent"  # 4xx (außer 408, 429)
+    TRANSIENT = "transient"  # 5xx, Netzwerk, Timeout
+```
+
+**2. `send()` gibt `DeliveryResult` zurück:**
+
+```python
+def send(self, batch: Batch) -> str:
+    try:
+        with urlopen(request, timeout=self.timeout) as response:
+            if response.status == 202:
+                return DeliveryResult.SUCCESS
+            LOGGER.warning(
+                "Delivery: HTTP %s for batch %s",
+                response.status,
+                batch.batch_id,
+            )
+            return DeliveryResult.TRANSIENT
+    except HTTPError as exc:
+        if 400 <= exc.code < 500 and exc.code not in (408, 429):
+            LOGGER.error(
+                "Delivery: permanent HTTP %s for batch %s",
+                exc.code,
+                batch.batch_id,
+            )
+            return DeliveryResult.PERMANENT
+        LOGGER.warning(
+            "Delivery: transient HTTP %s for batch %s",
+            exc.code,
+            batch.batch_id,
+        )
+        return DeliveryResult.TRANSIENT
+    except URLError as exc:
+        LOGGER.warning(
+            "Delivery: network error for batch %s: %s",
+            batch.batch_id,
+            exc,
+        )
+        return DeliveryResult.TRANSIENT
+```
+
+**3. `runtime.py` Queue-Replay:**
+
+```python
+for queued_batch in self.queue.pending():
+    result = self.delivery.send(queued_batch)
+    if result == DeliveryResult.SUCCESS:
+        self.queue.remove(queued_batch)
+    elif result == DeliveryResult.PERMANENT:
+        LOGGER.error(
+            "Batch %s permanently failed; moving to dead-letter",
+            queued_batch.batch_id,
+        )
+        self.queue.move_to_dead_letter(queued_batch)
+    else:
+        break  # transient → Reihenfolge erhalten
+```
+
+**4. Dead-Letter-Queue in `batch_queue.py`:**
+
+```python
+def move_to_dead_letter(self, batch: Batch) -> None:
+    dead_letter_path = self.path.parent / "dead_letter.jsonl"
+    with dead_letter_path.open("a", encoding="utf-8") as f:
+        json.dump(batch.to_dict(), f, ensure_ascii=False)
+        f.write("\n")
+    self.remove(batch)
+```
+
+**5. Logging in `runtime.py`:**
+
+```python
+LOGGER.info("Queue replay: %d pending", len(self.queue.pending()))
+```
+
+**6. Backoff (optional):**
+
+- Track consecutive failures in `runtime.py`.
+- Increase retry interval (15 min → 30 min → 1 h → 2 h).
+- Reset on success.
+
+**Check auf bestehende Dead Batches:**
+
+Auf dem LoggerPi:
+
+```bash
+# Queue-Datei finden
+echo \$LOGGERPI_QUEUE_FILE
+# oder
+grep LOGGERPI_QUEUE_FILE /etc/loggerpi-otterpi/loggerpi.env
+
+# Queue-Größe
+wc -l /var/lib/loggerpi-otterpi/queue.jsonl
+
+# Ältester Batch (erste Zeile)
+head -1 /var/lib/loggerpi-otterpi/queue.jsonl | python3 -m json.tool
+
+# Neuester Batch (letzte Zeile)
+tail -1 /var/lib/loggerpi-otterpi/queue.jsonl | python3 -m json.tool
+
+# Delivery-Fehler im Log
+journalctl -u loggerpi.observer.service -n 200 --no-pager | grep -i "delivery\|error\|fail"
+```
+
+**Was prüfen:**
+
+- Ist die Queue leer? → Alles gut.
+- Sind Batches drin, die älter als 1 Tag sind? → Möglicherweise permanent
+  fehlgeschlagen.
+- Gibt es Delivery-Fehler im Log? → Welche HTTP-Codes?
+
+**Tests:**
+
+- `test_delivery.py`: `send()` gibt `SUCCESS` bei 202, `PERMANENT` bei 400,
+  `TRANSIENT` bei 500/Netzwerkfehler.
+- `test_runtime.py`: Queue-Replay entfernt bei `SUCCESS`, verschiebt in
+  Dead-Letter bei `PERMANENT`, bricht ab bei `TRANSIENT`.
+- `test_batch_queue.py`: `move_to_dead_letter()` schreibt in
+  `dead_letter.jsonl` und entfernt aus der Queue.
+
+**Aufwand:** ~1–2 h inkl. Tests.
+
+**Status:** Proposed. Nächster Schritt nach 3.15 (Alert-Archivierung).
+
+---
+
 ## 4. Advanced Updates (Abschnitt 5, aus dem ursprünglichen Protokoll)
 
 ### 5.1 „Send on change" für device/setpoints
@@ -1189,6 +1231,12 @@ serial.diagnostics
 | **Door-Open-Dauer** | HPP260 unterstützt `door_open` nicht (liefert `N/A`). Geparkt für evtl. zukünftige AtmoWEB-Geräte. |
 | **Service-Restart** | Nicht nötig, weil JSON-Configs automatisch gelesen werden (mtime-Cache, `load_*()` bei jedem `_check`). |
 
+### 5.4 Auf „irgendwann" verschoben
+
+| Punkt | Zweck | Status |
+|---|---|---|
+| **Mobile-Optimierung Alert-Tabelle** | Spalten ausblenden oder auf Karten umstellen (aktuell: horizontal scrollen). | ⏸️ verschoben |
+
 ---
 
 ## 6. Design-Entscheidungen (DECs)
@@ -1207,6 +1255,9 @@ Die folgenden DECs sind in dieser Session entstanden und sollten nicht rückgän
 - **DEC-072:** Manueller Resolve-Button (kein automatischer Sweep für verwaiste Alerts).
 - **DEC-073:** Alert-Tab als Default-Tab.
 - **DEC-074:** Toast-Notification für Save-Buttons.
+- **DEC-098:** Current-Tab zeigt nur aktive Alerts (Tagesgruppen für alle aktiven, keine „Older active"-Sektion mehr).
+- **DEC-099:** Archive: „Last 3 days"-Button (Default) + „Unacknowledged" im Status-Dropdown.
+- **DEC-100:** Alert-Archivierung (geplant, Option B — Erweiterung von `archive_batches.py`, nur resolved Alerts).
 
 **Bewusste Entscheidungen, die nicht rückgängig gemacht werden sollten:**
 
@@ -1236,8 +1287,10 @@ Die folgenden DECs sind in dieser Session entstanden und sollten nicht rückgän
 **Empfohlene Reihenfolge:**
 
 1. **3.13 Gemeinsame Status-Berechnung** (7–10 h) – Refactoring.
+   Inkl. Fix für den falschen „⛔ Invalid"-Chip.
 2. **3.14 Acknowledge-Button im Dashboard** (1–2 h, nach 3.13).
 3. **3.11 Admin nach außen öffnen** (2–6 h, je nach Level).
+4. **3.15 Alert-Archivierung** (1–2 h, Option B).
 
 **Danach (nach Bedarf):**
 - Advanced Updates (5.1–5.5, 5.7).
@@ -1253,9 +1306,10 @@ Die folgenden DECs sind in dieser Session entstanden und sollten nicht rückgän
 | Kein Sweep für verwaiste Alerts | Würde falsch-positive Resolves erzeugen | ⏸️ (manueller Resolve-Button) |
 | Hysterese nicht implementiert | Zurückgestellt („wenn Bedarf") | ⏸️ |
 | Dashboard zeigt Limits | ✅ Erledigt (v1.12.1) | ✅ |
-| Alert-Tab wird lang | Noch nicht umgebaut | ⏳ (3.10) |
+| Alert-Tab wird lang | ✅ Erledigt (v1.12.6, Current nur aktive) | ✅ |
 | Admin nur LAN-only | Kein Login, keine Auth | ⏳ (3.11) |
 | Falscher „⛔ Invalid"-Chip bei Limit-Verletzung | `_device_chips()` prüft nicht, ob die Ursache eine Limit-Verletzung ist | ⏳ (3.13.1) |
+| Alert-Archivierung fehlt | `alerts.sqlite3` wächst unbegrenzt | ⏳ (3.15) |
 
 ---
 

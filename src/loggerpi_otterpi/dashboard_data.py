@@ -1,8 +1,10 @@
 """Daten-/Rechenfunktionen für das Dashboard."""
 
 import json
+import os
 import sqlite3
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Any, Optional
 
 from dashboard_constants import BERLIN
@@ -341,8 +343,12 @@ def _device_status(batches: list[dict], key: str, device_type: str = "atmoweb") 
     return "status-off"
 
 
-def _series(batches: list[dict], key: str) -> list[dict]:
-    """Extrahiert eine Messwert-Reihe aus den Batches."""
+def _series(batches: list[dict], key: str, max_points: int = 500) -> list[dict]:
+    """Extrahiert eine Messwert-Reihe aus den Batches.
+
+    Bei mehr als ``max_points`` Punkten wird auf ``max_points``
+    heruntergebrochen (Durchschnitt pro Bucket).
+    """
     series = []
     for batch in batches:
         measurement = batch.get("measurements", {}).get(key, {})
@@ -360,6 +366,25 @@ def _series(batches: list[dict], key: str) -> list[dict]:
             label = dt.strftime("%H:%M")
             date = dt.strftime("%Y-%m-%d")
             series.append({"label": label, "date": date, "value": value})
+
+    if len(series) > max_points:
+        step = len(series) / max_points
+        downsampled = []
+        for i in range(max_points):
+            start = int(i * step)
+            end = int((i + 1) * step)
+            chunk = series[start:end]
+            if not chunk:
+                continue
+            avg = sum(p["value"] for p in chunk) / len(chunk)
+            downsampled.append(
+                {
+                    "label": chunk[0]["label"],
+                    "date": chunk[0]["date"],
+                    "value": avg,
+                }
+            )
+        series = downsampled
 
     return series
 
@@ -388,6 +413,33 @@ def _latest_serial(batches: list[dict]) -> dict:
     return latest.get("serial", {})
 
 
+_alarm_limits_cache = {"mtime": None, "data": None}
+
+
+def _load_alarm_limits_cached() -> dict:
+    """Lädt alarm_limits.json mit mtime-Cache."""
+    config_dir = os.environ.get(
+        "OTTERPI_CONFIG_DIR",
+        "/var/lib/loggerpi-otterpi/config",
+    )
+    path = Path(config_dir) / "alarm_limits.json"
+    try:
+        mtime = path.stat().st_mtime
+    except OSError:
+        return {}
+    if _alarm_limits_cache["mtime"] == mtime and _alarm_limits_cache["data"] is not None:
+        return _alarm_limits_cache["data"]
+    try:
+        from config_store import load_alarm_limits
+
+        data = load_alarm_limits()
+    except Exception:
+        return {}
+    _alarm_limits_cache["mtime"] = mtime
+    _alarm_limits_cache["data"] = data
+    return data
+
+
 def _device_limits(device_key: str) -> dict:
     """Liest die Limits für ein Gerät aus alarm_limits.json.
 
@@ -395,12 +447,7 @@ def _device_limits(device_key: str) -> dict:
     ``{"atmoweb_101.temperature_1": {"warning_min": 22, ...}}``).
     Leeres Dict, wenn keine Limits gesetzt sind.
     """
-    try:
-        from config_store import load_alarm_limits
-
-        data = load_alarm_limits()
-    except Exception:
-        return {}
+    data = _load_alarm_limits_cached()
     sensors = data.get("sensors", {})
     result = {}
     for key, limits in sensors.items():
