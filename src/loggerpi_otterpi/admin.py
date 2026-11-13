@@ -3011,6 +3011,19 @@ function renderAlertRow(alert, deviceMap) {{
     `;
 }}
 
+async function reloadActiveAlertsView(message) {{
+    const archiveActive = document.getElementById('subtab-archive').classList.contains('active');
+    if (archiveActive) {{
+        setStatus('archive-status-text', message, 'success');
+        archiveState.alerts = [];
+        archiveState.offset = 0;
+        await fetchArchivePage();
+    }} else {{
+        setStatus('alerts-status', message, 'success');
+        loadAlerts();
+    }}
+}}
+
 async function acknowledgeAlert(id) {{
     try {{
         const resp = await fetch('/api/admin/alerts/' + id + '/acknowledge', {{
@@ -3019,8 +3032,7 @@ async function acknowledgeAlert(id) {{
             body: JSON.stringify({{acknowledged_by: 'admin'}})
         }});
         if (resp.ok) {{
-            setStatus('alerts-status', 'Acknowledged.', 'success');
-            loadAlerts();
+            await reloadActiveAlertsView('Acknowledged.');
         }} else {{
             const result = await resp.json();
             const msg = result.error?.message || resp.status;
@@ -3039,8 +3051,7 @@ async function resolveAlert(id) {{
             body: '{{}}'
         }});
         if (resp.ok) {{
-            setStatus('alerts-status', 'Resolved.', 'success');
-            loadAlerts();
+            await reloadActiveAlertsView('Resolved.');
         }} else {{
             const result = await resp.json();
             const msg = result.error?.message || resp.status;
