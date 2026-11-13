@@ -357,6 +357,11 @@ textarea.json-editor {{
     font-size: .75rem;
     border-radius: 6px;
 }}
+.btn.active {{
+    background: rgba(147,197,253,.5);
+    border-color: rgba(147,197,253,.8);
+    color: white;
+}}
 .enabled-yes {{
     color: #22c55e;
     font-weight: 600;
@@ -913,7 +918,7 @@ input[type="number"] {{
                     be re-sent until the state changes.</li>
                 <li><strong>Resolve:</strong> manually marks the alert as resolved
                     (e.g. if the sensor is gone).</li>
-                <li><strong>Filters:</strong> "Only unacknowledged" and "Only active".</li>
+                <li><strong>Filters:</strong> "Only unacknowledged".</li>
             </ol>
         </details>
         <div id="alerts-chart" class="alert-chart">
@@ -938,27 +943,30 @@ input[type="number"] {{
         <details class="howto">
             <summary>How-to: Browse older alerts</summary>
             <ol>
-                <li><strong>Period:</strong> quick buttons for last week, month,
-                    or 3 months.</li>
-                <li><strong>Custom range:</strong> pick a start and end date.</li>
-                <li><strong>Filters:</strong> device, severity, room, status.</li>
+                <li><strong>Period:</strong> quick buttons for last 3 days,
+                    week, month, or 3 months. The active period is
+                    highlighted.</li>
+                <li><strong>Custom range:</strong> pick a start and end date
+                    and click "Apply".</li>
+                <li><strong>Filters:</strong> room, device, severity, status
+                    (incl. "Unacknowledged").</li>
                 <li><strong>Pagination:</strong> 50 alerts per page,
                     "Load more" for the next page.</li>
             </ol>
         </details>
         <div class="save-row">
-            <button class="btn btn-secondary btn-small"
+            <button class="btn btn-secondary btn-small" data-period="3days"
                     onclick="loadArchive('3days')">Last 3 days</button>
-            <button class="btn btn-secondary btn-small"
+            <button class="btn btn-secondary btn-small" data-period="week"
                     onclick="loadArchive('week')">Last week</button>
-            <button class="btn btn-secondary btn-small"
+            <button class="btn btn-secondary btn-small" data-period="month"
                     onclick="loadArchive('month')">Last month</button>
-            <button class="btn btn-secondary btn-small"
+            <button class="btn btn-secondary btn-small" data-period="3months"
                     onclick="loadArchive('3months')">Last 3 months</button>
             <label>From: <input type="date" id="archive-from"></label>
             <label>To: <input type="date" id="archive-to"></label>
             <button class="btn btn-primary btn-small"
-                    onclick="loadArchive('custom')">Apply</button>
+                    onclick="archivePeriod = 'custom'; loadArchive('custom')">Apply</button>
         </div>
         <div class="save-row">
             <label>Room:
@@ -2600,6 +2608,8 @@ function showSubTab(name, btn) {{
     }}
 }}
 
+let archivePeriod = '3days';
+
 let archiveState = {{
     offset: 0,
     limit: 50,
@@ -2697,9 +2707,13 @@ async function loadArchive(period) {{
 
         const range = getArchiveDateRange(period);
         if (period !== 'custom') {{
+            archivePeriod = period;
             document.getElementById('archive-from').value = range.since || '';
             document.getElementById('archive-to').value = range.until || '';
         }}
+        document.querySelectorAll('[data-period]').forEach(btn => {{
+            btn.classList.toggle('active', btn.dataset.period === archivePeriod);
+        }});
 
         const severity = document.getElementById('archive-severity').value;
         const statusFilter = document.getElementById('archive-status').value;
