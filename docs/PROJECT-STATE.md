@@ -542,6 +542,36 @@ Archiv-Tab (3.10.3) – Short-Klick-Buttons, Kalender, Filter, Pagination.
 
 ---
 
+## Phase C – Archiv-Sub-Tab Bugfixes (abgeschlossen, v1.12.5)
+
+**Stand:** 2026-11-13
+
+### Umgesetzt
+
+- **Layout:** From/To/Apply in einer Zeile mit den Perioden-Buttons.
+- **Refresh-Button entfernt:** Filter-Dropdowns refreshen automatisch
+  (`onchange="loadArchive('custom')"`).
+- **Room-Dropdown-Bugfix:** Räume mit mehreren Geräten liefern jetzt Alerts.
+  Ursache: `encodeURIComponent(f.devices.join(','))` kodierte das Komma zu
+  `%2C`, Python splittet aber auf `,`. Fix:
+  `f.devices.map(encodeURIComponent).join(',')`.
+- **Neue Räume/Geräte:** Erscheinen sofort in den Dropdowns (kein F5 mehr
+  nötig). `archiveDropdownsPopulated`-Flag entfernt.
+- **Auswahl bleibt erhalten:** `populateArchiveDropdowns` merkt sich die
+  aktuelle Auswahl.
+- **Datumsbereich bleibt erhalten:** Perioden-Buttons füllen die From/To-Felder,
+  damit Filter-Wechsel den Zeitraum nicht verlieren.
+- **Room-Dropdown nach vorn:** Reihenfolge jetzt Room → Device → Severity → Status.
+- **Device-Dropdown nach Room gefiltert:** Zeigt nur Geräte des gewählten Raums.
+  Bei Room = „All" alle Geräte. Verhindert stillen Override (Device aus anderem
+  Raum bei gesetztem Room).
+
+### Nächster Schritt
+
+3.13 Gemeinsame Status-Berechnung (Refactoring).
+
+---
+
 Seit `v1.6.3` sind folgende Features implementiert:
 
 - **Stale-Logik für WeatherHub-Sensoren:** Konfigurierbar über

@@ -957,36 +957,36 @@ input[type="number"] {{
                     onclick="loadArchive('month')">Last month</button>
             <button class="btn btn-secondary btn-small"
                     onclick="loadArchive('3months')">Last 3 months</button>
-        </div>
-        <div class="save-row">
             <label>From: <input type="date" id="archive-from"></label>
             <label>To: <input type="date" id="archive-to"></label>
             <button class="btn btn-primary btn-small"
                     onclick="loadArchive('custom')">Apply</button>
         </div>
         <div class="save-row">
+            <label>Room:
+                <select id="archive-room" onchange="loadArchive('custom')">
+                    <option value="">All</option>
+                </select>
+            </label>
             <label>Device:
-                <select id="archive-device"><option value="">All</option></select>
+                <select id="archive-device" onchange="loadArchive('custom')">
+                    <option value="">All</option>
+                </select>
             </label>
             <label>Severity:
-                <select id="archive-severity">
+                <select id="archive-severity" onchange="loadArchive('custom')">
                     <option value="">All</option>
                     <option value="critical">Critical</option>
                     <option value="warning">Warning</option>
                 </select>
             </label>
-            <label>Room:
-                <select id="archive-room"><option value="">All</option></select>
-            </label>
             <label>Status:
-                <select id="archive-status">
+                <select id="archive-status" onchange="loadArchive('custom')">
                     <option value="">All</option>
                     <option value="active">Active</option>
                     <option value="resolved">Resolved</option>
                 </select>
             </label>
-            <button class="btn btn-primary btn-small"
-                    onclick="loadArchive('custom')">🔄 Refresh</button>
             <span id="archive-status-text" class="status"></span>
         </div>
         <div id="archive-list"></div>
@@ -2609,7 +2609,6 @@ let archiveState = {{
     filters: {{}},
     deviceMap: {{}},
 }};
-let archiveDropdownsPopulated = false;
 
 function getArchiveDateRange(period) {{
     const now = new Date();
@@ -2635,21 +2634,37 @@ function getArchiveDateRange(period) {{
 }}
 
 function populateArchiveDropdowns(rooms) {{
-    const deviceSelect = document.getElementById('archive-device');
     const roomSelect = document.getElementById('archive-room');
-    deviceSelect.innerHTML = '<option value="">All</option>';
+    const currentRoom = roomSelect.value;
     roomSelect.innerHTML = '<option value="">All</option>';
     for (const [roomId, room] of Object.entries(rooms)) {{
         const roomOpt = document.createElement('option');
         roomOpt.value = roomId;
         roomOpt.textContent = room.name;
         roomSelect.appendChild(roomOpt);
+    }}
+    if (currentRoom) roomSelect.value = currentRoom;
+    populateDeviceDropdown(rooms);
+}}
+
+function populateDeviceDropdown(rooms) {{
+    const deviceSelect = document.getElementById('archive-device');
+    const roomSelect = document.getElementById('archive-room');
+    const currentDevice = deviceSelect.value;
+    const roomId = roomSelect.value;
+    deviceSelect.innerHTML = '<option value="">All</option>';
+    const roomsToShow = roomId && rooms[roomId] ? {{[roomId]: rooms[roomId]}} : rooms;
+    for (const [rid, room] of Object.entries(roomsToShow)) {{
         for (const device of room.devices) {{
             const devOpt = document.createElement('option');
             devOpt.value = device.key;
             devOpt.textContent = room.name + ' / ' + device.name;
             deviceSelect.appendChild(devOpt);
         }}
+    }}
+    if (currentDevice) {{
+        const exists = Array.from(deviceSelect.options).some(o => o.value === currentDevice);
+        if (exists) deviceSelect.value = currentDevice;
     }}
 }}
 
@@ -2674,13 +2689,15 @@ async function loadArchive(period) {{
         const configResp = await fetch('/api/admin/config');
         const config = await configResp.json();
         const rooms = config.rooms.rooms;
-        if (!archiveDropdownsPopulated) {{
-            populateArchiveDropdowns(rooms);
-            archiveDropdownsPopulated = true;
-        }}
+        populateArchiveDropdowns(rooms);
         archiveState.deviceMap = buildDeviceMap(rooms);
 
         const range = getArchiveDateRange(period);
+        if (period !== 'custom') {{
+            document.getElementById('archive-from').value = range.since || '';
+            document.getElementById('archive-to').value = range.until || '';
+        }}
+
         const severity = document.getElementById('archive-severity').value;
         const statusFilter = document.getElementById('archive-status').value;
         const deviceKey = document.getElementById('archive-device').value;
@@ -2720,7 +2737,7 @@ async function fetchArchivePage() {{
     if (f.severity) url += '&severity=' + encodeURIComponent(f.severity);
     if (f.status) url += '&status=' + encodeURIComponent(f.status);
     if (f.devices && f.devices.length > 0) {{
-        url += '&devices=' + encodeURIComponent(f.devices.join(','));
+        url += '&devices=' + f.devices.map(encodeURIComponent).join(',');
     }}
     const resp = await fetch(url);
     const result = await resp.json();
