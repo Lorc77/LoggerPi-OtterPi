@@ -276,7 +276,7 @@ muss bestätigen, dass die Dateien bereits korrekt formatiert sind.
 pytest
 ```
 
-Aktueller Stand: **432 Tests**, alle bestehen.
+Aktueller Stand: **463 Tests**, alle bestehen.
 
 Alle Tests müssen erfolgreich sein.
 

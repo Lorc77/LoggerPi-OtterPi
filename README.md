@@ -148,8 +148,8 @@ PYTHONPATH=/opt/loggerpi-otterpi:/opt/loggerpi-otterpi/model
 
 | System | Version | Status |
 |--------|---------|--------|
-| LoggerPi | `v1.12.5` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.12.5` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
+| LoggerPi | `v1.12.6` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.12.6` | Empfängt Batches, speichert in SQLite, Alert-Engine aktiv |
 
 Der E2E-Datenpfad (LoggerPi → nginx → OtterPi → SQLite) ist verifiziert.
 
@@ -177,11 +177,13 @@ Admin (LAN-only): `https://observer.makki.route64.de/admin`
 - Notifications-Tab: Formular-UI (ntfy, webhook, Severity-Auswahl pro Kanal)
 - Messages-Tab: Formular-UI (globale Regel-Texte, gruppiert in Measurements,
   States, System)
-- Alerts-Tab (Default-Tab): Alert History als Tabelle (Status, Zeit, Severity,
-  Regel, Gerät, Aktionen), gruppiert nach Tagen, Status-Zeile
-  („3 active critical · 5 active warning · 12 resolved"), Balkendiagramm
-  (14 Tage kumulativ), Acknowledge-Button, Resolve-Button, Filter
-  „Only unacknowledged" / „Only active"
+- Alerts-Tab (Default-Tab): Sub-Tabs „Current" / „Archive".
+  - Current: nur aktive Alerts, gruppiert nach Tagen, Status-Zeile
+    („3 active critical · 5 active warning"), Balkendiagramm (14 Tage),
+    Filter „Only unacknowledged", Acknowledge/Resolve-Buttons.
+  - Archive: alle Alerts, Perioden-Buttons (Last 3 days / week / month /
+    3 months), From/To-Kalender, Filter (Room, Device, Severity, Status
+    inkl. „Unacknowledged"), Pagination (50/Seite).
 - Test-Mail-Button im Mail-Tab
 - JSON-Editor als „Advanced"-Toggle (alle Tabs)
 - JSON-Validierung, `.bak`, atomares Schreiben
@@ -312,18 +314,18 @@ pytest
 git diff --check
 ```
 
-Aktueller Stand: **432 Tests**, alle bestehen.
+Aktueller Stand: **463 Tests**, alle bestehen.
 
 ---
 
-Aktuelle Version: **v1.12.5**
+Aktuelle Version: **v1.12.6**
 
 Die Version wird geführt über:
 
-- `pyproject.toml` → `version = "1.12.5"`
-- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.12.5"`
-- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.12.5"`
-- Git-Tag `v1.12.5`
+- `pyproject.toml` → `version = "1.12.6"`
+- `src/loggerpi_otterpi/__init__.py` → `__version__ = "1.12.6"`
+- `src/loggerpi_otterpi/dashboard_constants.py` → `VERSION = "v1.12.6"`
+- Git-Tag `v1.12.6`
 
 ---
 

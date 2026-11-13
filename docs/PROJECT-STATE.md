@@ -14,10 +14,10 @@
 
 **Stand:** 2026-11-11
 
-| LoggerPi | `v1.12.2` | Läuft, sendet Batches alle 15 Minuten |
-| OtterPi | `v1.12.2` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
+| LoggerPi | `v1.12.6` | Läuft, sendet Batches alle 15 Minuten |
+| OtterPi | `v1.12.6` | Empfängt Batches, speichert in SQLite, Admin + Alert-Engine aktiv |
 
-LoggerPi und OtterPi laufen produktiv auf Version `v1.12.2`.
+LoggerPi und OtterPi laufen produktiv auf Version `v1.12.6`.
 
 ## Phase A – Config-Admin (abgeschlossen, v1.8.0)
 
@@ -565,6 +565,30 @@ Archiv-Tab (3.10.3) – Short-Klick-Buttons, Kalender, Filter, Pagination.
 - **Device-Dropdown nach Room gefiltert:** Zeigt nur Geräte des gewählten Raums.
   Bei Room = „All" alle Geräte. Verhindert stillen Override (Device aus anderem
   Raum bei gesetztem Room).
+
+### Nächster Schritt
+
+3.13 Gemeinsame Status-Berechnung (Refactoring).
+
+---
+
+## Phase C – Alert-Tab-Umbau (abgeschlossen, v1.12.6)
+
+**Stand:** 2026-11-13
+
+### Umgesetzt
+
+- **Current-Tab zeigt nur aktive Alerts:** `only_active=1` fest,
+  „Only active"-Checkbox entfernt, `include_older_active` entfernt
+  (redundant).
+- **Current-Tab nutzt `renderArchiveTable`:** Tagesgruppen für alle aktiven
+  Alerts, keine „Older active"-Sektion mehr. `renderAlertTable` gelöscht.
+- **Archive-Tab: „Last 3 days"-Button** als erster/Default-Button.
+  `getArchiveDateRange('3days')` neu. `showSubTab` lädt `3days` statt `week`.
+- **Archive-Tab: „Unacknowledged" im Status-Dropdown.** Filtert auf
+  `acknowledged = 0` (unabhängig von Active/Resolved).
+  `only_unacknowledged=1` wird gesendet.
+- **Chart: Datum als `dd.mm.yyyy`** statt `YYYY-MM-DD`.
 
 ### Nächster Schritt
 

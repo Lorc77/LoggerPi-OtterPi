@@ -3058,6 +3058,104 @@ der neue Archiv-Inhalt in `#subtab-archive`.
 
   ---
 
+## DEC-098 — Current-Tab zeigt nur aktive Alerts
+
+**Status:** Accepted
+**Datum:** 2026-11-13
+
+### Kontext
+
+Der Current-Tab zeigte bisher die letzten 3 Tage + ältere aktive Alerts.
+Das war redundant zum Archive-Tab, sobald dieser einen „Last 3 days"-Button
+bekommt.
+
+### Entscheidung
+
+Der Current-Tab zeigt **nur aktive Alerts** (`resolved_at IS NULL`).
+Die „Only active"-Checkbox entfällt (ist immer aktiv). `include_older_active`
+entfällt (redundant). Die Tabelle nutzt `renderArchiveTable` (Tagesgruppen
+für alle aktiven Alerts, keine „Older active"-Sektion mehr).
+`renderAlertTable` wird gelöscht.
+
+### Begründung
+
+- Klare Trennung: Current = „Was ist jetzt los?", Archive = „Was war früher?".
+- Kein redundanter „Older active"-Block mehr.
+- Tagesgruppen bleiben (auch für ältere aktive Alerts).
+
+### Konsequenz
+
+`admin.py`: `loadAlerts` angepasst, „Only active"-Checkbox entfernt,
+`renderAlertTable` gelöscht.
+
+---
+
+## DEC-099 — Archive: „Last 3 days" + „Unacknowledged"
+
+**Status:** Accepted
+**Datum:** 2026-11-13
+
+### Kontext
+
+Der Archive-Tab hatte „Last week / month / 3 months", aber keinen
+„Last 3 days"-Button. Außerdem fehlte ein Filter für „unacknowledged"
+Alerts.
+
+### Entscheidung
+
+- **„Last 3 days"** als erster/Default-Button. `getArchiveDateRange('3days')`
+  neu. `showSubTab` lädt `3days` statt `week`.
+- **„Unacknowledged"** im Status-Dropdown. Filtert auf `acknowledged = 0`
+  (unabhängig von Active/Resolved). `only_unacknowledged=1` wird gesendet.
+
+### Begründung
+
+- „Last 3 days" ist der häufigste Zeitraum (entspricht dem alten Current-Tab).
+- „Unacknowledged" ist eine eigene Dimension (nicht Active/Resolved), aber
+  im Status-Dropdown untergebracht, um die Filter-Leiste nicht zu überladen.
+
+### Konsequenz
+
+`admin.py`: HTML-Buttons, `getArchiveDateRange`, `showSubTab`, `loadArchive`,
+`fetchArchivePage` angepasst.
+
+---
+
+## DEC-100 — Alert-Archivierung (geplant, Option B)
+
+**Status:** Proposed
+**Datum:** 2026-11-13
+
+### Kontext
+
+`alerts.sqlite3` wächst kontinuierlich. Ohne Archivierung würde sie
+unbegrenzt wachsen. `archive_batches.py` archiviert bisher nur Batches.
+
+### Entscheidung
+
+`archive_batches.py` wird um `_archive_alerts()` erweitert (Option B).
+Nur **resolved** Alerts (`resolved_at IS NOT NULL`) älter als 12 Monate
+werden archiviert. Aktive Alerts bleiben in der Live-DB.
+
+Format: JSON Lines + gzip, `loggerpi-otterpi_alerts_YYYY-MM.json.gz`.
+Gleicher systemd-Timer (`archive-batches.timer`).
+
+### Begründung
+
+- Aktive Alerts müssen in der Live-DB bleiben, damit die Alert-Engine
+  `is_acknowledged()` und `is_active()` korrekt prüfen kann.
+- Ein gemeinsamer Timer reicht (Option B), kein separater Service.
+- Gleiches Format wie Batches (JSON Lines + gzip).
+
+### Konsequenz
+
+`archive_batches.py` erweitert. `deploy/otterpi/install.sh` unverändert
+(gleiches Skript). Doku in `DEPLOYMENT.md` ergänzt.
+
+**Status:** Proposed (noch nicht implementiert).
+
+---
+
 # Offene Entscheidungen
 
 Folgende Punkte sind derzeit bewusst noch offen:

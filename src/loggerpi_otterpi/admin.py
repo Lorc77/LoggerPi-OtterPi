@@ -930,10 +930,6 @@ input[type="number"] {{
                 <input type="checkbox" id="alerts-only-unack" onchange="loadAlerts()">
                 Only unacknowledged
             </label>
-            <label>
-                <input type="checkbox" id="alerts-only-active" onchange="loadAlerts()">
-                Only active
-            </label>
             <span id="alerts-status" class="status"></span>
         </div>
         <div id="alerts-list"></div>
@@ -951,6 +947,8 @@ input[type="number"] {{
             </ol>
         </details>
         <div class="save-row">
+            <button class="btn btn-secondary btn-small"
+                    onclick="loadArchive('3days')">Last 3 days</button>
             <button class="btn btn-secondary btn-small"
                     onclick="loadArchive('week')">Last week</button>
             <button class="btn btn-secondary btn-small"
@@ -985,6 +983,7 @@ input[type="number"] {{
                     <option value="">All</option>
                     <option value="active">Active</option>
                     <option value="resolved">Resolved</option>
+                    <option value="unacknowledged">Unacknowledged</option>
                 </select>
             </label>
             <span id="archive-status-text" class="status"></span>
@@ -2597,7 +2596,7 @@ function showSubTab(name, btn) {{
     document.getElementById('subtab-' + name).classList.add('active');
     btn.classList.add('active');
     if (name === 'archive') {{
-        loadArchive('week');
+        loadArchive('3days');
     }}
 }}
 
@@ -2614,7 +2613,11 @@ function getArchiveDateRange(period) {{
     const now = new Date();
     let since = null;
     let until = null;
-    if (period === 'week') {{
+    if (period === '3days') {{
+        const d = new Date(now);
+        d.setDate(d.getDate() - 3);
+        since = d.toISOString().slice(0, 10);
+    }} else if (period === 'week') {{
         const d = new Date(now);
         d.setDate(d.getDate() - 7);
         since = d.toISOString().slice(0, 10);
@@ -2700,6 +2703,8 @@ async function loadArchive(period) {{
 
         const severity = document.getElementById('archive-severity').value;
         const statusFilter = document.getElementById('archive-status').value;
+        const onlyUnack = statusFilter === 'unacknowledged';
+        const statusParam = onlyUnack ? null : statusFilter;
         const deviceKey = document.getElementById('archive-device').value;
         const roomId = document.getElementById('archive-room').value;
 
@@ -2714,7 +2719,8 @@ async function loadArchive(period) {{
             since: range.since,
             until: range.until,
             severity: severity,
-            status: statusFilter,
+            status: statusParam,
+            only_unacknowledged: onlyUnack,
             devices: devices,
         }};
         archiveState.alerts = [];
@@ -2736,6 +2742,7 @@ async function fetchArchivePage() {{
     if (f.until) url += '&until=' + encodeURIComponent(f.until);
     if (f.severity) url += '&severity=' + encodeURIComponent(f.severity);
     if (f.status) url += '&status=' + encodeURIComponent(f.status);
+    if (f.only_unacknowledged) url += '&only_unacknowledged=1';
     if (f.devices && f.devices.length > 0) {{
         url += '&devices=' + f.devices.map(encodeURIComponent).join(',');
     }}
@@ -2794,7 +2801,6 @@ async function loadAlerts() {{
     const list = document.getElementById('alerts-list');
     const summary = document.getElementById('alerts-summary');
     const onlyUnack = document.getElementById('alerts-only-unack').checked;
-    const onlyActive = document.getElementById('alerts-only-active').checked;
     status.textContent = 'Loading...';
     try {{
         const configResp = await fetch('/api/admin/config');
@@ -2812,8 +2818,7 @@ async function loadAlerts() {{
         }}
         let url = '/api/admin/alerts?limit=100&only_unacknowledged='
             + (onlyUnack ? '1' : '0')
-            + '&only_active=' + (onlyActive ? '1' : '0')
-            + '&include_older_active=1';
+            + '&only_active=1';
         if (currentFilters.severity) {{
             url += '&severity=' + currentFilters.severity;
         }}
@@ -2830,7 +2835,7 @@ async function loadAlerts() {{
         const stats = await statsResp.json();
         renderAlertSummary(summary, stats.by_status);
         renderAlertChart(stats.by_day);
-        renderAlertTable(list, result.alerts, deviceMap);
+        renderArchiveTable(list, result.alerts, deviceMap);
         status.textContent = 'Showing ' + result.alerts.length + ' alert(s).';
     }} catch (e) {{
         status.textContent = 'Request failed: ' + e.message;
@@ -2866,7 +2871,10 @@ function renderAlertChart(byDay) {{
     if (alertsChart) {{
         alertsChart.destroy();
     }}
-    const labels = byDay.map(d => d.date);
+    const labels = byDay.map(d => {{
+        const date = new Date(d.date + 'T00:00:00');
+        return date.toLocaleDateString('de-DE');
+    }});
     const warningData = byDay.map(d => d.warning);
     const criticalData = byDay.map(d => d.critical);
     const resolvedData = byDay.map(d => d.resolved);
@@ -2927,51 +2935,6 @@ function formatDayHeader(dateStr) {{
     else if (diffDays === 2) suffix = ' (2 days ago)';
 
     return `${{weekday}}, ${{dateLabel}}${{suffix}}`;
-}}
-
-function renderAlertTable(container, alerts, deviceMap) {{
-    if (alerts.length === 0) {{
-        container.innerHTML = '<p class="hint">No alerts.</p>';
-        return;
-    }}
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - 2);
-    cutoff.setHours(0, 0, 0, 0);
-
-    const olderActive = [];
-    const groups = {{}};
-    for (const alert of alerts) {{
-        const created = new Date(alert.created_at);
-        if (created < cutoff) {{
-            if (!alert.resolved_at) {{
-                olderActive.push(alert);
-            }}
-        }} else {{
-            const date = created.toLocaleDateString('sv-SE');
-            if (!groups[date]) {{
-                groups[date] = [];
-            }}
-            groups[date].push(alert);
-        }}
-    }}
-    let html = '<table class="alert-table"><thead><tr>'
-        + '<th>Status</th><th>Time</th><th>Severity</th>'
-        + '<th>Rule</th><th>Device</th><th>Actions</th>'
-        + '</tr></thead><tbody>';
-    if (olderActive.length > 0) {{
-        html += '<tr><td colspan="6" class="alert-day-header">Older active</td></tr>';
-        for (const alert of olderActive) {{
-            html += renderAlertRow(alert, deviceMap);
-        }}
-    }}
-    for (const [date, dayAlerts] of Object.entries(groups)) {{
-        html += `<tr><td colspan="6" class="alert-day-header">${{formatDayHeader(date)}}</td></tr>`;
-        for (const alert of dayAlerts) {{
-            html += renderAlertRow(alert, deviceMap);
-        }}
-    }}
-    html += '</tbody></table>';
-    container.innerHTML = html;
 }}
 
 function renderAlertRow(alert, deviceMap) {{

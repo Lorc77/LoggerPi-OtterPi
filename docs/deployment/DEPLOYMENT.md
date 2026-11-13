@@ -298,9 +298,10 @@ Wenn Sensoren umziehen oder neue Geräte hinzukommen:
 **Wichtig:** Bei Variante 2 ist die Änderung nicht im Git-Repository
 dokumentiert. Sie geht beim nächsten Deployment verloren.
 
-### Batch-Archivierung
+### Batch- und Alert-Archivierung
 
-Der OtterPi archiviert monatlich Batches älter als 12 Monate.
+Der OtterPi archiviert monatlich Batches älter als 12 Monate und
+resolved Alerts älter als 12 Monate.
 
 **Automatisch:**
 
@@ -332,6 +333,25 @@ systemctl status archive-batches.timer --no-pager
 
 **Retention:** 12 Monate in der Live-Datenbank. Ältere Batches werden
 nach erfolgreichem Export gelöscht.
+
+
+**Alert-Archivierung (geplant, Option B):**
+
+`archive_batches.py` wird um `_archive_alerts()` erweitert. Nur
+**resolved** Alerts (`resolved_at IS NOT NULL`) älter als 12 Monate
+werden archiviert. Aktive Alerts bleiben in der Live-DB (damit die
+Alert-Engine `is_acknowledged()` und `is_active()` korrekt prüfen kann).
+
+**Archiv-Dateien:**
+
+```text
+/var/lib/loggerpi-otterpi/archive/loggerpi-otterpi_alerts_YYYY-MM.json.gz
+```
+
+**Retention:** 12 Monate in der Live-Datenbank. Ältere resolved Alerts
+werden nach erfolgreichem Export gelöscht.
+
+**Gleicher Timer:** `archive-batches.timer` (1. des Monats, 03:00 Uhr).
 
 ### Alert-Engine
 
@@ -817,7 +837,7 @@ Repository:
     main
 
 Version:
-    v1.12.3
+    v1.12.6
 
 Letzter bekannter Release-Commit:
     (wird beim Deploy gesetzt)
